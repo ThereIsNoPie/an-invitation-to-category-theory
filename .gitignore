@@ -1,10 +1,5 @@
 # Agda compiled interface files
 *.agdai
 
-# Agda compiled executables and build artifacts
-*.exe
-MAlonzo/
-
-# Visualization output files
-*.dot
-*.svg
+# Visualization artifacts (executables, build files, outputs)
+scripts/visualize-artifacts/
