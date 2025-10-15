@@ -1,5 +1,6 @@
 # Agda compiled interface files
 *.agdai
+_build/
 
 # Visualization artifacts (executables, build files, outputs)
 scripts/visualize-artifacts/
@@ -7,6 +8,7 @@ scripts/visualize-artifacts/
 # Generated HTML documentation (built by GitHub Actions)
 docs/
 
-# PowerShell/Bash build scripts (kept for local testing)
-# build-site.ps1
-# build-site.sh
+# Jekyll build artifacts
+_site/
+.jekyll-cache/
+Gemfile.lock
