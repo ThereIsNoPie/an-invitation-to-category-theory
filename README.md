@@ -147,6 +147,23 @@ Edit `site-assets/index.html` to customize the landing page content.
    ```
 3. Regenerate the HTML
 
+### Embedding Code Snippets
+
+Want to embed clickable Agda code snippets into your own webpages? See [EMBEDDING-GUIDE.md](./EMBEDDING-GUIDE.md) for detailed instructions on how to:
+
+- Extract snippets from generated HTML
+- Preserve clickable links to definitions
+- Use JavaScript to dynamically load snippets
+- Style embedded code examples
+
+**Quick example:**
+```html
+<link rel="stylesheet" href="Agda.css">
+<pre class="Agda"><a href="examples.ApplesAndBuckets.html#1595" class="Function">f!⊆→⊆f*</a> <a class="Symbol">:</a> <a class="Symbol">∀</a> <a class="Symbol">{</a><a href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a><a class="Symbol">}</a> <a class="Symbol">→</a> <a href="examples.ApplesAndBuckets.html#1096" class="Function">f!</a> <a href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a href="examples.ApplesAndBuckets.html#555" class="Function Operator">⊆</a> <a href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a> <a class="Symbol">→</a> <a href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a href="examples.ApplesAndBuckets.html#555" class="Function Operator">⊆</a> <a href="examples.ApplesAndBuckets.html#907" class="Function">f*</a> <a href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a></pre>
+```
+
+Check out the live example on the [landing page](docs/index.html)!
+
 ## Viewing the Site
 
 After deployment, visit your GitHub Pages site at:

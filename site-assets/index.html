@@ -110,6 +110,37 @@
                 color: #ce93d8;
             }
         }
+
+        /* Code example styling */
+        .code-example {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--agda-function);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .code-example h3 {
+            margin-top: 0;
+            color: var(--agda-function);
+        }
+
+        .code-example pre.Agda {
+            font-size: 1.1rem;
+            background-color: var(--bg-code);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .code-caption {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +254,18 @@
                 <a href="examples.ApplesAndBuckets.html">(ApplesAndBuckets.agda)</a>
             </li>
         </ul>
+
+        <div class="code-example">
+            <h3>Example: Adjunction with Clickable Code</h3>
+            <p>
+                The first adjunction <code>f! ⊣ f*</code> says that for all subsets A' ⊆ A and B' ⊆ B,
+                we have f!(A') ⊆ B' if and only if A' ⊆ f*(B'). Here's the type signature (click on identifiers to jump to their definitions):
+            </p>
+            <pre class="Agda"><a id="1595" href="examples.ApplesAndBuckets.html#1595" class="Function">f!⊆→⊆f*</a> <a id="1603" class="Symbol">:</a> <a id="1605" class="Symbol">∀</a> <a id="1607" class="Symbol">{</a><a id="1608" href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a id="1611" href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a><a id="1613" class="Symbol">}</a> <a id="1615" class="Symbol">→</a> <a id="1617" href="examples.ApplesAndBuckets.html#1096" class="Function">f!</a> <a id="1620" href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a id="1623" href="examples.ApplesAndBuckets.html#555" class="Function Operator">⊆</a> <a id="1625" href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a> <a id="1628" class="Symbol">→</a> <a id="1630" href="examples.ApplesAndBuckets.html#1608" class="Bound">A'</a> <a id="1633" href="examples.ApplesAndBuckets.html#555" class="Function Operator">⊆</a> <a id="1635" href="examples.ApplesAndBuckets.html#907" class="Function">f*</a> <a id="1638" href="examples.ApplesAndBuckets.html#1611" class="Bound">B'</a></pre>
+            <p class="code-caption">
+                <em>Try clicking on <code>f!</code>, <code>f*</code>, or <code>⊆</code> to navigate to their definitions!</em>
+            </p>
+        </div>
     </div>
 
     <div class="section">
