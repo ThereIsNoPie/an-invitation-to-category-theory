@@ -24,17 +24,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Cache Agda
+      - name: Cache Cabal and Agda
+        id: cache-agda
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cabal
-            ~/.local
-          key: ${{ runner.os }}-agda-${{ hashFiles('**/*.agda') }}
+            ~/.cabal/store
+            ~/.cabal/packages
+            ~/.local/bin
+          key: ${{ runner.os }}-agda-2.6.4.3-ghc-9.4.7
           restore-keys: |
             ${{ runner.os }}-agda-
 
       - name: Install Agda
+        if: steps.cache-agda.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y ghc cabal-install
@@ -42,11 +45,32 @@ jobs:
           cabal install Agda
           echo "$HOME/.cabal/bin" >> $GITHUB_PATH
 
+      - name: Add Agda to PATH
+        if: steps.cache-agda.outputs.cache-hit == 'true'
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Get latest Agda stdlib version
+        id: stdlib-version
+        run: |
+          STDLIB_VERSION=$(git ls-remote --tags --refs --sort="v:refname" https://github.com/agda/agda-stdlib.git | tail -n1 | sed 's/.*\///')
+          echo "version=$STDLIB_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest agda-stdlib version: $STDLIB_VERSION"
+
+      - name: Cache Agda standard library
+        id: cache-stdlib
+        uses: actions/cache@v4
+        with:
+          path: ~/.agda
+          key: ${{ runner.os }}-agda-stdlib-${{ steps.stdlib-version.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-agda-stdlib-
+
       - name: Install Agda standard library
+        if: steps.cache-stdlib.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/.agda
           cd ~/.agda
-          git clone https://github.com/agda/agda-stdlib.git
+          git clone --depth 1 --branch ${{ steps.stdlib-version.outputs.version }} https://github.com/agda/agda-stdlib.git
           cd agda-stdlib
           echo "name: standard-library" > standard-library.agda-lib
           echo "include: src" >> standard-library.agda-lib
