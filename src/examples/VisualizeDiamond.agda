@@ -1,8 +1,8 @@
 {-# OPTIONS --guardedness #-}
 
-module VisualizeDiamond where
+module examples.VisualizeDiamond where
 
-open import SimplePreorder
+open import examples.SimplePreorder
 open import IO
 open import Data.String using (String)
 open import Data.Unit.Polymorphic using (⊤)

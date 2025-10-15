@@ -1,7 +1,7 @@
 -- Example 1.109: Apples and Buckets
 -- This file demonstrates the three adjoint functors induced by a function f : A → B
 
-module ApplesAndBuckets where
+module examples.ApplesAndBuckets where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃; Σ-syntax; Σ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)

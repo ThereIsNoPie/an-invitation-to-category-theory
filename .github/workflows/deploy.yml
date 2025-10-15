@@ -1,0 +1,84 @@
+name: Build and Deploy Agda Documentation
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Cache Agda
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal
+            ~/.local
+          key: ${{ runner.os }}-agda-${{ hashFiles('**/*.agda') }}
+          restore-keys: |
+            ${{ runner.os }}-agda-
+
+      - name: Install Agda
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ghc cabal-install
+          cabal update
+          cabal install Agda
+          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+
+      - name: Install Agda standard library
+        run: |
+          mkdir -p ~/.agda
+          cd ~/.agda
+          git clone https://github.com/agda/agda-stdlib.git
+          cd agda-stdlib
+          echo "name: standard-library" > standard-library.agda-lib
+          echo "include: src" >> standard-library.agda-lib
+          echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
+          echo "standard-library" > ~/.agda/defaults
+
+      - name: Generate HTML documentation
+        run: |
+          agda --version
+          agda --html --html-dir=docs --html-highlight=auto src/Everything.agda
+
+      - name: Copy custom assets
+        run: |
+          if [ -d "site-assets" ]; then
+            cp -r site-assets/* docs/ || true
+          fi
+
+      - name: Add .nojekyll
+        run: touch docs/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,4 +1,4 @@
-module SimplePreorder where
+module examples.SimplePreorder where
 
 open import Preorder
 open import GraphViz

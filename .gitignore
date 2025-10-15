@@ -3,3 +3,10 @@
 
 # Visualization artifacts (executables, build files, outputs)
 scripts/visualize-artifacts/
+
+# Generated HTML documentation (built by GitHub Actions)
+docs/
+
+# PowerShell/Bash build scripts (kept for local testing)
+# build-site.ps1
+# build-site.sh

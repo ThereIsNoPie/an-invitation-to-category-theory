@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Invitation to Category Theory - Formalized in Agda</title>
+    <link rel="stylesheet" href="Agda.css">
+    <style>
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            margin-bottom: 0.5rem;
+            color: var(--agda-module);
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .module-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .module-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: var(--agda-function);
+        }
+
+        .module-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .module-card a {
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            margin: 3rem 0;
+        }
+
+        .section h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .badge-core {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-example {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .badge-core {
+                background-color: #1a237e;
+                color: #90caf9;
+            }
+
+            .badge-example {
+                background-color: #4a148c;
+                color: #ce93d8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>An Invitation to Category Theory</h1>
+        <p>Formalized in Agda with clickable, interactive code</p>
+    </div>
+
+    <div class="section">
+        <h2>About</h2>
+        <p>
+            This is a formalization of category-theoretic concepts in Agda, focusing on preorders,
+            Galois connections, and adjoint functors. The code features:
+        </p>
+        <ul>
+            <li>Fully type-checked proofs in Agda</li>
+            <li>Clickable identifiers that link to their definitions</li>
+            <li>Syntax highlighting for better readability</li>
+            <li>Interactive exploration of mathematical structures</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Core Theory</h2>
+        <div class="module-grid">
+            <div class="module-card">
+                <span class="badge badge-core">Core</span>
+                <h3>Preorder</h3>
+                <p>
+                    Defines preorders, monotonic functions, Galois connections, and proves key theorems
+                    including the Adjoint Functor Theorem for preorders (Theorem 1.108).
+                </p>
+                <a href="Preorder.html">View module →</a>
+            </div>
+
+            <div class="module-card">
+                <span class="badge badge-core">Core</span>
+                <h3>GraphViz</h3>
+                <p>
+                    Utilities for visualizing preorders and graphs using GraphViz DOT format.
+                    Includes text and DOT output generation.
+                </p>
+                <a href="GraphViz.html">View module →</a>
+            </div>
+
+            <div class="module-card">
+                <span class="badge badge-core">Core</span>
+                <h3>MeetExample</h3>
+                <p>
+                    Demonstrates meet and join operations in preorders with concrete examples
+                    of lattice structures and their properties.
+                </p>
+                <a href="MeetExample.html">View module →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Examples</h2>
+        <div class="module-grid">
+            <div class="module-card">
+                <span class="badge badge-example">Example</span>
+                <h3>Apples and Buckets</h3>
+                <p>
+                    Example 1.109: Demonstrates three adjoint functors induced by a function,
+                    using the intuitive metaphor of apples and buckets.
+                </p>
+                <a href="examples.ApplesAndBuckets.html">View module →</a>
+            </div>
+
+            <div class="module-card">
+                <span class="badge badge-example">Example</span>
+                <h3>Simple Preorder</h3>
+                <p>
+                    A concrete example of a diamond-shaped preorder with 4 elements,
+                    showing how to construct preorders from directed graphs.
+                </p>
+                <a href="examples.SimplePreorder.html">View module →</a>
+            </div>
+
+            <div class="module-card">
+                <span class="badge badge-example">Example</span>
+                <h3>Visualize Diamond</h3>
+                <p>
+                    Executable module that generates GraphViz visualizations of the diamond preorder,
+                    demonstrating the integration of proof and visualization.
+                </p>
+                <a href="examples.VisualizeDiamond.html">View module →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Key Theorems</h2>
+        <ul>
+            <li>
+                <strong>Proposition 1.101</strong>: Equivalence between Galois connections and unit/counit conditions
+                <a href="Preorder.html#FromGalois">(Preorder.agda)</a>
+            </li>
+            <li>
+                <strong>Proposition 1.104</strong>: Right adjoints preserve meets, left adjoints preserve joins
+                <a href="Preorder.html#Prop104">(Preorder.agda)</a>
+            </li>
+            <li>
+                <strong>Theorem 1.108</strong>: Adjoint Functor Theorem for Preorders -
+                a monotonic function is an adjoint iff it preserves the appropriate limits
+                <a href="Preorder.html#Theorem108">(Preorder.agda)</a>
+            </li>
+            <li>
+                <strong>Example 1.109</strong>: Apples and Buckets - three adjoint functors induced by a function
+                <a href="examples.ApplesAndBuckets.html">(ApplesAndBuckets.agda)</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Navigation</h2>
+        <p>
+            Click on any identifier in the Agda code to jump to its definition.
+            Use your browser's back button to return to where you were.
+        </p>
+        <p>
+            Start with <a href="Everything.html"><code>Everything.agda</code></a> to see all imports,
+            or dive directly into <a href="Preorder.html"><code>Preorder.agda</code></a> for the core theory.
+        </p>
+    </div>
+
+    <footer>
+        <p>
+            Generated with <a href="https://github.com/agda/agda" target="_blank">Agda</a>
+            • Formalization based on <em>An Invitation to Applied Category Theory</em>
+        </p>
+        <p>
+            <a href="https://github.com/yourusername/an-invitation-to-category-theory" target="_blank">
+                View on GitHub
+            </a>
+        </p>
+    </footer>
+</body>
+</html>
