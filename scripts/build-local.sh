@@ -28,7 +28,7 @@ echo ""
 
 # Step 3: Add Jekyll front matter to markdown files
 echo "Step 3/5: Adding Jekyll front matter to markdown files..."
-./add-jekyll-frontmatter.sh
+./scripts/add-jekyll-frontmatter.sh
 echo "✓ Front matter added"
 echo ""
 

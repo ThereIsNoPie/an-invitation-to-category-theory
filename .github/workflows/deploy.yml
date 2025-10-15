@@ -66,8 +66,8 @@ jobs:
 
       - name: Add Jekyll front matter to markdown files
         run: |
-          chmod +x add-jekyll-frontmatter.sh
-          ./add-jekyll-frontmatter.sh
+          chmod +x scripts/add-jekyll-frontmatter.sh
+          ./scripts/add-jekyll-frontmatter.sh
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1

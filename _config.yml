@@ -22,7 +22,6 @@ exclude:
   - README.md
   - Gemfile
   - Gemfile.lock
-  - build-site.sh
-  - add-jekyll-frontmatter.sh
+  - scripts
   - category-theory.agda-lib
   - EMBEDDING-GUIDE.md
