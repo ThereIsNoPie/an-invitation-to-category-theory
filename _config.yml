@@ -1,6 +1,6 @@
 title: "An Invitation to Category Theory"
 description: "Formalized in Agda with clickable, interactive code"
-baseurl: ""
+baseurl: "/an-invitation-to-category-theory"
 url: ""
 
 # Build settings
