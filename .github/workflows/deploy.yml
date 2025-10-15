@@ -24,6 +24,19 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Get GHC and Agda versions
+        id: versions
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ghc cabal-install
+          GHC_VERSION=$(ghc --numeric-version)
+          cabal update
+          AGDA_VERSION=$(cabal list --simple-output agda | grep '^agda ' | head -1 | awk '{print $2}')
+          echo "ghc=$GHC_VERSION" >> $GITHUB_OUTPUT
+          echo "agda=$AGDA_VERSION" >> $GITHUB_OUTPUT
+          echo "GHC version: $GHC_VERSION"
+          echo "Latest Agda version: $AGDA_VERSION"
+
       - name: Cache Cabal and Agda
         id: cache-agda
         uses: actions/cache@v4
@@ -32,18 +45,15 @@ jobs:
             ~/.cabal/store
             ~/.cabal/packages
             ~/.local/bin
-          key: ${{ runner.os }}-agda-2.6.4.3-ghc-9.4.7
+          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-ghc-${{ steps.versions.outputs.ghc }}
           restore-keys: |
             ${{ runner.os }}-agda-
 
       - name: Install Agda
         if: steps.cache-agda.outputs.cache-hit != 'true'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ghc cabal-install
-          cabal update
           cabal install Agda
-          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Add Agda to PATH
         if: steps.cache-agda.outputs.cache-hit == 'true'
