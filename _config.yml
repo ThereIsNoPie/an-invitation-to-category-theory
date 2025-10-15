@@ -1,0 +1,27 @@
+title: "An Invitation to Category Theory"
+description: "Formalized in Agda with clickable, interactive code"
+baseurl: ""
+url: ""
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter_opts:
+    disable: true  # We use Agda's syntax highlighting
+
+# Include Agda-generated files
+include:
+  - docs
+
+# Exclude source files from the build
+exclude:
+  - src
+  - .github
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+# Allow HTML in markdown (important for Agda code blocks)
+kramdown:
+  parse_block_html: true

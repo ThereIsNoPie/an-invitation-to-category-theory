@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ '/docs/Agda.css' | relative_url }}">
+    <style>
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Article-style wrapper for Agda markdown content */
+        .agda-content {
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .agda-content h1,
+        .agda-content h2,
+        .agda-content h3,
+        .agda-content h4 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--agda-module);
+        }
+
+        .agda-content h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .agda-content p {
+            margin-bottom: 1rem;
+        }
+
+        .agda-content pre.Agda {
+            background-color: var(--bg-code);
+            padding: 1.2rem;
+            overflow-x: auto;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .agda-content ul,
+        .agda-content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .agda-content blockquote {
+            border-left: 4px solid var(--agda-function);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .agda-content code {
+            background-color: var(--bg-secondary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .agda-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        /* Navigation link back to home */
+        nav {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        nav a {
+            color: var(--agda-function);
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ '/' | relative_url }}">← Back to Home</a>
+    </nav>
+
+    <div class="agda-content">
+        {{ content }}
+    </div>
+</body>
+</html>

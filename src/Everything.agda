@@ -10,7 +10,7 @@ import Preorder
 import GraphViz
 import MeetExample
 
--- Examples
-import examples.ApplesAndBuckets
+-- Examples (includes both .agda and .lagda.md files)
+import examples.ApplesAndBuckets  -- Now a .lagda.md file!
 import examples.SimplePreorder
 import examples.VisualizeDiamond
