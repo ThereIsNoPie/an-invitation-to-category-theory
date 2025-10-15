@@ -9,6 +9,7 @@ kramdown:
   input: GFM
   syntax_highlighter_opts:
     disable: true  # We use Agda's syntax highlighting
+  parse_block_html: true  # Allow HTML in markdown (important for Agda code blocks)
 
 # Include Agda-generated files
 include:
@@ -21,7 +22,7 @@ exclude:
   - README.md
   - Gemfile
   - Gemfile.lock
-
-# Allow HTML in markdown (important for Agda code blocks)
-kramdown:
-  parse_block_html: true
+  - build-site.sh
+  - add-jekyll-frontmatter.sh
+  - category-theory.agda-lib
+  - EMBEDDING-GUIDE.md
