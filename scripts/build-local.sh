@@ -10,7 +10,7 @@ echo "════════════════════════�
 echo ""
 
 # Step 1: Generate HTML from Agda
-echo "Step 1/5: Generating HTML documentation from Agda..."
+echo "Step 1/4: Generating HTML documentation from Agda..."
 echo "Running: agda --html --html-dir=docs --html-highlight=auto src/Everything.agda"
 agda --html --html-dir=docs --html-highlight=auto src/Everything.agda
 echo "✓ Agda HTML generation complete"
