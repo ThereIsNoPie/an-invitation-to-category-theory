@@ -1,3 +1,8 @@
+---
+layout: agda
+title: "ApplesAndBuckets"
+---
+
 <!--
 ```agda
 module examples.ApplesAndBuckets where

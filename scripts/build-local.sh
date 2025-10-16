@@ -17,7 +17,7 @@ echo "✓ Agda HTML generation complete"
 echo ""
 
 # Step 2: Copy custom CSS
-echo "Step 2/5: Copying custom CSS and assets..."
+echo "Step 2/4: Copying custom CSS and assets..."
 if [ -d "site-assets" ]; then
     cp -r site-assets/* docs/
     echo "✓ Custom assets copied to docs/"
@@ -26,14 +26,8 @@ else
 fi
 echo ""
 
-# Step 3: Add Jekyll front matter to markdown files
-echo "Step 3/5: Adding Jekyll front matter to markdown files..."
-./scripts/add-jekyll-frontmatter.sh
-echo "✓ Front matter added"
-echo ""
-
-# Step 4: Build with Jekyll
-echo "Step 4/5: Building site with Jekyll..."
+# Step 3: Build with Jekyll
+echo "Step 3/4: Building site with Jekyll..."
 if command -v bundle &> /dev/null; then
     bundle exec jekyll build
     echo "✓ Jekyll build complete"
@@ -43,8 +37,8 @@ else
 fi
 echo ""
 
-# Step 5: Report results
-echo "Step 5/5: Build summary"
+# Step 4: Report results
+echo "Step 4/4: Build summary"
 echo "────────────────────────────────────────────────────────────────"
 echo "✓ Site built successfully!"
 echo ""

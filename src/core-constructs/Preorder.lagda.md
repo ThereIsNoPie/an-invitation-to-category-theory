@@ -1,3 +1,13 @@
+---
+layout: agda
+title: "Preorder"
+---
+
+# Preorder
+
+Basic definitions of preorders, monotonic functions, and Galois connections.
+
+```agda
 module core-constructs.Preorder where
 
 record IsPreorder {A : Set} (_≤_ : A → A → Set) : Set where
@@ -83,3 +93,4 @@ module MeetJoin where
   -- Join (supremum/least upper bound)
   IsJoin : {A : Set} → (_≤_ : A → A → Set) → A → Subset A → Set
   IsJoin _≤_ j P = IsUpperBound _≤_ j P × (∀ {x} → IsUpperBound _≤_ x P → j ≤ x)
+```

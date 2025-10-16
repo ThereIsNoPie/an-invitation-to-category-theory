@@ -1,3 +1,9 @@
+---
+layout: agda
+title: "SimplePreorder"
+---
+
+```agda
 module examples.SimplePreorder where
 
 open import core-constructs.Preorder
@@ -104,3 +110,4 @@ diamondDot = graphToDot diamondGraphVizConfig
 -- Generate text representation
 diamondText : String
 diamondText = graphToText diamondGraphVizConfig
+```

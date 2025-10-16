@@ -1,3 +1,13 @@
+---
+layout: agda
+title: "GraphViz"
+---
+
+# GraphViz
+
+Utilities for visualizing preorders and graphs using GraphViz DOT format.
+
+```agda
 module core-constructs.GraphViz where
 
 open import Data.String using (String; _++_)
@@ -64,3 +74,4 @@ graphToText config =
       (foldr (λ { (v1 , v2) acc →
         ("  " ++ showVertex v1 ++ " → " ++ showVertex v2) ∷ acc
       }) [] edges)
+```

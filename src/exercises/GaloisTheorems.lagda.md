@@ -1,3 +1,9 @@
+---
+layout: agda
+title: "GaloisTheorems"
+---
+
+```agda
 module exercises.GaloisTheorems where
 
 open import core-constructs.Preorder
@@ -272,3 +278,4 @@ module GaloisTheorems (P Q : Preorder) where
         GaloisConnection.f gc ≡ f → PreservesJoins
       is-left-adjoint→preserves-joins gc refl S j join-S =
         Prop104.LeftAdjointPreserveJoin.f-preserves-join gc S j join-S
+```

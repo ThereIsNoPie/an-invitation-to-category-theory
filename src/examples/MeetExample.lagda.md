@@ -1,3 +1,9 @@
+---
+layout: agda
+title: "MeetExample"
+---
+
+```agda
 module examples.MeetExample where
 
 open import Data.Nat using (ℕ; zero; suc; _≤_; z≤n; s≤s)
@@ -39,3 +45,5 @@ P n = 2 ≤ n
 -- If we try to prove P 2, we need to prove 2 ≤ 2, which is impossible
 
 -- This shows that the meet of a subset does not need to be in the subset itself
+
+```
