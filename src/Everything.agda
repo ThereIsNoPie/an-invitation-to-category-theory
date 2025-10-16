@@ -6,7 +6,10 @@
 module Everything where
 
 -- Definitions
+import definitions.EquivalenceRelation
+import definitions.Partition
 import definitions.Preorder
+import definitions.Relation
 
 -- Exercises
 import exercises.GaloisTheorems
