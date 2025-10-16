@@ -25,6 +25,7 @@ import exercises.GaloisTheorems
 
 -- Examples
 import examples.ApplesAndBuckets
+import examples.PreciseAndForgetful
 
 -- Non-textbook
 import non-textbook.GraphViz
