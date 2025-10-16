@@ -3,12 +3,16 @@ layout: agda
 title: "Galois Connection"
 section: "Definitions"
 chapter: 1
-number: 95
+number: 90
 ---
 
 # Galois Connection
 
-Galois connections between preorders.
+**Definition 1.90.** A *Galois connection* between preorders P and Q is a pair of monotone maps f : P → Q and g : Q → P such that
+
+f(p) ≤ q if and only if p ≤ g(q).   (1.6)
+
+We say that f is the *left adjoint* and g is the *right adjoint* of the Galois connection.
 
 ```agda
 module definitions.GaloisConnection where

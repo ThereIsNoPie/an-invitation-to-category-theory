@@ -6,11 +6,13 @@
 module Everything where
 
 -- Definitions
+import definitions.ClosureOperator
 import definitions.Composition
 import definitions.EquivalenceRelation
 import definitions.Function
 import definitions.GaloisConnection
 import definitions.Graph
+import definitions.Isomorphism
 import definitions.MeetJoin
 import definitions.MonotoneMap
 import definitions.Partition
