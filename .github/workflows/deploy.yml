@@ -137,11 +137,6 @@ jobs:
             cp -r site-assets/* docs/ || true
           fi
 
-      - name: Add Jekyll front matter to markdown files
-        run: |
-          chmod +x scripts/add-jekyll-frontmatter.sh
-          ./scripts/add-jekyll-frontmatter.sh
-
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
