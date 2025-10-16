@@ -24,17 +24,18 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Get GHC and Agda versions
-        id: versions
+      - name: Setup GHC and Cabal
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ghc cabal-install
-          GHC_VERSION=$(ghc --numeric-version)
+          sudo apt-get install -y cabal-install
           cabal update
-          AGDA_VERSION=$(cabal list --simple-output agda | grep '^agda ' | head -1 | awk '{print $2}')
-          echo "ghc=$GHC_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get versions for cache key
+        id: versions
+        run: |
+          # Get the latest Agda version available on Hackage
+          AGDA_VERSION=$(cabal list --simple-output agda | grep -E '^agda\s' | tail -1 | awk '{print $2}')
           echo "agda=$AGDA_VERSION" >> $GITHUB_OUTPUT
-          echo "GHC version: $GHC_VERSION"
           echo "Latest Agda version: $AGDA_VERSION"
 
       - name: Cache Cabal and Agda
@@ -46,7 +47,7 @@ jobs:
             ~/.cabal/packages
             ~/.local/bin
             ~/.local/state/cabal/store
-          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-ghc-${{ steps.versions.outputs.ghc }}
+          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}
           restore-keys: |
             ${{ runner.os }}-agda-
 
