@@ -5,15 +5,17 @@
 
 module Everything where
 
--- Core constructs
-import core-constructs.Preorder
-import core-constructs.GraphViz
+-- Definitions
+import definitions.Preorder
 
 -- Exercises
 import exercises.GaloisTheorems
 
 -- Examples
 import examples.ApplesAndBuckets
-import examples.MeetExample
-import examples.SimplePreorder
-import examples.VisualizeDiamond
+
+-- Non-textbook
+import non-textbook.GraphViz
+import non-textbook.MeetExample
+import non-textbook.SimplePreorder
+import non-textbook.VisualizeDiamond

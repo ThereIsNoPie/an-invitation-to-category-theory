@@ -1,6 +1,9 @@
 ---
 layout: agda
 title: "GraphViz"
+section: "Not In Textbook"
+chapter: 1
+number: 2
 ---
 
 # GraphViz
@@ -8,7 +11,7 @@ title: "GraphViz"
 Utilities for visualizing preorders and graphs using GraphViz DOT format.
 
 ```agda
-module core-constructs.GraphViz where
+module non-textbook.GraphViz where
 
 open import Data.String using (String; _++_)
 open import Data.List using (List; []; _∷_; foldr)

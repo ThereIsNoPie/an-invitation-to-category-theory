@@ -1,12 +1,28 @@
 ---
 layout: agda
-title: "GaloisTheorems"
+title: "Galois Theorems"
+section: "Exercises"
+chapter: 1
+number: 101
+subsections:
+  - name: "Prop 1.101"
+    chapter: 1
+    number: 101
+    anchor: "GaloisTheorems.FromGalois"
+  - name: "Prop 1.104"
+    chapter: 1
+    number: 104
+    anchor: "GaloisTheorems.Prop104"
+  - name: "Theorem 1.108"
+    chapter: 1
+    number: 108
+    anchor: "GaloisTheorems.Theorem108"
 ---
 
 ```agda
 module exercises.GaloisTheorems where
 
-open import core-constructs.Preorder
+open import definitions.Preorder
 open import Data.Product
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 

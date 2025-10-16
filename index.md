@@ -38,8 +38,8 @@ _Coming soon: A brief introduction to dependent types, pattern matching, and pro
 
 ### Core Constructs
 
-1. [Preorder](docs/core-constructs.Preorder.html) - Basic definitions of preorders, monotonic functions, and Galois connections
-2. [GraphViz](docs/core-constructs.GraphViz.html) - Utilities for visualizing preorders and graphs
+1. [Preorder](docs/definitions.Preorder.html) - Basic definitions of preorders, monotonic functions, and Galois connections
+2. [GraphViz](docs/non-textbook.GraphViz.html) - Utilities for visualizing preorders and graphs
 
 ### Exercises
 
@@ -51,9 +51,9 @@ _Coming soon: A brief introduction to dependent types, pattern matching, and pro
 ### Examples
 
 1. [Apples and Buckets](docs/examples.ApplesAndBuckets.html) - Example 1.109: Three adjoint functors induced by a function
-2. [Simple Preorder](docs/examples.SimplePreorder.html) - A concrete diamond-shaped preorder with 4 elements
-3. [Meet Example](docs/examples.MeetExample.html) - Demonstrations of meet and join operations
-4. [Visualize Diamond](docs/examples.VisualizeDiamond.html) - Executable GraphViz visualization
+2. [Simple Preorder](docs/non-textbook.SimplePreorder.html) - A concrete diamond-shaped preorder with 4 elements
+3. [Meet Example](docs/non-textbook.MeetExample.html) - Demonstrations of meet and join operations
+4. [Visualize Diamond](docs/non-textbook.VisualizeDiamond.html) - Executable GraphViz visualization
 
 </div>
 

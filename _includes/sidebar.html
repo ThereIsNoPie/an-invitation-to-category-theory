@@ -2,37 +2,33 @@
     <div class="sidebar-title">Category Theory</div>
     <div class="sidebar-subtitle">Formalized in Agda</div>
 
-    <div class="nav-section">
-        <h3>Core Constructs</h3>
-        <ol>
-            <li><a href="{{ '/docs/core-constructs.Preorder.html' | relative_url }}">1. Preorder</a></li>
-            <li><a href="{{ '/docs/core-constructs.GraphViz.html' | relative_url }}">2. GraphViz</a></li>
-        </ol>
-    </div>
+    {% comment %}
+    Automatically construct navigation sections from page front matter.
+    Pages with a 'section' field will be grouped and ordered by their 'order' field.
+    {% endcomment %}
 
-    <div class="nav-section">
-        <h3>Exercises</h3>
-        <ol>
-            <li>
-                <a href="{{ '/docs/exercises.GaloisTheorems.html' | relative_url }}">1. Galois Theorems</a>
-                <ol>
-                    <li><a href="{{ '/docs/exercises.GaloisTheorems.html#GaloisTheorems.FromGalois' | relative_url }}">1.1 Prop 1.101</a></li>
-                    <li><a href="{{ '/docs/exercises.GaloisTheorems.html#GaloisTheorems.Prop104' | relative_url }}">1.2 Prop 1.104</a></li>
-                    <li><a href="{{ '/docs/exercises.GaloisTheorems.html#GaloisTheorems.Theorem108' | relative_url }}">1.3 Theorem 1.108</a></li>
-                </ol>
-            </li>
-        </ol>
-    </div>
+    {% assign sections = site.pages | where_exp: "page", "page.section != nil" | group_by: "section" | sort: "name" %}
 
-    <div class="nav-section">
-        <h3>Examples</h3>
-        <ol>
-            <li><a href="{{ '/docs/examples.ApplesAndBuckets.html' | relative_url }}">1. Apples and Buckets</a></li>
-            <li><a href="{{ '/docs/examples.SimplePreorder.html' | relative_url }}">2. Simple Preorder</a></li>
-            <li><a href="{{ '/docs/examples.MeetExample.html' | relative_url }}">3. Meet Example</a></li>
-            <li><a href="{{ '/docs/examples.VisualizeDiamond.html' | relative_url }}">4. Visualize Diamond</a></li>
-        </ol>
-    </div>
+    {% for section_group in sections %}
+        <div class="nav-section">
+            <h3>{{ section_group.name }}</h3>
+            <ol>
+                {% assign section_pages = section_group.items | sort: "number" %}
+                {% for page in section_pages %}
+                    <li>
+                        <a href="{{ page.url | relative_url }}">{{ page.chapter }}.{{ page.number }} {{ page.title }}</a>
+                        {% if page.subsections %}
+                            <ol>
+                                {% for subsection in page.subsections %}
+                                    <li><a href="{{ page.url | relative_url }}#{{ subsection.anchor }}">{{ subsection.chapter }}.{{ subsection.number }} {{ subsection.name }}</a></li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+    {% endfor %}
 
     <div class="nav-section">
         <h3>Home</h3>

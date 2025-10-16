@@ -1,10 +1,13 @@
 ---
 layout: agda
-title: "MeetExample"
+title: "Meet Example"
+section: "Not In Textbook"
+chapter: 1
+number: 2
 ---
 
 ```agda
-module examples.MeetExample where
+module non-textbook.MeetExample where
 
 open import Data.Nat using (ℕ; zero; suc; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤-refl; ≤-trans)
@@ -13,7 +16,7 @@ open import Data.Product using (_,_)
 open import Data.Empty using (⊥; ⊥-elim)
 
 -- Import our definitions
-open import core-constructs.Preorder
+open import definitions.Preorder
 open MeetJoin
 
 -- Example: Meet of "positive naturals" in ℕ is 1, but 1 is not in the subset

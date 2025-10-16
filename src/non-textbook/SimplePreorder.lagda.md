@@ -1,13 +1,16 @@
 ---
 layout: agda
-title: "SimplePreorder"
+title: "Simple Preorder"
+section: "Not In Textbook"
+chapter: 1
+number: 3
 ---
 
 ```agda
-module examples.SimplePreorder where
+module non-textbook.SimplePreorder where
 
-open import core-constructs.Preorder
-open import core-constructs.GraphViz
+open import definitions.Preorder
+open import non-textbook.GraphViz
 open import Data.String using (String)
 open import Data.List using (List; _∷_; [])
 open import Data.Product using (_×_; _,_)

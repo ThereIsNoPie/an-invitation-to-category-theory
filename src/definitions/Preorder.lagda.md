@@ -1,6 +1,9 @@
 ---
 layout: agda
 title: "Preorder"
+section: "Definitions"
+chapter: 1
+number: 1
 ---
 
 # Preorder
@@ -8,7 +11,7 @@ title: "Preorder"
 Basic definitions of preorders, monotonic functions, and Galois connections.
 
 ```agda
-module core-constructs.Preorder where
+module definitions.Preorder where
 
 record IsPreorder {A : Set} (_≤_ : A → A → Set) : Set where
   field

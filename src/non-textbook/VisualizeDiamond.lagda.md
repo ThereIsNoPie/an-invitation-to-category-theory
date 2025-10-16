@@ -1,14 +1,17 @@
 ---
 layout: agda
-title: "VisualizeDiamond"
+title: "Visualize Diamond"
+section: "Not In Textbook"
+chapter: 1
+number: 4
 ---
 
 ```agda
 {-# OPTIONS --guardedness #-}
 
-module examples.VisualizeDiamond where
+module non-textbook.VisualizeDiamond where
 
-open import examples.SimplePreorder
+open import non-textbook.SimplePreorder
 open import IO
 open import Data.String using (String)
 open import Data.Unit.Polymorphic using (⊤)
