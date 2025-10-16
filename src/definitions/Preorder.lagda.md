@@ -3,21 +3,40 @@ layout: agda
 title: "Preorder"
 section: "Definitions"
 chapter: 1
-number: 1
+number: 25
 ---
 
 # Preorder
 
-Basic definitions of preorders, monotonic functions, and Galois connections.
+**Definition 1.25.** A *preorder relation* on a set X is a binary relation on X, here denoted with infix notation ≤, such that
+
+(a) x ≤ x; and
+
+(b) if x ≤ y and y ≤ z, then x ≤ z.
+
+The first condition is called *reflexivity* and the second is called *transitivity*. If x ≤ y and y ≤ x, we write x ≅ y and say x and y are *equivalent*. We call a pair (X, ≤) consisting of a set equipped with a preorder relation a *preorder*.
 
 ```agda
 module definitions.Preorder where
 
+open import Data.Product using (_×_)
+
+-- A preorder relation on a set X is a binary relation satisfying
+-- reflexivity and transitivity
 record IsPreorder {A : Set} (_≤_ : A → A → Set) : Set where
   field
+    -- (a) Reflexivity: x ≤ x
     reflexive  : ∀ {x} → x ≤ x
+
+    -- (b) Transitivity: if x ≤ y and y ≤ z, then x ≤ z
     transitive : ∀ {x y z} → x ≤ y → y ≤ z → x ≤ z
 
+  -- If x ≤ y and y ≤ x, we write x ≅ y and say x and y are equivalent
+  _≅_ : A → A → Set
+  x ≅ y = (x ≤ y) × (y ≤ x)
+
+-- A preorder is a pair (X, ≤) consisting of a set equipped with
+-- a preorder relation
 record Preorder : Set₁ where
   field
     Carrier    : Set
@@ -40,60 +59,4 @@ record Preorder : Set₁ where
 
     _∎ : ∀ x → x ≤ x
     x ∎ = reflexive
-
--- Monotonic functions (order-preserving)
-Monotonic : {A B : Set} → (_≤₁_ : A → A → Set) → (_≤₂_ : B → B → Set) → (A → B) → Set
-Monotonic _≤₁_ _≤₂_ f = ∀ {x y} → x ≤₁ y → f x ≤₂ f y
-
--- Monotonic function between preorders
-_⇒_ : Preorder → Preorder → Set
-P ⇒ Q = let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-            open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-        in Σ (A → B) λ f → Monotonic _≤₁_ _≤₂_ f
-  where open import Data.Product
-
--- Galois connection between preorders
-record GaloisConnection (P Q : Preorder) : Set where
-  open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-  open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-
-  field
-    f : A → B  -- Lower adjoint (left adjoint)
-    g : B → A  -- Upper adjoint (right adjoint)
-
-    -- Adjunction property: f(x) ≤₂ y  ⟺  x ≤₁ g(y)
-    f-g : ∀ {x y} → f x ≤₂ y → x ≤₁ g y
-    g-f : ∀ {x y} → x ≤₁ g y → f x ≤₂ y
-
-  -- Derived properties
-  f-monotonic : Monotonic _≤₁_ _≤₂_ f
-  f-monotonic x≤y = g-f (Preorder.transitive P x≤y (f-g (Preorder.reflexive Q)))
-
-  g-monotonic : Monotonic _≤₂_ _≤₁_ g
-  g-monotonic y≤z = f-g (Preorder.transitive Q (g-f (Preorder.reflexive P)) y≤z)
-
-module MeetJoin where
-
-  open import Data.Product
-  open import Relation.Binary
-
-  Subset : Set → Set₁
-  Subset A = A → Set
-
-
-  -- Lower bound for a subset
-  IsLowerBound : {A : Set} → (_≤_ : A → A → Set) → A → Subset A → Set
-  IsLowerBound _≤_ x P = ∀ {y} → P y → x ≤ y
-
-  -- Upper bound for a subset
-  IsUpperBound : {A : Set} → (_≤_ : A → A → Set) → A → Subset A → Set
-  IsUpperBound _≤_ x P = ∀ {y} → P y → y ≤ x
-
-  -- Meet (infimum/greatest lower bound)
-  IsMeet : {A : Set} → (_≤_ : A → A → Set) → A → Subset A → Set
-  IsMeet _≤_ m P = IsLowerBound _≤_ m P × (∀ {x} → IsLowerBound _≤_ x P → x ≤ m)
-
-  -- Join (supremum/least upper bound)
-  IsJoin : {A : Set} → (_≤_ : A → A → Set) → A → Subset A → Set
-  IsJoin _≤_ j P = IsUpperBound _≤_ j P × (∀ {x} → IsUpperBound _≤_ x P → j ≤ x)
 ```

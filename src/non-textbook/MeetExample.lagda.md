@@ -17,7 +17,7 @@ open import Data.Empty using (⊥; ⊥-elim)
 
 -- Import our definitions
 open import definitions.Preorder
-open MeetJoin
+open import definitions.MeetJoin
 
 -- Example: Meet of "positive naturals" in ℕ is 1, but 1 is not in the subset
 -- We'll use the subset P = {n | n ≥ 2} = {2, 3, 4, ...}

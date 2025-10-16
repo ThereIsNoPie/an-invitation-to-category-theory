@@ -23,6 +23,9 @@ subsections:
 module exercises.GaloisTheorems where
 
 open import definitions.Preorder
+open import definitions.GaloisConnection using (GaloisConnection)
+open import definitions.MeetJoin
+open import definitions.MonotoneMap using (Monotonic)
 open import Data.Product
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
@@ -90,7 +93,7 @@ module GaloisTheorems (P Q : Preorder) where
   -- Proposition 1.104: Right adjoints preserve meets, left adjoints preserve joins
   module Prop104 (gc : GaloisConnection P Q) where
     open GaloisConnection gc
-    open MeetJoin
+    open import definitions.MeetJoin
     open Preorder.≤-Reasoning P renaming (begin_ to beginP_; _≤⟨_⟩_ to _≤P⟨_⟩_; _∎ to _∎P)
     open Preorder.≤-Reasoning Q renaming (begin_ to beginQ_; _≤⟨_⟩_ to _≤Q⟨_⟩_; _∎ to _∎Q)
 
@@ -147,7 +150,7 @@ module GaloisTheorems (P Q : Preorder) where
 
   -- Theorem 1.108: Adjoint Functor Theorem for Preorders
   module Theorem108 where
-    open MeetJoin
+    open import definitions.MeetJoin
 
     image : {X Y : Set} → (X → Y) → Subset X → Subset Y
     image h S y = ∃[ x ] (S x × h x ≡ y)
