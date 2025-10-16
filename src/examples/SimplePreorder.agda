@@ -1,7 +1,7 @@
 module examples.SimplePreorder where
 
-open import Preorder
-open import GraphViz
+open import core-constructs.Preorder
+open import core-constructs.GraphViz
 open import Data.String using (String)
 open import Data.List using (List; _∷_; [])
 open import Data.Product using (_×_; _,_)

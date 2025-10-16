@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(agda:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

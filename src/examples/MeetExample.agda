@@ -1,4 +1,4 @@
-module MeetExample where
+module examples.MeetExample where
 
 open import Data.Nat using (ℕ; zero; suc; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤-refl; ≤-trans)
@@ -7,7 +7,7 @@ open import Data.Product using (_,_)
 open import Data.Empty using (⊥; ⊥-elim)
 
 -- Import our definitions
-open import Preorder
+open import core-constructs.Preorder
 open MeetJoin
 
 -- Example: Meet of "positive naturals" in ℕ is 1, but 1 is not in the subset

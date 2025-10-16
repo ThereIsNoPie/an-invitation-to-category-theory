@@ -5,12 +5,15 @@
 
 module Everything where
 
--- Core theory
-import Preorder
-import GraphViz
-import MeetExample
+-- Core constructs
+import core-constructs.Preorder
+import core-constructs.GraphViz
 
--- Examples (includes both .agda and .lagda.md files)
-import examples.ApplesAndBuckets  -- Now a .lagda.md file!
+-- Exercises
+import exercises.GaloisTheorems
+
+-- Examples
+import examples.ApplesAndBuckets
+import examples.MeetExample
 import examples.SimplePreorder
 import examples.VisualizeDiamond

@@ -1,4 +1,4 @@
-module GraphViz where
+module core-constructs.GraphViz where
 
 open import Data.String using (String; _++_)
 open import Data.List using (List; []; _∷_; foldr)
