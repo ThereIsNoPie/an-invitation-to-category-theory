@@ -87,6 +87,7 @@ jobs:
 
       - name: Generate HTML documentation
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           agda --version
           agda --html --html-dir=docs --html-highlight=auto src/Everything.agda
 
