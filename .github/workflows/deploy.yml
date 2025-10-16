@@ -17,9 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Set PATH at job level to ensure Agda is always available
-      PATH: /home/runner/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
       - name: Checkout repository
@@ -28,16 +25,39 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Setup PATH for Cabal binaries
+        run: |
+          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Setup GHC and Cabal
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y cabal-install ghc
+          echo "Running cabal update..."
           cabal update
+          echo "Cabal update complete"
 
       - name: Get Agda version for cache key
         id: versions
         run: |
-          AGDA_VERSION=$(cabal list --simple-output agda | grep -E '^agda\s' | tail -1 | awk '{print $2}')
+          echo "Querying Hackage for Agda version..."
+          echo "Running: cabal list --simple-output agda"
+
+          AGDA_OUTPUT=$(cabal list --simple-output agda)
+          echo "Cabal list output:"
+          echo "$AGDA_OUTPUT"
+
+          AGDA_VERSION=$(echo "$AGDA_OUTPUT" | grep -E '^agda\s' | tail -1 | awk '{print $2}')
+
+          echo "Extracted version: '$AGDA_VERSION'"
+
+          if [ -z "$AGDA_VERSION" ]; then
+            echo "ERROR: Failed to get Agda version from cabal list"
+            echo "Using fallback version"
+            AGDA_VERSION="2.8.0"
+          fi
+
           echo "agda=$AGDA_VERSION" >> $GITHUB_OUTPUT
           echo "Using Agda version: $AGDA_VERSION"
 
@@ -48,26 +68,49 @@ jobs:
           path: |
             ~/.cabal/store
             ~/.cabal/packages
-            ~/.local/bin
-          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-v2
+            ~/.cabal/bin
+          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-v3
           restore-keys: |
             ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-
 
       - name: Verify or install Agda
         run: |
+          echo "=== Diagnostic Info ==="
+          echo "Agda version from previous step: ${{ steps.versions.outputs.agda }}"
+          echo "Expected cache key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-v3"
+          echo "Cache hit status: ${{ steps.cache-agda.outputs.cache-hit }}"
+          echo "Cache matched key: ${{ steps.cache-agda.outputs.cache-matched-key }}"
+          echo "PATH: $PATH"
+          echo ""
+          echo "Contents of ~/.cabal/bin:"
+          ls -lah ~/.cabal/bin/ 2>/dev/null || echo "~/.cabal/bin does not exist"
+          echo ""
+          echo "Which agda:"
+          which agda 2>/dev/null || echo "agda not found in PATH"
+          echo ""
+
           if [ "${{ steps.cache-agda.outputs.cache-hit }}" == "true" ]; then
             echo "Cache hit - verifying Agda installation..."
-            if command -v agda &> /dev/null && agda --version &> /dev/null; then
-              echo "✓ Agda successfully restored from cache"
-              agda --version
+            if command -v agda &> /dev/null; then
+              echo "✓ agda command found at: $(which agda)"
+              if agda --version &> /dev/null; then
+                echo "✓ Agda successfully restored from cache"
+                agda --version
+              else
+                echo "✗ agda binary exists but --version failed"
+                echo "Reinstalling..."
+                cabal install Agda
+              fi
             else
-              echo "⚠ Cache hit but Agda not working - reinstalling..."
+              echo "✗ agda command not found in PATH"
+              echo "Reinstalling..."
               cabal install Agda
             fi
           else
             echo "Cache miss - installing Agda (this takes ~20 minutes)..."
             cabal install Agda
             echo "✓ Agda installed successfully"
+            echo "Installed to: $(which agda)"
             agda --version
           fi
 
@@ -89,18 +132,36 @@ jobs:
 
       - name: Setup Agda standard library
         run: |
+          echo "=== Stdlib Diagnostic Info ==="
+          echo "~/.agda directory contents:"
+          ls -lah ~/.agda/ 2>/dev/null || echo "~/.agda does not exist"
+          echo "Cache hit status: ${{ steps.cache-stdlib.outputs.cache-hit }}"
+          echo ""
+
           if [ "${{ steps.cache-stdlib.outputs.cache-hit }}" == "true" ]; then
             echo "✓ Standard library restored from cache"
-            # Verify the cache is valid
-            if [ -f ~/.agda/libraries ] && [ -f ~/.agda/defaults ]; then
-              echo "Configuration files present"
+
+            # Verify the stdlib directory exists
+            if [ -d ~/.agda/agda-stdlib ]; then
+              echo "✓ agda-stdlib directory present"
             else
-              echo "⚠ Cache incomplete - regenerating config files..."
+              echo "✗ agda-stdlib directory missing!"
+            fi
+
+            # Verify config files
+            if [ -f ~/.agda/libraries ] && [ -f ~/.agda/defaults ]; then
+              echo "✓ Configuration files present"
+            else
+              echo "⚠ Configuration files missing - regenerating..."
+              if [ ! -d ~/.agda/agda-stdlib ]; then
+                echo "✗ Cannot regenerate config - stdlib directory missing. Cache corrupted!"
+                exit 1
+              fi
               echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
               echo "standard-library" > ~/.agda/defaults
             fi
           else
-            echo "Installing Agda standard library..."
+            echo "Cache miss - installing Agda standard library..."
             mkdir -p ~/.agda
             cd ~/.agda
             git clone --depth 1 --branch ${{ steps.stdlib-version.outputs.version }} https://github.com/agda/agda-stdlib.git
@@ -112,10 +173,14 @@ jobs:
             echo "✓ Standard library installed"
           fi
 
-          # Display configuration for debugging
-          echo "Library configuration:"
+          echo ""
+          echo "=== Final Configuration ==="
+          echo "libraries file:"
           cat ~/.agda/libraries
+          echo "defaults file:"
           cat ~/.agda/defaults
+          echo "agda-stdlib directory:"
+          ls ~/.agda/agda-stdlib/ 2>/dev/null || echo "agda-stdlib not found!"
 
       - name: Generate HTML documentation
         run: |
