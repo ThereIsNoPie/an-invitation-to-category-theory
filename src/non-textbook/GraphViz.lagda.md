@@ -1,4 +1,17 @@
-module GraphViz where
+---
+layout: agda
+title: "GraphViz"
+section: "Not In Textbook"
+chapter: 1
+number: 2
+---
+
+# GraphViz
+
+Utilities for visualizing preorders and graphs using GraphViz DOT format.
+
+```agda
+module non-textbook.GraphViz where
 
 open import Data.String using (String; _++_)
 open import Data.List using (List; []; _∷_; foldr)
@@ -64,3 +77,4 @@ graphToText config =
       (foldr (λ { (v1 , v2) acc →
         ("  " ++ showVertex v1 ++ " → " ++ showVertex v2) ∷ acc
       }) [] edges)
+```

@@ -1,7 +1,16 @@
-module examples.SimplePreorder where
+---
+layout: agda
+title: "Simple Preorder"
+section: "Not In Textbook"
+chapter: 1
+number: 3
+---
 
-open import Preorder
-open import GraphViz
+```agda
+module non-textbook.SimplePreorder where
+
+open import definitions.Preorder
+open import non-textbook.GraphViz
 open import Data.String using (String)
 open import Data.List using (List; _∷_; [])
 open import Data.Product using (_×_; _,_)
@@ -104,3 +113,4 @@ diamondDot = graphToDot diamondGraphVizConfig
 -- Generate text representation
 diamondText : String
 diamondText = graphToText diamondGraphVizConfig
+```

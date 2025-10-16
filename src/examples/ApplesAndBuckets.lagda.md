@@ -1,3 +1,11 @@
+---
+layout: agda
+title: "Apples and Buckets"
+section: "Examples"
+chapter: 1
+number: 109
+---
+
 <!--
 ```agda
 module examples.ApplesAndBuckets where

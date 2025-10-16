@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
     <link rel="stylesheet" href="{{ '/docs/Agda.css' | relative_url }}">
+    {% include shared-styles.html %}
     <style>
         body {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            line-height: 1.6;
         }
 
         /* Article-style wrapper for Agda markdown content */
@@ -71,31 +70,15 @@
             background: none;
             padding: 0;
         }
-
-        /* Navigation link back to home */
-        nav {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        nav a {
-            color: var(--agda-function);
-            text-decoration: none;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="{{ '/' | relative_url }}">← Back to Home</a>
-    </nav>
+    {% include sidebar.html %}
 
-    <div class="agda-content">
-        {{ content }}
-    </div>
+    <main class="main-content">
+        <div class="agda-content">
+            {{ content }}
+        </div>
+    </main>
 </body>
 </html>

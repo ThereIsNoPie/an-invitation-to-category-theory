@@ -1,0 +1,41 @@
+<nav class="sidebar">
+    <a href="{{ '/' | relative_url }}" class="sidebar-title-link">
+        <div class="sidebar-title">An Invitation to Category Theory</div>
+        <div class="sidebar-subtitle">Formalized in Agda</div>
+    </a>
+
+    {% comment %}
+    Automatically construct navigation sections from page front matter.
+    Pages with a 'section' field will be grouped and ordered by their 'number' field.
+    Sections and subsections are collapsible using details/summary elements.
+    {% endcomment %}
+
+    {% assign sections = site.pages | where_exp: "page", "page.section != nil" | group_by: "section" | sort: "name" %}
+
+    {% for section_group in sections %}
+    <details class="nav-section" open>
+        <summary>{{ section_group.name }}</summary>
+        <ol>
+            {% assign section_pages = section_group.items | sort: "number" %}
+            {% for page in section_pages %}
+            <li>
+                {% if page.subsections %}
+                <details class="nav-subsection" open>
+                    <summary><a href="{{ page.url | relative_url }}">{{ page.chapter }}.{{ page.number }} {{ page.title
+                            }}</a></summary>
+                    <ol>
+                        {% for subsection in page.subsections %}
+                        <li><a href="{{ page.url | relative_url }}#{{ subsection.anchor }}">{{ subsection.chapter }}.{{
+                                subsection.number }} {{ subsection.name }}</a></li>
+                        {% endfor %}
+                    </ol>
+                </details>
+                {% else %}
+                <a href="{{ page.url | relative_url }}">{{ page.chapter }}.{{ page.number }} {{ page.title }}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </details>
+    {% endfor %}
+</nav>

@@ -1,4 +1,13 @@
-module MeetExample where
+---
+layout: agda
+title: "Meet Example"
+section: "Not In Textbook"
+chapter: 1
+number: 2
+---
+
+```agda
+module non-textbook.MeetExample where
 
 open import Data.Nat using (ℕ; zero; suc; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤-refl; ≤-trans)
@@ -7,8 +16,8 @@ open import Data.Product using (_,_)
 open import Data.Empty using (⊥; ⊥-elim)
 
 -- Import our definitions
-open import Preorder
-open MeetJoin
+open import definitions.Preorder
+open import definitions.MeetJoin
 
 -- Example: Meet of "positive naturals" in ℕ is 1, but 1 is not in the subset
 -- We'll use the subset P = {n | n ≥ 2} = {2, 3, 4, ...}
@@ -39,3 +48,5 @@ P n = 2 ≤ n
 -- If we try to prove P 2, we need to prove 2 ≤ 2, which is impossible
 
 -- This shows that the meet of a subset does not need to be in the subset itself
+
+```
