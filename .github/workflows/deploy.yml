@@ -45,6 +45,7 @@ jobs:
             ~/.cabal/store
             ~/.cabal/packages
             ~/.local/bin
+            ~/.local/state/cabal/store
           key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-ghc-${{ steps.versions.outputs.ghc }}
           restore-keys: |
             ${{ runner.os }}-agda-
