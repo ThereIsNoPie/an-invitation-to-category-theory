@@ -89,25 +89,12 @@ jobs:
           which agda 2>/dev/null || echo "agda not found in PATH"
           echo ""
 
-          if [ "${{ steps.cache-agda.outputs.cache-hit }}" == "true" ]; then
-            echo "Cache hit - verifying Agda installation..."
-            if command -v agda &> /dev/null; then
-              echo "✓ agda command found at: $(which agda)"
-              if agda --version &> /dev/null; then
-                echo "✓ Agda successfully restored from cache"
-                agda --version
-              else
-                echo "✗ agda binary exists but --version failed"
-                echo "Reinstalling..."
-                cabal install Agda
-              fi
-            else
-              echo "✗ agda command not found in PATH"
-              echo "Reinstalling..."
-              cabal install Agda
-            fi
+          # Check if Agda actually exists and works, regardless of cache-hit status
+          if command -v agda &> /dev/null && agda --version &> /dev/null; then
+            echo "✓ Agda is available and working"
+            agda --version
           else
-            echo "Cache miss - installing Agda (this takes ~20 minutes)..."
+            echo "Agda not found or not working - installing..."
             cabal install Agda
             echo "✓ Agda installed successfully"
             echo "Installed to: $(which agda)"
@@ -135,35 +122,34 @@ jobs:
           echo "=== Stdlib Diagnostic Info ==="
           echo "~/.agda directory contents:"
           ls -lah ~/.agda/ 2>/dev/null || echo "~/.agda does not exist"
-          echo "Cache hit status: ${{ steps.cache-stdlib.outputs.cache-hit }}"
+          echo "Cache hit status: ${{ steps.cache-agda.outputs.cache-hit }}"
+          echo "Cache matched key: ${{ steps.cache-stdlib.outputs.cache-matched-key }}"
           echo ""
 
-          if [ "${{ steps.cache-stdlib.outputs.cache-hit }}" == "true" ]; then
-            echo "✓ Standard library restored from cache"
+          # Check if stdlib actually exists, regardless of cache-hit status
+          if [ -d ~/.agda/agda-stdlib ] && [ -f ~/.agda/agda-stdlib/standard-library.agda-lib ]; then
+            echo "✓ Standard library already present (from cache or previous run)"
 
-            # Verify the stdlib directory exists
-            if [ -d ~/.agda/agda-stdlib ]; then
-              echo "✓ agda-stdlib directory present"
-            else
-              echo "✗ agda-stdlib directory missing!"
-            fi
-
-            # Verify config files
+            # Verify/regenerate config files
             if [ -f ~/.agda/libraries ] && [ -f ~/.agda/defaults ]; then
               echo "✓ Configuration files present"
             else
               echo "⚠ Configuration files missing - regenerating..."
-              if [ ! -d ~/.agda/agda-stdlib ]; then
-                echo "✗ Cannot regenerate config - stdlib directory missing. Cache corrupted!"
-                exit 1
-              fi
               echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
               echo "standard-library" > ~/.agda/defaults
+              echo "✓ Configuration files regenerated"
             fi
           else
-            echo "Cache miss - installing Agda standard library..."
+            echo "Installing Agda standard library..."
             mkdir -p ~/.agda
             cd ~/.agda
+
+            # Remove partial install if it exists
+            if [ -d "agda-stdlib" ]; then
+              echo "Removing incomplete agda-stdlib directory..."
+              rm -rf agda-stdlib
+            fi
+
             git clone --depth 1 --branch ${{ steps.stdlib-version.outputs.version }} https://github.com/agda/agda-stdlib.git
             cd agda-stdlib
             echo "name: standard-library" > standard-library.agda-lib
