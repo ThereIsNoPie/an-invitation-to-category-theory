@@ -20,6 +20,9 @@ import definitions.Preorder
 import definitions.Quotient
 import definitions.Relation
 
+-- Propositions
+import propositions.PartitionEquivalenceCorrespondence
+
 -- Exercises
 import exercises.GaloisTheorems
 
