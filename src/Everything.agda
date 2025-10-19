@@ -5,6 +5,9 @@
 
 module Everything where
 
+-- Axioms
+import plumbing.ClassicalPostulates
+
 -- Definitions
 import definitions.ClosureOperator
 import definitions.Composition

@@ -43,6 +43,32 @@ record Partition (A : Set) : Set₁ where
     -- A = ⋃_{p∈P} A_p (every element is in some part)
     union : ∀ a → Σ[ p ∈ P ] (A[ p ] a)
 
-    -- If p ≠ q then A_p ∩ A_q = ∅ (parts are disjoint)
-    disjoint : ∀ {p q} → ¬ (p ≡ q) → ∀ {a} → ¬ (A[ p ] a × A[ q ] a)
+    -- Each element is in exactly one part (uniqueness)
+    unique : ∀ {a p q} → A[ p ] a → A[ q ] a → p ≡ q
+```
+
+## Disjointness from Uniqueness
+
+The classical formulation of partitions states "if p ≠ q then A_p ∩ A_q = ∅" (disjointness). This is the contrapositive of uniqueness, and can be derived classically using the law of excluded middle.
+
+```agda
+open import Data.Empty using (⊥-elim)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_,_)
+
+module ClassicalDisjointness where
+  -- Law of Excluded Middle
+  -- postulate
+  --   law-of-excluded-middle : {A : Set} → A ⊎ ¬ A
+
+  -- From uniqueness, we can derive disjointness (without even needing LEM!)
+  -- This shows that uniqueness is constructively stronger than disjointness
+  disjoint-from-unique : {A : Set} → (π : Partition A) →
+    let open Partition π in
+    ∀ {p q} → ¬ (p ≡ q) → ∀ {a} → ¬ (A[ p ] a × A[ q ] a)
+  disjoint-from-unique π {p} {q} p≢q {a} =
+    λ { (a∈p , a∈q) →
+      let open Partition π
+          p≡q = unique a∈p a∈q
+      in p≢q p≡q }
 ```

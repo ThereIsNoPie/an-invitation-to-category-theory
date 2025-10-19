@@ -30,6 +30,6 @@ See the [Precise and Forgetful Example](docs/examples.PreciseAndForgetful.html).
 
 Generated with [Agda](https://github.com/agda/agda) • Formalization based on _An Invitation to Applied Category Theory_
 
-[View on GitHub](https://github.com/yourusername/an-invitation-to-category-theory)
+[View Original Textbook](http://www.brendanfong.com/fong_spivak_an_invitation.pdf)
 
 </footer>
