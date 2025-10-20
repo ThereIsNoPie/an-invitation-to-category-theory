@@ -37,6 +37,7 @@ import propositions.SubsetMeetJoinMonotonicity
 
 -- Examples
 import examples.ApplesAndBuckets
+import examples.ComputationAsRewriting
 import examples.PreciseAndForgetful
 
 -- Non-textbook

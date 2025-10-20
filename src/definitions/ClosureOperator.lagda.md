@@ -19,24 +19,23 @@ module definitions.ClosureOperator where
 
 open import definitions.Preorder using (Preorder)
 open import definitions.MonotoneMap using (Monotonic)
-open import Relation.Binary.PropositionalEquality using (_≡_)
 
 -- A closure operator on a preorder P is a monotone map j : P → P
 -- satisfying extensivity and idempotence
 record ClosureOperator (P : Preorder) : Set where
-  open Preorder P renaming (Carrier to A; _≤_ to _≤P_)
+  open Preorder P
 
   field
     -- The closure function j : P → P
-    j : A → A
+    j : Carrier → Carrier
 
     -- j is monotone
-    j-monotonic : Monotonic _≤P_ _≤P_ j
+    j-monotonic : Monotonic _≤_ _≤_ j
 
     -- (a) Extensivity: p ≤ j(p) for all p ∈ P
-    extensive : ∀ (p : A) → p ≤P j p
+    extensive : ∀ (p : Carrier) → p ≤ j p
 
     -- (b) Idempotence: j(j(p)) ≅ j(p) for all p ∈ P
-    -- This means j(j(p)) ≤ j(p) and j(p) ≤ j(j(p))
-    idempotent : ∀ (p : A) → j (j p) ≡ j p
+    -- We use preorder equivalence (≅), not propositional equality (≡)
+    idempotent : ∀ (p : Carrier) → j (j p) ≅ j p
 ```

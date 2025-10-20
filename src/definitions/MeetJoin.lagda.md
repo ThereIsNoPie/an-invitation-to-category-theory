@@ -101,22 +101,22 @@ module PreservesMeetsJoins where
   PreservesMeets : (P Q : Preorder) → (P ⇒ Q) → Set
   PreservesMeets P Q f-mono =
     let open DP.Preorder P renaming (Carrier to A; _≤_ to _≤P_)
-        open DP.Preorder Q renaming (Carrier to B; _≤_ to _≤Q_)
+        open DP.Preorder Q renaming (Carrier to B; _≤_ to _≤Q_; _≅_ to _≅Q_)
         f = proj₁ f-mono
     in ∀ (a b m : A) → IsMeet _≤P_ m (λ x → (x ≡ a) ⊎ (x ≡ b)) →
        ∀ (n : B) → IsMeet _≤Q_ n (λ y → (y ≡ f a) ⊎ (y ≡ f b)) →
-       f m ≡ n
+       f m ≅Q n
 
   -- A monotone map f : P → Q preserves joins if
   -- f(a ∨ b) ≅ f(a) ∨ f(b) for all a, b ∈ P
   PreservesJoins : (P Q : Preorder) → (P ⇒ Q) → Set
   PreservesJoins P Q f-mono =
     let open DP.Preorder P renaming (Carrier to A; _≤_ to _≤P_)
-        open DP.Preorder Q renaming (Carrier to B; _≤_ to _≤Q_)
+        open DP.Preorder Q renaming (Carrier to B; _≤_ to _≤Q_; _≅_ to _≅Q_)
         f = proj₁ f-mono
     in ∀ (a b j : A) → IsJoin _≤P_ j (λ x → (x ≡ a) ⊎ (x ≡ b)) →
        ∀ (k : B) → IsJoin _≤Q_ k (λ y → (y ≡ f a) ⊎ (y ≡ f b)) →
-       f j ≡ k
+       f j ≅Q k
 ```
 
 ## Definition 1.88: Generative Effect {#GenerativeEffect}
