@@ -41,33 +41,50 @@ This is the easier direction—we just need to check that ∼ is reflexive, symm
 partition→equivalence : {A : Set} → Partition A → Σ[ _∼_ ∈ BinRel A ] (IsEquivalence _∼_)
 ```
 
-### Proof
+### Proof Strategy
+
+We define: **a ∼ b** means "there exists a part p containing both a and b"
+
+Then we verify this is reflexive, symmetric, and transitive.
 
 ```agda
 partition→equivalence {A} π = _∼_ , is-equivalence
   where
     open Partition π
 
-    -- Two elements are equivalent if they are in the same part
+    -- DEFINITION: Two elements are equivalent if they share a part
     _∼_ : BinRel A
     a ∼ b = Σ[ p ∈ P ] (A[ p ] a × A[ p ] b)
+    --      └─────┬─────┘  └────┬────┘
+    --        "some part p"   "a proof `a` is in p AND a proof `b` is in p"
 
-    -- This relation is an equivalence relation
+    -- Reflexive: a ∼ a (every element is in the same part as itself)
+    reflexive-proof : ∀ {a} → a ∼ a
+    reflexive-proof {a} =
+      let (p , a∈p) = union a -- in the definition of partition, "union" says a is in some part p
+          in p , (a∈p , a∈p) -- use that proof to prove "a is in p AND a is in p"
+
+    -- Symmetric: if a ∼ b then b ∼ a (if a and b are in the same part, then b and a are in the same part)
+    symmetric-proof : ∀ {a b} → a ∼ b → b ∼ a
+    symmetric-proof (p , (a-in-p , b-in-p)) =
+      p , (b-in-p , a-in-p)  -- Just swap the order!
+
+    -- Transitive: if a ∼ b and b ∼ c then a ∼ c
+    transitive-proof : ∀ {a b c} → a ∼ b → b ∼ c → a ∼ c
+    transitive-proof {a} {b} {c} a∼b b∼c =
+      let
+          (p , (a∈p , b∈p)) = a∼b -- p is the part containing a and b
+          (q , (b∈q , c∈q)) = b∼c -- q is the part containing b and c
+          p≡q = unique b∈p b∈q -- b is in both p and q, so they must be the same part
+          c∈p = subst (λ part → A[ part ] c) (sym p≡q) c∈q -- if c is in q and p ≡ q, then c is in p
+      in p , (a∈p , c∈p)
+
+    -- PROOF: This is reflexive, symmetric, and transitive
     is-equivalence : IsEquivalence _∼_
     is-equivalence = record
-      { reflexive = λ {a} →
-          -- a is in the same part as itself
-          let (p , a∈p) = union a
-          in p , (a∈p , a∈p)
-      ; symmetric = λ (p , (a∈p , b∈p)) →
-          -- if a is in the same part as b, then b is in the same part as a
-          p , (b∈p , a∈p)
-      ; transitive = λ {a} {b} {c} (p , (a∈p , b∈p)) (q , (b∈q , c∈q)) →
-          -- if a is in the same part as b and b is in the same part as c,
-          -- then a is in the same part as c
-          -- Since b is in both part p and part q, we have p ≡ q by uniqueness
-          let p≡q = unique b∈p b∈q
-          in p , (a∈p , subst (λ r → A[ r ] c) (sym p≡q) c∈q)
+      { reflexive = reflexive-proof
+      ; symmetric = symmetric-proof
+      ; transitive = transitive-proof
       }
 ```
 
@@ -92,6 +109,7 @@ The **equivalence class** of an element a is the set of all elements related to 
 equivalence→partition {A} _∼_ equiv = partition
   where
     open IsEquivalence equiv
+    open import plumbing.EquationalReasoning using (module ∼-Reasoning; module ≡-Reasoning)
 
     -- The equivalence class of an element a
     -- ⟦ a ⟧ = { x ∈ A | x ∼ a }
@@ -132,45 +150,70 @@ We need to show equivalence classes are both **closed** and **connected**.
 
 ### Step 3: Build the partition using quotient types
 
-A disadvantage of agda is you can't 
+In the textbook, many reasonable informal assumptions are made. A disadvantage of agda is you have to be explicit about these assumptions. Our options are to either use a complicated library (cubical agda) or postulate these reasonable assumptions (by creating a quotient type).
 
-The **quotient type** A/∼ represents "the set of all equivalence classes."
+The **quotient type** A/∼ represents "the set of all equivalence classes." It assumes:
 - Each element q : A/∼ represents one equivalence class
 - We can extract a representative: quotient-surjective gives us some a with [a] ≡ q
 
 ```agda
     partition : Partition A
     partition = record
-      { P = A / _∼_  -- Labels: one for each equivalence class
-
-      ; A[_] = λ q →
-          -- Given a label q, return its equivalence class
-          -- Extract any representative rep where [rep] ≡ q
+      { P = A / _∼_
+      ; A[_] = get-part
+      ; nonempty = nonempty-proof
+      ; union = union-proof
+      ; unique = unique-proof
+      }
+      where
+        -- Given a label q : A/∼, what is the corresponding part?
+        -- Answer: the equivalence class of any representative
+        get-part : (A / _∼_) → Subset A
+        get-part q =
           let (rep , _) = quotient-surjective q
           in ⟦ rep ⟧
 
-      ; nonempty = λ q →
-          -- Each part is nonempty
+        -- Prove each part is nonempty
+        nonempty-proof : ∀ (q : A / _∼_) → Σ[ a ∈ A ] (get-part q a)
+        nonempty-proof q =
           let (rep , _) = quotient-surjective q
-          in rep , reflexive
+          in rep , reflexive  -- rep ∼ rep 
 
-      ; union = λ a →
-          -- Every element a is in some part
-          -- The part is labeled by [ a ], the equivalence class containing a
-          let (rep , [rep]≡[a]) = quotient-surjective {_∼_ = _∼_} [ a ]
-              rep∼a = quotient-effective {_∼_ = _∼_} [rep]≡[a]
-              a∼rep = symmetric rep∼a
-          in [ a ] , a∼rep
+        -- Prove every element is in some part
+        union-proof : ∀ (a : A) → Σ[ q ∈ (A / _∼_) ] (get-part q a)
+        union-proof a =
+          let label : A / _∼_
+              label = [ a ]  
 
-      ; unique = λ {a} {p} {q} a∈p a∈q →
-          -- If a is in part p and part q, then p ≡ q
-          -- Key insight: a∈p means a ∼ rep-p, a∈q means a ∼ rep-q
-          -- So rep-p ∼ rep-q, thus their equivalence classes are equal
-          let (rep-p , [rep-p]≡p) = quotient-surjective {_∼_ = _∼_} p
+              (rep , [rep]≡[a]) = quotient-surjective {_∼_ = _∼_} label
+              rep~a = quotient-effective {_∼_ = _∼_} [rep]≡[a]
+              a∼rep = symmetric rep~a
+          in label , a∼rep
+
+        -- Prove if a is in two parts, those parts are equal
+        unique-proof : ∀ {a : A} {p q : A / _∼_} →
+                       get-part p a → get-part q a → p ≡ q
+        unique-proof {a} {p} {q} a∈p a∈q =
+          let -- Extract representatives for p and q
+              (rep-p , [rep-p]≡p) = quotient-surjective {_∼_ = _∼_} p
               (rep-q , [rep-q]≡q) = quotient-surjective {_∼_ = _∼_} q
-              rep-p∼a = symmetric a∈p
-              rep-p∼rep-q = transitive rep-p∼a a∈q
+
+              -- Use ∼-Reasoning to show rep-p ∼ rep-q
+              open ∼-Reasoning _∼_ reflexive symmetric transitive
+                renaming (begin_ to begin∼_; _∎ to _∎∼)
+              rep-p∼rep-q : rep-p ∼ rep-q
+              rep-p∼rep-q =
+                begin∼
+                  rep-p   ∼⟨ symmetric a∈p ⟩   -- a ∼ rep-q
+                  a       ∼⟨ a∈q ⟩
+                  rep-q   ∎∼
+
               [rep-p]≡[rep-q] = quotient-sound {_∼_ = _∼_} rep-p∼rep-q
-          in trans (sym [rep-p]≡p) (trans [rep-p]≡[rep-q] [rep-q]≡q)
-      }
+
+              open ≡-Reasoning
+          in begin
+               p           ≡˘⟨ [rep-p]≡p ⟩     -- p ≡ [rep-p]
+               [ rep-p ]   ≡⟨ [rep-p]≡[rep-q] ⟩  -- [rep-p] ≡ [rep-q]
+               [ rep-q ]   ≡⟨ [rep-q]≡q ⟩        -- [rep-q] ≡ q
+               q           ∎
 ```
