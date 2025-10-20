@@ -25,6 +25,8 @@ import definitions.Quotient
 import definitions.Relation
 
 -- Propositions
+import propositions.MonotoneIdentityComposition
+import propositions.MonotoneUpperSetCorrespondence
 import propositions.PartitionEquivalenceCorrespondence
 
 -- Exercises

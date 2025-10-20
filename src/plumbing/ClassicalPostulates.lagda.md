@@ -70,6 +70,20 @@ postulate
 
 **Why needed**: The textbook freely uses "the set of equivalence classes" as in Definition 1.16 (Quotient) and throughout. Without quotient types, we cannot properly represent this at the right universe level in Agda.
 
+## Law of Excluded Middle
+
+In classical logic, every proposition is either true or false.
+
+```agda
+open import Data.Sum using (_⊎_)
+open import Data.Empty using (⊥)
+
+postulate
+  LEM : {P : Set} → P ⊎ (P → ⊥)
+```
+
+**Why needed**: The textbook reasoning is classical throughout. For instance, Proposition 1.73 requires constructing functions based on subset membership, which needs decidability. LEM provides this and will be useful for many classical arguments.
+
 ## Notes
 
 These postulates are:

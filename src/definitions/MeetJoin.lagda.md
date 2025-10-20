@@ -5,11 +5,11 @@ section: "Definitions"
 chapter: 1
 number: 76
 subsections:
-  - name: "Def 1.87: Preserves Meets/Joins"
+  - name: "Preserves Meets/Joins"
     chapter: 1
     number: 87
     anchor: "PreservesMeetsJoins"
-  - name: "Def 1.88: Generative Effect"
+  - name: "Generative Effect"
     chapter: 1
     number: 88
     anchor: "GenerativeEffect"
