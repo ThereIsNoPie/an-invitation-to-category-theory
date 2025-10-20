@@ -28,6 +28,8 @@ open import Relation.Nullary using (¬_)
 open import definitions.Partition using (Partition; Subset)
 open import definitions.EquivalenceRelation using (IsEquivalence)
 open import definitions.Relation using (BinRel)
+-- Note: definitions.Quotient defines quotients as Subset A (predicative)
+-- We use the impredicative quotient type from ClassicalPostulates for this proof
 open import plumbing.ClassicalPostulates using (_/_; [_]; quotient-sound; quotient-surjective; quotient-effective)
 ```
 
@@ -150,11 +152,16 @@ We need to show equivalence classes are both **closed** and **connected**.
 
 ### Step 3: Build the partition using quotient types
 
-In the textbook, many reasonable informal assumptions are made. A disadvantage of agda is you have to be explicit about these assumptions. Our options are to either use a complicated library (cubical agda) or postulate these reasonable assumptions (by creating a quotient type).
+**Note on quotients:** Definition 1.16 defines the quotient `Quotient A _∼_` as a synonym for `Subset A`, representing quotients as predicates. However, to prove this proposition, we need the stronger **quotient type** with computational content from `plumbing.ClassicalPostulates`.
 
-The **quotient type** A/∼ represents "the set of all equivalence classes." It assumes:
-- Each element q : A/∼ represents one equivalence class
-- We can extract a representative: quotient-surjective gives us some a with [a] ≡ q
+The **quotient type** A/∼ (written `A / _∼_`) represents "the set of all equivalence classes" as a Set (not Set₁). It provides:
+- A type `A / _∼_ : Set` of equivalence class labels
+- A function `[_] : A → A / _∼_` that maps elements to their class
+- `quotient-sound`: if a ∼ b then [a] ≡ [b]
+- `quotient-effective`: if [a] ≡ [b] then a ∼ b
+- `quotient-surjective`: every label has a representative
+
+This quotient type lives at the same universe level as A, which is essential for constructing `P : Set` in the partition. Without this postulate, the partition's index type would live in Set₁, violating the definition.
 
 ```agda
     partition : Partition A

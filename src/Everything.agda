@@ -25,12 +25,15 @@ import definitions.Quotient
 import definitions.Relation
 
 -- Propositions
+import propositions.AdjointFunctorTheorem
+import propositions.AdjointsPreserveMeetsJoins
+import propositions.GaloisUnitCounit
 import propositions.MonotoneIdentityComposition
 import propositions.MonotoneUpperSetCorrespondence
 import propositions.PartitionEquivalenceCorrespondence
+import propositions.SubsetMeetJoinMonotonicity
 
 -- Exercises
-import exercises.GaloisTheorems
 
 -- Examples
 import examples.ApplesAndBuckets
