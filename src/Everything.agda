@@ -34,8 +34,10 @@ import propositions.PartitionEquivalenceCorrespondence
 import propositions.SubsetMeetJoinMonotonicity
 
 -- Exercises
+import exercises.GaloisGivesClosure
 
 -- Examples
+import examples.AdjunctionFromClosure
 import examples.ApplesAndBuckets
 import examples.ComputationAsRewriting
 import examples.PreciseAndForgetful
