@@ -32,6 +32,8 @@ record IsPreorder {A : Set} (_≤_ : A → A → Set) : Set where
     transitive : ∀ {x y z} → x ≤ y → y ≤ z → x ≤ z
 
   -- If x ≤ y and y ≤ x, we write x ≅ y and say x and y are equivalent
+  -- Note: This is element equivalence within a preorder.
+  -- Preorder isomorphism (P ≅ Q) is defined separately in definitions.Isomorphism
   _≅_ : A → A → Set
   x ≅ y = (x ≤ y) × (y ≤ x)
 

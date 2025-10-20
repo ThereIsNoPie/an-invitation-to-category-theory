@@ -5,6 +5,10 @@
 
 module Everything where
 
+-- Plumbing
+import plumbing.ClassicalPostulates
+import plumbing.EquationalReasoning
+
 -- Definitions
 import definitions.ClosureOperator
 import definitions.Composition
@@ -20,12 +24,22 @@ import definitions.Preorder
 import definitions.Quotient
 import definitions.Relation
 
+-- Propositions
+import propositions.AdjointFunctorTheorem
+import propositions.AdjointsPreserveMeetsJoins
+import propositions.GaloisUnitCounit
+import propositions.MonotoneIdentityComposition
+import propositions.MonotoneUpperSetCorrespondence
+import propositions.PartitionEquivalenceCorrespondence
+import propositions.SubsetMeetJoinMonotonicity
+
 -- Exercises
-import exercises.GaloisTheorems
+import exercises.GaloisGivesClosure
 
 -- Examples
+import examples.AdjunctionFromClosure
 import examples.ApplesAndBuckets
-import examples.PreciseAndForgetful
+import examples.ComputationAsRewriting
 
 -- Non-textbook
 import non-textbook.GraphViz

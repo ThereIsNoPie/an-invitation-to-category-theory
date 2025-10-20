@@ -4,13 +4,17 @@
         <div class="sidebar-subtitle">Formalized in Agda</div>
     </a>
 
-    {% comment %}
-    Automatically construct navigation sections from page front matter.
-    Pages with a 'section' field will be grouped and ordered by their 'number' field.
-    Sections and subsections are collapsible using details/summary elements.
-    {% endcomment %}
+    {% assign sectionOrder = "Plumbing,Definitions,Propositions,Examples,Exercises,Not in Textbook" | split: "," %}
+    {% assign grouped = site.pages | where_exp: "page", "page.section != nil" | group_by: "section" %}
+    {% assign sections = "" | split: "" %}
 
-    {% assign sections = site.pages | where_exp: "page", "page.section != nil" | group_by: "section" | sort: "name" %}
+    {% for name in sectionOrder %}
+    {% assign match = grouped | where: "name", name | first %}
+    {% if match %}
+    {% assign sections = sections | push: match %}
+    {% endif %}
+    {% endfor %}
+
 
     {% for section_group in sections %}
     <details class="nav-section" open>
