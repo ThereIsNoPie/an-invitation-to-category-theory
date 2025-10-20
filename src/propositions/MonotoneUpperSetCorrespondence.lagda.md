@@ -8,6 +8,8 @@ number: 73
 
 # Monotone-UpperSet Correspondence
 
+## Textbook Definition
+
 **Proposition 1.73.** Let P be a preorder. Monotone maps P → B are in one-to-one correspondence with upper sets of P.
 
 ## Intuition
@@ -18,7 +20,7 @@ The correspondence is:
 - **Monotone → Upper Set:** Given f : P → B, the upper set is {x ∈ P | f(x) = true}
 - **Upper Set → Monotone:** Given upper set U, define f(x) = true if x ∈ U, false otherwise
 
-## Setup
+## Agda Setup
 
 ```agda
 module propositions.MonotoneUpperSetCorrespondence where
@@ -37,7 +39,7 @@ Subset : Set → Set₁
 Subset A = A → Set
 ```
 
-## The Two-Element Preorder B
+### The Two-Element Preorder B
 
 B has two elements: false and true, with the ordering false ≤ true.
 
@@ -74,7 +76,7 @@ B = record
   }
 ```
 
-## Upper Sets
+### Upper Sets
 
 An upper set (or upward closed set) is a subset U such that if x ∈ U and x ≤ y, then y ∈ U.
 
@@ -88,17 +90,19 @@ UpperSet : Preorder → Set₁
 UpperSet P = Σ[ U ∈ Subset (Preorder.Carrier P) ] (IsUpperSet (Preorder._≤_ P) U)
 ```
 
-## Direction 1: Monotone Map to Upper Set
+## Proposition
+
+```agda
+monotone→upperset : (P : Preorder) → (P ⇒ B) → UpperSet P
+
+upperset→monotone : (P : Preorder) → UpperSet P → (P ⇒ B)
+```
+
+## Proof: Direction 1 (Monotone Map → Upper Set)
 
 Given a monotone map f : P → B, we extract the upper set U = {x ∈ P | f(x) = true}.
 
 **Strategy:** The preimage of true is upward closed because f is monotone.
-
-```agda
-monotone→upperset : (P : Preorder) → (P ⇒ B) → UpperSet P
-```
-
-### Proof
 
 ```agda
 monotone→upperset P (f , f-mono) = U , U-is-upper
@@ -116,17 +120,11 @@ monotone→upperset P (f , f-mono) = U , U-is-upper
     ... | true | false | ()
 ```
 
-## Direction 2: Upper Set to Monotone Map
+## Proof: Direction 2 (Upper Set → Monotone Map)
 
 Given an upper set U ⊆ P, we define f : P → B by f(x) = true if x ∈ U, false otherwise.
 
 **Strategy:** Use the Law of Excluded Middle to decide membership in U. If x ≤ y and f(x) = true, then x ∈ U, so y ∈ U (by upward closure), hence f(y) = true.
-
-```agda
-upperset→monotone : (P : Preorder) → UpperSet P → (P ⇒ B)
-```
-
-### Proof
 
 ```agda
 upperset→monotone P (U , U-is-upper) = f , f-mono
@@ -149,7 +147,7 @@ upperset→monotone P (U , U-is-upper) = f , f-mono
     ... | inj₂ x∉U | inj₂ y∉U = false≤false
 ```
 
-## Roundtrip Properties
+## Proof: Roundtrip Properties
 
 We can show that these maps are inverses of each other (up to equivalence).
 
@@ -157,10 +155,5 @@ We can show that these maps are inverses of each other (up to equivalence).
 -- Going from monotone map to upper set and back preserves the upper set
 roundtrip-1 : (P : Preorder) → (f : P ⇒ B) →
   ∀ x → proj₁ (monotone→upperset P f) x ≡ (proj₁ f x ≡ true)
-```
-
-### Proof
-
-```agda
 roundtrip-1 P (f , f-mono) x = refl
 ```

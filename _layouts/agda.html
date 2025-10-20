@@ -70,6 +70,57 @@
             background: none;
             padding: 0;
         }
+
+        /* Collapsible section styles */
+        .collapsible-section {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .collapsible-section summary {
+            background-color: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .collapsible-section summary:hover {
+            background-color: var(--bg-code);
+        }
+
+        .collapsible-section summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .collapsible-section summary::before {
+            content: '▶';
+            font-size: 0.7em;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .collapsible-section[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-section-content {
+            padding: 1rem;
+            background-color: var(--bg-primary, #fff);
+        }
+
+        /* Adjust heading styles inside collapsible sections */
+        .collapsible-section .collapsible-section-content h2 {
+            margin-top: 0;
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -80,5 +131,67 @@
             {{ content }}
         </div>
     </main>
+
+    <script>
+        // Make specific sections collapsible and collapsed by default
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all h2 elements
+            const h2Elements = document.querySelectorAll('.agda-content h2');
+
+            h2Elements.forEach(function(h2) {
+                const h2Text = h2.textContent.trim();
+
+                // Collapse these sections by default:
+                // - "Textbook Definition"
+                // - "Agda Setup" or "Setup"
+                // - Any heading starting with "Proof"
+                if (h2Text === 'Textbook Definition' ||
+                    h2Text === 'Agda Setup' ||
+                    h2Text === 'Setup' ||
+                    h2.id === 'setup' ||
+                    h2Text.startsWith('Proof')) {
+                    wrapSectionInCollapsible(h2, false); // collapsed by default
+                }
+            });
+
+            function wrapSectionInCollapsible(heading, openByDefault) {
+                const details = document.createElement('details');
+                details.className = 'collapsible-section';
+                if (openByDefault) {
+                    details.setAttribute('open', '');
+                }
+
+                const summary = document.createElement('summary');
+                summary.textContent = heading.textContent;
+                details.appendChild(summary);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'collapsible-section-content';
+
+                // Save reference to parent and next sibling before we start moving nodes
+                const parent = heading.parentNode;
+                const nextSibling = heading.nextSibling;
+
+                // Collect all content until the next h2 or end
+                const contentToWrap = [heading];
+                let currentNode = heading.nextElementSibling;
+
+                while (currentNode && currentNode.tagName !== 'H2') {
+                    contentToWrap.push(currentNode);
+                    currentNode = currentNode.nextElementSibling;
+                }
+
+                // Move all content nodes into the collapsible
+                contentToWrap.forEach(function(node) {
+                    contentDiv.appendChild(node);
+                });
+
+                details.appendChild(contentDiv);
+
+                // Insert the collapsible section where the heading was
+                parent.insertBefore(details, nextSibling);
+            }
+        });
+    </script>
 </body>
 </html>

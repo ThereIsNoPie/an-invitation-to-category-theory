@@ -8,11 +8,13 @@ number: 101
 
 # Galois Connection Unit-Counit Characterization
 
+## Textbook Definition
+
 **Proposition 1.101.** A pair of monotone maps f : P → Q and g : Q → P forms a Galois connection if and only if they satisfy the unit and counit conditions:
 - Unit: p ≤ g(f(p)) for all p ∈ P
 - Counit: f(g(q)) ≤ q for all q ∈ Q
 
-## Setup
+## Agda Setup
 
 ```agda
 module propositions.GaloisUnitCounit where
@@ -24,9 +26,7 @@ open import definitions.GaloisConnection using (GaloisConnection)
 open import definitions.MonotoneMap using (Monotonic)
 ```
 
-## Part 1: Galois Connection Implies Unit and Counit
-
-If f ⊣ g is a Galois connection, then the unit and counit conditions hold.
+## Proposition
 
 ```agda
 galois→unit-counit : (P Q : Preorder)
@@ -35,9 +35,21 @@ galois→unit-counit : (P Q : Preorder)
                          open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
                          open GaloisConnection gc
                      in ((∀ (p : A) → p ≤₁ g (f p)) × (∀ (q : B) → f (g q) ≤₂ q))
+
+unit-counit→galois : (P Q : Preorder)
+                   → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
+                         open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
+                     in (f : A → B) → (g : B → A)
+                   → (f-mono : Monotonic (Preorder._≤_ P) (Preorder._≤_ Q) f)
+                   → (g-mono : Monotonic (Preorder._≤_ Q) (Preorder._≤_ P) g)
+                   → (unit : ∀ (p : Preorder.Carrier P) → Preorder._≤_ P p (g (f p)))
+                   → (counit : ∀ (q : Preorder.Carrier Q) → Preorder._≤_ Q (f (g q)) q)
+                   → GaloisConnection P Q
 ```
 
-### Proof
+## Proof: Part 1 (Galois Connection → Unit and Counit)
+
+If f ⊣ g is a Galois connection, then the unit and counit conditions hold.
 
 **Strategy:** Use the Galois connection property with reflexivity. For unit, apply f(p) ≤ f(p) to get p ≤ g(f(p)). For counit, apply g(q) ≤ g(q) to get f(g(q)) ≤ q.
 
@@ -69,23 +81,9 @@ galois→unit-counit P Q gc = (unit , counit)
         lem = g q ∎P
 ```
 
-## Part 2: Unit and Counit Imply Galois Connection
+## Proof: Part 2 (Unit and Counit → Galois Connection)
 
 If f and g are monotone maps satisfying the unit and counit conditions, then they form a Galois connection.
-
-```agda
-unit-counit→galois : (P Q : Preorder)
-                   → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-                         open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-                     in (f : A → B) → (g : B → A)
-                   → (f-mono : Monotonic (Preorder._≤_ P) (Preorder._≤_ Q) f)
-                   → (g-mono : Monotonic (Preorder._≤_ Q) (Preorder._≤_ P) g)
-                   → (unit : ∀ (p : Preorder.Carrier P) → Preorder._≤_ P p (g (f p)))
-                   → (counit : ∀ (q : Preorder.Carrier Q) → Preorder._≤_ Q (f (g q)) q)
-                   → GaloisConnection P Q
-```
-
-### Proof
 
 **Strategy:** Given f(x) ≤ y, compose with the unit to get x ≤ g(f(x)) and use monotonicity of g to get x ≤ g(y). Given x ≤ g(y), use monotonicity of f to get f(x) ≤ f(g(y)) and compose with counit to get f(x) ≤ y.
 

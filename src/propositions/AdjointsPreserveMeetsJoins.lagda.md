@@ -8,11 +8,13 @@ number: 104
 
 # Adjoints Preserve Meets and Joins
 
+## Textbook Definition
+
 **Proposition 1.104.** In a Galois connection f ⊣ g between preorders P and Q:
 - Right adjoints preserve meets: g(∧B) is the meet of g(B) for any subset B ⊆ Q
 - Left adjoints preserve joins: f(∨A) is the join of f(A) for any subset A ⊆ P
 
-## Setup
+## Agda Setup
 
 ```agda
 module propositions.AdjointsPreserveMeetsJoins where
@@ -26,7 +28,7 @@ open import definitions.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; Is
 open import propositions.GaloisUnitCounit using (galois→unit-counit)
 ```
 
-## Helper: Image of a Subset
+### Helper: Image of a Subset
 
 ```agda
 -- Image of a subset under a function
@@ -34,9 +36,7 @@ image : {X Y : Set} → (X → Y) → Subset X → Subset Y
 image h S y = ∃[ x ] (S x × h x ≡ y)
 ```
 
-## Part 1: Right Adjoints Preserve Meets
-
-If g is the right adjoint in a Galois connection and m is the meet of a subset S ⊆ Q, then g(m) is the meet of g(S).
+## Proposition
 
 ```agda
 right-adjoint-preserves-meets : (P Q : Preorder)
@@ -46,9 +46,19 @@ right-adjoint-preserves-meets : (P Q : Preorder)
                                     open GaloisConnection gc
                                 in (S : Subset B) → (m : B) → IsMeet _≤₂_ m S
                                 → IsMeet _≤₁_ (g m) (image g S)
+
+left-adjoint-preserves-joins : (P Q : Preorder)
+                             → (gc : GaloisConnection P Q)
+                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
+                                   open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
+                                   open GaloisConnection gc
+                               in (S : Subset A) → (j : A) → IsJoin _≤₁_ j S
+                               → IsJoin _≤₂_ (f j) (image f S)
 ```
 
-### Proof
+## Proof: Part 1 (Right Adjoints Preserve Meets)
+
+If g is the right adjoint in a Galois connection and m is the meet of a subset S ⊆ Q, then g(m) is the meet of g(S).
 
 **Strategy:** Show that g(m) is a lower bound for g(S) using monotonicity, and that it's the greatest lower bound using the Galois connection adjunction.
 
@@ -77,21 +87,9 @@ right-adjoint-preserves-meets P Q gc S m meet-S = (g-lower-bound , g-greatest-lo
         lem = proj₂ meet-S λ {q} Sq → g-f (x-lower (q , Sq , refl))
 ```
 
-## Part 2: Left Adjoints Preserve Joins
+## Proof: Part 2 (Left Adjoints Preserve Joins)
 
 If f is the left adjoint in a Galois connection and j is the join of a subset S ⊆ P, then f(j) is the join of f(S).
-
-```agda
-left-adjoint-preserves-joins : (P Q : Preorder)
-                             → (gc : GaloisConnection P Q)
-                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-                                   open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-                                   open GaloisConnection gc
-                               in (S : Subset A) → (j : A) → IsJoin _≤₁_ j S
-                               → IsJoin _≤₂_ (f j) (image f S)
-```
-
-### Proof
 
 **Strategy:** Show that f(j) is an upper bound for f(S) using monotonicity, and that it's the least upper bound using the Galois connection adjunction and the unit condition.
 

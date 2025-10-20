@@ -8,11 +8,13 @@ number: 108
 
 # Adjoint Functor Theorem for Preorders
 
+## Textbook Definition
+
 **Theorem 1.108.** For preorders P and Q:
 - A monotone map g : Q → P preserves meets if and only if g is a right adjoint (assuming Q has all meets)
 - A monotone map f : P → Q preserves joins if and only if f is a left adjoint (assuming P has all joins)
 
-## Setup
+## Agda Setup
 
 ```agda
 module propositions.AdjointFunctorTheorem where
@@ -27,7 +29,7 @@ open import definitions.MonotoneMap using (Monotonic)
 open import propositions.AdjointsPreserveMeetsJoins using (image; right-adjoint-preserves-meets; left-adjoint-preserves-joins)
 ```
 
-## Helper Definitions
+### Helper Definitions
 
 ```agda
 -- Q has all meets
@@ -41,11 +43,7 @@ HasAllJoins P = let open Preorder P in
   ∀ (S : Subset Carrier) → ∃[ j ] IsJoin _≤_ j S
 ```
 
-## Part 1: Right Adjoints and Meet Preservation
-
-### Part 1a: Meet Preservation Implies Right Adjoint
-
-If g : Q → P is monotone and preserves meets (and Q has all meets), then g is a right adjoint.
+## Proposition
 
 ```agda
 preserves-meets→right-adjoint : (P Q : Preorder)
@@ -58,9 +56,38 @@ preserves-meets→right-adjoint : (P Q : Preorder)
                                             → IsMeet (Preorder._≤_ Q) m S
                                             → IsMeet (Preorder._≤_ P) (g m) (image g S))
                               → GaloisConnection P Q
+
+right-adjoint→preserves-meets : (P Q : Preorder)
+                              → (gc : GaloisConnection P Q)
+                              → let open Preorder P renaming (_≤_ to _≤₁_)
+                                    open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
+                                    open GaloisConnection gc
+                                in ∀ (S : Subset B) (m : B) → IsMeet _≤₂_ m S
+                                → IsMeet _≤₁_ (g m) (image g S)
+
+preserves-joins→left-adjoint : (P Q : Preorder)
+                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
+                                   open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
+                               in (f : A → B)
+                             → (f-mono : Monotonic (Preorder._≤_ P) (Preorder._≤_ Q) f)
+                             → (all-joins : HasAllJoins P)
+                             → (preserves : ∀ (S : Subset (Preorder.Carrier P)) (j : Preorder.Carrier P)
+                                           → IsJoin (Preorder._≤_ P) j S
+                                           → IsJoin (Preorder._≤_ Q) (f j) (image f S))
+                             → GaloisConnection P Q
+
+left-adjoint→preserves-joins : (P Q : Preorder)
+                             → (gc : GaloisConnection P Q)
+                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
+                                   open Preorder Q renaming (_≤_ to _≤₂_)
+                                   open GaloisConnection gc
+                               in ∀ (S : Subset A) (j : A) → IsJoin _≤₁_ j S
+                               → IsJoin _≤₂_ (f j) (image f S)
 ```
 
-### Proof
+## Proof: Part 1a (Meet Preservation → Right Adjoint)
+
+If g : Q → P is monotone and preserves meets (and Q has all meets), then g is a right adjoint.
 
 **Strategy:** Construct the left adjoint f by taking, for each x : A, the meet of the upper set ↑x = {q ∈ Q | x ≤ g(q)}. Verify the Galois connection using the meet-preservation property.
 
@@ -119,21 +146,9 @@ preserves-meets→right-adjoint P Q g g-mono all-meets preserves = record
         fx-is-a-meet = proj₂ (all-meets (↑ x))
 ```
 
-### Part 1b: Right Adjoint Implies Meet Preservation
+## Proof: Part 1b (Right Adjoint → Meet Preservation)
 
 If g is a right adjoint in a Galois connection, then g preserves meets.
-
-```agda
-right-adjoint→preserves-meets : (P Q : Preorder)
-                              → (gc : GaloisConnection P Q)
-                              → let open Preorder P renaming (_≤_ to _≤₁_)
-                                    open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-                                    open GaloisConnection gc
-                                in ∀ (S : Subset B) (m : B) → IsMeet _≤₂_ m S
-                                → IsMeet _≤₁_ (g m) (image g S)
-```
-
-### Proof
 
 **Strategy:** This is exactly Proposition 1.104.
 
@@ -142,26 +157,9 @@ right-adjoint→preserves-meets P Q gc S m meet-S =
   right-adjoint-preserves-meets P Q gc S m meet-S
 ```
 
-## Part 2: Left Adjoints and Join Preservation
-
-### Part 2a: Join Preservation Implies Left Adjoint
+## Proof: Part 2a (Join Preservation → Left Adjoint)
 
 If f : P → Q is monotone and preserves joins (and P has all joins), then f is a left adjoint.
-
-```agda
-preserves-joins→left-adjoint : (P Q : Preorder)
-                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-                                   open Preorder Q renaming (Carrier to B; _≤_ to _≤₂_)
-                               in (f : A → B)
-                             → (f-mono : Monotonic (Preorder._≤_ P) (Preorder._≤_ Q) f)
-                             → (all-joins : HasAllJoins P)
-                             → (preserves : ∀ (S : Subset (Preorder.Carrier P)) (j : Preorder.Carrier P)
-                                           → IsJoin (Preorder._≤_ P) j S
-                                           → IsJoin (Preorder._≤_ Q) (f j) (image f S))
-                             → GaloisConnection P Q
-```
-
-### Proof
 
 **Strategy:** Construct the right adjoint g by taking, for each y : B, the join of the lower set ↓y = {p ∈ P | f(p) ≤ y}. Verify the Galois connection using the join-preservation property.
 
@@ -220,21 +218,9 @@ preserves-joins→left-adjoint P Q f f-mono all-joins preserves = record
         fgy≤y = proj₂ fgy-preserves-join y-is-upper-bound
 ```
 
-### Part 2b: Left Adjoint Implies Join Preservation
+## Proof: Part 2b (Left Adjoint → Join Preservation)
 
 If f is a left adjoint in a Galois connection, then f preserves joins.
-
-```agda
-left-adjoint→preserves-joins : (P Q : Preorder)
-                             → (gc : GaloisConnection P Q)
-                             → let open Preorder P renaming (Carrier to A; _≤_ to _≤₁_)
-                                   open Preorder Q renaming (_≤_ to _≤₂_)
-                                   open GaloisConnection gc
-                               in ∀ (S : Subset A) (j : A) → IsJoin _≤₁_ j S
-                               → IsJoin _≤₂_ (f j) (image f S)
-```
-
-### Proof
 
 **Strategy:** This is exactly Proposition 1.104.
 

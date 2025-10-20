@@ -8,6 +8,8 @@ number: 14
 
 # Partition-Equivalence Correspondence
 
+## Textbook Definition
+
 **Proposition 1.14.** Let A be a set. There is a one-to-one correspondence between the ways to partition A and the equivalence relations on A.
 
 ## Intuition
@@ -15,7 +17,7 @@ number: 14
 - Partition → Equivalence: "a ∼ b" means "a and b are in the same part"
 - Equivalence → Partition: "the parts are the equivalence classes"
 
-## Setup
+## Agda Setup
 
 ```agda
 module propositions.PartitionEquivalenceCorrespondence where
@@ -33,17 +35,19 @@ open import definitions.Relation using (BinRel)
 open import plumbing.ClassicalPostulates using (_/_; [_]; quotient-sound; quotient-surjective; quotient-effective)
 ```
 
-## Direction 1: Partition to Equivalence Relation
+## Proposition
+
+```agda
+partition→equivalence : {A : Set} → Partition A → Σ[ _∼_ ∈ BinRel A ] (IsEquivalence _∼_)
+
+equivalence→partition : {A : Set} (_∼_ : BinRel A) → IsEquivalence _∼_ → Partition A
+```
+
+## Proof: Direction 1 (Partition → Equivalence)
 
 **Strategy:** Given a partition, define a ∼ b to mean "a and b are in the same part."
 
 This is the easier direction—we just need to check that ∼ is reflexive, symmetric, and transitive.
-
-```agda
-partition→equivalence : {A : Set} → Partition A → Σ[ _∼_ ∈ BinRel A ] (IsEquivalence _∼_)
-```
-
-### Proof Strategy
 
 We define: **a ∼ b** means "there exists a part p containing both a and b"
 
@@ -90,7 +94,7 @@ partition→equivalence {A} π = _∼_ , is-equivalence
       }
 ```
 
-## Direction 2: Equivalence Relation to Partition
+## Proof: Direction 2 (Equivalence → Partition)
 
 **Strategy:** Given an equivalence relation ∼, the parts are the equivalence classes.
 
@@ -98,10 +102,6 @@ This is the harder direction. We need to:
 1. Define what the "parts" are (equivalence classes)
 2. Choose labels for the parts (the quotient type A/∼)
 3. Verify the partition properties (nonempty, union, unique)
-
-```agda
-equivalence→partition : {A : Set} (_∼_ : BinRel A) → IsEquivalence _∼_ → Partition A
-```
 
 ### Step 1: Define equivalence classes
 
@@ -184,13 +184,13 @@ This quotient type lives at the same universe level as A, which is essential for
         nonempty-proof : ∀ (q : A / _∼_) → Σ[ a ∈ A ] (get-part q a)
         nonempty-proof q =
           let (rep , _) = quotient-surjective q
-          in rep , reflexive  -- rep ∼ rep 
+          in rep , reflexive  -- rep ∼ rep
 
         -- Prove every element is in some part
         union-proof : ∀ (a : A) → Σ[ q ∈ (A / _∼_) ] (get-part q a)
         union-proof a =
           let label : A / _∼_
-              label = [ a ]  
+              label = [ a ]
 
               (rep , [rep]≡[a]) = quotient-surjective {_∼_ = _∼_} label
               rep~a = quotient-effective {_∼_ = _∼_} [rep]≡[a]
