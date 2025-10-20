@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -123,6 +124,7 @@
         }
     </style>
 </head>
+
 <body>
     {% include sidebar.html %}
 
@@ -134,23 +136,38 @@
 
     <script>
         // Make specific sections collapsible and collapsed by default
-        document.addEventListener('DOMContentLoaded', function() {
-            // Find all h2 elements
+        document.addEventListener('DOMContentLoaded', function () {
+            // Find all h2 and h3 elements
             const h2Elements = document.querySelectorAll('.agda-content h2');
+            const h3Elements = document.querySelectorAll('.agda-content h3');
 
-            h2Elements.forEach(function(h2) {
+            h2Elements.forEach(function (h2) {
                 const h2Text = h2.textContent.trim();
 
-                // Collapse these sections by default:
-                // - "Textbook Definition"
+                // Collapse these h2 sections by default:
+                // - "Textbook Definition" (for propositions)
+                // - "Textbook Description" (for examples)
                 // - "Agda Setup" or "Setup"
                 // - Any heading starting with "Proof"
+                // - "Implementation" (for examples)
                 if (h2Text === 'Textbook Definition' ||
+                    h2Text === 'Textbook Description' ||
                     h2Text === 'Agda Setup' ||
                     h2Text === 'Setup' ||
                     h2.id === 'setup' ||
-                    h2Text.startsWith('Proof')) {
+                    h2Text.startsWith('Proof:') ||
+                    h2Text === 'Implementation') {
                     wrapSectionInCollapsible(h2, false); // collapsed by default
+                }
+            });
+
+            h3Elements.forEach(function (h3) {
+                const h3Text = h3.textContent.trim();
+
+                // Collapse these h3 sections by default:
+                // - "Implementation" (for examples)
+                if (h3Text === 'Implementation') {
+                    wrapSectionInCollapsible(h3, false); // collapsed by default
                 }
             });
 
@@ -172,17 +189,21 @@
                 const parent = heading.parentNode;
                 const nextSibling = heading.nextSibling;
 
-                // Collect all content until the next h2 or end
+                // Determine what level we're stopping at
+                const headingLevel = heading.tagName;
+                const stopAtTags = headingLevel === 'H2' ? ['H2'] : ['H2', 'H3'];
+
+                // Collect all content until the next heading of the same or higher level
                 const contentToWrap = [heading];
                 let currentNode = heading.nextElementSibling;
 
-                while (currentNode && currentNode.tagName !== 'H2') {
+                while (currentNode && !stopAtTags.includes(currentNode.tagName)) {
                     contentToWrap.push(currentNode);
                     currentNode = currentNode.nextElementSibling;
                 }
 
                 // Move all content nodes into the collapsible
-                contentToWrap.forEach(function(node) {
+                contentToWrap.forEach(function (node) {
                     contentDiv.appendChild(node);
                 });
 
@@ -194,4 +215,5 @@
         });
     </script>
 </body>
+
 </html>

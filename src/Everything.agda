@@ -40,7 +40,6 @@ import exercises.GaloisGivesClosure
 import examples.AdjunctionFromClosure
 import examples.ApplesAndBuckets
 import examples.ComputationAsRewriting
-import examples.PreciseAndForgetful
 
 -- Non-textbook
 import non-textbook.GraphViz

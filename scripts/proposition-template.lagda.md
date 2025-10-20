@@ -31,7 +31,7 @@ State what you're proving (optional high-level description).
 your-proposition-name : {A : Set} → PremiseType → ConclusionType
 ```
 
-## Proof
+## Proof:  (Proof Title)
 
 **Strategy:** Brief description of the proof strategy (optional).
 

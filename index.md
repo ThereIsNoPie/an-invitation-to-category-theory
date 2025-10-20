@@ -20,9 +20,6 @@ Using Agda to read through has 2 advantages:
 * When you have a mistake in your understanding Agda will tell you **precisely** where you are wrong.
 * When you **forget** a definition you can just click on the type signature. 
 
-See the [Precise and Forgetful Example](docs/examples.PreciseAndForgetful.html).
-
-
 </div>
 
 

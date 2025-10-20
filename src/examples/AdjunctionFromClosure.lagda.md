@@ -8,6 +8,8 @@ number: 114
 
 # Adjunctions from Closure Operators
 
+## Textbook Description
+
 **Example 1.114 (Adjunctions from closure operators).** Just as every adjunction gives rise to a closure operator, from every closure operator we may construct an adjunction.
 
 Let P be a preorder and let j : P → P be a closure operator. We can define a preorder fix j to have elements the fixed points of j; that is,
@@ -18,7 +20,7 @@ This is a subset of P and inherits an order as a result; hence fix j is a sub-pr
 
 We define an adjunction with left adjoint j : P → fix j sending p to j(p), and right adjoint g : fix j → P simply the inclusion of the sub-preorder. To see it's really an adjunction, we need to see that for any p ∈ P and q ∈ fix j, we have j(p) ≤ q if and only if p ≤ q. Let's check it. Since p ≤ j(p), we have that j(p) ≤ q implies p ≤ q by transitivity. Conversely, since q is a fixed point, p ≤ q implies j(p) ≤ j(q) ≅ q.
 
-## Setup
+## Agda Setup
 
 ```agda
 module examples.AdjunctionFromClosure where
@@ -32,9 +34,11 @@ open import definitions.GaloisConnection using (GaloisConnection)
 open import definitions.MonotoneMap using (Monotonic; _⇒_)
 ```
 
-## The Subpreorder of Fixed Points
+## The Example
 
-Given a closure operator j on a preorder P, we construct the subpreorder of fixed points.
+Given a closure operator j on a preorder P, we construct an adjunction between P and the subpreorder of fixed points.
+
+### Key Type Definitions
 
 ```agda
 module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
@@ -42,7 +46,6 @@ module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
   open ClosureOperator closure
 
   -- A fixed point of j is an element p where j(p) ≅ p
-  -- We represent this as a pair (p, proof that j(p) ≅ p)
   IsFixedPoint : A → Set
   IsFixedPoint p = (j p ≤P p) × (p ≤P j p)
 
@@ -54,6 +57,24 @@ module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
   _≤fix_ : FixJ → FixJ → Set
   (p , _) ≤fix (q , _) = p ≤P q
 
+  -- The preorder of fixed points
+  FixJPreorder : Preorder
+```
+
+## The Subpreorder of Fixed Points
+
+We construct the preorder structure on fixed points.
+
+```agda
+  -- Key observation: j(p) is always a fixed point
+  j-is-fixed-point : ∀ (p : A) → IsFixedPoint (j p)
+```
+
+### Implementation
+
+**Strategy:** Use the idempotence property of the closure operator to show j(p) is a fixed point, and inherit the preorder structure from P.
+
+```agda
   -- fix j forms a preorder
   fixj-isPreorder : IsPreorder _≤fix_
   fixj-isPreorder = record
@@ -61,83 +82,68 @@ module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
     ; transitive = transitive
     }
 
-  -- The preorder of fixed points
-  FixJPreorder : Preorder
   FixJPreorder = record
     { Carrier = FixJ
     ; _≤_ = _≤fix_
     ; isPreorder = fixj-isPreorder
     }
-```
 
-## Key Observation: j(p) is Always a Fixed Point
-
-For any p ∈ P, j(p) is a fixed point because j(j(p)) ≅ j(p) by idempotence.
-
-```agda
-  -- j(p) is always a fixed point
-  j-is-fixed-point : ∀ (p : A) → IsFixedPoint (j p)
+  -- j(p) is always a fixed point because j(j(p)) ≅ j(p) by idempotence
   j-is-fixed-point p = idempotent p
 ```
 
-## The Left Adjoint: P → fix j
+## The Adjunction
 
-The left adjoint sends p to j(p), which we've shown is always a fixed point.
+We construct the left and right adjoints and verify the adjunction property.
 
 ```agda
-  -- The function j : P → fix j
+  -- The left adjoint: P → fix j
+  left-adjoint : P ⇒ FixJPreorder
+
+  -- The right adjoint: fix j → P (inclusion)
+  right-adjoint : FixJPreorder ⇒ P
+
+  -- The Galois connection
+  closure-adjunction : GaloisConnection P FixJPreorder
+```
+
+### Implementation
+
+**Strategy:** The left adjoint sends p to j(p) (which is always a fixed point). The right adjoint is inclusion. The adjunction properties follow from extensivity and idempotence.
+
+```agda
+  -- The left adjoint sends p to j(p)
   left-adjoint-fn : A → FixJ
   left-adjoint-fn p = (j p , j-is-fixed-point p)
 
-  -- j is monotonic as a function to fix j
   left-adjoint-monotonic : Monotonic _≤P_ _≤fix_ left-adjoint-fn
   left-adjoint-monotonic p≤q = j-monotonic p≤q
 
-  -- The left adjoint as a monotone map
-  left-adjoint : P ⇒ FixJPreorder
   left-adjoint = (left-adjoint-fn , left-adjoint-monotonic)
-```
 
-## The Right Adjoint: fix j → P
-
-The right adjoint is simply the inclusion map, sending a fixed point to its underlying element.
-
-```agda
-  -- The inclusion function g : fix j → P
+  -- The right adjoint is the inclusion map
   right-adjoint-fn : FixJ → A
   right-adjoint-fn (p , _) = p
 
-  -- The inclusion is monotonic
   right-adjoint-monotonic : Monotonic _≤fix_ _≤P_ right-adjoint-fn
   right-adjoint-monotonic {x} {y} p≤q = p≤q
 
-  -- The right adjoint as a monotone map
-  right-adjoint : FixJPreorder ⇒ P
   right-adjoint = (right-adjoint-fn , λ {x} {y} → right-adjoint-monotonic {x} {y})
-```
 
-## Proof of Adjunction
-
-We need to prove that j(p) ≤ q iff p ≤ q for all p ∈ P and q ∈ fix j.
-
-```agda
-  -- We need to prove the adjunction: f(p) ≤ q iff p ≤ g(q)
-  -- In our case: j(p) ≤ q iff p ≤ q (where q is already a fixed point)
+  -- Proof of adjunction: j(p) ≤ q iff p ≤ q
 
   -- Forward direction: j(p) ≤ q → p ≤ q
-  -- Proof: Since p ≤ j(p) (extensivity) and j(p) ≤ q, we get p ≤ q by transitivity
+  -- Since p ≤ j(p) (extensivity) and j(p) ≤ q, we get p ≤ q by transitivity
   forward : ∀ {p : A} {q : FixJ} → left-adjoint-fn p ≤fix q → p ≤P right-adjoint-fn q
   forward {p} {q , _} jp≤q = transitive (extensive p) jp≤q
 
   -- Backward direction: p ≤ q → j(p) ≤ q
-  -- Proof: Since q is a fixed point (j(q) ≅ q) and j is monotonic,
-  --        p ≤ q → j(p) ≤ j(q) ≅ q
+  -- Since q is a fixed point (j(q) ≅ q) and j is monotonic: p ≤ q → j(p) ≤ j(q) ≅ q
   backward : ∀ {p : A} {q : FixJ} → p ≤P right-adjoint-fn q → left-adjoint-fn p ≤fix q
   backward {p} {q , (jq≤q , q≤jq)} p≤q =
     transitive (j-monotonic p≤q) jq≤q
 
   -- The Galois connection
-  closure-adjunction : GaloisConnection P FixJPreorder
   closure-adjunction = record
     { f = left-adjoint-fn
     ; g = right-adjoint-fn
