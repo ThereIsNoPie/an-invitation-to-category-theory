@@ -17,25 +17,37 @@
 
 
     {% for section_group in sections %}
-    <details class="nav-section" open>
+    {% assign section_pages = section_group.items | sort: "number" %}
+    {% assign section_contains_current = false %}
+    {% for pg in section_pages %}
+        {% if pg.url == page.url %}
+            {% assign section_contains_current = true %}
+        {% endif %}
+    {% endfor %}
+
+    <details class="nav-section"{% if section_contains_current %} open{% endif %}>
         <summary>{{ section_group.name }}</summary>
         <ol>
-            {% assign section_pages = section_group.items | sort: "number" %}
-            {% for page in section_pages %}
+            {% for pg in section_pages %}
+            {% assign is_current_page = false %}
+            {% if pg.url == page.url %}
+                {% assign is_current_page = true %}
+            {% endif %}
+
             <li>
-                {% if page.subsections %}
-                <details class="nav-subsection" open>
-                    <summary><a href="{{ page.url | relative_url }}">{{ page.chapter }}.{{ page.number }} {{ page.title
+                {% if pg.subsections %}
+                <details class="nav-subsection"{% if is_current_page %} open{% endif %}>
+                    <summary><a href="{{ pg.url | relative_url }}"{% if is_current_page %} class="current-page"{% endif %}>{{ pg.chapter }}.{{ pg.number }} {{ pg.title
                             }}</a></summary>
                     <ol>
-                        {% for subsection in page.subsections %}
-                        <li><a href="{{ page.url | relative_url }}#{{ subsection.anchor }}">{{ subsection.chapter }}.{{
+                        {% for subsection in pg.subsections %}
+                        <li><a href="{{ pg.url | relative_url }}#{{ subsection.anchor }}">{{ subsection.chapter }}.{{
                                 subsection.number }} {{ subsection.name }}</a></li>
                         {% endfor %}
                     </ol>
                 </details>
                 {% else %}
-                <a href="{{ page.url | relative_url }}">{{ page.chapter }}.{{ page.number }} {{ page.title }}</a>
+                <a href="{{ pg.url | relative_url }}"{% if is_current_page %} class="current-page"{% endif %}>{{ pg.chapter }}.{{ pg.number }} {{ pg.title }}</a>
                 {% endif %}
             </li>
             {% endfor %}

@@ -17,7 +17,7 @@ number: 111
 
 Given a Galois connection with f : P → Q left adjoint to g : Q → P, we may compose f and g to arrive at a monotone map g ∘ f : P → P from preorder P to itself. This monotone map has the property that p ≤ (g ∘ f)(p), and that (g ∘ f ∘ g ∘ f)(p) ≅ (g ∘ f)(p) for any p ∈ P. This is an example of a closure operator.
 
-## Setup
+## Agda Setup
 
 ```agda
 module exercises.GaloisGivesClosure where
@@ -116,15 +116,4 @@ Now we can construct the closure operator g ∘ f : P → P.
     ; extensive = part1
     ; idempotent = part2
     }
-```
-
-## Interpretation
-
-This exercise shows that **every Galois connection gives rise to a closure operator** via the composition g ∘ f. The key insights are:
-
-- **Extensivity** (p ≤ g(f(p))) comes directly from the unit condition
-- **Idempotence** (g(f(g(f(p)))) ≅ g(f(p))) follows from applying the unit and counit conditions
-- **Monotonicity** is automatic from the fact that both f and g are monotonic
-
-Together with Example 1.114 (which shows the converse - every closure operator gives a Galois connection), this establishes a fundamental correspondence between Galois connections and closure operators.
 ```
