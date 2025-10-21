@@ -36,15 +36,25 @@ open import definitions.MonotoneMap using (Monotonic; _⇒_)
 
 ## The Example
 
-Given a closure operator j on a preorder P, we construct an adjunction between P and the subpreorder of fixed points.
-
-### Key Type Definitions
+From a closure operator j on preorder P, we construct a Galois connection between P and the preorder of fixed points.
 
 ```agda
 module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
   open Preorder P renaming (Carrier to A; _≤_ to _≤P_)
   open ClosureOperator closure
 
+  -- The preorder of fixed points
+  FixJPreorder : Preorder
+
+  -- The Galois connection: P ⊣ fix j
+  closure-adjunction : GaloisConnection P FixJPreorder
+```
+
+### Implementation
+
+**Strategy:** Define fix j = { p ∈ P | j(p) ≅ p }, use j as left adjoint and inclusion as right adjoint.
+
+```agda
   -- A fixed point of j is an element p where j(p) ≅ p
   IsFixedPoint : A → Set
   IsFixedPoint p = j p ≅ p
@@ -57,24 +67,6 @@ module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
   _≤fix_ : FixJ → FixJ → Set
   (p , _) ≤fix (q , _) = p ≤P q
 
-  -- The preorder of fixed points
-  FixJPreorder : Preorder
-```
-
-## The Subpreorder of Fixed Points
-
-We construct the preorder structure on fixed points.
-
-```agda
-  -- Key observation: j(p) is always a fixed point
-  j-is-fixed-point : ∀ (p : A) → IsFixedPoint (j p)
-```
-
-### Implementation
-
-**Strategy:** Use the idempotence property of the closure operator to show j(p) is a fixed point, and inherit the preorder structure from P.
-
-```agda
   -- fix j forms a preorder
   fixj-isPreorder : IsPreorder _≤fix_
   fixj-isPreorder = record
@@ -89,29 +81,9 @@ We construct the preorder structure on fixed points.
     }
 
   -- j(p) is always a fixed point because j(j(p)) ≅ j(p) by idempotence
+  j-is-fixed-point : ∀ (p : A) → IsFixedPoint (j p)
   j-is-fixed-point p = idempotent p
-```
 
-## The Adjunction
-
-We construct the left and right adjoints and verify the adjunction property.
-
-```agda
-  -- The left adjoint: P → fix j
-  left-adjoint : P ⇒ FixJPreorder
-
-  -- The right adjoint: fix j → P (inclusion)
-  right-adjoint : FixJPreorder ⇒ P
-
-  -- The Galois connection
-  closure-adjunction : GaloisConnection P FixJPreorder
-```
-
-### Implementation
-
-**Strategy:** The left adjoint sends p to j(p) (which is always a fixed point). The right adjoint is inclusion. The adjunction properties follow from extensivity and idempotence.
-
-```agda
   -- The left adjoint sends p to j(p)
   left-adjoint-fn : A → FixJ
   left-adjoint-fn p = (j p , j-is-fixed-point p)
@@ -119,6 +91,7 @@ We construct the left and right adjoints and verify the adjunction property.
   left-adjoint-monotonic : Monotonic _≤P_ _≤fix_ left-adjoint-fn
   left-adjoint-monotonic p≤q = j-monotonic p≤q
 
+  left-adjoint : P ⇒ FixJPreorder
   left-adjoint = (left-adjoint-fn , left-adjoint-monotonic)
 
   -- The right adjoint is the inclusion map
@@ -128,17 +101,14 @@ We construct the left and right adjoints and verify the adjunction property.
   right-adjoint-monotonic : Monotonic _≤fix_ _≤P_ right-adjoint-fn
   right-adjoint-monotonic {x} {y} p≤q = p≤q
 
+  right-adjoint : FixJPreorder ⇒ P
   right-adjoint = (right-adjoint-fn , λ {x} {y} → right-adjoint-monotonic {x} {y})
 
-  -- Proof of adjunction: j(p) ≤ q iff p ≤ q
-
-  -- Forward direction: j(p) ≤ q → p ≤ q
-  -- Since p ≤ j(p) (extensivity) and j(p) ≤ q, we get p ≤ q by transitivity
+  -- Forward: j(p) ≤ q → p ≤ q (use extensivity and transitivity)
   forward : ∀ {p : A} {q : FixJ} → left-adjoint-fn p ≤fix q → p ≤P right-adjoint-fn q
   forward {p} {q , _} jp≤q = transitive (extensive p) jp≤q
 
-  -- Backward direction: p ≤ q → j(p) ≤ q
-  -- Since q is a fixed point (j(q) ≅ q) and j is monotonic: p ≤ q → j(p) ≤ j(q) ≅ q
+  -- Backward: p ≤ q → j(p) ≤ q (use monotonicity and q being fixed)
   backward : ∀ {p : A} {q : FixJ} → p ≤P right-adjoint-fn q → left-adjoint-fn p ≤fix q
   backward {p} {q , (jq≤q , q≤jq)} p≤q =
     transitive (j-monotonic p≤q) jq≤q
@@ -152,20 +122,11 @@ We construct the left and right adjoints and verify the adjunction property.
     }
 ```
 
-## Interpretation
+## Summary
 
-This construction demonstrates one direction of the fundamental correspondence between Galois connections and closure operators:
+This establishes one direction of the **Galois connection ⟷ closure operator correspondence**:
 
-- **Exercise 1.111** (GaloisGivesClosure) shows that every Galois connection f ⊣ g gives a closure operator: the composition g∘f : P → P is a closure operator on P. This uses Proposition 1.101 (unit/counit) to prove extensivity and idempotence.
+- Exercise 1.111: Galois connection f ⊣ g ⟹ closure operator g∘f
+- Example 1.114 (this): Closure operator j ⟹ Galois connection P ⊣ fix j
 
-- **Example 1.114** (this example) shows the converse: every closure operator j : P → P gives rise to a Galois connection between P and the subpreorder of fixed points fix j.
-
-The key insight is that:
-1. The **fixed points** of j form a natural subpreorder fix j = { p ∈ P | j(p) ≅ p }
-2. The closure operator j provides a **left adjoint** j : P → fix j (sending p ↦ j(p))
-3. The **inclusion** g : fix j → P provides the right adjoint
-4. The adjunction properties (j(p) ≤ q ⟺ p ≤ q) follow directly from:
-   - Extensivity: p ≤ j(p)
-   - Idempotence: j(j(p)) ≅ j(p), meaning j(p) is always a fixed point
-
-Together, Exercise 1.111 and Example 1.114 establish that **Galois connections and closure operators are in bijective correspondence** - they are two perspectives on the same mathematical structure!
+Together they show these are two perspectives on the same structure!

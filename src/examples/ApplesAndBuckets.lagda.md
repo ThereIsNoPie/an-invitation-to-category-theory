@@ -30,99 +30,54 @@ open import Level using (Level; _⊔_)
 
 ## The Example
 
-Given a function `f : Apples → Buckets`, we derive three functors between powersets that form two adjoint pairs.
-
-### Key Type Definitions
-
-We represent subsets using the **powerset** construction. A subset of `X` is represented as a predicate `X → Set`.
+From a single function f : Apples → Buckets, we derive three functors and two adjunctions.
 
 ```agda
 Powerset : Set → Set₁
 Powerset X = X → Set
 
--- Subset inclusion
 _⊆_ : {X : Set} → Powerset X → Powerset X → Set
 _⊆_ S T = ∀ {x} → S x → T x
-```
 
-### The Three Functors
-
-```agda
 module ApplesAndBucketsTheorem (Apples Buckets : Set) (f : Apples → Buckets) where
-
   A = Apples
   B = Buckets
   𝒫A = Powerset A
   𝒫B = Powerset B
 
-  -- Functor 1: Pullback f* : 𝒫B → 𝒫A
-  -- "Which apples go into these buckets?"
-  f* : 𝒫B → 𝒫A
+  -- Three functors from one function
+  f* : 𝒫B → 𝒫A  -- Pullback: "Which apples go in these buckets?"
+  f! : 𝒫A → 𝒫B  -- Existential: "Which buckets have ≥1 of these apples?"
+  f∗ : 𝒫A → 𝒫B  -- Universal: "Which buckets have only these apples?"
 
-  -- Functor 2: Existential Image f! : 𝒫A → 𝒫B
-  -- "Which buckets contain at least one of these apples?"
-  f! : 𝒫A → 𝒫B
-
-  -- Functor 3: Universal Image f∗ : 𝒫A → 𝒫B
-  -- "Which buckets contain only these apples?"
-  f∗ : 𝒫A → 𝒫B
-```
-
-### Implementation
-
-**Strategy:** Define each functor based on its intuitive meaning.
-
-```agda
-  -- Pullback: f*(B') = { a ∈ A | f(a) ∈ B' }
-  -- An apple a is in f*(B') if its bucket f(a) is in B'
-  f* B' a = B' (f a)
-
-  -- Existential Image: f!(A') = { b ∈ B | ∃a ∈ A'. f(a) = b }
-  -- A bucket b is in f!(A') if there exists some apple a in A' such that f(a) = b
-  f! A' b = Σ[ a ∈ A ] (A' a × f a ≡ b)
-
-  -- Universal Image: f∗(A') = { b ∈ B | ∀a. f(a) = b → a ∈ A' }
-  -- A bucket b is in f∗(A') if every apple that goes into b is in A'
-  f∗ A' b = ∀ {a} → f a ≡ b → A' a
-```
-
-## The Two Adjunctions
-
-```agda
-  -- Adjunction 1: f! ⊣ f*
-  -- f!(A') ⊆ B' ⟺ A' ⊆ f*(B')
+  -- Two adjunctions
   f!⊆→⊆f* : ∀ {A' B'} → f! A' ⊆ B' → A' ⊆ f* B'
   ⊆f*→f!⊆ : ∀ {A' B'} → A' ⊆ f* B' → f! A' ⊆ B'
 
-  -- Adjunction 2: f* ⊣ f∗
-  -- f*(B') ⊆ A' ⟺ B' ⊆ f∗(A')
   f*⊆→⊆f∗ : ∀ {B' A'} → f* B' ⊆ A' → B' ⊆ f∗ A'
   ⊆f∗→f*⊆ : ∀ {B' A'} → B' ⊆ f∗ A' → f* B' ⊆ A'
 ```
 
 ### Implementation
 
-**Strategy:** Prove the adjunction properties using the functor definitions directly.
+**Strategy:** Use quantifiers (∃ for f!, ∀ for f∗), prove adjunctions directly.
 
 ```agda
-  -- Adjunction 1 proofs
+  -- Pullback: a ∈ f*(B') iff f(a) ∈ B'
+  f* B' a = B' (f a)
 
-  -- Forward: If all buckets containing apples from A' are in B',
-  --          then all apples in A' map to buckets in B'
+  -- Existential: b ∈ f!(A') iff ∃a ∈ A'. f(a) = b
+  f! A' b = Σ[ a ∈ A ] (A' a × f a ≡ b)
+
+  -- Universal: b ∈ f∗(A') iff ∀a. f(a) = b → a ∈ A'
+  f∗ A' b = ∀ {a} → f a ≡ b → A' a
+
+  -- Adjunction 1: f! ⊣ f*
   f!⊆→⊆f* f!A'⊆B' {a} a∈A' = f!A'⊆B' (a , a∈A' , refl)
-
-  -- Backward: If all apples in A' map to buckets in B',
-  --           then all buckets containing an apple from A' are in B'
   ⊆f*→f!⊆ A'⊆f*B' {b} (a , a∈A' , refl) = A'⊆f*B' a∈A'
 
-  -- Adjunction 2 proofs
-
-  -- Forward: If all apples in buckets B' are in A',
-  --          then every bucket in B' contains only apples from A'
+  -- Adjunction 2: f* ⊣ f∗
   f*⊆→⊆f∗ f*B'⊆A' {b} b∈B' {a} refl = f*B'⊆A' b∈B'
-
-  -- Backward: If every bucket in B' contains only apples from A',
-  --           then all apples in buckets B' are in A'
   ⊆f∗→f*⊆ B'⊆f∗A' {a} fa∈B' = B'⊆f∗A' fa∈B' refl
 ```
 
@@ -174,3 +129,11 @@ Now let's compute the three images:
 - Therefore, `f∗(AppleSubset) = ∅` (empty set)
 
 This illustrates the difference between "at least one" (existential) and "all" (universal) quantification!
+
+## Summary
+
+One function f : A → B induces:
+- Three functors: f* (pullback), f! (existential), f∗ (universal)
+- Two adjunctions: f! ⊣ f* and f* ⊣ f∗
+
+This pattern appears throughout mathematics!

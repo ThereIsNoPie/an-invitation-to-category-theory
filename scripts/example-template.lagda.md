@@ -141,6 +141,8 @@ f!⊆→⊆f* f!A'⊆B' {a} a∈A' = f!A'⊆B' (a , a∈A' , refl)
 ```
 ```
 
-7. **Narrative sections** (like Summary, Interpretation, Concrete Examples) don't need Implementation subsections - they stay fully visible.
+7. **Narrative sections** (Concrete Examples) don't need Implementation subsections - they stay fully visible.
 
-8. **Goal**: Reader should understand the example in 30 seconds from the visible parts, then dive into details if interested.
+8. **Goal**: Reader should understand the example in 30 seconds from the visible parts, then dive into details if interested. 
+
+9. **Goal 2**: Closely follow the textbook example. Do not add extra explanations or change the structure significantly.
