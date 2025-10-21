@@ -41,4 +41,6 @@ Generated with [Agda](https://github.com/agda/agda) • Formalization based on _
 
 [View Original Textbook](http://www.brendanfong.com/fong_spivak_an_invitation.pdf)
 
+[Check Out The Code](https://github.com/ThereIsNoPie/an-invitation-to-category-theory)
+
 </footer>
