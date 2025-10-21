@@ -152,10 +152,13 @@
                 // - "Implementation" (for examples)
                 if (h2Text === 'Textbook Definition' ||
                     h2Text === 'Textbook Description' ||
+                    h2Text === 'Textbook Exercise' ||
                     h2Text === 'Agda Setup' ||
                     h2Text === 'Setup' ||
                     h2.id === 'setup' ||
                     h2Text.startsWith('Proof:') ||
+                    h2Text.startsWith('Solution:') ||
+                    h2Text === 'Solution' ||
                     h2Text === 'Implementation') {
                     wrapSectionInCollapsible(h2, false); // collapsed by default
                 }

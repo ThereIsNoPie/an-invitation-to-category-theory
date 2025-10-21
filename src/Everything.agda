@@ -35,6 +35,7 @@ import propositions.SubsetMeetJoinMonotonicity
 
 -- Exercises
 import exercises.GaloisGivesClosure
+import exercises.ClosureAdjunctionExample
 
 -- Examples
 import examples.AdjunctionFromClosure
