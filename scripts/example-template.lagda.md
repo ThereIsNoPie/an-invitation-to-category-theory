@@ -25,117 +25,47 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 ## The Example
 
-Brief high-level explanation of what we're constructing.
-
-### Key Type Definitions
-
-Define any important types that are central to the example:
+Brief high-level summary of what we're constructing (1-2 sentences).
 
 ```agda
--- Core type definitions
-DataType : Set
-DataType = ...
+-- Key type signatures that show WHAT we're building
+main-construction : InputType → OutputType
 
--- Important type aliases or specialized types
-AnotherType : Set
-AnotherType = ...
-```
-
-## Main Construction
-
-Brief description of what we're building.
-
-Type signatures for what we're constructing (visible):
-
-```agda
-main-function : InputType → OutputType
-
-helper-function : HelperInputType → HelperOutputType
+-- Any other important top-level definitions
+helper-type : Set
+helper-type = ...
 ```
 
 ### Implementation
 
-**Strategy:** Brief description of how the implementation works.
+**Strategy:** Brief description of how the construction works.
 
 ```agda
--- Implementation details here
-main-function input = result
+-- All implementation details here
+main-construction input = result
   where
     helper : HelperType
     helper = ...
 
     result : OutputType
     result = ...
-
-helper-function input = ...
 ```
 
-## Properties We Get For Free
+## [Optional: Additional Sections]
 
-Brief explanation of what properties follow from the main construction.
-
-Type signatures for properties (visible):
+You can have additional sections if the example is complex. Each follows the same pattern:
 
 ```agda
-property-1 : ∀ (x : Type) → PropertyType
-
-property-2 : ∀ (x y : Type) → AnotherPropertyType
-```
-
-### Implementation
-
-**Strategy:** How these properties follow from the main construction.
-
-```agda
--- Proofs/implementations
-property-1 x = ...
-  where
-    -- Use main-function here
-    ...
-
-property-2 x y = ...
-```
-
-## [Optional: Additional Constructions/Properties]
-
-You can have multiple sections following the same pattern:
-- Section heading
-- Type signatures (visible)
-- Implementation subsection (collapsed)
-
-For example:
-
-## Another Construction
-
-Brief description.
-
-```agda
-another-thing : SomeType → ResultType
+-- Type signatures visible
+another-construction : SomeType → ResultType
 ```
 
 ### Implementation
 
 ```agda
-another-thing input = ...
+-- Implementation collapsed
+another-construction input = ...
 ```
-
-## [Optional: Concrete Example]
-
-Demonstrate the constructions with specific values:
-
-```agda
--- Concrete data
-example-input : InputType
-example-input = ...
-
--- Applying our construction
-example-result : OutputType
-example-result = main-function example-input
-```
-
-## [Optional: Interpretation/Summary]
-
-Explain the significance of what was constructed and how it connects to broader theory.
 
 ---
 
@@ -145,10 +75,25 @@ Explain the significance of what was constructed and how it connects to broader 
 
 2. **Agda Setup** - Always collapsed by default.
 
-3. **Pattern for each major section:**
+3. **The Example** - Main section showing WHAT is being constructed
+   - Keep type signatures visible
+   - Add brief explanatory text
+   - Implementation details go in the "Implementation" subsection
+
+4. **Implementation** (h3) - Always collapsed by default
+   - Contains all proof/construction details
+   - Include Strategy explanation
+   - Can appear multiple times under different h2 sections
+
+5. **Keep it concise** - The visible parts should give a quick overview
+   - Type signatures tell the story
+   - Brief prose explains the idea
+   - Details are hidden but accessible
+
+6. **Pattern to follow:**
    ```
    ## Section Title
-   Brief overview
+   Brief explanation
 
    Type signatures (visible)
 
@@ -156,21 +101,46 @@ Explain the significance of what was constructed and how it connects to broader 
    Code (collapsed)
    ```
 
-4. This pattern can repeat multiple times:
-   - **Main Construction** + Implementation
-   - **Properties** + Implementation
-   - **Another Construction** + Implementation
-   - etc.
+Example structure:
 
-5. The key insight: Each h2 section can have its own h3 "Implementation" subsection that gets collapsed, while the type signatures remain visible.
+```markdown
+## The Functors
 
-6. **Implementation** headings (h3) will be collapsed automatically by the layout.
+Brief explanation of what functors we're defining.
 
-7. Examples of section titles:
-   - "Main Construction"
-   - "Properties We Get For Free"
-   - "Verification"
-   - "The Adjunction"
-   - "Direction 1" / "Direction 2" (for bidirectional constructions)
+```agda
+f* : 𝒫B → 𝒫A
+f! : 𝒫A → 𝒫B
+f∗ : 𝒫A → 𝒫B
+```
 
-8. Narrative sections without implementations (like "Interpretation", "Concrete Example", "Summary") don't need an Implementation subsection and remain fully visible.
+### Implementation
+
+**Strategy:** How we define each functor.
+
+```agda
+f* B' a = B' (f a)
+f! A' b = Σ[ a ∈ A ] (A' a × f a ≡ b)
+f∗ A' b = ∀ {a} → f a ≡ b → A' a
+```
+
+## The Adjunctions
+
+Brief explanation of the adjoint pairs.
+
+```agda
+f!⊆→⊆f* : ∀ {A' B'} → f! A' ⊆ B' → A' ⊆ f* B'
+⊆f*→f!⊆ : ∀ {A' B'} → A' ⊆ f* B' → f! A' ⊆ B'
+```
+
+### Implementation
+
+```agda
+f!⊆→⊆f* f!A'⊆B' {a} a∈A' = f!A'⊆B' (a , a∈A' , refl)
+⊆f*→f!⊆ A'⊆f*B' {b} (a , a∈A' , refl) = A'⊆f*B' a∈A'
+```
+```
+
+7. **Narrative sections** (like Summary, Interpretation, Concrete Examples) don't need Implementation subsections - they stay fully visible.
+
+8. **Goal**: Reader should understand the example in 30 seconds from the visible parts, then dive into details if interested.

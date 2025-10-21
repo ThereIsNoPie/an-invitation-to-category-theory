@@ -193,15 +193,5 @@ example-monotonicity = reduction-preserves-improvement
 
 Without the closure operator structure, we would need to prove each of these properties individually for each expression. The `ClosureOperator` abstraction gives us these guarantees for all expressions, demonstrating why it's desirable to structure reduction strategies as closure operators.
 
-## Summary
 
-This example demonstrates that:
-- Reduction strategies can be modeled as closure operators
-- The closure operator properties (monotonicity, extensivity, idempotence) correspond to desirable properties for program semantics
-- Using closure operators provides a principled framework for reasoning about computation
 
-**Note:** For pedagogical purposes, we postulated the closure operator properties. A complete formalization would prove:
-- **Monotonicity**: By induction on the derivation of e₁ ⇒* e₂
-- **Extensivity**: By induction on the structure of expressions
-- **Idempotence**: By showing that reduce-once produces expressions in normal form
-```

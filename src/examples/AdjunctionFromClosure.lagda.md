@@ -47,7 +47,7 @@ module ConstructAdjunction (P : Preorder) (closure : ClosureOperator P) where
 
   -- A fixed point of j is an element p where j(p) ≅ p
   IsFixedPoint : A → Set
-  IsFixedPoint p = (j p ≤P p) × (p ≤P j p)
+  IsFixedPoint p = j p ≅ p
 
   -- The carrier of fix j: pairs (p, proof that p is a fixed point)
   FixJ : Set
@@ -169,14 +169,3 @@ The key insight is that:
    - Idempotence: j(j(p)) ≅ j(p), meaning j(p) is always a fixed point
 
 Together, Exercise 1.111 and Example 1.114 establish that **Galois connections and closure operators are in bijective correspondence** - they are two perspectives on the same mathematical structure!
-
-## Summary
-
-Given `closure : ClosureOperator P`, we construct:
-- `FixJPreorder`: The preorder of fixed points { p | j(p) ≅ p }
-- `left-adjoint`: The map P → fix j sending p ↦ j(p)
-- `right-adjoint`: The inclusion fix j → P
-- `closure-adjunction`: The Galois connection between P and fix j
-
-This construction is universal: every closure operator determines a unique adjunction in this way.
-```

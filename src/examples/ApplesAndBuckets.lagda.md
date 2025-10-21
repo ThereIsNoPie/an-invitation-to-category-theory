@@ -174,19 +174,3 @@ Now let's compute the three images:
 - Therefore, `f∗(AppleSubset) = ∅` (empty set)
 
 This illustrates the difference between "at least one" (existential) and "all" (universal) quantification!
-
-## Summary
-
-From a single function `f : A → B`, we derived:
-
-1. **f*** (pullback): maps bucket-subsets to apple-subsets
-2. **f!** (existential image): maps apple-subsets to bucket-subsets ("at least one")
-3. **f∗** (universal image): maps apple-subsets to bucket-subsets ("only")
-
-These functors satisfy two adjunctions:
-
-- **f! ⊣ f***: The existential image is left adjoint to the pullback
-- **f* ⊣ f∗**: The pullback is left adjoint to the universal image
-
-This pattern appears throughout mathematics: functions between sets induce adjoint functors between their powersets!
-```
