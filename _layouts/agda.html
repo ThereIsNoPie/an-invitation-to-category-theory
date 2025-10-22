@@ -137,6 +137,20 @@
     <script>
         // Make specific sections collapsible and collapsed by default
         document.addEventListener('DOMContentLoaded', function () {
+            // Check if a header name should be hideable (collapsed by default)
+            function isHideableHeaderName(headerText) {
+                return headerText === 'Textbook Definition' ||
+                    headerText === 'Textbook Description' ||
+                    headerText === 'Textbook Exercise' ||
+                    headerText === 'Agda Setup' ||
+                    headerText === 'Setup' ||
+                    headerText.startsWith('Proof:') ||
+                    headerText === 'Proof' ||
+                    headerText.startsWith('Solution:') ||
+                    headerText === 'Solution' ||
+                    headerText === 'Implementation';
+            }
+
             // Find all h2 and h3 elements
             const h2Elements = document.querySelectorAll('.agda-content h2');
             const h3Elements = document.querySelectorAll('.agda-content h3');
@@ -150,16 +164,7 @@
                 // - "Agda Setup" or "Setup"
                 // - Any heading starting with "Proof"
                 // - "Implementation" (for examples)
-                if (h2Text === 'Textbook Definition' ||
-                    h2Text === 'Textbook Description' ||
-                    h2Text === 'Textbook Exercise' ||
-                    h2Text === 'Agda Setup' ||
-                    h2Text === 'Setup' ||
-                    h2.id === 'setup' ||
-                    h2Text.startsWith('Proof:') ||
-                    h2Text.startsWith('Solution:') ||
-                    h2Text === 'Solution' ||
-                    h2Text === 'Implementation') {
+                if (isHideableHeaderName(h2Text) || h2.id === 'setup') {
                     wrapSectionInCollapsible(h2, false); // collapsed by default
                 }
             });
@@ -169,7 +174,7 @@
 
                 // Collapse these h3 sections by default:
                 // - "Implementation" (for examples)
-                if (h3Text === 'Implementation') {
+                if (isHideableHeaderName(h3Text)) {
                     wrapSectionInCollapsible(h3, false); // collapsed by default
                 }
             });
@@ -197,7 +202,8 @@
                 const stopAtTags = headingLevel === 'H2' ? ['H2'] : ['H2', 'H3'];
 
                 // Collect all content until the next heading of the same or higher level
-                const contentToWrap = [heading];
+                // Don't include the heading itself since it's in the summary
+                const contentToWrap = [];
                 let currentNode = heading.nextElementSibling;
 
                 while (currentNode && !stopAtTags.includes(currentNode.tagName)) {
@@ -214,25 +220,28 @@
 
                 // Insert the collapsible section where the heading was
                 parent.insertBefore(details, nextSibling);
+
+                // Remove the original heading since it's now in the summary
+                heading.remove();
             }
         });
 
         // Mobile menu toggle functionality
-        (function() {
+        (function () {
             const menuToggle = document.querySelector('.mobile-menu-toggle');
             const sidebar = document.querySelector('.sidebar');
             const body = document.body;
 
             if (menuToggle && sidebar) {
                 // Toggle menu when button is clicked
-                menuToggle.addEventListener('click', function() {
+                menuToggle.addEventListener('click', function () {
                     menuToggle.classList.toggle('active');
                     sidebar.classList.toggle('open');
                     body.classList.toggle('sidebar-open');
                 });
 
                 // Close menu when clicking overlay (outside sidebar)
-                body.addEventListener('click', function(e) {
+                body.addEventListener('click', function (e) {
                     if (body.classList.contains('sidebar-open') &&
                         !sidebar.contains(e.target) &&
                         !menuToggle.contains(e.target)) {
@@ -244,8 +253,8 @@
 
                 // Close menu when clicking a link in the sidebar
                 const sidebarLinks = sidebar.querySelectorAll('a');
-                sidebarLinks.forEach(function(link) {
-                    link.addEventListener('click', function() {
+                sidebarLinks.forEach(function (link) {
+                    link.addEventListener('click', function () {
                         menuToggle.classList.remove('active');
                         sidebar.classList.remove('open');
                         body.classList.remove('sidebar-open');
