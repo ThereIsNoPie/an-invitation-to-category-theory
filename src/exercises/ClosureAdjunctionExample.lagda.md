@@ -10,7 +10,9 @@ number: 117
 
 ## Textbook Exercise
 
-**Exercise 1.117.** Let S = {1, 2, 3}. Let's try to understand the adjunction discussed above.
+**Exercise 1.117.** 
+```text
+Let S = {1, 2, 3}. Let's try to understand the adjunction discussed above.
 
 1. Come up with any preorder relation ≤ on S, and define U(≤) to be the subset U(≤) := {(s₁, s₂) | s₁ ≤ s₂} ⊆ S × S, i.e. U(≤) is the image of ≤ under the inclusion Pos(S) → Rel(S), the relation "underlying" the preorder.
 
@@ -21,6 +23,7 @@ We now want to check that, in this case, the closure operation Cl is really left
 3. Concretely (without using the assertion that there is some sort of adjunction), show that Cl(Q) ⊑ ≤, where ⊑ is the order on Pos(S), defined immediately above this exercise.
 
 4. Concretely show that Cl(Q') ⊈ ≤.
+```
 
 ## Context
 
@@ -34,13 +37,13 @@ Every preorder relation is a relation, so we have an inclusion U : Pos(S) → Re
 module exercises.ClosureAdjunctionExample where
 
 open import Data.Fin using (Fin; zero; suc)
-open import Data.Product using (_×_; _,_)
+open import Data.Product using (_×_; _,_; Σ; Σ-syntax)
 open import Data.Empty using (⊥)
 open import Data.Unit using (⊤; tt)
 open import Relation.Nullary using (¬_)
-
-open import definitions.Relation using (BinRel)
-open import definitions.Preorder using (IsPreorder)
+open import Level using (Level; _⊔_) renaming (suc to ℓsuc)
+open import Relation.Binary using (IsPreorder; Preorder; Rel)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 -- Our set S = {1, 2, 3}
 S : Set
@@ -50,6 +53,74 @@ S = Fin 3
 pattern s₁ = zero
 pattern s₂ = suc zero
 pattern s₃ = suc (suc zero)
+
+-- Universe-polymorphic binary relation
+BinRel : ∀ {ℓ} → Set ℓ → (ℓ' : Level) → Set (ℓ ⊔ ℓsuc ℓ')
+BinRel {ℓ} A ℓ' = Rel A ℓ'
+
+-- Simple IsPreorder record for our purposes
+record SimpleIsPreorder {ℓ ℓ'} {A : Set ℓ} (_≤_ : BinRel A ℓ') : Set (ℓ ⊔ ℓ') where
+  field
+    reflexive  : ∀ {x} → x ≤ x
+    transitive : ∀ {x y z} → x ≤ y → y ≤ z → x ≤ z
+
+-- Pos(S): The set of all preorders on S
+-- For our S : Set, relations at level 0, so Pos S : Set₁
+Pos : Set → Set₁
+Pos A = Σ (BinRel A Level.zero) (SimpleIsPreorder {Level.zero} {Level.zero})
+
+-- The preorder structure on Pos(S) given by inclusion: ≤₁ ⊑ ≤₂ iff ∀ a b → a ≤₁ b → a ≤₂ b
+_⊑_ : Pos S → Pos S → Set
+(R₁ , _) ⊑ (R₂ , _) = ∀ {a b} → R₁ a b → R₂ a b
+
+-- ⊑ forms a preorder on Pos(S)
+⊑-reflexive : ∀ {P : Pos S} → P ⊑ P
+⊑-reflexive {(R , _)} x = x
+
+⊑-transitive : ∀ {P₁ P₂ P₃ : Pos S} → P₁ ⊑ P₂ → P₂ ⊑ P₃ → P₁ ⊑ P₃
+⊑-transitive {(R₁ , _)} {(R₂ , _)} {(R₃ , _)} f g x = g (f x)
+
+-- Standard library preorder structure for Pos(S)
+-- Universe levels:
+-- - Pos S : Set₁ 
+-- - _≡_ on Pos S : Pos S → Pos S → Set₁ 
+-- - _⊑_ : Pos S → Pos S → Set
+
+open import Relation.Binary.PropositionalEquality as PE
+
+⊑-isPreorder : IsPreorder _≡_ _⊑_
+⊑-isPreorder = record
+  { isEquivalence = record 
+    { refl = refl
+    ; sym = PE.sym
+    ; trans = PE.trans
+    }
+  ; reflexive = λ {x} {y} x≡y → PE.subst (λ z → x ⊑ z) x≡y (⊑-reflexive {x})
+  ; trans = λ {x} {y} {z} → ⊑-transitive {x} {y} {z}
+  }
+
+-- The preorder of preorders on S using standard library
+-- Successfully constructed with proper universe level handling:
+-- - Carrier level: 1 (since Pos S : Set₁)
+-- - Equality level: 1 (since _≡_ on Set₁ types has type Set₁)  
+-- - Relation level: 0 (since _⊑_ : Pos S → Pos S → Set)
+PosPreorder : Preorder _ _ _
+PosPreorder = record
+  { Carrier = Pos S
+  ; _≈_ = _≡_
+  ; _≲_ = _⊑_
+  ; isPreorder = ⊑-isPreorder
+  }
+
+-- U: The "underlying relation" function from Pos(S) to Rel(S)
+-- This extracts the relation from a preorder, forgetting the preorder structure
+U : Pos S → BinRel S Level.zero
+U (R , _) = R
+
+-- Alternative notation that matches the mathematical presentation
+-- U(≤) extracts the underlying relation from a preorder ≤
+U-notation : ∀ (≤ : BinRel S Level.zero) → SimpleIsPreorder ≤ → BinRel S Level.zero
+U-notation ≤ _ = ≤
 ```
 
 ## Problem
@@ -58,35 +129,44 @@ We'll work with S = {1, 2, 3} and demonstrate the Galois connection Cl ⊣ U.
 
 ```agda
 -- Reflexive-transitive closure of a relation
-data Cl (R : BinRel S) : BinRel S where
-  incl  : ∀ {a b} → R a b → Cl R a b           -- Include original relation
-  refl  : ∀ {a} → Cl R a a                     -- Reflexivity
-  trans : ∀ {a b c} → Cl R a b → Cl R b c → Cl R a c  -- Transitivity
+data Cl (R : BinRel S Level.zero) : BinRel S Level.zero where
+  incl      : ∀ {a b} → R a b → Cl R a b           -- Include original relation
+  cl-refl   : ∀ {a} → Cl R a a                     -- Reflexivity
+  cl-trans  : ∀ {a b c} → Cl R a b → Cl R b c → Cl R a c  -- Transitivity
+
+-- Cl as a function from BinRel S to Pos S
+Cl-to-PosS : BinRel S Level.zero → Pos S
+Cl-to-PosS R = (Cl R , record { reflexive = cl-refl ; transitive = cl-trans })
 
 module Exercise where
   -- Part 1: Define a preorder relation on S
-  _≤_ : BinRel S
-  ≤-isPreorder : IsPreorder _≤_
+  _≤_ : BinRel S Level.zero
+  ≤-isPreorder : SimpleIsPreorder _≤_
+  
+  -- The preorder ≤ as an element of PosS
+  ≤-as-PosS : Pos S
+  ≤-as-PosS = (_≤_ , ≤-isPreorder)
 
   -- Part 2: Define relations Q and Q'
-  Q : BinRel S                                   -- Q ⊆ U(≤)
-  Q⊆U : ∀ {a b} → Q a b → a ≤ b
+  Q : BinRel S Level.zero                        -- Q ⊆ U(≤)
+  Q⊆U : ∀ {a b} → Q a b → U ≤-as-PosS a b
 
-  Q' : BinRel S                                  -- Q' ⊈ U(≤)
+  Q' : BinRel S Level.zero                       -- Q' ⊈ U(≤)
   Q'⊈U-witness-a : S
   Q'⊈U-witness-b : S
   Q'⊈U-holds : Q' Q'⊈U-witness-a Q'⊈U-witness-b
-  Q'⊈U-fails : ¬ (Q'⊈U-witness-a ≤ Q'⊈U-witness-b)
+  Q'⊈U-fails : ¬ (U ≤-as-PosS Q'⊈U-witness-a Q'⊈U-witness-b)
 
-  -- Part 3: Show Cl(Q) ⊑ ≤
-  Cl-Q-isPreorder : IsPreorder (Cl Q)
-  Cl-Q⊑≤ : ∀ {a b} → Cl Q a b → a ≤ b
+  -- Part 3: Show Cl(Q) ⊑ ≤ using the preorder structure on Pos(S)
+  -- This means Cl-to-PosS Q is "smaller" than ≤-as-PosS in the preorder PosPreorder
+  Cl-Q⊑≤ : (Cl-to-PosS Q) ⊑ ≤-as-PosS
 
-  -- Part 4: Show Cl(Q') ⊈ ≤
+  -- Part 4: Show Cl(Q') ⊈ ≤  
+  -- This means Cl-to-PosS Q' is NOT smaller than ≤-as-PosS in the preorder
   Cl-Q'⊈≤-witness-a : S
   Cl-Q'⊈≤-witness-b : S
-  Cl-Q'⊈≤-holds : Cl Q' Cl-Q'⊈≤-witness-a Cl-Q'⊈≤-witness-b
-  Cl-Q'⊈≤-fails : ¬ (Cl-Q'⊈≤-witness-a ≤ Cl-Q'⊈≤-witness-b)
+  Cl-Q'⊈≤-holds : U (Cl-to-PosS Q') Cl-Q'⊈≤-witness-a Cl-Q'⊈≤-witness-b
+  Cl-Q'⊈≤-fails : ¬ (U ≤-as-PosS Cl-Q'⊈≤-witness-a Cl-Q'⊈≤-witness-b)
 ```
 
 ## Solution
@@ -151,21 +231,16 @@ module Exercise where
   Q'⊈U-holds = tt
   Q'⊈U-fails ()
 
-  -- Part 3: Cl(Q) is a preorder
-  Cl-Q-isPreorder = record
-    { reflexive = refl
-    ; transitive = trans
-    }
+  -- Part 3: Show Cl(Q) ⊑ ≤ using the preorder structure on Pos(S)
+  -- This means ∀ {a b} → Cl Q a b → a ≤ b
+  -- Since Q ⊆ U(≤) and U(≤) is already reflexive and transitive,
+  -- any element built from Q via cl-refl/cl-trans is also in U(≤)
+  Cl-Q⊑≤ (incl q) = Q⊆U q              -- Q a b implies U(≤) a b
+  Cl-Q⊑≤ cl-refl = ≤-refl              -- U(≤) is reflexive
+  Cl-Q⊑≤ (cl-trans p₁ p₂) = ≤-trans (Cl-Q⊑≤ p₁) (Cl-Q⊑≤ p₂)  -- U(≤) is transitive
 
-  -- Show Cl(Q) ⊑ ≤ by induction on the closure construction
-  -- Since Q ⊆ ≤ and ≤ is already reflexive and transitive,
-  -- any element built from Q via refl/trans is also in ≤
-  Cl-Q⊑≤ (incl q) = Q⊆U q              -- Q a b implies a ≤ b
-  Cl-Q⊑≤ refl = ≤-refl                 -- ≤ is reflexive
-  Cl-Q⊑≤ (trans p₁ p₂) = ≤-trans (Cl-Q⊑≤ p₁) (Cl-Q⊑≤ p₂)  -- ≤ is transitive
-
-  -- Part 4: We can show Cl(Q') s₂ s₁ holds (since Q' s₂ s₁ holds)
-  -- but s₂ ≤ s₁ does not hold
+  -- Part 4: We can show U(Cl-to-PosS Q') s₂ s₁ holds (since Q' s₂ s₁ holds)
+  -- but U(≤-as-PosS) s₂ s₁ does not hold
   Cl-Q'⊈≤-witness-a = s₂
   Cl-Q'⊈≤-witness-b = s₁
   Cl-Q'⊈≤-holds = incl tt
@@ -181,4 +256,3 @@ This exercise demonstrates the Galois connection Cl ⊣ U:
 - **Part 4** shows that when Q' ⊈ U(≤), we have Cl(Q') ⊈ ≤. This demonstrates that the adjunction relationship genuinely depends on the subset inclusion.
 
 Together, these illustrate the adjunction property: Cl(R) ⊑ P if and only if R ⊆ U(P).
-```
