@@ -43,13 +43,58 @@
         line-height: 1.4;
     }
 
+    /* Chapter-level navigation */
+    .nav-chapter {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+    }
+
+    .nav-chapter:last-child {
+        border-bottom: none;
+    }
+
+    .nav-chapter .chapter-summary {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--agda-module);
+        margin-bottom: 1rem;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .nav-chapter .chapter-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .nav-chapter .chapter-summary::before {
+        content: '▼';
+        position: absolute;
+        left: 0;
+        font-size: 0.8rem;
+        transition: transform 0.2s;
+    }
+
+    .nav-chapter:not([open]) .chapter-summary::before {
+        transform: rotate(-90deg);
+    }
+
+    .nav-chapter .chapter-summary:hover {
+        color: var(--agda-function);
+    }
+
+    /* Section-level navigation (nested under chapters) */
     .nav-section {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
+        margin-left: 0.5rem;
     }
 
     /* Collapsible section styling */
     .nav-section summary {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--text-secondary);
@@ -70,7 +115,7 @@
         content: '▼';
         position: absolute;
         left: 0;
-        font-size: 0.7rem;
+        font-size: 0.6rem;
         transition: transform 0.2s;
     }
 
