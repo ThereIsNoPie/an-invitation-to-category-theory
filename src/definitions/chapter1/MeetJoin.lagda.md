@@ -34,7 +34,7 @@ Similarly, we say that p is a *join of A* if
 We write p = ⋁ A or p = ⋁_{a∈A} a, or when A = {a, b} we may simply write p = a ∨ b.
 
 ```agda
-module definitions.MeetJoin where
+module definitions.chapter1.MeetJoin where
 
 open import Data.Product using (_×_)
 
@@ -89,8 +89,8 @@ _∨_ : {A : Set} → (_≤_ : A → A → Set) → A → A → A → Set
 **Definition 1.87.** We say that a monotone map f : P → Q *preserves meets* if f(a ∧ b) ≅ f(a) ∧ f(b) for all a, b ∈ P. We similarly say f *preserves joins* if f(a ∨ b) ≅ f(a) ∨ f(b) for all a, b ∈ P.
 
 ```agda
-open import definitions.Preorder as DP using (Preorder)
-open import definitions.MonotoneMap using (_⇒_)
+open import definitions.chapter1.Preorder as DP using (Preorder)
+open import definitions.chapter1.MonotoneMap using (_⇒_)
 open import Data.Product using (proj₁; Σ; Σ-syntax; _×_)
 open import Data.Sum using (_⊎_)
 open import Relation.Binary.PropositionalEquality using (_≡_)

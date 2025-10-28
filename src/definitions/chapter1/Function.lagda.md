@@ -15,11 +15,11 @@ The function F is often denoted F : S → T. From now on, we write F(s) = t, or 
 A function is called *surjective*, or a *surjection*, if for all t ∈ T, there exists s ∈ S with F(s) = t. A function is called *injective*, or an *injection*, if for all t ∈ T and s₁, s₂ ∈ S with F(s₁) = t and F(s₂) = t, we have s₁ = s₂. A function is called *bijective* if it is both surjective and injective.
 
 ```agda
-module definitions.Function where
+module definitions.chapter1.Function where
 
 open import Data.Product using (Σ; Σ-syntax; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
-open import definitions.Partition using (Subset)
+open import definitions.chapter1.Partition using (Subset)
 
 -- Preimage of t along F
 Preimage : {S T : Set} → (S → T) → T → Subset S

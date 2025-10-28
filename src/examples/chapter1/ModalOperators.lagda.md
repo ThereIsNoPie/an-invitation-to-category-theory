@@ -21,13 +21,13 @@ If p is true then "assuming Bob is in San Diego, p" is still true. Suppose that 
 ## Agda Setup
 
 ```agda
-module examples.ModalOperators where
+module examples.chapter1.ModalOperators where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Level using (Level; _⊔_; suc)
 
-open import definitions.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 ```
 
 ## The Example

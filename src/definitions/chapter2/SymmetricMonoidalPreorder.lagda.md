@@ -33,7 +33,7 @@ We call these conditions *monotonicity*, *unitality*, *associativity*, and *symm
 ```agda
 module definitions.chapter2.SymmetricMonoidalPreorder where
 
-open import definitions.Preorder using (Preorder)
+open import definitions.chapter1.Preorder using (Preorder)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
 -- A symmetric monoidal structure on a preorder (X, ≤)

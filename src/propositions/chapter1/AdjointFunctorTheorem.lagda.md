@@ -17,16 +17,16 @@ number: 108
 ## Agda Setup
 
 ```agda
-module propositions.AdjointFunctorTheorem where
+module propositions.chapter1.AdjointFunctorTheorem where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃-syntax; Σ; Σ-syntax)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import definitions.Preorder using (Preorder)
-open import definitions.GaloisConnection using (GaloisConnection)
-open import definitions.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
-open import definitions.MonotoneMap using (Monotonic)
-open import propositions.AdjointsPreserveMeetsJoins using (image; right-adjoint-preserves-meets; left-adjoint-preserves-joins)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.GaloisConnection using (GaloisConnection)
+open import definitions.chapter1.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
+open import propositions.chapter1.AdjointsPreserveMeetsJoins using (image; right-adjoint-preserves-meets; left-adjoint-preserves-joins)
 ```
 
 ### Helper Definitions

@@ -28,7 +28,7 @@ We now want to check that, in this case, the closure operation Cl is really left
 ## Agda Setup
 
 ```agda
-module exercises.ClosureAdjunctionExample where
+module exercises.chapter1.ClosureAdjunctionExample where
 
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Product using (_×_; _,_; Σ; Σ-syntax; ∃; ∃-syntax)

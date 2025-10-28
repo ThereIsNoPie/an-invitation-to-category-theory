@@ -17,11 +17,11 @@ We refer to g as the *inverse* of f, and vice versa: f is the inverse of g.
 If there is an isomorphism P → Q, we say that P and Q are *isomorphic*.
 
 ```agda
-module definitions.Isomorphism where
+module definitions.chapter1.Isomorphism where
 
-open import definitions.Preorder using (Preorder)
-open import definitions.MonotoneMap using (_⇒_)
-open import definitions.Composition using (_⨾_)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.MonotoneMap using (_⇒_)
+open import definitions.chapter1.Composition using (_⨾_)
 open import Data.Product using (Σ; Σ-syntax; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 

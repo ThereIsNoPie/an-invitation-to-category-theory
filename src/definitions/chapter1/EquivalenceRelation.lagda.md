@@ -19,9 +19,9 @@ number: 13
 These properties are called *reflexivity*, *symmetry*, and *transitivity*, respectively.
 
 ```agda
-module definitions.EquivalenceRelation where
+module definitions.chapter1.EquivalenceRelation where
 
-open import definitions.Relation using (BinRel)
+open import definitions.chapter1.Relation using (BinRel)
 
 -- An equivalence relation on A is a binary relation satisfying
 -- reflexivity, symmetry, and transitivity

@@ -9,45 +9,45 @@ module Everything where
 import plumbing.ClassicalPostulates
 import plumbing.EquationalReasoning
 
--- Definitions
-import definitions.ClosureOperator
-import definitions.Composition
-import definitions.EquivalenceRelation
-import definitions.Function
-import definitions.GaloisConnection
-import definitions.Graph
-import definitions.Isomorphism
-import definitions.MeetJoin
-import definitions.MonotoneMap
-import definitions.Partition
-import definitions.Preorder
-import definitions.Quotient
-import definitions.Relation
+-- Chapter 1 Definitions
+import definitions.chapter1.ClosureOperator
+import definitions.chapter1.Composition
+import definitions.chapter1.EquivalenceRelation
+import definitions.chapter1.Function
+import definitions.chapter1.GaloisConnection
+import definitions.chapter1.Graph
+import definitions.chapter1.Isomorphism
+import definitions.chapter1.MeetJoin
+import definitions.chapter1.MonotoneMap
+import definitions.chapter1.Partition
+import definitions.chapter1.Preorder
+import definitions.chapter1.Quotient
+import definitions.chapter1.Relation
 
 -- Chapter 2 Definitions
 import definitions.chapter2.SymmetricMonoidalPreorder
 
--- Propositions
-import propositions.AdjointFunctorTheorem
-import propositions.AdjointsPreserveMeetsJoins
-import propositions.GaloisUnitCounit
-import propositions.MonotoneIdentityComposition
-import propositions.MonotoneUpperSetCorrespondence
-import propositions.PartitionEquivalenceCorrespondence
-import propositions.SubsetMeetJoinMonotonicity
+-- Chapter 1 Propositions
+import propositions.chapter1.AdjointFunctorTheorem
+import propositions.chapter1.AdjointsPreserveMeetsJoins
+import propositions.chapter1.GaloisUnitCounit
+import propositions.chapter1.MonotoneIdentityComposition
+import propositions.chapter1.MonotoneUpperSetCorrespondence
+import propositions.chapter1.PartitionEquivalenceCorrespondence
+import propositions.chapter1.SubsetMeetJoinMonotonicity
 
--- Exercises
-import exercises.GaloisGivesClosure
-import exercises.ClosureAdjunctionExample
+-- Chapter 1 Exercises
+import exercises.chapter1.GaloisGivesClosure
+import exercises.chapter1.ClosureAdjunctionExample
 
 -- Chapter 2 Exercises
 import exercises.chapter2.IntegersWithMultiplication
 
--- Examples
-import examples.AdjunctionFromClosure
-import examples.ApplesAndBuckets
-import examples.ComputationAsRewriting
-import examples.ModalOperators
+-- Chapter 1 Examples
+import examples.chapter1.AdjunctionFromClosure
+import examples.chapter1.ApplesAndBuckets
+import examples.chapter1.ComputationAsRewriting
+import examples.chapter1.ModalOperators
 
 -- Chapter 2 Examples
 import examples.chapter2.IntegersWithAddition

@@ -30,7 +30,7 @@ In general, I want readers to be able to grasp the concept of the file within 30
 
 ## Where to start
 
-Check out [Proposition 1.14]({{ '/docs/propositions.PartitionEquivalenceCorrespondence.html' | relative_url }}). Click on the agda code to navigate.
+Check out [Proposition 1.14]({{ '/docs/propositions.chapter1.PartitionEquivalenceCorrespondence.html' | relative_url }}). Click on the agda code to navigate.
 
 </div>
 

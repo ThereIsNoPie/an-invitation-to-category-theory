@@ -15,13 +15,13 @@ number: 65
 ## Agda Setup
 
 ```agda
-module propositions.MonotoneIdentityComposition where
+module propositions.chapter1.MonotoneIdentityComposition where
 
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Function using (id; _∘_)
 
-open import definitions.Preorder using (Preorder; IsPreorder)
-open import definitions.MonotoneMap using (Monotonic; _⇒_)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.MonotoneMap using (Monotonic; _⇒_)
 ```
 
 ## Proposition

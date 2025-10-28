@@ -23,7 +23,7 @@ The correspondence is:
 ## Agda Setup
 
 ```agda
-module propositions.MonotoneUpperSetCorrespondence where
+module propositions.chapter1.MonotoneUpperSetCorrespondence where
 
 open import Data.Bool using (Bool; true; false)
 open import Data.Product using (_,_; Σ; Σ-syntax; proj₁; proj₂)
@@ -31,8 +31,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Empty using (⊥-elim)
 
-open import definitions.Preorder using (Preorder; IsPreorder)
-open import definitions.MonotoneMap using (Monotonic; _⇒_)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.MonotoneMap using (Monotonic; _⇒_)
 
 -- Subset type
 Subset : Set → Set₁

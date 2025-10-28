@@ -21,7 +21,7 @@ If x₁ ≤ y₁ and x₂ ≤ y₂, it is true that x₁ + x₂ ≤ y₁ + y₂.
 ```agda
 module examples.chapter2.IntegersWithAddition where
 
-open import definitions.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalStructure; SymmetricMonoidalPreorder)
 open import Data.Integer using (ℤ; _+_; _≤_; 0ℤ)

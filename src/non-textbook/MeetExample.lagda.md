@@ -16,8 +16,8 @@ open import Data.Product using (_,_)
 open import Data.Empty using (⊥; ⊥-elim)
 
 -- Import our definitions
-open import definitions.Preorder
-open import definitions.MeetJoin
+open import definitions.chapter1.Preorder
+open import definitions.chapter1.MeetJoin
 
 -- Example: Meet of "positive naturals" in ℕ is 1, but 1 is not in the subset
 -- We'll use the subset P = {n | n ≥ 2} = {2, 3, 4, ...}

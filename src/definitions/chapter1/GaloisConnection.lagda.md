@@ -15,10 +15,10 @@ f(p) ≤ q if and only if p ≤ g(q).   (1.6)
 We say that f is the *left adjoint* and g is the *right adjoint* of the Galois connection.
 
 ```agda
-module definitions.GaloisConnection where
+module definitions.chapter1.GaloisConnection where
 
-open import definitions.Preorder using (Preorder)
-open import definitions.MonotoneMap using (Monotonic)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
 
 -- Galois connection between preorders
 record GaloisConnection (P Q : Preorder) : Set where

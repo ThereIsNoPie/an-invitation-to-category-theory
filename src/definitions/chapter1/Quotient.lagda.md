@@ -11,10 +11,10 @@ number: 16
 **Definition 1.16.** Given a set A and an equivalence relation ∼ on A, we say that the *quotient A/∼ of A under ∼* is the set of parts of the corresponding partition.
 
 ```agda
-module definitions.Quotient where
+module definitions.chapter1.Quotient where
 
-open import definitions.EquivalenceRelation using (IsEquivalence)
-open import definitions.Partition using (Partition; Subset)
+open import definitions.chapter1.EquivalenceRelation using (IsEquivalence)
+open import definitions.chapter1.Partition using (Partition; Subset)
 
 -- The quotient A/∼ is the set of parts of the partition corresponding to ∼
 -- Each part is an equivalence class

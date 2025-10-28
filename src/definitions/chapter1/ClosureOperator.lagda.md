@@ -15,10 +15,10 @@ number: 112
 (b) j(j(p)) ≅ j(p).
 
 ```agda
-module definitions.ClosureOperator where
+module definitions.chapter1.ClosureOperator where
 
-open import definitions.Preorder using (Preorder)
-open import definitions.MonotoneMap using (Monotonic)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
 
 -- A closure operator on a preorder P is a monotone map j : P → P
 -- satisfying extensivity and idempotence

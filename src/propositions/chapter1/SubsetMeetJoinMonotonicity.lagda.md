@@ -17,13 +17,13 @@ Similarly, if A and B have joins, then ∨ A ≤ ∨ B.
 ## Agda Setup
 
 ```agda
-module propositions.SubsetMeetJoinMonotonicity where
+module propositions.chapter1.SubsetMeetJoinMonotonicity where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import definitions.Preorder using (Preorder)
-open import definitions.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
 ```
 
 ## Proposition

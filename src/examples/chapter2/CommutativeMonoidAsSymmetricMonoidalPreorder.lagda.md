@@ -23,7 +23,7 @@ Every set S determines a *discrete preorder* Disc_S (where m ≤ n iff m = n; se
 ```agda
 module examples.chapter2.CommutativeMonoidAsSymmetricMonoidalPreorder where
 
-open import definitions.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalStructure; SymmetricMonoidalPreorder)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂)

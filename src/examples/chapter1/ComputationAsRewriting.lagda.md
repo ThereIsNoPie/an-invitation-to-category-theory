@@ -17,15 +17,15 @@ We might think of a computer program, then, as a method of taking an expression 
 ## Agda Setup
 
 ```agda
-module examples.ComputationAsRewriting where
+module examples.chapter1.ComputationAsRewriting where
 
 open import Data.Nat using (ℕ; _+_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong)
 
-open import definitions.Preorder using (Preorder; IsPreorder)
-open import definitions.ClosureOperator using (ClosureOperator)
-open import definitions.MonotoneMap using (Monotonic)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.ClosureOperator using (ClosureOperator)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
 ```
 
 ## The Example

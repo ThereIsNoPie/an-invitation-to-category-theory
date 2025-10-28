@@ -19,7 +19,7 @@ number: 4
 ```agda
 module exercises.chapter2.IntegersWithMultiplication where
 
-open import definitions.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalStructure)
 open import Data.Integer using (ℤ; _*_; _≤_; +_; -[1+_])

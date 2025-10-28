@@ -20,16 +20,16 @@ number: 14
 ## Agda Setup
 
 ```agda
-module propositions.PartitionEquivalenceCorrespondence where
+module propositions.chapter1.PartitionEquivalenceCorrespondence where
 
 open import Data.Product using (_×_; Σ; Σ-syntax; proj₁; proj₂; _,_)
 open import Data.Empty using (⊥-elim; ⊥)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; cong; trans)
 open import Relation.Nullary using (¬_)
 
-open import definitions.Partition using (Partition; Subset)
-open import definitions.EquivalenceRelation using (IsEquivalence)
-open import definitions.Relation using (BinRel)
+open import definitions.chapter1.Partition using (Partition; Subset)
+open import definitions.chapter1.EquivalenceRelation using (IsEquivalence)
+open import definitions.chapter1.Relation using (BinRel)
 -- Note: definitions.Quotient defines quotients as Subset A (predicative)
 -- We use the impredicative quotient type from ClassicalPostulates for this proof
 open import plumbing.ClassicalPostulates using (_/_; [_]; quotient-sound; quotient-surjective; quotient-effective)
