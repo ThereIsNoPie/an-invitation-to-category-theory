@@ -11,7 +11,7 @@ number: 8
 **Definition 1.8.** Let X and Y be sets. A *relation between X and Y* is a subset R ⊆ X × Y. A *binary relation on X* is a relation between X and X, i.e. a subset R ⊆ X × X.
 
 ```agda
-module definitions.Relation where
+module definitions.chapter1.Relation where
 
 open import Data.Product using (_×_)
 

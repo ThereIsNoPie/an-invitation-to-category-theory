@@ -19,7 +19,7 @@ Now, we can ask questions about _subsets_ of apples and subsets of buckets. Give
 ## Agda Setup
 
 ```agda
-module examples.ApplesAndBuckets where
+module examples.chapter1.ApplesAndBuckets where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃; Σ-syntax; Σ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)

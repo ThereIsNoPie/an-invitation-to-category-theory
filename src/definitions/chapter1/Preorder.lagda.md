@@ -17,7 +17,7 @@ number: 25
 The first condition is called *reflexivity* and the second is called *transitivity*. If x ≤ y and y ≤ x, we write x ≅ y and say x and y are *equivalent*. We call a pair (X, ≤) consisting of a set equipped with a preorder relation a *preorder*.
 
 ```agda
-module definitions.Preorder where
+module definitions.chapter1.Preorder where
 
 open import Data.Product using (_×_)
 

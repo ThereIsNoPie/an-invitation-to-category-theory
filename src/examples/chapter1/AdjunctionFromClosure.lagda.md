@@ -23,15 +23,15 @@ We define an adjunction with left adjoint j : P → fix j sending p to j(p), and
 ## Agda Setup
 
 ```agda
-module examples.AdjunctionFromClosure where
+module examples.chapter1.AdjunctionFromClosure where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ; Σ-syntax)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import definitions.Preorder using (Preorder; IsPreorder)
-open import definitions.ClosureOperator using (ClosureOperator)
-open import definitions.GaloisConnection using (GaloisConnection)
-open import definitions.MonotoneMap using (Monotonic; _⇒_)
+open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
+open import definitions.chapter1.ClosureOperator using (ClosureOperator)
+open import definitions.chapter1.GaloisConnection using (GaloisConnection)
+open import definitions.chapter1.MonotoneMap using (Monotonic; _⇒_)
 ```
 
 ## The Example

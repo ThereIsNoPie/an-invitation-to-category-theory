@@ -1,9 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(agda:*)",
-      "Bash(powershell:*)",
-      "Bash(mkdir:*)"
+      "Bash(do sed -i 's/^module examples\\./module examples.chapter1./' \"$file\")",
+      "Bash(do sed -i 's/^module exercises\\./module exercises.chapter1./' \"$file\")",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

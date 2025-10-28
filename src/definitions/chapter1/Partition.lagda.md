@@ -17,7 +17,7 @@ We may denote the partition by {A_p}_{p∈P}. We refer to P as the *set of part 
 We consider two different partitions {A_p}_{p∈P} and {A'_{p'}}_{p'∈P'} of A to be the same if for each p ∈ P there exists a p' ∈ P' with A_p = A'_{p'}. In other words, if two ways to divide A into parts are exactly the same – the only change is in the labels – then we don't make a distinction between them.
 
 ```agda
-module definitions.Partition where
+module definitions.chapter1.Partition where
 
 open import Data.Product using (_×_; Σ; Σ-syntax)
 open import Relation.Binary.PropositionalEquality using (_≡_)

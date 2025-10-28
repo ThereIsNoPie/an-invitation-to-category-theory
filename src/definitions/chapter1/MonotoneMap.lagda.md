@@ -11,9 +11,9 @@ number: 54
 **Definition 1.54.** A *monotone map* between preorders (A, ≤_A) and (B, ≤_B) is a function f : A → B such that, for all elements x, y ∈ A, if x ≤_A y then f(x) ≤_B f(y).
 
 ```agda
-module definitions.MonotoneMap where
+module definitions.chapter1.MonotoneMap where
 
-open import definitions.Preorder using (Preorder)
+open import definitions.chapter1.Preorder using (Preorder)
 open import Data.Product using (Σ; Σ-syntax)
 
 -- A monotone map between preorders (A, ≤_A) and (B, ≤_B) is a function

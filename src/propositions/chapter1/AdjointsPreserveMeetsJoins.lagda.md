@@ -17,15 +17,15 @@ number: 104
 ## Agda Setup
 
 ```agda
-module propositions.AdjointsPreserveMeetsJoins where
+module propositions.chapter1.AdjointsPreserveMeetsJoins where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃-syntax)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-open import definitions.Preorder using (Preorder)
-open import definitions.GaloisConnection using (GaloisConnection)
-open import definitions.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
-open import propositions.GaloisUnitCounit using (galois→unit-counit)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.GaloisConnection using (GaloisConnection)
+open import definitions.chapter1.MeetJoin using (Subset; IsMeet; IsJoin; IsLowerBound; IsUpperBound)
+open import propositions.chapter1.GaloisUnitCounit using (galois→unit-counit)
 ```
 
 ### Helper: Image of a Subset

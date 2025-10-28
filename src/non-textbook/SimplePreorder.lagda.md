@@ -9,7 +9,7 @@ number: 3
 ```agda
 module non-textbook.SimplePreorder where
 
-open import definitions.Preorder
+open import definitions.chapter1.Preorder
 open import non-textbook.GraphViz
 open import Data.String using (String)
 open import Data.List using (List; _∷_; [])

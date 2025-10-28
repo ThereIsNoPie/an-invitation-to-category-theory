@@ -20,15 +20,15 @@ Given a Galois connection with f : P → Q left adjoint to g : Q → P, we may c
 ## Agda Setup
 
 ```agda
-module exercises.GaloisGivesClosure where
+module exercises.chapter1.GaloisGivesClosure where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 
-open import definitions.Preorder using (Preorder)
-open import definitions.GaloisConnection using (GaloisConnection)
-open import definitions.ClosureOperator using (ClosureOperator)
-open import definitions.MonotoneMap using (Monotonic)
-open import propositions.GaloisUnitCounit using (galois→unit-counit)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.GaloisConnection using (GaloisConnection)
+open import definitions.chapter1.ClosureOperator using (ClosureOperator)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
+open import propositions.chapter1.GaloisUnitCounit using (galois→unit-counit)
 ```
 
 ## Problem

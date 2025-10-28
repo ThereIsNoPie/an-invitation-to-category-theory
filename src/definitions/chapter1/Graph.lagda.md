@@ -13,7 +13,7 @@ number: 31
 By a *path* in G we mean any sequence of arrows such that the target of one arrow is the source of the next. This includes sequences of length 1, which are just arrows a ∈ A in G, and sequences of length 0, which just start and end at the same vertex v, without traversing any arrows.
 
 ```agda
-module definitions.Graph where
+module definitions.chapter1.Graph where
 
 open import Data.List using (List; []; _∷_)
 open import Relation.Binary.PropositionalEquality using (_≡_)

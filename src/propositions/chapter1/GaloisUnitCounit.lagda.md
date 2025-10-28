@@ -17,13 +17,13 @@ number: 101
 ## Agda Setup
 
 ```agda
-module propositions.GaloisUnitCounit where
+module propositions.chapter1.GaloisUnitCounit where
 
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 
-open import definitions.Preorder using (Preorder)
-open import definitions.GaloisConnection using (GaloisConnection)
-open import definitions.MonotoneMap using (Monotonic)
+open import definitions.chapter1.Preorder using (Preorder)
+open import definitions.chapter1.GaloisConnection using (GaloisConnection)
+open import definitions.chapter1.MonotoneMap using (Monotonic)
 ```
 
 ## Proposition

@@ -138,8 +138,8 @@ Here are some example usages:
 
 ```agda
 module Examples where
-  open import definitions.EquivalenceRelation using (IsEquivalence)
-  open import definitions.Relation using (BinRel)
+  open import definitions.chapter1.EquivalenceRelation using (IsEquivalence)
+  open import definitions.chapter1.Relation using (BinRel)
 
   -- Example: Using ∼-Reasoning
   module EquivExample
