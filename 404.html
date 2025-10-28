@@ -1,0 +1,69 @@
+---
+layout: default
+title: "Page Not Found"
+permalink: /404.html
+---
+
+<h1>Page Not Found</h1>
+<p id="redirect-message">The page you're looking for doesn't exist. Checking for redirects...</p>
+
+<script>
+  // Redirect old chapter 1 URLs to new chapter1 URLs
+  (function() {
+    const path = window.location.pathname;
+    const baseUrl = '{{ site.baseurl }}';
+
+    // Remove baseUrl from path if present
+    let cleanPath = path;
+    if (baseUrl && path.startsWith(baseUrl)) {
+      cleanPath = path.substring(baseUrl.length);
+    }
+
+    // Patterns to match and redirect
+    const redirects = {
+      // Definitions
+      '/docs/definitions.ClosureOperator.html': '/docs/definitions.chapter1.ClosureOperator.html',
+      '/docs/definitions.Composition.html': '/docs/definitions.chapter1.Composition.html',
+      '/docs/definitions.EquivalenceRelation.html': '/docs/definitions.chapter1.EquivalenceRelation.html',
+      '/docs/definitions.Function.html': '/docs/definitions.chapter1.Function.html',
+      '/docs/definitions.GaloisConnection.html': '/docs/definitions.chapter1.GaloisConnection.html',
+      '/docs/definitions.Graph.html': '/docs/definitions.chapter1.Graph.html',
+      '/docs/definitions.Isomorphism.html': '/docs/definitions.chapter1.Isomorphism.html',
+      '/docs/definitions.MeetJoin.html': '/docs/definitions.chapter1.MeetJoin.html',
+      '/docs/definitions.MonotoneMap.html': '/docs/definitions.chapter1.MonotoneMap.html',
+      '/docs/definitions.Partition.html': '/docs/definitions.chapter1.Partition.html',
+      '/docs/definitions.Preorder.html': '/docs/definitions.chapter1.Preorder.html',
+      '/docs/definitions.Quotient.html': '/docs/definitions.chapter1.Quotient.html',
+      '/docs/definitions.Relation.html': '/docs/definitions.chapter1.Relation.html',
+
+      // Propositions
+      '/docs/propositions.AdjointFunctorTheorem.html': '/docs/propositions.chapter1.AdjointFunctorTheorem.html',
+      '/docs/propositions.AdjointsPreserveMeetsJoins.html': '/docs/propositions.chapter1.AdjointsPreserveMeetsJoins.html',
+      '/docs/propositions.GaloisUnitCounit.html': '/docs/propositions.chapter1.GaloisUnitCounit.html',
+      '/docs/propositions.MonotoneIdentityComposition.html': '/docs/propositions.chapter1.MonotoneIdentityComposition.html',
+      '/docs/propositions.MonotoneUpperSetCorrespondence.html': '/docs/propositions.chapter1.MonotoneUpperSetCorrespondence.html',
+      '/docs/propositions.PartitionEquivalenceCorrespondence.html': '/docs/propositions.chapter1.PartitionEquivalenceCorrespondence.html',
+      '/docs/propositions.SubsetMeetJoinMonotonicity.html': '/docs/propositions.chapter1.SubsetMeetJoinMonotonicity.html',
+
+      // Examples
+      '/docs/examples.AdjunctionFromClosure.html': '/docs/examples.chapter1.AdjunctionFromClosure.html',
+      '/docs/examples.ApplesAndBuckets.html': '/docs/examples.chapter1.ApplesAndBuckets.html',
+      '/docs/examples.ComputationAsRewriting.html': '/docs/examples.chapter1.ComputationAsRewriting.html',
+      '/docs/examples.ModalOperators.html': '/docs/examples.chapter1.ModalOperators.html',
+
+      // Exercises
+      '/docs/exercises.GaloisGivesClosure.html': '/docs/exercises.chapter1.GaloisGivesClosure.html',
+      '/docs/exercises.ClosureAdjunctionExample.html': '/docs/exercises.chapter1.ClosureAdjunctionExample.html'
+    };
+
+    if (redirects[cleanPath]) {
+      const newUrl = baseUrl + redirects[cleanPath];
+      document.getElementById('redirect-message').innerHTML =
+        'Redirecting to <a href="' + newUrl + '">' + newUrl + '</a>...';
+      window.location.href = newUrl;
+    } else {
+      document.getElementById('redirect-message').innerHTML =
+        'Page not found. <a href="' + baseUrl + '/">Return to home</a>.';
+    }
+  })();
+</script>
