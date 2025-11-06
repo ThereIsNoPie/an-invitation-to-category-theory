@@ -103,6 +103,45 @@ module ≤-Reasoning
   x ∎ = reflexive
 ```
 
+## Mixed Reasoning for Preorders with Equality
+
+For proofs that mix preorder steps (≤) with equality steps (≡), such as when using associativity or other structural equalities:
+
+```agda
+module ≤-≡-Reasoning
+  {A : Set}
+  (_≤_ : A → A → Set)
+  (reflexive : ∀ {x} → x ≤ x)
+  (transitive : ∀ {x y z} → x ≤ y → y ≤ z → x ≤ z)
+  where
+
+  open import Relation.Binary.PropositionalEquality using (_≡_; sym; subst)
+
+  infix  3 _∎
+  infixr 2 _≤⟨_⟩_ _≡⟨_⟩_ _≡˘⟨_⟩_
+  infix  1 begin_
+
+  -- Start a reasoning chain
+  begin_ : ∀ {x y} → x ≤ y → x ≤ y
+  begin p = p
+
+  -- Preorder step: x ≤ y and y ≤ z implies x ≤ z
+  _≤⟨_⟩_ : ∀ x {y z} → x ≤ y → y ≤ z → x ≤ z
+  x ≤⟨ p ⟩ q = transitive p q
+
+  -- Equality step (forward): x ≡ y and y ≤ z implies x ≤ z
+  _≡⟨_⟩_ : ∀ x {y z} → x ≡ y → y ≤ z → x ≤ z
+  x ≡⟨ p ⟩ q = subst (λ expr → expr ≤ _) (sym p) q
+
+  -- Equality step (backward): y ≡ x and y ≤ z implies x ≤ z
+  _≡˘⟨_⟩_ : ∀ x {y z} → y ≡ x → y ≤ z → x ≤ z
+  x ≡˘⟨ p ⟩ q = subst (λ expr → expr ≤ _) p q
+
+  -- End a reasoning chain
+  _∎ : ∀ x → x ≤ x
+  x ∎ = reflexive
+```
+
 ## Reasoning for Propositional Equality
 
 For completeness, we also provide reasoning for `≡` (though Agda's standard library has this).
