@@ -42,7 +42,9 @@ import exercises.chapter1.ClosureAdjunctionExample
 
 -- Chapter 2 Exercises
 import exercises.chapter2.IntegersWithMultiplication
-import exercises.chapter2.WiringDiagramProof 
+import exercises.chapter2.WiringDiagramProof
+import exercises.chapter2.ChemicalReactions
+import exercises.chapter2.PowerSetIntersection 
 
 -- Chapter 1 Examples
 import examples.chapter1.AdjunctionFromClosure
