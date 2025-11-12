@@ -4,7 +4,8 @@
       "Bash(do sed -i 's/^module examples\\./module examples.chapter1./' \"$file\")",
       "Bash(do sed -i 's/^module exercises\\./module exercises.chapter1./' \"$file\")",
       "Bash(find:*)",
-      "Bash(agda --safe:*)"
+      "Bash(agda --safe:*)",
+      "Bash(agda:*)"
     ],
     "deny": [],
     "ask": []

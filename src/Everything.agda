@@ -55,6 +55,7 @@ import examples.chapter1.ModalOperators
 -- Chapter 2 Examples
 import examples.chapter2.IntegersWithAddition
 import examples.chapter2.CommutativeMonoidAsSymmetricMonoidalPreorder
+import examples.chapter2.Cost
 
 -- Non-textbook
 import non-textbook.GraphViz
