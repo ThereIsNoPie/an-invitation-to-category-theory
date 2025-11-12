@@ -26,6 +26,7 @@ import definitions.chapter1.Relation
 
 -- Chapter 2 Definitions
 import definitions.chapter2.SymmetricMonoidalPreorder
+import definitions.chapter2.MonoidalMonotone
 
 -- Chapter 1 Propositions
 import propositions.chapter1.AdjointFunctorTheorem
@@ -35,6 +36,9 @@ import propositions.chapter1.MonotoneIdentityComposition
 import propositions.chapter1.MonotoneUpperSetCorrespondence
 import propositions.chapter1.PartitionEquivalenceCorrespondence
 import propositions.chapter1.SubsetMeetJoinMonotonicity
+
+-- Chapter 2 Propositions
+import propositions.chapter2.OppositeSymmetricMonoidalPreorder
 
 -- Chapter 1 Exercises
 import exercises.chapter1.GaloisGivesClosure
