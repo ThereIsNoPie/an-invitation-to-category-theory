@@ -48,7 +48,9 @@ import exercises.chapter1.ClosureAdjunctionExample
 import exercises.chapter2.IntegersWithMultiplication
 import exercises.chapter2.WiringDiagramProof
 import exercises.chapter2.ChemicalReactions
-import exercises.chapter2.PowerSetIntersection 
+import exercises.chapter2.PowerSetIntersection
+import exercises.chapter2.MonoidalMonotoneBoolToCost
+import exercises.chapter2.MonoidalMonotoneCostToBool 
 
 -- Chapter 1 Examples
 import examples.chapter1.AdjunctionFromClosure
