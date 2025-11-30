@@ -27,6 +27,7 @@ import definitions.chapter1.Relation
 -- Chapter 2 Definitions
 import definitions.chapter2.SymmetricMonoidalPreorder
 import definitions.chapter2.MonoidalMonotone
+import definitions.chapter2.VCategory
 
 -- Chapter 1 Propositions
 import propositions.chapter1.AdjointFunctorTheorem
@@ -62,6 +63,7 @@ import examples.chapter1.ModalOperators
 import examples.chapter2.IntegersWithAddition
 import examples.chapter2.CommutativeMonoidAsSymmetricMonoidalPreorder
 import examples.chapter2.Cost
+import examples.chapter2.PreorderAsBoolCategory
 
 -- Non-textbook
 import non-textbook.GraphViz
