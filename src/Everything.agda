@@ -40,6 +40,7 @@ import propositions.chapter1.SubsetMeetJoinMonotonicity
 
 -- Chapter 2 Propositions
 import propositions.chapter2.OppositeSymmetricMonoidalPreorder
+import propositions.chapter2.PreorderBoolCategoryCorrespondence
 
 -- Chapter 1 Exercises
 import exercises.chapter1.GaloisGivesClosure

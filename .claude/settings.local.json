@@ -5,7 +5,8 @@
       "Bash(do sed -i 's/^module exercises\\./module exercises.chapter1./' \"$file\")",
       "Bash(find:*)",
       "Bash(agda --safe:*)",
-      "Bash(agda:*)"
+      "Bash(agda:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
