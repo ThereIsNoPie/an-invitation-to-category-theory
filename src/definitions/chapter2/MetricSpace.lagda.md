@@ -35,21 +35,15 @@ If we ask instead in (ii) for a function d : X × X → [0, ∞] = ℝ≥0 ∪ {
 ```agda
 module definitions.chapter2.MetricSpace where
 
+open import plumbing.Reals using ([0,∞]; 0∞; _+ℝ_; _≥_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 ```
 
 ## Agda Formalization
 
-We postulate nonnegative reals and define metric spaces as a record.
+We use [0,∞] from plumbing.Reals for distances. This covers both ordinary metric spaces (where distances happen to be finite) and extended metric spaces (where ∞ is allowed).
 
 ```agda
--- Postulate the nonnegative reals
-postulate
-  ℝ≥0 : Set
-  0ℝ : ℝ≥0
-  _+ℝ_ : ℝ≥0 → ℝ≥0 → ℝ≥0
-  _≥ℝ_ : ℝ≥0 → ℝ≥0 → Set
-
 -- A metric space (X, d) with the four axioms
 record MetricSpace : Set₁ where
   field
@@ -57,54 +51,19 @@ record MetricSpace : Set₁ where
     X : Set
 
     -- (ii) A distance function
-    d : X → X → ℝ≥0
+    d : X → X → [0,∞]
 
     -- (a) Zero self-distance: d(x, x) = 0
-    zero-self : ∀ {x : X} → d x x ≡ 0ℝ
+    zero-self : ∀ {x : X} → d x x ≡ 0∞
 
     -- (b) Separation (identity of indiscernibles): d(x, y) = 0 implies x = y
-    separation : ∀ {x y : X} → d x y ≡ 0ℝ → x ≡ y
+    separation : ∀ {x y : X} → d x y ≡ 0∞ → x ≡ y
 
     -- (c) Symmetry: d(x, y) = d(y, x)
     symmetry : ∀ {x y : X} → d x y ≡ d y x
 
     -- (d) Triangle inequality: d(x, y) + d(y, z) ≥ d(x, z)
-    triangle : ∀ {x y z : X} → (d x y +ℝ d y z) ≥ℝ d x z
-```
-
-## Extended Metric Space
-
-For extended metric spaces, we allow distances to be infinite.
-
-```agda
--- Postulate extended nonnegative reals [0, ∞]
-postulate
-  [0,∞] : Set
-  0∞ : [0,∞]
-  ∞ : [0,∞]
-  _+∞_ : [0,∞] → [0,∞] → [0,∞]
-  _≥∞_ : [0,∞] → [0,∞] → Set
-
--- An extended metric space allows infinite distances
-record ExtendedMetricSpace : Set₁ where
-  field
-    -- (i) A set of points
-    X : Set
-
-    -- (ii) A distance function (now to [0, ∞])
-    d : X → X → [0,∞]
-
-    -- (a) Zero self-distance
-    zero-self : ∀ {x : X} → d x x ≡ 0∞
-
-    -- (b) Separation
-    separation : ∀ {x y : X} → d x y ≡ 0∞ → x ≡ y
-
-    -- (c) Symmetry
-    symmetry : ∀ {x y : X} → d x y ≡ d y x
-
-    -- (d) Triangle inequality
-    triangle : ∀ {x y z : X} → (d x y +∞ d y z) ≥∞ d x z
+    triangle : ∀ {x y z : X} → (d x y +ℝ d y z) ≥ d x z
 ```
 
 ## Comparison with Lawvere Metric Spaces
@@ -117,7 +76,6 @@ Lawvere metric spaces (Definition 2.36) relax the ordinary metric space axioms:
 | Separation | d(x,y) = 0 → x = y | Not required |
 | Symmetry | d(x,y) = d(y,x) | Not required |
 | Triangle inequality | d(x,y) + d(y,z) ≥ d(x,z) | d(x,y) + d(y,z) ≥ d(x,z) |
-| Infinite distances | Only in extended version | Always allowed |
 
 The textbook explains why dropping separation and symmetry is useful:
 - **Asymmetric distances**: effort to go uphill ≠ effort to go downhill

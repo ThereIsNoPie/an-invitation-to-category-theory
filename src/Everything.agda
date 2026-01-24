@@ -8,6 +8,7 @@ module Everything where
 -- Plumbing
 import plumbing.ClassicalPostulates
 import plumbing.EquationalReasoning
+import plumbing.Reals
 
 -- Chapter 1 Definitions
 import definitions.chapter1.ClosureOperator

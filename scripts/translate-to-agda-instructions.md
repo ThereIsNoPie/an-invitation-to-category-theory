@@ -117,6 +117,22 @@ Skip items that are:
 
 Ask the user if unsure.
 
+## Plumbing (check first!)
+
+`src/plumbing/` has common postulates - **use these instead of re-postulating**:
+
+- **`Reals`** - real numbers (general, then metric-specific):
+  - `ℝ` with ordering (`_≤ℝ_`, `_≥ℝ_`), arithmetic (`_+_`, `_-_`, `_*_`, `-_`), absolute value (`∣_∣`)
+  - `[0,∞]` with `0∞`, `∞`, `_≥_`, `_+ℝ_` (extended nonnegative reals for Cost)
+  - `dist` : ℝ → ℝ → [0,∞] with `dist-refl`, `dist-sym`, `dist-triangle` (metric space distance)
+
+- **`ClassicalPostulates`** - classical logic:
+  - `funext`, `propext`, `proof-irrelevance`
+  - `LEM` (law of excluded middle)
+  - Quotient types `_/_`, `[_]`
+
+- **`EquationalReasoning`** - proof combinators
+
 ## Available Definitions (prefer these over stdlib)
 
 Chapter 1:
@@ -136,7 +152,7 @@ Chapter 2:
 - `LawvereMetricSpace`
 
 Examples:
-- `Cost` (has `[0,∞]`, `_≥_`, `_+ℝ_`, `0ℝ`, `∞`)
+- `Cost` - uses `plumbing.Reals` for `[0,∞]`
 
 ## Template
 

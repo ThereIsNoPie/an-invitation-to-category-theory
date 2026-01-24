@@ -17,10 +17,11 @@ number: 37
 ```agda
 module examples.chapter2.RealsAsMetricSpace where
 
+open import plumbing.Reals using (ℝ; [0,∞]; 0∞; _≥_; _+ℝ_; dist; dist-refl; dist-triangle; dist-sym; 0-least)
 open import definitions.chapter2.LawvereMetricSpace using (LawvereMetricSpace)
 open import definitions.chapter2.VCategory using (VCategory)
-open import examples.chapter2.Cost using (Cost; [0,∞]; _≥_; _+ℝ_; 0ℝ; ≥-refl; ≥-trans)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import examples.chapter2.Cost using (Cost)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 ```
 
 ## The Example
@@ -28,21 +29,9 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 We construct ℝ as a Lawvere metric space with distance d(x, y) = |y - x|.
 
 ```agda
--- We postulate the real numbers and their properties
-postulate
-  ℝ : Set
-
-  -- The distance function: absolute value of difference
-  abs-diff : ℝ → ℝ → [0,∞]
-
-  -- d(x, x) = 0 (reflexivity)
-  abs-diff-zero : ∀ {x : ℝ} → abs-diff x x ≡ 0ℝ
-
-  -- 0 ≥ d(x, x) follows from d(x, x) = 0
-  abs-diff-identity : ∀ {x : ℝ} → 0ℝ ≥ abs-diff x x
-
-  -- Triangle inequality: |x - y| + |y - z| ≥ |x - z|
-  abs-diff-triangle : ∀ {x y z : ℝ} → (abs-diff x y +ℝ abs-diff y z) ≥ abs-diff x z
+-- We need: 0 ≥ dist x x, which follows from dist x x = 0∞ and x ≥ 0∞ for all x
+0≥dist-refl : ∀ {x : ℝ} → 0∞ ≥ dist x x
+0≥dist-refl {x} = subst (0∞ ≥_) (sym dist-refl) 0-least
 
 -- The reals form a Lawvere metric space
 ℝ-metric : LawvereMetricSpace
@@ -50,34 +39,24 @@ postulate
 
 ### Implementation
 
-**Strategy:** We construct a Cost-category with ℝ as objects and |y - x| as the hom-object (distance).
+**Strategy:** We construct a Cost-category with ℝ as objects and dist as the hom-object.
 
 ```agda
 ℝ-metric = record
   { Ob = ℝ
-  ; hom = abs-diff
-  ; identity = abs-diff-identity
-  ; composition = abs-diff-triangle
+  ; hom = dist
+  ; identity = 0≥dist-refl
+  ; composition = dist-triangle
   }
-```
-
-## Symmetry
-
-Unlike general Lawvere metric spaces, the standard metric on ℝ is symmetric: d(x, y) = d(y, x).
-
-```agda
-postulate
-  -- The standard metric is symmetric: |x - y| = |y - x|
-  abs-diff-sym : ∀ {x y : ℝ} → abs-diff x y ≡ abs-diff y x
 ```
 
 ## Interpretation
 
 The real numbers with the standard distance function form a **symmetric** Lawvere metric space. This is a special case where:
 
-1. **Symmetry holds**: |x - y| = |y - x| for all x, y
-2. **Separation holds**: if |x - y| = 0 then x = y
-3. **Distances are finite**: |x - y| < ∞ for all x, y ∈ ℝ
+1. **Symmetry holds**: dist x y = dist y x for all x, y (from dist-sym)
+2. **Separation holds**: if dist x y = 0 then x = y
+3. **Distances are finite**: dist x y < ∞ for all x, y ∈ ℝ
 
 This example shows that ordinary metric spaces embed naturally into the more general framework of Lawvere metric spaces (Cost-categories).
 ```

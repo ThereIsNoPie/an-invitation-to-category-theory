@@ -36,7 +36,7 @@ Since d(x, x) ∈ [0, ∞], if 0 ≥ d(x, x) then d(x, x) = 0. So the first cond
 module definitions.chapter2.LawvereMetricSpace where
 
 open import definitions.chapter2.VCategory using (VCategory)
-open import examples.chapter2.Cost using (Cost; [0,∞]; _≥_; _+ℝ_; 0ℝ; ∞)
+open import examples.chapter2.Cost using (Cost; [0,∞]; _≥_; _+ℝ_; 0ℝ; 0∞; ∞)
 ```
 
 ## Agda Formalization
@@ -66,8 +66,8 @@ module LawvereMetricSpaceOps (X : LawvereMetricSpace) where
   d = hom
 
   -- Property (a): d(x, x) = 0
-  -- From identity: 0ℝ ≥ d(x, x), and since d(x,x) ∈ [0,∞], this means d(x,x) = 0
-  zero-self-distance : ∀ {x : Point} → 0ℝ ≥ d x x
+  -- From identity: 0∞ ≥ d(x, x), and since d(x,x) ∈ [0,∞], this means d(x,x) = 0
+  zero-self-distance : ∀ {x : Point} → 0∞ ≥ d x x
   zero-self-distance = identity
 
   -- Property (b): Triangle inequality

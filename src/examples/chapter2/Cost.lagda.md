@@ -20,60 +20,26 @@ because we can think of the elements of [0, ∞] as costs. In terms of structuri
 
 The monoidal unit being 0 will translate into saying that you can always get from a to a at no cost. The monoidal product being + will translate into saying that the cost of getting from a to c is at most the cost of getting from a to b plus the cost of getting from b to c. Finally, the "at most" in the previous sentence comes from the ≥.
 
-**Note:** We postulate the nonnegative extended reals [0, ∞] with their necessary properties rather than constructing them explicitly, keeping the formalization simple and close to the textbook presentation.
-
 ## Agda Setup
 
 ```agda
 module examples.chapter2.Cost where
 
+open import plumbing.Reals using ([0,∞]; 0∞; ∞; _≥_; _+ℝ_; ≥-refl; ≥-trans; +ℝ-identityˡ; +ℝ-identityʳ; +ℝ-assoc; +ℝ-comm; +ℝ-mono) public
 open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalStructure; SymmetricMonoidalPreorder)
-open import Relation.Binary.PropositionalEquality using (_≡_)
+
+-- Alias for convenience: 0ℝ in Cost context means 0∞
+0ℝ : [0,∞]
+0ℝ = 0∞
 ```
 
 ## The Example
 
-NOTE: the Real numbers kinda suck to formalize in Agda. So we postulate pretty much everything making this example a mostly useless addition to the textbook.
-
 We construct Cost = ([0, ∞], ≥, 0, +) as a symmetric monoidal preorder.
 
 ```agda
--- Postulate the carrier: nonnegative extended reals [0, ∞]
-postulate
-  [0,∞] : Set
-
-  -- Distinguished elements
-  0ℝ : [0,∞]   -- Zero
-  ∞  : [0,∞]   -- Infinity
-
-  -- The ordering ≥ (note: reversed from usual ≤)
-  _≥_ : [0,∞] → [0,∞] → Set
-
-  -- Addition on extended nonnegative reals
-  _+ℝ_ : [0,∞] → [0,∞] → [0,∞]
-
-  -- Preorder properties
-  ≥-refl : ∀ {x : [0,∞]} → x ≥ x
-  ≥-trans : ∀ {x y z : [0,∞]} → x ≥ y → y ≥ z → x ≥ z
-
-  -- Infinity is greatest
-  ∞-greatest : ∀ {x : [0,∞]} → ∞ ≥ x
-
-  -- Addition properties
-  +ℝ-identityˡ : ∀ {x : [0,∞]} → 0ℝ +ℝ x ≡ x
-  +ℝ-identityʳ : ∀ {x : [0,∞]} → x +ℝ 0ℝ ≡ x
-  +ℝ-assoc : ∀ {x y z : [0,∞]} → (x +ℝ y) +ℝ z ≡ x +ℝ (y +ℝ z)
-  +ℝ-comm : ∀ {x y : [0,∞]} → x +ℝ y ≡ y +ℝ x
-
-  -- Monotonicity: if x₁ ≥ y₁ and x₂ ≥ y₂, then x₁ + x₂ ≥ y₁ + y₂
-  +ℝ-mono : ∀ {x₁ x₂ y₁ y₂ : [0,∞]} → x₁ ≥ y₁ → x₂ ≥ y₂ → (x₁ +ℝ x₂) ≥ (y₁ +ℝ y₂)
-
-  -- Infinity absorbs addition: x + ∞ = ∞ and ∞ + x = ∞
-  +ℝ-∞ʳ : ∀ {x : [0,∞]} → x +ℝ ∞ ≡ ∞
-  +ℝ-∞ˡ : ∀ {x : [0,∞]} → ∞ +ℝ x ≡ ∞
-
 -- The Cost symmetric monoidal preorder
 Cost-preorder : Preorder
 Cost-monoidal-structure : SymmetricMonoidalStructure Cost-preorder
@@ -82,7 +48,7 @@ Cost : SymmetricMonoidalPreorder
 
 ### Implementation
 
-**Strategy:** We postulate the nonnegative extended reals [0, ∞] with their properties, then assemble them into a symmetric monoidal preorder.
+**Strategy:** Use the postulates from plumbing.Reals and assemble them into a symmetric monoidal preorder.
 
 ```agda
 -- [0, ∞] with ≥ forms a preorder
@@ -97,7 +63,7 @@ Cost-preorder = record
 
 -- The symmetric monoidal structure (0, +) on [0, ∞]
 Cost-monoidal-structure = record
-  { I = 0ℝ
+  { I = 0∞
   ; _⊗_ = _+ℝ_
   ; monotonicity = +ℝ-mono
   ; left-unit = +ℝ-identityˡ
