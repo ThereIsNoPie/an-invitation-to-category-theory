@@ -28,6 +28,8 @@ import definitions.chapter1.Relation
 import definitions.chapter2.SymmetricMonoidalPreorder
 import definitions.chapter2.MonoidalMonotone
 import definitions.chapter2.VCategory
+import definitions.chapter2.MetricSpace
+import definitions.chapter2.LawvereMetricSpace
 
 -- Chapter 1 Propositions
 import propositions.chapter1.AdjointFunctorTheorem
@@ -65,6 +67,7 @@ import examples.chapter2.IntegersWithAddition
 import examples.chapter2.CommutativeMonoidAsSymmetricMonoidalPreorder
 import examples.chapter2.Cost
 import examples.chapter2.PreorderAsBoolCategory
+import examples.chapter2.RealsAsMetricSpace
 
 -- Non-textbook
 import non-textbook.GraphViz
