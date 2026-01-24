@@ -1,0 +1,2627 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+
+\setcounter{chapter}{3}%Just finished 3.
+%------------ Chapter ------------%
+\chapter[Co-design: profunctors and monoidal categories]{Collaborative design:\\Profunctors, categorification, and
+monoidal categories}%
+\label{chap.codesign}%
+\index{co-design|(}%
+\index{co-design|seealso {feasibility}}
+
+%-------- Section --------%
+\section{Can we build it?}
+
+When designing a large-scale system, many different fields of expertise are
+joined to work on a single project. Thus the whole project team is divided into
+multiple sub-teams, each of which is working on a sub-project. And we recurse
+downward: the sub-project is again factored into sub-sub-projects, each with
+their own team. One could refer to this sort of hierarchical design process as \emph{collaborative design}, or co-design. In this
+chapter, we discuss a mathematical theory of co-design, due to Andrea Censi \cite{Censi:2015a}.%
+\index{design}
+
+Consider just one level of this hierarchy: a project and a set of teams working
+on it. Each team is supposed to \emph{provide} resources---sometimes called
+``functionalities''---to the project, but the team also \emph{requires} resources in
+order to do so. Different design teams must be allowed to plan and work
+independently from one another in order for progress to be made. Yet the design
+decisions made by one group affect the design decisions others can make: if $A$
+wants more space in order to provide a better radio speaker, then $B$ must use less space. So
+these teams---though ostensibly working independently---are dependent on each other
+after all.%
+\index{resource}
+
+The combination of dependence and independence is crucial for progress to be
+made, and yet it can cause major problems. When a team requires more resources
+than it originally expected to require, or if it cannot provide the resources
+that it originally claimed it could provide, the usual response is for the team
+to issue a design-change notice. But these affect neighboring teams: if team $A$
+now requires more than originally claimed, team $B$ may have to change their design, which can in turn affect team $C$. Thus these design-change notices can ripple through the system through feedback loops and can cause whole projects to fail \cite{Subrahmanian.Lee.Granger:2015a}.
+
+As an example, consider the design problem of creating a robot to carry some load at some velocity. The top-level planner breaks the problem into three design teams: chassis team, motor team, and battery team. Each of these teams could break up into multiple parts and the process repeated, but let's remain at the top level and consider the resources produced and the resources required by each of our three teams.
+
+The chassis in some sense provides all the functionality---it carries the load at the velocity---but it requires some things in order to do so. It requires money to build, of course, but more to the point it requires a source of torque and speed. These are supplied by the motor, which in turn needs voltage and current from the battery. Both the motor and the battery cost money, but more importantly they need to be carried by the chassis: they become part of the load. A feedback loop is created: the chassis must carry all the weight, even that of the parts that power the chassis. A heavier battery might provide more energy to power the chassis, but is the extra power worth the heavier load?
+
+In the following picture, each part---chassis, motor, battery, and robot---is shown as a box with ports on the left and right. The functionalities, or resources produced by the part are shown as ports on the left of the box, and the resources required by the part are shown as ports on its right.
+\begin{equation}%
+\label{eqn.chassis}
+\begin{tikzpicture}
+[oriented WD, bb min width =.5cm, bby=2ex, bbx=.6cm, bb port length=3pt, 
+string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\leq$};},
+baseline=(Y)] 
+  \node[bb port sep=.8, bb={3}{1}] (Sigma1) {$\Sigma$};
+  \node[bb port sep=2,bb min width=4.3em, bb={2}{3}, below right=-3 and 1 of Sigma1.south east] (Chassis) {Chassis};
+  \node (Chassis 15) at ($(Chassis_out1)!.5!(Chassis_out2)$) {};
+  \node[bb port sep=2*3/5,bb min width=4.3em, bb={2}{4}, right=2 of Chassis 15] (Motor) {Motor};
+  \node[bb port sep=2*3/5, bb={2}{2}, bb min width=4.3em, right=2 of Motor] (Battery) {Battery};
+	\node[bb port sep=.8, bb={3}{1}, below right=-.5 and 1 of Battery] (Sigma2) {$\Sigma$};
+  \node[bb={0}{0}, fit={($(Sigma1.north west)+(-.5,3)$) (Chassis) (Motor) (Sigma2)}, bb name=Robot] (Y) {};
+	\node[coordinate] (Y_in1) at (Y.west|-Sigma1_in3) {};
+	\node[coordinate] (Y_in2) at (Y.west|-Chassis_in2) {};
+	\node[coordinate] (Y_out1) at (Y.east|-Sigma2_out1) {};
+  \draw[ar, shorten <=-3pt] (Y_in1) to (Sigma1_in3);
+  \draw[ar, shorten <=-3pt] (Y_in2) to (Chassis_in2);
+  \draw[ar] (Sigma1_out1) to (Chassis_in1);
+  \draw[ar] (Chassis_out1) to (Motor_in1);
+  \draw[ar] (Chassis_out2) to (Motor_in2);
+  \draw[ar] let \p1=(Motor.west), \p2=(Sigma2_in3), \n1=\bbportlen in
+  	(Chassis_out3) to (\x1-\n1,\y2) -- (Sigma2_in3);
+  \draw[ar] (Motor_out2) to node[above=-1pt, font=\tiny] {Voltage} (Battery_in1);
+  \draw[ar] (Motor_out3) to node[above=-1pt, font=\tiny] {Current} (Battery_in2);
+  \draw[ar] let \p1=(Battery.west), \p2=(Sigma2_in2), \n1=\bbportlen in
+    (Motor_out4) to node[pos=.4, above=1pt, font=\tiny] {\$} (\x1-\n1, \y2) -- (Sigma2_in2);
+  \draw[ar] (Battery_out2) to (Sigma2_in1);
+  \draw[ar, shorten >=-3pt, string decoration pos=.5] (Sigma2_out1) to (Y_out1); 
+  \draw[ar, string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\geq$};}, string decoration pos=.5] let \p1=(Motor.north east), \p2=(Sigma1.north west), \n1={\y2+\bby},\n2=\bbportlen in
+  	(Motor_out1) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (Sigma1_in1);
+  \draw[ar, string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\geq$};}, string decoration pos=.5] let \p1=(Battery.north east), \p2=(Sigma1.north west), \n1={\y2+\bby+\bby},\n2=\bbportlen in
+  	(Battery_out1) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (Sigma1_in2);
+%
+	\draw[label]
+		node[left=.3 of Y_in1,align=center] {\footnotesize Weight \\
+		\footnotesize (as payload)}
+		node[left=.3 of Y_in2] {\footnotesize Velocity}
+		node[right=.3 of Y_out1] {\footnotesize \$}
+		node[above right=.2 and 0 of Chassis_out1] {\tiny Torque}
+		node[above right=.2 and 0 of Chassis_out2] {\tiny Speed}
+		node[above right=.2 and 0 of Chassis_out3] {\tiny \$}
+		node[above right=.3 and .5 of Motor_out1, align=left, font=\tiny] {Weight}
+		node[above right=.3 and .8 of Battery_out1, align=left, font=\tiny] {Weight}
+		node[above right=.2 and 0 of Battery_out2, font=\tiny] {\$}
+	;	
+\end{tikzpicture}
+\end{equation}
+The boxes marked $\Sigma$ correspond to summing inputs. These boxes are not to
+be designed, but we will see later that they fit easily into the same conceptual
+framework. Note also the $\leq$'s on each wire; they indicate that if box $A$
+requires a resource that box $B$ produces, then $A$'s requirement must be
+less-than-or-equal-to $B$'s production. The chassis requires torque, and the motor must produce at least that much torque.
+
+To formalize this a bit more, let's call diagrams like the one above
+\emph{co-design diagrams}. Each of the wires in a co-design diagram represents a
+preorder of resources. For example, in \cref{eqn.chassis} every wire corresponds to
+a resource type---weights, velocities, torques, speeds, costs, voltages, and
+currents---where resources of each type can be ordered from less useful to more
+useful. In general, these preorders do not have to be linear orders, though in the
+above cases each will likely correspond to a linear order: $\$10\leq \$20$,
+$5\textrm{W}\leq6\textrm{W}$, and so on.%
+\index{co-design!diagram}
+
+Each of the boxes in a co-design diagram corresponds to what we call a
+\emph{feasibility relation}. A feasibility relation matches resource production
+with requirements. For every pair $(p,r)\in P\times R$, where $P$ is the preorder
+of resources to be produced and $R$ is the preorder of resources to be required,
+the box says ``true'' or ``false''---feasible or infeasible---for that pair. In
+other words, ``yes I can provide $p$ given $r$'' or ``no, I cannot provide $p$
+given $r$.''%
+\index{feasibility relation}
+
+Feasibility relations hence define a function $\Phi\colon P \times R \to \Bool$.
+For a function $\Phi\colon P\times R\to\Bool$ to make sense as a feasibility
+relation, however, there are two conditions:
+\begin{enumerate}[label=(\alph*)]
+	\item If $\Phi(p,r)=\true$ and $p' \le p$, then $\Phi(p',r)=\true$.
+	\item If $\Phi(p,r)=\true$ and $r \le r'$ then $\Phi(p,r')=\true$.
+\end{enumerate}
+These conditions, which we will see again in
+\cref{def.feasibility_relationship}, say that if you can produce $p$ given
+resources $r$, you can (a) also produce less $p'\leq p$ with the same resources
+$r$, and (b) also produce $p$ given more resources $r'\geq r$. We will see that
+these two conditions are formalized by requiring $\Phi$ to be a monotone map
+$P\op\times R\to\Bool$.%
+\index{booleans!and feasibility}
+
+A \emph{co-design problem}%
+\index{co-design!problem}, represented by a co-design
+diagram, asks us to find the composite of some feasibility relations. It asks,
+for example, given these capabilities of the chassis, motor, and battery teams,
+can we build a robot together? Indeed, a co-design diagram factors a
+problem---for example, that of designing a robot---into interconnected
+subproblems, as in \cref{eqn.chassis}.  Once the feasibility relation is worked
+out for each of the subproblems, i.e.\ the inner boxes in the diagram, the
+mathematics provides an algorithm producing the feasibility relation of the
+whole outer box. This process can be recursed downward, from the largest problem
+to tiny subproblems. 
+
+In this chapter, we will understand co-design problems in terms of enriched
+profunctors, in particular $\Bool$-profunctors. A $\Bool$-profunctor is like a
+bridge connecting one preorder to another. We will show how the co-design framework
+gives rise to a structure known as a compact closed category, and that any
+compact closed category can interpret the sorts of wiring diagrams we see in
+\cref{eqn.chassis}. 
+
+%-------- Section --------%
+\section{Enriched profunctors}%
+\index{profunctor|(}
+
+In this section we will understand how co-design problems form a category. Along
+the way we will develop some abstract machinery that will allow us to replace
+preorder design spaces with other enriched categories.
+
+%---- Subsection ----%
+\subsection{Feasibility relationships as $\Bool$-profunctors}%
+\index{feasibility relation|(}%
+\index{profunctor!Bool@$\Bool$}
+
+The theory of co-design is based on preorders: each resource---e.g.\ velocity,
+torque, or \$---is structured as a preorder. The order $x\leq y$ represents the
+\emph{availability of $x$ given $y$}, i.e.\ that whenever you have $y$, you also
+have $x$. For example, in our preorder of wattage, if 5W $\leq$ 10W, it means that
+whenever we are provided 10W, we implicitly also have 5W. Above we referred to this as an order from less useful to more useful: if $x$ is always available given $y$, then $x$ is less useful than $y$.%
+%\tablefootnote{Suppose someone says ``usually having a sharp scissors is better than having dull ones, but not for children,'' we answer that children's scissors must then be considered a different resource than adult scissors. The usefulness calculation for children's scissors is different than that for adult scissors, so they are different resource preorders.}
+
+We know from \cref{subsec.preorders_Bool_enriched} that a preorder $\cat{X}$ can be
+conceived of as a $\Bool$-category. Given $x,y\in X$, we have
+$\cat{X}(x,y)\in\BB$; this value responds to the assertion ``$x$ is available
+given $y$,'' marking it either $\true$ or $\false$.
+
+Our goal is to see feasibility relations as $\Bool$-profunctors, which are a
+special case of something called enriched profunctors. Indeed, we hope that this
+chapter will give you some intuition for profunctors, arising from the table
+\[
+\begin{tabular}{r|l}
+ $\Bool$-category & preorder \\
+ $\Bool$-functor & monotone map \\
+ $\Bool$-profunctor & feasibility relation
+\end{tabular}
+\]
+Because enriched profunctors are a bit abstract, we first concretely discuss
+$\Bool$-profunctors as feasibility relations. Recall that if $\cat{X}=(X,\leq)$
+is a preorder, then its opposite $\cat{X}\op=(X,\geq)$ has $x\geq y$ iff $y\leq x$.
+
+\begin{definition}%
+\label{def.feasibility_relationship}
+Let $\cat{X}=(X,\leq_X)$ and $\cat{Y}=(Y,\leq_Y)$ be preorders. A \emph{feasibility relation} for $\cat{X}$ given $\cat{Y}$ is a monotone map
+\begin{equation}%
+\label{eqn.feasibility}
+	\Phi\colon \cat{X}\op\times \cat{Y}\to\Bool.
+\end{equation}
+We denote this by $\Phi\colon\cat{X}\tickar\cat{Y}$.
+
+Given $x\in X$ and $y\in Y$, if $\Phi(x,y)=\true$ we say \emph{$x$ can be obtained given $y$}.
+\end{definition}
+
+As mentioned in the introduction, the requirement that $\Phi$ is monotone says
+that if $x'\leq_X x$ and $y\leq_Y y'$ then $\Phi(x,y)\leq_\Bool \Phi(x',y')$. In
+other words, if $x$ can be obtained given $y$, and if $x'$ is available given
+$x$, then $x'$ can be obtained given $y$. And if furthermore $y$ is available
+given $y'$, then $x'$ can also be obtained given $y'$.
+
+\begin{exercise} %
+\label{exc.a_profunctor}
+Suppose we have the preorders
+\[
+\begin{tikzpicture}
+	\node (cat) {category};
+	\node[below right=1 of cat] (pos) {preorder};
+	\node[below left=1 of cat] (mon) {monoid};
+	\draw[->] (pos) -- (cat);
+	\draw[->] (mon) -- (cat);
+	\node[draw, fit=(cat) (pos) (mon)] (X) {};
+	\node[left=0 of X] {$\cat{X}\coloneqq$};
+%
+	\node[right=2 of pos] (0) {nothing};
+	\node at (0|-cat) (1) {this book};
+	\draw[->] (0) -- (1);
+	\node[draw, fit=(0) (1)] (Y) {};
+	\node[left=0 of Y] {$\cat{Y}\coloneqq$};
+\end{tikzpicture}
+\]
+\begin{enumerate}
+  \item Draw the Hasse diagram for the preorder $\cat{X}\op\times\cat{Y}$. 
+  \item Write down a profunctor $\Lambda\colon\cat{X} \tickar \cat{Y}$ and, reading
+  $\Lambda(x,y)=\true$ as ``my aunt can explain an $x$ given $y$,'' give an
+  interpretation of the fact that the preimage of $\true$ forms an upper set in
+  $\cat{X}\op\times\cat{Y}$. %
+\index{preimage}
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+
+To generalize the notion of feasibility relation, we must notice that the
+symmetric monoidal preorder $\Bool$ has more structure than just that of a
+symmetric monoidal preorder: as mentioned in \cref{exc.Bool_quantale},
+$\Bool$ is a quantale. That means it has all joins $\vee$, and a closure
+operation, which we'll write $\imp\colon\BB\times\BB\to\BB$. By definition, this
+operation satisfies the property that for all $b,c,d\in\BB$ one has
+\begin{equation}%
+\label{eqn.implies_internal_hom}
+	b\wedge c\leq d\quad\text{iff}\quad b\leq (c\imp d).
+\end{equation}
+The operation $\imp$ is given by the following table:
+\begin{equation}%
+\label{eqn.implies}
+\begin{array}{cc|c}
+c&d&c\imp d\\\hline
+\true&\true&\true\\
+\true&\false&\false\\
+\false&\true&\true\\
+\false&\false&\true
+\end{array}
+\end{equation}
+
+\begin{exercise} %
+\label{exc.implies_is_hom}
+Show that $\imp$ as defined in \cref{eqn.implies} indeed satisfies \cref{eqn.implies_internal_hom}.
+\end{exercise}
+
+%
+\index{quantale}
+On an abstract level, it is the fact that $\Bool$ is a quantale which makes
+everything in this chapter work; any other (unital commutative) quantale also
+defines a way to interpret co-design diagrams. For example, we could use the
+quantale $\Cost$, which would describe not \emph{whether} $x$ is available given
+$y$ but the \emph{cost} of obtaining $x$ given $y$; see
+\cref{ex.Lawveres_base,def.cat_enriched_mpos}.
+
+\subsection{$\cat{V}$-profunctors}%
+\index{profunctor!enriched}
+We are now ready to recast \cref{eqn.feasibility} in abstract terms. Recall the
+notions of enriched product (\cref{def.enriched_prod}), enriched functor
+(\cref{def.enriched_functor}), and quantale (\cref{def.monoidal_closed}).
+
+\begin{definition}%
+\label{def.enriched_profunctor}%
+\index{profunctor}
+Let $\cat{V}=(V,\leq,I,\otimes)$ be a (unital commutative) quantale,%
+\tablefootnote{From here on, as in \cref{chap.resource_theory}, whenever we speak of
+quantales we mean unital commutative quantales.
+}
+ and let $\cat{X}$ and $\cat{Y}$ be $\cat{V}$-categories. A
+ \emph{$\cat{V}$-profunctor} from $\cat{X}$ to $\cat{Y}$, denoted
+ $\Phi\colon\cat{X}\tickar\cat{Y}$, is a $\cat{V}$-functor
+\[
+\Phi\colon\cat{X}\op\times\cat{Y}\to\cat{V}.
+\]
+\end{definition}
+
+Note that a $\cat{V}$-functor must have $\cat{V}$-categories for domain and
+codomain, so here we are considering $\cat{V}$ as enriched in itself; see
+\cref{rem.quantale_enriches_itself}.%
+\index{V-profunctor@$\cat{V}$-profunctor|see {profunctor, enriched}}
+
+
+\begin{exercise} %
+\label{exc.profunctor_def_alt}
+Show that a $\cat{V}$-profunctor (\cref{def.enriched_profunctor}) is
+the same as a function $\Phi\colon\Ob(\cat{X})\times\Ob(\cat{Y})\to V$ such that
+for any $x,x'\in\cat{X}$ and $y,y'\in\cat{Y}$ the following inequality holds in
+$\cat{V}$: 
+\[
+  \cat{X}(x',x)\otimes\Phi(x,y)\otimes\cat{Y}(y,y')\leq\Phi(x',y').
+  \qedhere
+\]
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.Bool_enriched_is_feas}%
+\index{feasibility relation!as $\Bool$-profunctor}
+Is it true that a $\Bool$-profunctor, as in \cref{def.enriched_profunctor}, is exactly the same as a feasibility relation, as in \cref{def.feasibility_relationship}, once you peel back all the jargon? Or is there some subtle difference?
+\end{exercise}
+
+We know that \cref{def.enriched_profunctor} is quite abstract. But have no fear, we will take you through it in pictures.
+
+\begin{example}[$\Bool$-profunctors and their interpretation as
+  bridges]%
+\label{ex.bool_profunctor_bridges}%
+\index{profunctor!as bridges}
+Let's discuss \cref{def.enriched_profunctor} in the case $\cat{V}=\Bool$. One
+way to imagine a $\Bool$-profunctor $\Phi\colon X\tickar Y$ is in terms
+of building bridges between two cities.  Recall that a preorder (a $\Bool$-category) 
+can be drawn using a Hasse
+diagram. We'll think of the preorder as a city, and each vertex in it as some point of interest. An arrow $A\to B$ in the Hasse diagram means that there exists a way to get from point $A$ to
+point $B$ in the city. So what's a profunctor?
+
+A profunctor is just a bunch of bridges connecting points in one city to points
+in another. Let's see a specific example. Here is a picture of a
+$\Bool$-profunctor $\Phi\colon X \tickar Y$:
+\[
+\begin{tikzpicture}
+	\node (mid) {};
+	\node[above=of mid] (XN) {$\LMO{N}$};
+	\node[left=of mid] (XW) {$\LMO{W}$};
+	\node[right=of mid] (XE) {$\LMO{E}$};
+	\node[below=of mid] (XS) {$\LMO[under]{S}$};
+	\node[draw, fit=(XN) (XW) (XS) (XE)] (X) {};
+	\draw[->]
+		(XS) edge (XW) edge (XE) 
+		(XW) edge (XN) 
+		(XE) edge (XN)
+	;
+	\node[left=0 of X, font=\normalsize] {$X\coloneqq$};
+%
+	\node[right=5 of XS] (Ya) {$\LMO[under]{a}$};
+	\node[above left=.4 and .5 of Ya] (Yb) {$\LMO{b}$};
+	\node[above right=.4 and .5 of Ya] (Yc) {$\LMO{c}$};
+	\node[above=.4 of Yb] (Yd) {$\LMO{d}$};
+	\node[right=5 of XN] (Ye) {$\LMO{e}$};
+	\node[draw, fit=(Ye) (Yd) (Yc) (Ya)] (Y) {};
+	\draw[->]
+		(Yb) edge (Ya) edge (Yd)
+		(Yc) edge (Ya)
+	;
+	\node[right=0 of Y, font=\normalsize] {$=:Y$};
+%
+	\draw[mapsto, bend right] (XS) to (Ya);
+	\draw[mapsto, bend right] (XE) to (Yb);
+	\draw[mapsto, bend left] (XN) to (Yc);
+	\draw[mapsto, bend left] (XN) to (Ye);
+\end{tikzpicture}
+\]
+Both $X$ and $Y$ are preorders, e.g.\ with $W\leq N$ and $b\leq a$. With bridges
+coming from the profunctor in blue, one can now use both paths within the cities
+and the bridges to get from points in city $X$ to points in city $Y$. For example,
+since there is a path from $N$ to $e$ and $E$ to $a$, we have $\Phi(N,e)=\true$
+and $\Phi(E,a)=\true$. On the other hand, since there is no path from $W$ to
+$d$, we have $\Phi(W,d)=\false.$
+
+In fact, one could put a box around this entire picture and see a new preorder with
+$W\leq N\leq c\leq a$, etc. This is called the \emph{collage} of $\Phi$; we'll
+explore this in more detail later; see \cref{def.collage_prof}.%
+\index{collage}
+\end{example}
+
+\begin{exercise} %
+\label{exc.feas_matrix}
+We can express $\Phi$ as a matrix where the $(m,n)$th entry is the value of
+$\Phi(m,n)\in \BB$. Fill out the $\Bool$-matrix:
+\[
+\begin{array}{c|ccccc}
+	\Phi&a&b&c&d&e\\\hline
+  N&\?&\?&\?&\?&\true\\
+  E&\true&\?&\?&\?&\?\\
+  W&\?&\?&\?&\false&\?\\
+  S&\?&\?&\?&\?&\?
+\end{array}
+\qedhere
+\]
+We'll call this the \emph{feasibility matrix} of
+$\Phi$.%
+\index{matrix!feasibility}
+\end{exercise}
+
+\begin{example}[$\Cost$-profunctors and their interpretation as
+  bridges]%
+\index{profunctor!$\Cost$}%
+\index{profunctor!$\Cost$|seealso {Cost}}
+Let's now consider $\Cost$-profunctors. Again we can view these as bridges, but
+this time our bridges are labelled by their length. Recall from \cref{def.Lawvere_metric_space,eqn.cities_distances} that
+$\Cost$-categories are Lawvere metric spaces, and can be depicted using weighted
+graphs. We'll think of such a weighted graph as a chart of distances between points in a city, and generate a $\Cost$-profunctor by building a few bridges between
+the cities.
+
+Here is a depiction of a $\Cost$-profunctor $\Phi\colon X \tickar Y$:
+\begin{equation}%
+\label{eqn.bridges_Lawv}
+\begin{tikzpicture}[font=\scriptsize, x=1cm, every label/.style={font=\tiny}, baseline=(Y)]
+	\node[label={[above=-5pt]:$A$}] (a) {$\bullet$};
+	\node[right=1 of a, label={[above=-5pt]:$B$}] (b) {$\bullet$};
+	\node[below=1 of a, label={[below=5pt]:$C$}] (c) {$\bullet$};
+	\node[right=1 of c, label={[below=5pt]:$D$}] (d) {$\bullet$};
+	\draw[->] (c) to node[above left=-1pt and -1pt] {3} (b);
+	\draw[bend right,->] (a) to node[left] {3} (c);
+	\draw[bend left,->] (d) to node[below] {4} (c);
+	\draw[bend right,->] (b) to node[above] {2} (a);
+	\draw[bend left,->] (b) to node[right] {5} (d);
+	\node[draw, inner sep=15pt, fit=(a) (b) (c) (d)] (X) {};
+	\node[left=0 of X, font=\normalsize] {$X\coloneqq$};
+%
+	\node[right=4 of b] (x) {$\LMO{x}$};
+	\node[below=1 of x] (y) {$\LMO[under]{y}$};
+	\node at ($(x)!.5!(y)+(1.5cm,0)$) (z) {$\LMO{z}$};
+	\draw[bend left,->] (y) to node[left] {3} (x);
+	\draw[bend left,->] (x) to node[right] {4} (y);	
+	\draw[bend left,->] (x) to node[above] {3} (z);
+	\draw[bend left,->] (z) to node[below right=-1pt and -1pt] {4} (y);
+	\node[draw, inner sep=15pt, fit=(x) (y) (z.west)] (Y) {};
+	\node[right=0 of Y, font=\normalsize] {$=:Y$};
+%
+	\draw[mapsto, bend left] (b) to node[above] {11} (x);
+	\draw[mapsto, bend right] (d) to node[below] {9} (y);
+\end{tikzpicture}
+\end{equation}
+The distance from a point $x$ in city $X$ to a point $y$ in city $Y$ is given by the shortest
+path that runs from $x$ through $X$, then across one of the bridges, and then
+through $Y$ to the destination $y$. So for example
+\[
+	\Phi(B,x)=11,\quad \Phi(A,z)=20,\quad \Phi(C,y)=17.
+	\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.distance_matrix_Phi}
+Fill out the $\Cost$-matrix:
+\[
+\begin{array}{c|ccc}
+  \Phi&x&y&z\\\hline
+  A&\?&\?&20\\
+  B&11&\?&\?\\
+  C&\?&17&\?\\
+  D&\?&\?&\?
+\end{array}
+\qedhere
+\]
+\end{exercise}
+
+\begin{remark}[Computing profunctors via matrix multiplication]
+  %
+\index{matrix}
+We can give an algorithm for computing the above distance matrix using matrix
+multiplication. First, just like in \cref{eqn.matrix_Y}, we can begin with
+the labelled graphs in \cref{eqn.bridges_Lawv} and read off the matrices of
+arrow labels for $X$, $Y$, and $\Phi$:
+\[
+\begin{array}{c|cccc}
+  M_X&A&B&C&D\\\hline
+	A & 0 &\infty&3&\infty\\
+	B & 2 & 0 & \infty & 5\\
+	C & \infty & 3 & 0 &\infty\\
+	D & \infty & \infty & 4 & 0
+\end{array}
+\hspace{.7in}
+\begin{array}{c|ccc}
+  M_\Phi&x&y&z\\\hline
+  A&\infty&\infty&\infty\\
+  B&11&\infty&\infty\\
+  C&\infty&\infty&\infty\\
+  D&\infty&9&\infty
+\end{array}
+\hspace{.7in}
+\begin{array}{c|ccc}
+  M_Y&x&y&z\\\hline
+  x&0&4&3\\
+  y&3&0&\infty\\
+  z&\infty&4&0\\
+\end{array}
+\]
+Recall from \cref{subsubsec.nav_matrix_mult} that the matrix of distances $d_Y$ for
+$\Cost$-category $X$ can be obtained by taking the matrix power of $M_X$ with
+smallest entries, and similarly for $Y$. The matrix of distances for the profunctor
+$\Phi$ will be equal to $d_X*M_\Phi*d_Y$. In fact, since $X$ has four elements
+and $Y$ has three, we also know that $\Phi= M_X^3*M_\Phi*M_Y^2$.
+\end{remark}
+
+\begin{exercise} %
+\label{exc.cost_matrix_mult}%
+\index{quantale}
+Calculate $M_X^3*M_\Phi*M_Y^2$, remembering to do matrix multiplication according to the $(\min,+)$-formula for matrix multiplication in the quantale $\Cost$; see \cref{eqn.quantale_matrix_mult}.
+
+Your answer should agree with what you got in \cref{exc.distance_matrix_Phi}; does it?
+\end{exercise}
+
+
+% Subsubsection %
+\subsection{Back to co-design diagrams}%
+\index{co-design!diagram}
+
+Each box in a co-design diagram has a left-hand and a right-hand side, which in turn consist of a collection of ports, which in turn are labeled by preorders. For example, consider the chassis box below:
+\[
+\begin{tikzpicture}[oriented WD]
+  \node[bb port sep=2,bb min width=4.3em, bb={2}{3}, below right=-3 and 1 of Sigma1.south east] (C) {Chassis};
+  \draw[label, font=\footnotesize]
+  	node[left=1pt of C_in1] {load}
+  	node[left=1pt of C_in2] {velocity}
+  	node[right=1pt of C_out1] {torque}
+  	node[right=1pt of C_out2] {speed}
+  	node[right=1pt of C_out3] {\$}
+  ;
+\end{tikzpicture}
+\]
+Its left side consists of two ports---one for load and one for velocity---and these are the functionality that the chassis produces. Its right side consists of three ports---one for torque, one for speed, and one for \$---and these are the resources that the chassis
+requires. Each of these resources is to be taken as a preorder. For example, load might be
+the preorder $([0,\infty],\leq)$, where an element $x\in[0,\infty]$ represents the
+idea ``I can handle any load up to $x$.,'' while \$ might be the two-element preorder
+$\{\texttt{up\_to\_\$100}, \;\texttt{more\_than\_\$100}\}$, where the first
+element of this set is less than the second.
+
+We then multiply---i.e.\ we take the product preorder---of all preorders on the left,
+and similarly for those on the right. The box then represents a feasibility
+relation between the results. For example, the chassis box above represents a
+feasibility relation
+\[
+\textrm{Chassis}\colon \big(\textrm{load}\times\textrm{velocity}\big) \tickar
+\big(\textrm{torque} \times \textrm{speed} \times \$\big)\\
+\]
+
+
+%\[
+%\begin{tikzpicture}[oriented WD, bb port sep=2, bb min width=2cm]
+%	\node[bb={2}{3}] (C) {$\Phi$};
+%  \draw[label, font=\footnotesize]
+%  	node[left=1pt of C_in1] {$\cat{P}_1$}
+%  	node[left=1pt of C_in2] {$\cat{P}_2$}
+%  	node[right=1pt of C_out1] {$\cat{Q}_1$}
+%  	node[right=1pt of C_out2] {$\cat{Q}_2$}
+%  	node[right=1pt of C_out3] {$\cat{Q}_3$}
+%  ;
+%\end{tikzpicture}
+%\]
+%In the picture above, the indicated feasibility problem is of the form:
+%\[\Phi\colon\cat{P}\tickar\cat{Q}\]
+%where $\cat{P}\coloneqq\cat{P}_1\times\cat{P}_2$ and $\cat{Q}\coloneqq\cat{Q}_1\times\cat{Q}_2\times\cat{Q}_3$.
+
+Let's walk through this a bit more concretely. Consider the design problem of
+filming a movie, where you must pit the tone and entertainment value against the
+cost. A feasibility relation describing this situation details what tone and
+entertainment value can be obtained at each cost; as such, it is described by a
+feasibility relation $\Phi\colon (T\times E)\tickar\$$. We represent this by
+the box
+\[
+\begin{tikzpicture}[oriented WD, bb port sep=2, bb min width=2cm]
+	\node[bb={2}{1}] (C) {$\Phi$};
+  \draw[label, font=\normalsize]
+  	node[left=1pt of C_in1] {$T$}
+  	node[left=1pt of C_in2] {$E$}
+  	node[right=1pt of C_out1] {\$}
+	;
+\end{tikzpicture}
+\]
+where $T$, $E$, and \$ are the preorders drawn below:
+\[
+\begin{tikzpicture}
+	\node(evil) {$\LTO{mean-spirited}$};
+	\node[above=1 of evil] (good) {$\LTO{good-natured}$};
+	\draw[->] (evil) -- (good);
+	\node[draw, fit=(good) (evil)] (T) {};
+	\node[left=0 of T] {$T\coloneqq$};
+%
+	\node[right=2 of evil] (boring) {$\LTO{boring}$};
+	\node[above=1 of boring] (funny) {$\LTO{funny}$};
+	\draw[->] (boring) -- (funny);
+	\node[draw, fit=(boring) (funny)] (E) {};
+	\node[left=0 of E] {$E\coloneqq$};
+%
+	\node at ($(boring)!.5!(funny)$) (helper) {};
+	\node[right=3 of helper] (b) {$\LTO{\$500K}$};
+	\node[above=.5 of b] (a) {$\LTO{\$1M}$};
+	\node[below=.5 of b] (c) {$\LTO{\$100K}$};
+	\draw[->] (c) -- (b);
+	\draw[->] (b) -- (a);
+	\node[draw, fit=(a) (c)] (D) {};
+	\node[left=0 of D] {$\$\coloneqq$};
+\end{tikzpicture}
+\]
+A possible feasibility relation is then described by the profunctor
+\[
+\begin{tikzpicture}
+	\node[right=3 of C] (mean funny) {$\LTO{(mean, funny)}$};
+	\node[right=1 of mean funny] (good boring) {$\LTO{(g/n, boring)}$};
+	\node at ($(mean funny)!.5!(good boring)$) (helper) {};
+	\node[below=1 of helper] (mean boring) {$\LTO{(mean, boring)}$};
+	\node[above=1 of helper] (good funny) {$\LTO{(g/n, funny)}$};
+	\draw[->] (mean boring) -- (mean funny);
+	\draw[->] (mean boring) -- (good boring);
+	\draw[->] (good boring) -- (good funny);
+	\draw[->] (mean funny) -- (good funny);
+	\node[draw, fit=(mean boring) (mean funny) (good boring) (good funny)] (L) {};
+	\node[left=0 of L] {$T\times E=$};
+%
+	\node[right=3 of mean boring] (a) {$\LTO{\$100K}$};
+	\node[above=.8 of a] (b) {$\LTO{\$500K}$};
+	\node[above=.8 of b] (c) {$\LTO{\$1M}$};
+	\draw[->] (a) -- (b);
+	\draw[->] (b) -- (c);
+	\node[draw, fit=(a) (c)] (D) {};
+	\node[right=0 of D] {$=\$$};
+%
+	\draw[mapsto, bend left=10pt] (mean funny) to (c);
+	\draw[mapsto] (mean boring) to (a);
+	\draw[mapsto] (good boring) to (b);
+\end{tikzpicture}
+\]
+This says, for example, that a good-natured but boring movie costs \$500K to
+produce (of course, the producers would also be happy to get \$1M).
+
+To elaborate, each arrow in the above diagram is to be interpreted as saying,
+``I can provide the source given the target''. For example, there are arrows
+witnessing each of ``I can provide \$500K given \$1M'', ``I can provide a
+good-natured but boring movie given \$500K'', and ``I can provide a mean and
+boring movie given a good-natured but boring movie''.  Moreover, this
+relationship is transitive, so the path from (mean, boring) to \$1M indicates
+also that ``I can provide a mean and boring movie given \$1M''.  
+
+Note the similarity and difference with the bridge interpretation of profunctors
+in \cref{ex.bool_profunctor_bridges}: the arrows still indicate the possibility
+of moving between source and target, but in this co-design driven interpretation
+we understand them as indicating that it is possible to get \emph{to} the source
+\emph{from} the target.
+
+\begin{exercise} %
+\label{exc.bad_humour}
+In the above diagram, the node (g/n, funny) has no dashed blue arrow emerging
+from it. Is this valid? If so, what does it mean?
+\end{exercise}
+
+%
+\index{feasibility relation|)}
+
+%---- Subsection ----%
+\section{Categories of profunctors}%
+\index{profunctors!category of|(}
+
+There is a category $\Feas$ whose objects are preorders and whose morphisms are
+feasibility relations. In order to describe it, we must give the composition
+formula and the identities, and prove that they satisfy the properties of being
+a category: unitality and associativity.%
+\index{associativity}%
+\index{unitality}
+
+\subsection{Composing profunctors}%
+\index{profunctors!composition of}
+If feasibility relations are to be morphisms, we need to give a formula for
+composing two of them in series. Imagine you have cities $\cat{P}$, $\cat{Q}$,
+and $\cat{R}$ and you have bridges---and hence feasibility matrices---connecting
+these cities, say $\Phi\colon\cat{P}\tickar\cat{Q}$ and
+$\Psi\colon\cat{Q}\tickar\cat{R}$. 
+\begin{equation}%
+\label{eqn.comp_profunctors}
+\begin{tikzpicture}[baseline=(Y)]
+	\node (mid) {};
+	\node[above=of mid] (XN) {$\LMO{N}$};
+	\node[left=of mid] (XW) {$\LMO{W}$};
+	\node[right=of mid] (XE) {$\LMO{E}$};
+	\node[below=of mid] (XS) {$\LMO[under]{S}$};
+	\node[draw, fit=(XN) (XW) (XS) (XE)] (X) {};
+	\draw[->]
+		(XS) edge (XW) edge (XE) 
+		(XW) edge (XN) 
+		(XE) edge (XN)
+	;
+	\node[above=0 of X, font=\normalsize] {$\cat{P}$};
+%
+	\node[right=5 of XS] (Ya) {$\LMO[under]{a}$};
+	\node[above left=.4 and .5 of Ya] (Yb) {$\LMO{b}$};
+	\node[above right=.4 and .5 of Ya] (Yc) {$\LMO{c}$};
+	\node[above=.4 of Yb] (Yd) {$\LMO{d}$};
+	\node[right=5 of XN] (Ye) {$\LMO{e}$};
+	\node[draw, fit=(Ye) (Yd) (Yc) (Ya)] (Y) {};
+	\draw[->]
+		(Yb) edge (Ya) edge (Yd)
+		(Yc) edge (Ya)
+	;
+	\node[above=0 of Y, font=\normalsize] {$\cat{Q}$};
+%
+	\node[right=4 of Ye] (Zx) {$\LMO{x}$};
+	\node[below=2 of Zx] (Zy) {$\LMO[under]{y}$};
+	\node[draw, fit=(Zx) (Zy)] (Z) {};
+	\draw[->] (Zx) -- (Zy);
+	\node[above=0 of Z, font=\normalsize] {$\cat{R}$};
+%
+	\draw[mapsto, bend right] (XW) to (Yb);
+	\draw[mapsto, bend left] (XN) to (Yc);
+	\draw[mapsto, bend left] (XE) to (Ye);
+	\draw[mapsto, red] (Ya) to (Zy);
+	\draw[mapsto, red] (Yd) to (Zx);
+\end{tikzpicture}
+\end{equation}
+The feasibility matrices for $\Phi$ (in blue) and $\Psi$ (in red) are:
+\[
+\begin{array}{c|ccccc}
+	\Phi&a&b&c&d&e\\\hline
+	N & \true& \false& \true& \false& \false\\ 
+	E & \true& \false& \true& \false& \true\\
+	W & \true& \true & \true& \true & \false\\ 
+	S & \true& \true & \true& \true & \true
+\end{array}
+\hspace{1in}
+\begin{array}{c|cc}
+	\Psi&x&y\\\hline
+	a & \false& \true\\
+	b & \true & \true\\
+	c & \false& \true\\
+	d & \true & \true\\
+	e & \false&\false
+\end{array}
+\]
+As in \cref{rem.personify_navigator}, we personify a quantale as a
+navigator.%
+\index{navigator} So
+imagine a navigator is trying to give a feasibility matrix $\Phi\cp\Psi$ for
+getting from $\cat{P}$ to $\cat{R}$. How should this be done? Basically, for
+every pair $p\in\cat{P}$ and $r\in\cat{R}$, the navigator searches through
+$\cat{Q}$ for a way-point $q$, somewhere both to which we can get from $p$ AND
+from which we can get to $r$. It is true that we can navigate from $p$ to $r$ iff there is a way-point $q$ through which to travel; this is a big OR over all possible $q$. The
+composition formula is thus:
+\begin{equation}%
+\label{eqn.comp_V_prof}
+  (\Phi\cp\Psi)(p,r)\coloneqq\bigvee_{q\in\cat{Q}}\Phi(p,q)\wedge\Psi(q,r).
+\end{equation}
+But as we said in \cref{eqn.quantale_matrix_mult}, this can be thought of as matrix multiplication. In our
+example, the result is
+\[
+\begin{array}{c|cc}
+	\Phi\cp\Psi&x&y\\\hline
+	N & \false& \true\\
+	E & \false& \true\\
+	W & \true & \true\\
+	S & \true & \true
+\end{array}
+\]
+and one can check that this answers the question, ``can you get from here to there'' in \cref{eqn.comp_profunctors}: you can't get from $N$ to $x$ but you can get from $N$ to $y$.
+
+The formula \eqref{eqn.comp_V_prof} is written in terms of the quantale $\Bool$,
+but it works for arbitrary (unital commutative) quantales. We give the following
+definition.
+
+\begin{definition}%
+\label{def.composite_profunctor}%
+\index{profunctors!composition of}
+Let $\cat{V}$ be a quantale, let $\cat{X}$, $\cat{Y}$, and
+$\cat{Z}$ be $\cat{V}$-categories, and let $\Phi\colon\cat{X}\tickar\cat{Y}$ and
+$\Psi\colon\cat{Y}\tickar\cat{Z}$ be $\cat{V}$-profunctors. We define their
+\emph{composite}, denoted $\Phi\cp\Psi\colon\cat{X}\tickar\cat{Z}$ by the formula
+\[(\Phi\cp\Psi)(p,r)=\bigvee_{q\in Q}\big(\Phi(p,q)\otimes\Psi(q,r)\big).\]
+\end{definition}
+
+\begin{exercise}%
+\label{exc.compose_Lawv_profs}
+Consider the $\Cost$-profunctors $\Phi\colon\cat{X}\tickar\cat{Y}$ and $\Psi\colon\cat{Y}\tickar\cat{Z}$ shown below:
+\[
+\begin{tikzpicture}[font=\scriptsize, x=1cm, every label/.style={font=\tiny}]
+	\node[label={[above=-5pt]:$A$}] (a) {$\bullet$};
+	\node[right=1 of a, label={[above=-5pt]:$B$}] (b) {$\bullet$};
+	\node[below=1 of a, label={[below=5pt]:$C$}] (c) {$\bullet$};
+	\node[right=1 of c, label={[below=5pt]:$D$}] (d) {$\bullet$};
+	\draw[->] (c) to node[above left=-1pt and -1pt] {3} (b);
+	\draw[bend right,->] (a) to node[left] {3} (c);
+	\draw[bend left,->] (d) to node[below] {4} (c);
+	\draw[bend right,->] (b) to node[above] {2} (a);
+	\draw[bend left,->] (b) to node[right] {5} (d);
+	\node[draw, inner sep=15pt, fit=(a) (b) (c) (d)] (X) {};
+	\node[above=0 of X, font=\normalsize] {$\cat{X}\coloneqq$};
+%
+	\node[right=4 of a, label={[above=-5pt]:$x$}] (x) {$\bullet$};
+	\node[below=1 of x, label={[below=5pt]:$y$}] (y) {$\bullet$};
+	\node[label={[right=-5pt]:$z$}] at ($(x)!.5!(y)+(1.5cm,0)$) (z) {$\bullet$};
+	\draw[bend left,->] (y) to node[left] {3} (x);
+	\draw[bend left,->] (x) to node[right] {4} (y);	
+	\draw[bend left,->] (x) to node[above] {3} (z);
+	\draw[bend left,->] (z) to node[below right=-1pt and -1pt] {4} (y);
+	\node[draw, inner sep=15pt, fit=(x) (y) (z.west)] (Y) {};
+	\node[above=0 of Y, font=\normalsize] {$\cat{Y}\coloneqq$};
+%
+	\node [right=3.5 of x, label={[above=-5pt]:$p$}] (p) {$\bullet$};
+	\node [right=1 of p, label={[above=-5pt]:$q$}] (q) {$\bullet$};
+	\node [below=1 of q, label={[below=5pt]:$r$}]  (r) {$\bullet$};
+	\node [left=1 of r, label={[below=5pt]:$s$}]   (s) {$\bullet$};
+	\draw[bend left,->] (p) to node[above] {2} (q);
+	\draw[bend left,->] (q) to node[right] {2} (r);
+	\draw[bend left,->] (r) to node[below] {1} (s);
+	\draw[bend left,->] (s) to node[left]  {1} (p);
+	\node[draw, inner sep=15pt, fit=(p) (r)] (Z) {};
+	\node[above=0 of Z, font=\normalsize] {$\cat{Z}\coloneqq$};
+%
+\begin{scope}[mapsto]
+	\draw[bend left] (b) to node[above] {11} (x);
+	\draw[bend right] (d) to node[below] {9} (y);
+	\draw[bend left=20pt] (z) to node[above] {4} (p);
+	\draw[bend right=20pt] (z) to node[below] {4} (s);
+	\draw[bend right=20pt] (y) to node[below] {0} (r);
+\end{scope}
+\end{tikzpicture}
+\]
+Fill in the matrix for the composite profunctor:
+\[
+\begin{array}{c|cccc}
+  \Phi\cp\Psi&p&q&r&s\\\hline
+  A&\?&24&\?&\?\\
+  B&\?&\?&\?&\?\\
+  C&\?&\?&\?&\?\\
+  D&\?&\?&9&\?
+\end{array}
+\qedhere
+\]
+\end{exercise}
+
+
+% Subsubsection %
+\subsection{The categories $\cat{V}\textrm{-}\Cat{Prof}$ and $\Feas$}
+
+A composition rule suggests a category, and there is indeed a category where
+the objects are $\Bool$-categories and the morphisms are $\Bool$-profunctors. To
+make this work more generally, however, we need to add one technical condition.
+
+Recall from \cref{rem.partial_orders} that a preorder is a skeletal preorder if
+whenever $x \le y$ and $y \le x$, we have $x=y$. Skeletal preorders are also
+known as posets. We say a quantale is skeletal if its underlying preorder is
+skeletal; $\Bool$ and $\Cost$ are skeletal quantales.%
+\index{partial order}
+
+\begin{theorem}%
+\label{thm.quantale_prof}%
+\index{profunctors!category of}
+For any skeletal quantale $\cat{V}$, there is a category $\Prof_{\cat{V}}$ whose
+objects are $\cat{V}$-categories $\cat{X}$, whose morphisms are
+$\cat{V}$-profunctors $\cat{X}\tickar\cat{Y}$, and with composition defined as in \cref{def.composite_profunctor}.
+\end{theorem}
+
+\begin{definition}%
+\index{feasibility relation!as $\Bool$-profunctor}
+We define $\Feas\coloneqq\Prof_{\Bool}$.
+\end{definition}
+
+At this point perhaps you have two questions in mind. What are the identity
+morphisms? And why did we need to specialize to skeletal quantales? It turns out
+these two questions are closely related. 
+
+Define the \emph{unit profunctor}%
+\index{profunctor!unit}%
+\index{unit!profunctor} $\Unit{\cat{X}}\colon
+\cat{X} \tickar \cat{X}$ on a $\cat{V}$-category $\cat{X}$ by the formula 
+\begin{equation}%
+\label{eqn.unit_profunctor}
+	\Unit{\cat{X}}(x,y)\coloneqq\cat{X}(x,y).
+\end{equation}%
+\index{identity!profunctor|seealso {unit}}
+How do we interpret this? Recall that, by \cref{def.cat_enriched_mpos},
+$\cat{X}$ already assigns to each pair of elements $x,y\in\cat{X}$ an hom-object
+$\cat{X}(x,y)\in\cat{V}$. The unit profunctor $\Unit{\cat{X}}$ just assigns each
+pair $(x,y)$ that same object.%
+\index{hom object}
+
+In the $\Bool$ case the unit profunctor on some preorder $\cat{X}$ can be drawn like this:
+\[
+\begin{tikzpicture}[x=.7in, y=.25in, inner sep=5pt]
+	\node (a) at (0,5) {$\LMO{a}$};
+	\node (b) at (0,3) {$\LMO{b}$};
+	\node (c) at (-1,2) {$\LMO{c}$};
+	\node (d) at (1,2) {$\LMO{d}$};
+	\node (e) at (0,1) {$\LMO{e}$};
+	\node[draw, fit=(a) (b) (c) (d) (e)] (A) {};
+	\node[left=0 of A, font=\normalsize] {$\cat{X}\coloneqq$};
+	\draw[->] (b) to (a);
+	\draw[->] (c) to (b);
+	\draw[->] (d) to (b);
+	\draw[->] (e) to (c);
+	\draw[->] (e) to (d);
+%
+	\node (a') at (0+4,5) {$\LMO{a}$};
+	\node (b') at (0+4,3) {$\LMO{b}$};
+	\node (c') at (-1+4,2) {$\LMO{c}$};
+	\node (d') at (1+4,2) {$\LMO{d}$};
+	\node (e') at (0+4,1) {$\LMO{e}$};
+	\node[draw, fit=(a') (b') (c') (d') (e')] (A') {};
+	\draw[->] (b') to (a');
+	\draw[->] (c') to (b');
+	\draw[->] (d') to (b');
+	\draw[->] (e') to (c');
+	\draw[->] (e') to (d');
+	\node[right=0 of A', font=\normalsize] {$=:\cat{X}$};
+
+%
+\begin{scope}[mapsto]
+	\draw (a) to (a');
+	\draw[bend left=8pt] (b) to (b');
+	\draw[bend left=8pt] (c) to (c');
+	\draw[bend left=8pt] (d) to (d');
+	\draw (e) to (e');
+\end{scope}
+\end{tikzpicture}
+\]
+Obviously, composing a feasibility relation with with the unit leaves it
+unchanged; this is the content of \cref{lemma:unital_serial}.
+
+\begin{exercise} %
+\label{exc.draw_a_bridge}
+Choose a not-too-simple $\Cost$-category $\cat{X}$. Give a bridge-style diagram for the unit profunctor $U_{\cat{X}}\colon\cat{X}\tickar\cat{X}$.
+\end{exercise}
+
+\begin{lemma}%
+\label{lemma:unital_serial}
+Composing any profunctor $\Phi\colon\cat{P}\to\cat{Q}$ with either unit profunctor, $\Unit{\cat{P}}$ or $\Unit{\cat{Q}}$, returns $\Phi$:
+\[\Unit{\cat{P}}\cp\Phi=\Phi=\Phi\cp\Unit{\cat{Q}}\]
+\end{lemma}
+\begin{proof}
+We show that $\Unit{\cat{P}}\cp\Phi=\Phi$ holds; proving
+$\Phi=\Phi\cp\Unit{\cat{Q}}$ is similar. Fix $p\in P$ and $q\in Q$. Since
+$\cat{V}$ is skeletal, to prove the equality it's enough to show
+$\Phi\leq\Unit{\cat{P}}\cp\Phi$ and $\Unit{\cat{P}}\cp\Phi\leq\Phi$. We have one
+direction:
+\begin{equation}%
+\label{eqn.direction_rand597}
+	\Phi(p,q)= I\otimes\Phi(p,q)\leq\cat{P}(p,p)\otimes\Phi(p,q)\leq\bigvee_{p_1\in P}\big(\cat{P}(p,p_1)\otimes\Phi(p_1,q)\big)=(\Unit{\cat{P}}\cp\Phi)(p,q).
+\end{equation}
+For the other direction, we must show $\bigvee_{p_1\in P}\big(\cat{P}(p,p_1)\otimes\Phi(p_1,q)\big)\leq\Phi(p,q)$. But by definition of join, this holds iff $\cat{P}(p,p_1)\otimes\Phi(p_1,q)\leq\Phi(p,q)$ is true for each $p_1\in\cat{P}$. This follows from \cref{def.cat_enriched_mpos,def.enriched_profunctor}:
+\begin{equation}%
+\label{eqn.rand_16749}
+  \cat{P}(p,p_1)\otimes\Phi(p_1,q)=\cat{P}(p,p_1)\otimes\Phi(p_1,q)\otimes I\leq\cat{P}(p,p_1)\otimes\Phi(p_1,q)\otimes\cat{Q}(q,q)\leq\Phi(p,q).
+\end{equation}
+\end{proof}
+
+\begin{exercise} %
+\label{exc.prof_unitality}
+\begin{enumerate}
+  \item Justify each of the four steps $(=, \leq, \leq, =)$ in
+  \cref{eqn.direction_rand597}.
+  \item In the case $\cat{V}=\Bool$, we can directly show each of the four steps
+  in \cref{eqn.direction_rand597} is actually an equality. How? 
+  \item Justify each of the three steps $(=,\leq,\leq)$ in \cref{eqn.rand_16749}.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Composition of profunctors is also associative; we leave the proof to you. 
+
+\begin{lemma}%
+\label{lemma:assoc_serial}%
+\index{associativity!of profunctor composition}
+Serial composition of profunctors is associative. That is, given profunctors $\Phi\colon\cat{P}\to\cat{Q}$, $\Psi\colon\cat{Q}\to\cat{R}$, and $\Upsilon\colon\cat{R}\to\cat{S}$, we have
+\[(\Phi\cp\Psi)\cp\Upsilon=\Phi\cp(\Psi\cp\Upsilon).\]
+\end{lemma}
+
+\begin{exercise} %
+\label{exc.prof_associativity}
+Prove \cref{lemma:assoc_serial}. (Hint: remember to use the fact that $\cat{V}$
+is skeletal.)
+\end{exercise} 
+
+So, feasibility relations form a category. Since this is the case, we
+can describe feasibility relations using wiring diagrams for categories (see also \cref{subsec.reflection_wds}), which are very simple. Indeed, each box can only have
+one input and one output, and they're connected in a line:
+\[
+\begin{tikzpicture}[oriented WD, align=center, bbx=1cm, bby=1.5ex]
+	\node[bb={1}{1}] (f) {$f$};
+	\node[left=1 of f_in1] (a) {$a$};
+	\node[right=1.5 of f_out1, bb={1}{1}] (g) {$g$};
+	\node[right=1.5 of g_out1, bb={1}{1}] (h) {$h$};
+	\node[right=1 of h_out1] (d) {$d$};
+	\node[bb={1}{1}, fit=(f) (g) (h)] (outer) {};
+	\draw (f_in1) to (outer_in1);
+	\draw (f_out1) to node[above] {$b$} (g_in1);
+	\draw (g_out1) to node[above] {$c$} (h_in1);
+	\draw (h_out1) to (outer_out1); 
+\end{tikzpicture}
+\]
+On the other hand, we have seen that feasibility relations are the building
+blocks of co-design problems, and we know that co-design problems can be
+depicted with a much richer wiring diagram, for example:
+\[
+\begin{tikzpicture}
+[oriented WD, bb min width =.5cm, bby=2ex, bbx=.6cm, bb port length=3pt, 
+string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\leq$};},
+baseline=(Y)] 
+  \node[bb port sep=.8, bb={3}{1}] (Sigma1) {$\Sigma$};
+  \node[bb port sep=2,bb min width=4.3em, bb={2}{3}, below right=-3 and 1 of Sigma1.south east] (Chassis) {Chassis};
+  \node (Chassis 15) at ($(Chassis_out1)!.5!(Chassis_out2)$) {};
+  \node[bb port sep=2*3/5,bb min width=4.3em, bb={2}{4}, right=2 of Chassis 15] (Motor) {Motor};
+  \node[bb port sep=2*3/5, bb={2}{2}, bb min width=4.3em, right=2 of Motor] (Battery) {Battery};
+	\node[bb port sep=.8, bb={3}{1}, below right=-.5 and 1 of Battery] (Sigma2) {$\Sigma$};
+  \node[bb={0}{0}, fit={($(Sigma1.north west)+(-.5,3)$) (Chassis) (Motor) (Sigma2)}, bb name=Robot] (Y) {};
+	\node[coordinate] (Y_in1) at (Y.west|-Sigma1_in3) {};
+	\node[coordinate] (Y_in2) at (Y.west|-Chassis_in2) {};
+	\node[coordinate] (Y_out1) at (Y.east|-Sigma2_out1) {};
+  \draw[ar, shorten <=-3pt] (Y_in1) to (Sigma1_in3);
+  \draw[ar, shorten <=-3pt] (Y_in2) to (Chassis_in2);
+  \draw[ar] (Sigma1_out1) to (Chassis_in1);
+  \draw[ar] (Chassis_out1) to (Motor_in1);
+  \draw[ar] (Chassis_out2) to (Motor_in2);
+  \draw[ar] let \p1=(Motor.west), \p2=(Sigma2_in3), \n1=\bbportlen in
+  	(Chassis_out3) to (\x1-\n1,\y2) -- (Sigma2_in3);
+  \draw[ar] (Motor_out2) to node[above=-1pt, font=\tiny] {Voltage} (Battery_in1);
+  \draw[ar] (Motor_out3) to node[above=-1pt, font=\tiny] {Current} (Battery_in2);
+  \draw[ar] let \p1=(Battery.west), \p2=(Sigma2_in2), \n1=\bbportlen in
+    (Motor_out4) to node[pos=.4, above=1pt, font=\tiny] {\$} (\x1-\n1, \y2) -- (Sigma2_in2);
+  \draw[ar] (Battery_out2) to (Sigma2_in1);
+  \draw[ar, shorten >=-3pt, string decoration pos=.5] (Sigma2_out1) to (Y_out1); 
+  \draw[ar, string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\geq$};}, string decoration pos=.5] let \p1=(Motor.north east), \p2=(Sigma1.north west), \n1={\y2+\bby},\n2=\bbportlen in
+  	(Motor_out1) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (Sigma1_in1);
+  \draw[ar, string decoration = {\node[circle, inner sep=0pt, fill=white, font=\fontsize{5}{5}\selectfont] {$\geq$};}, string decoration pos=.5] let \p1=(Battery.north east), \p2=(Sigma1.north west), \n1={\y2+\bby+\bby},\n2=\bbportlen in
+  	(Battery_out1) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (Sigma1_in2);
+%
+	\draw[label]
+		node[left=.3 of Y_in1,align=center] {\footnotesize Weight \\ \footnotesize (as payload)}
+		node[left=.3 of Y_in2] {\footnotesize Velocity}
+		node[right=.3 of Y_out1] {\footnotesize \$}
+		node[above right=.2 and 0 of Chassis_out1] {\tiny Torque}
+		node[above right=.2 and 0 of Chassis_out2] {\tiny Speed}
+		node[above right=.2 and 0 of Chassis_out3] {\tiny \$}
+		node[above right=.3 and .5 of Motor_out1, align=left, font=\tiny] {Weight}
+		node[above right=.3 and .8 of Battery_out1, align=left, font=\tiny] {Weight}
+		node[above right=.2 and 0 of Battery_out2, font=\tiny] {\$}
+	;	
+\end{tikzpicture}
+\]
+This hints that the category $\Feas$ has more structure. We've seen wiring
+diagrams where boxes can have multiple inputs and outputs before, in
+\cref{chap.resource_theory}; there they depicted morphisms in a monoidal
+preorder. On other hand the boxes in the wiring diagrams of
+\cref{chap.resource_theory} could not have distinct labels, like the boxes in a
+co-design problem: all boxes in a wiring diagram for monoidal preorders indicate
+the order $\le$, while above we see boxes labelled by ``Chassis'', ``Motor'',
+and so on. Similarly, we know that $\Feas$ is a proper category, not just a
+preorder. To understand these diagrams then, we must introduce a new structure,
+called a \emph{monoidal category}. A monoidal category is a \emph{categorified}
+monoidal preorder. 
+
+
+\begin{remark}%
+\index{categorification}
+While we have chosen to define $\Prof_\cat{V}$ only for skeletal quantales in
+\cref{thm.quantale_prof}, it is not too hard to work with non-skeletal ones.
+There are two straightforward ways to do this. First, we might let the morphisms
+of $\Prof_\cat{V}$ be isomorphism classes of $\cat{V}$-profunctors. This is
+analogous to the trick we will use when defining the category $\cospan{\cat{C}}$
+in \cref{def.cospan_sym_mon_cat}.  Second, we might relax what we mean by
+category, only requiring composition to be unital and associative `up to
+isomorphism'. This is also a type of categorification, known as bicategory theory.%
+\index{bicategory}%
+\index{associativity!weak}%
+\index{unitality!weak}
+\end{remark}
+
+In the next section we'll discuss categorification and introduce monoidal
+categories. First though, we finish this section by discussing why profunctors
+are called profunctors, and by formally introducing something called the \emph{collage} of a profunctor.
+
+%
+\index{profunctors!category of|)}
+
+%---- Subsection ----%
+\subsection{Fun profunctor facts: companions, conjoints, collages}
+
+
+\paragraph{Companions and conjoints.}
+Recall that a preorder is a $\Bool$-category and a monotone map is a $\Bool$-functor. We said above that a profunctor is a generalization of a functor; how so?
+
+In fact, every $\cat{V}$-functor gives rise to two $\cat{V}$-profunctors, called the companion and the conjoint.
+
+\begin{definition}%
+\label{def.companion_conjoint}%
+\index{companion profunctor}%
+\index{conjoint profunctor}
+Let $F\colon\cat{P}\to\cat{Q}$ be a $\cat{V}$-functor. The \emph{companion of
+$F$}, denoted $\comp{F}\colon\cat{P}\tickar\cat{Q}$ and the \emph{conjoint of
+$F$}, denoted $\conj{F}\colon\cat{Q}\tickar\cat{P}$ are defined to be the
+following $\cat{V}$-profunctors:
+\[
+  \comp{F}(p,q)\coloneqq\cat{Q}(F(p),q)
+  \quad\text{and}\quad
+  \conj{F}(q,p)\coloneqq\cat{Q}(q,F(p))
+\]
+\end{definition}
+
+Let's consider the $\Bool$ case again. One can think of a monotone map
+$F\colon\cat{P}\to\cat{Q}$ as a bunch of arrows, one coming out of each vertex
+$p\in P$ and landing at some vertex $F(p)\in Q$.
+\[
+\begin{tikzpicture}[x=.7in, y=.4in, inner sep=5pt]
+  	\node (a) at (0,4) {$\bullet$};
+  	\node (b) at (0,3) {$\bullet$};
+  	\node (c) at (-1,2) {$\bullet$};
+  	\node (d) at (1,2) {$\bullet$};
+  	\node (e) at (0,1) {$\bullet$};
+  	\node[draw, fit=(a) (b) (c) (d) (e)] (A) {};
+  	\node[left=0 of A, font=\normalsize] {$\cat{P}\coloneqq$};
+  	\draw[->] (b) to (a);
+  	\draw[->] (c) to (b);
+  	\draw[->] (d) to (b);
+  	\draw[->] (e) to (c);
+  	\draw[->] (e) to (d);
+  	\node (B0) at (4,4) {$\bullet$};
+  	\node (B1) at (4,2.5) {$\bullet$};
+  	\node (B2) at (4,1) {$\bullet$};
+  	\draw[->] (B2) to (B1);
+  	\draw[->] (B1) to (B0);
+  	\node[draw, fit=(B0) (B1) (B2)] (B) {};
+  	\node[right=0 of B, font=\normalsize] {$=:\cat{Q}$};
+	\begin{scope}[mapsto]
+    \draw (a) -- (B0);
+  	\draw (b) to[out=0,in=170] (B1);
+  	\draw (c) to[out=10,in=180] (B1);
+  	\draw (d) to[out=0,in=196] (B1);
+  	\draw (e) -- (B2);
+	\end{scope}
+\end{tikzpicture}
+\]
+This looks like the pictures of bridges connecting cities, and if one regards
+the above picture in that light, they are seeing the companion $\comp{F}$. But
+now mentally reverse every dotted arrow, and the result would be bridges
+$\cat{Q}$ to $\cat{P}$. This is a profunctor $\cat{Q} \tickar \cat{P}$! We call
+it $\conj{F}$.
+
+\begin{example}%
+\label{ex.unit_profunctor}%
+\index{profunctor!unit}
+For any preorder $\cat{P}$, there is an identity functor
+$\id\colon\cat{P}\to\cat{P}$. Its companion and conjoint agree
+$\comp{\id}=\conj{\id}\colon\cat{P}\tickar\cat{P}$. The resulting profunctor is
+in fact the unit profunctor, $\Unit{\cat{P}}$, as defined in \cref{eqn.unit_profunctor}.
+\end{example}
+
+\begin{exercise} %
+\label{exc.unit_companion}
+Check that the companion $\comp{\id}$ of $\id\colon\cat{P}\to\cat{P}$ really has
+the unit profunctor formula given in \cref{eqn.unit_profunctor}.
+\end{exercise}
+
+%\begin{exercise}%
+\label{exc.comp_conj_unit}
+%In \cref{def.companion_conjoint}, we gave the definition of companion and conjoint of a monotone map between preorders, i.e.\ for the $\Bool$-enriched case. We also defined the unit profunctor in \cref{ex.unit_profunctor}.
+%
+%Now let $\cat{V}$ be an arbitrary quantale (see \cref{def.monoidal_closed}), and suppose $\cat{X}$ and $\cat{Y}$ are $\cat{V}$-categories.
+%\begin{enumerate}
+%	\item Let $f\colon\cat{X}\to\cat{Y}$ is a $\cat{V}$-functor. Give a definition for its companion and conjoint, $\comp{f}\colon\cat{X}\tickar\cat{Y}$ and $\conj{f}\colon\cat{Y}\tickar\cat{X}$ in the $\cat{V}$-enriched case.
+%	\item Give a definition for the unit $\Unit{\cat{X}}\colon\cat{X}\tickar\cat{X}$ in the $\cat{V}$-enriched case.
+%	\qedhere
+%\end{enumerate}
+%\end{exercise}
+
+\begin{example}%
+\label{ex.plus_3}
+Consider the function $+\colon\RR\times\RR\times\RR\to\RR$, sending a triple $(a,b,c)$ of real numbers to $a+b+c\in\RR$. This function is monotonic, because if $(a,b,c)\leq(a',b',c')$---i.e.\ if $a\leq a'$ and $b\leq b'$, and $c\leq c'$---then obviously $a+b+c\leq a'+b'+c'$. Thus it has a companion and a conjoint.
+
+Its companion $\comp{+}\colon(\RR\times\RR\times\RR)\tickar\RR$ is the function that sends $(a,b,c,d)$ to $\true$ if $a+b+c\leq d$ and to $\false$ otherwise.
+\end{example}
+
+\begin{exercise} %
+\label{exc.plus_conjoint}
+	Let $+\colon\RR\times\RR\times\RR\to\RR$ be as in \cref{ex.plus_3}. What is its conjoint $\conj{+}$?
+\end{exercise}
+
+\begin{remark}[$\cat{V}$-Adjoints]%
+\index{adjunction!relationship to companions
+  and conjoints}
+Recall from \cref{def.galois} the definition of Galois connection between preorders $\cat{P}$ and $\cat{Q}$. The definition of adjoint can be extended from the $\Bool$-enriched setting (of preorders and monotone maps) to the $\cat{V}$-enriched setting for arbitrary monoidal preorders $\cat{V}$. In that case, the definition of a $\cat{V}$-adjunction is a pair of $\cat{V}$-functors $F\colon\cat{P}\to\cat{Q}$ and $G\colon\cat{Q}\to\cat{P}$ such that the following holds for all $p\in P$ and $q\in Q$.
+\begin{equation}%
+\label{eqn.adjoint_V_funs}
+	\cat{P}(p,G(q))\cong\cat{Q}(F(p),q)
+\end{equation}
+\end{remark}
+
+\begin{exercise} %
+\label{exc.adjoint_comp_conj}
+Let $\cat{V}$ be a skeletal quantale, let $\cat{P}$ and $\cat{Q}$ be $\cat{V}$-categories, and let $F\colon\cat{P}\to\cat{Q}$ and $G\colon\cat{Q}\to\cat{P}$ be $\cat{V}$-functors.
+\begin{enumerate}
+	\item Show that $F$ and $G$ are $\cat{V}$-adjoints (as in
+	\cref{eqn.adjoint_V_funs}) if and only if the companion of the former
+	equals the conjoint of the latter: $\comp{F}=\conj{G}$.
+	\item Use this to prove that $\comp{\id}=\conj{\id}$, as was stated in \cref{ex.unit_profunctor}.
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\paragraph{Collage of a profunctor.}%
+\index{collage|(}%
+\index{profunctor!collage of|see {collage}}
+
+We have been drawing profunctors as bridges connecting cities. One may get an inkling that given a $\cat{V}$-profunctor $\Phi\colon X\tickar Y$ between $\cat{V}$-categories $\cat{X}$ and $\cat{Y}$, we have turned $\Phi$ into a some sort of new $\cat{V}$-category that has $\cat{X}$ on the left and $\cat{Y}$ on the right. This works for any $\cat{V}$ and profunctor $\Phi$, and is called the collage construction.
+%
+\index{profunctor!as bridges}
+
+\begin{definition}%
+\label{def.collage_prof}%
+\index{collage}
+	Let $\cat{V}$ be a quantale, let $\cat{X}$ and $\cat{Y}$ be $\cat{V}$-categories, and let $\Phi\colon\cat{X}\tickar\cat{Y}$ be a $\cat{V}$-profunctor. The \emph{collage of $\Phi$}, denoted $\Cat{Col}(\Phi)$ is the $\cat{V}$-category defined as follows:
+	\begin{enumerate}[label=(\roman*)]
+		\item $\Ob(\Cat{Col}(\Phi))\coloneqq\Ob(\cat{X})\sqcup\Ob(\cat{Y})$;
+		\item For any $a,b\in\Ob(\Cat{Col}(\Phi))$, define $\Cat{Col}(\Phi)(a,b)\in\cat{V}$ to be
+		\[
+			\Cat{Col}(\Phi)(a,b)\coloneqq
+			\begin{cases}
+				\cat{X}(a,b)&\tn{ if }a,b\in\cat{X}\\
+				\Phi(a,b)&\tn{ if }a\in\cat{X},b\in\cat{Y}\\
+				\varnothing&\tn{ if }a\in\cat{Y},b\in\cat{X}\\
+				\cat{Y}(a,b)&\tn{ if }a,b\in\cat{Y}
+			\end{cases}
+		\]
+	\end{enumerate}
+There are obvious functors $i_\cat{X}\colon\cat{X}\to\Cat{Col}(\Phi)$ and $i_\cat{Y}\colon\cat{Y}\to\Cat{Col}(\Phi)$, sending each object and morphism to ``itself,'' called  \emph{collage inclusions}.
+\end{definition}
+
+Some pictures will help clarify this.
+
+\begin{example}%
+\index{Hasse diagram!for profunctors}
+Consider the following picture of a $\Cost$-profunctor $\Phi\colon\cat{X}\tickar\cat{Y}$:
+\[
+\begin{tikzpicture}[font=\scriptsize, x=1cm, y=5ex]
+	\node (A) {$\LMO{A}$};
+	\node[below=1 of A] (B) {$\LMO[under]{B}$};
+	\draw[->] (A) to node[left] {2} (B);
+	\node[draw, inner xsep=15pt, inner ysep=5pt, fit=(A) (B)] (X) {};
+	\node[left=0 of X, font=\normalsize] {$\cat{X}\coloneqq$};
+%
+	\node[right=4 of A] (x) {$\LMO{x}$};
+	\node[below=1 of x] (y) {$\LMO[under]{y}$};
+	\draw[bend right,->] (x) to node[left] {3} (y);
+	\draw[bend right,->] (y) to node[right] {4} (x);
+	\node[draw, inner xsep=15pt, inner ysep=5pt, fit=(x) (y)] (Y) {};
+	\node[right=0 of Y, font=\normalsize] {$=:\cat{Y}$};
+%
+ 	\draw[mapsto, bend left] (A) to node[above] {5} (x);
+\end{tikzpicture}
+\]
+It corresponds to the following matrices
+\[
+\begin{array}{c|cc}
+\cat{X}&A&B\\\hline
+A&0&2\\
+B&\infty&0
+\end{array}
+\hspace{.5in}
+\begin{array}{c|cc}
+\Phi&x&y\\\hline
+A&5&8\\
+B&\infty&\infty
+\end{array}
+\hspace{.5in}
+\begin{array}{c|cc}
+\cat{Y}&x&y\\\hline
+x&0&3\\
+y&4&0
+\end{array}
+\]
+A generalized Hasse diagram of the collage can be obtained by simply taking the
+union of the Hasse diagrams for $\cat{X}$ and $\cat{Y}$, and adding in the
+bridges as arrows. Given the above profunctor $\Phi$, we draw the Hasse diagram
+for $\Cat{Col}(\Phi)$ below left, and the $\Cost$-matrix representation of the
+resulting $\Cost$-category on the right:
+\[
+\begin{tikzpicture}[font=\scriptsize, x=1cm, baseline=(Collage)]
+	\node (A) {$\LMO{A}$};
+	\node[below=1 of A] (B) {$\LMO[under]{B}$};
+	\node[right=1 of A] (x) {$\LMO{x}$};
+	\node[below=1 of x] (y) {$\LMO[under]{y}$};
+	\draw[->] (A) to node[left] {2} (B);
+ 	\draw[->] (A) to node[above] {5} (x);
+	\draw[bend right,->] (x) to node[left] {3} (y);
+	\draw[bend right,->] (y) to node[right] {4} (x);
+	\node[draw, inner xsep=15pt, inner ysep=10pt, fit=(A) (y)] (Collage) {};
+	\node[left=0 of Collage, font=\normalsize] {$\Cat{Col}(\Phi)=$};
+\end{tikzpicture}
+\hspace{1in}
+\begin{array}{c|cccc}
+  \Cat{Col}(\Phi)&A&B&x&y\\\hline
+  A&0&2&5&8\\
+  B&\infty&0&\infty&\infty\\
+  x&0&0&0&3\\
+  y&0&0&4&0
+\end{array}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.collage_practice}
+Draw a Hasse diagram for the collage of the profunctor shown here:
+\[
+\begin{tikzpicture}[font=\scriptsize, x=1cm, every label/.style={font=\tiny}, baseline=(Y)]
+	\node[label={[above=-5pt]:$A$}] (a) {$\bullet$};
+	\node[right=1 of a, label={[above=-5pt]:$B$}] (b) {$\bullet$};
+	\node[below=1 of a, label={[below=5pt]:$C$}] (c) {$\bullet$};
+	\node[right=1 of c, label={[below=5pt]:$D$}] (d) {$\bullet$};
+	\draw[->] (c) to node[above left=-1pt and -1pt] {3} (b);
+	\draw[bend right,->] (a) to node[left] {3} (c);
+	\draw[bend left,->] (d) to node[below] {4} (c);
+	\draw[bend right,->] (b) to node[above] {2} (a);
+	\draw[bend left,->] (b) to node[right] {5} (d);
+	\node[draw, inner sep=15pt, fit=(a) (b) (c) (d)] (X) {};
+	\node[left=0 of X, font=\normalsize] {$X\coloneqq$};
+%
+	\node[right=4 of b] (x) {$\LMO{x}$};
+	\node[below=1 of x] (y) {$\LMO[under]{y}$};
+	\node at ($(x)!.5!(y)+(1.5cm,0)$) (z) {$\LMO{z}$};
+	\draw[bend left,->] (y) to node[left] {3} (x);
+	\draw[bend left,->] (x) to node[right] {4} (y);	
+	\draw[bend left,->] (x) to node[above] {3} (z);
+	\draw[bend left,->] (z) to node[below right=-1pt and -1pt] {4} (y);
+	\node[draw, inner sep=15pt, fit=(x) (y) (z.west)] (Y) {};
+	\node[right=0 of Y, font=\normalsize] {$=:Y$};
+%
+	\draw[mapsto, bend left] (b) to node[above] {11} (x);
+	\draw[mapsto, bend right] (d) to node[below] {9} (y);
+\end{tikzpicture}
+\qedhere
+\]
+\end{exercise}
+
+%
+\index{profunctor|)}%
+\index{collage|)}
+
+%-------- Section --------%
+\section{Categorification}%
+\label{sec.categorification}%
+\index{categorification|(}
+
+Here we switch gears, to discuss a general concept called \emph{categorification}. We will begin again with the basics, categorifying several of the notions we've encountered already. The goal is to define compact closed categories and their feedback-style wiring diagrams. At that point we will return to the story of co-design, and $\cat{V}$-profunctors in general, and show that they do in fact form a compact closed category, and thus interpret the diagrams we've been drawing since \cref{eqn.chassis}. 
+
+%---- Subsection ----%
+\subsection{The basic idea of categorification}
+
+The general idea of categorification is that we take a thing we know and
+add structure to it, so that what were formerly \emph{properties} become
+\emph{structures}. We do this in such a way that we can recover the thing we
+categorified by forgetting this new structure. This is rather vague; let's give
+an example.%
+\index{categorification}
+
+Basic arithmetic concerns properties of the natural numbers $\nn$, such as the
+fact that $5+3=8$. One way to categorify $\nn$ is to use the category
+$\finset$ of finite sets and functions. To obtain a categorification, we replace
+the brute $5$, $3$, and $8$ with sets of that many elements, say
+$\ol{5}=\{\textrm{apple}, \textrm{banana}, \textrm{cherry},
+\textrm{dragonfruit}, \textrm{elephant}\}$, $\ol{3}=\{\textrm{apple},
+\textrm{tomato}, \textrm{cantaloupe}\}$, and $\ol{8}=\{\textrm{Ali},
+\textrm{Bob}, \textrm{Carl}, \textrm{Deb}, \textrm{Eli}, \textrm{Fritz},
+\textrm{Gem}, \textrm{Helen}\}$ respectively. We also replace $+$ with disjoint
+union of sets $\sqcup$, and the brute property of equality with the structure of
+an isomorphism. What makes this a good categorification is that, having made
+these replacements, the analogue of $5+3=8$ is still true: $\ol{5}\sqcup \ol{3}
+\cong \ol{8}$.%
+\index{union!disjoint}
+\[
+\begin{tikzpicture}[y=.3ex, rounded corners]
+	\node (a1) {$\LTO{apple}$};
+	\node [below=1 of a1] (a2) {$\LTO{banana}$};
+	\node [below=1 of a2] (a3) {$\LTO{cherry}$};
+	\node [below=1 of a3] (a4) {$\LTO{dragonfruit}$};
+	\node [below=1 of a4] (a5) {$\LTO{elephant}$};
+	\node [draw, fit=(a1) (a5)] (a) {};
+%
+	\node [right=2 of a2] (b1) {$\LTO{apple}$};
+	\node [below=1 of b1] (b2) {$\LTO{tomato}$};
+	\node [below=1 of b2] (b3) {$\LTO{cantaloupe}$};
+	\node [draw, fit=(b1) (b3)] (b) {};	
+%
+	\node at ($(a)!.5!(b)$) {$\sqcup$};
+%
+%	\node [right=5 of a1] (x11) {$\LTO{apple1}$};
+%	\node [below=1 of x11] (x12) {$\LTO{banana1}$};
+%	\node [below=1 of x12] (x13) {$\LTO{cherry1}$};
+%	\node [below=1 of x13] (x14) {$\LTO{dragonfruit1}$};
+%	\node [below=1 of x14] (x15) {$\LTO{elephant1}$};
+%	\node [right=1 of x12] (x21) {$\LTO{apple2}$};
+%	\node [below=1 of x21] (x22) {$\LTO{tomato2}$};
+%	\node [below=1 of x22] (x23) {$\LTO{cantaloupe2}$};
+%	\node [draw, fit=(x11) (x21) (x15) (x23)] (x) {};	
+%%
+%	\node at ($(b.east)!.5!(x.west)$) {$=$};
+%
+	\node at ($(a1.south)!.5!(a2.north)$) (helper) {};
+	\node [right=6 of helper] (y1) {$\LTO{Ali}$};
+	\node [below=1 of y1] (y2) {$\LTO{Bob}$};
+	\node [below=1 of y2] (y3) {$\LTO{Carl}$};
+	\node [below=1 of y3] (y4) {$\LTO{Deb}$};
+	\node [right=1 of y1] (y5) {$\LTO{Eli}$};
+	\node [below=1 of y5] (y6) {$\LTO{Fritz}$};
+	\node [below=1 of y6] (y7) {$\LTO{Gem}$};
+	\node [below=1 of y7] (y8) {$\LTO{Helen}$};
+	\node [draw, fit= (y1) (y8)] (y) {};
+%
+	\node at ($(b.east)!.5!(y.west)$) {$\cong$};
+	\begin{scope}[densely dashed, blue, <->, bend left=40]
+		\draw (a1) to (y5);
+		\draw (a2) to (y6);
+	\end{scope}
+	\begin{scope}[densely dashed, blue, <->, bend right=34]
+		\draw (a3) to (y4);
+	\end{scope}
+	\begin{scope}[densely dashed, blue, <->, bend right=40]
+		\draw (a4) to (y7);
+		\draw (a5) to (y8);
+	\end{scope}
+	\begin{scope}[densely dashed, blue, <->]
+		\draw (b1) to (y1);
+		\draw (b2) to (y2);
+		\draw (b3) to (y3);
+	\end{scope}
+\end{tikzpicture}
+\]
+In this categorified world, we have more structure available to talk about the
+relationships between objects, so we can be more precise about how they relate
+to each other. Thus it's not the case that $\ol{5} \sqcup \ol{3}$ is
+\emph{equal} to our chosen eight-element set $\ol{8}$, but more precisely that
+there exists an invertible function comparing the two, showing that they are
+isomorphic in the \emph{category} $\finset$.
+
+Note that in the above construction we made a number of choices; here we must
+beware. Choosing a good categorification---like designing a good algebraic
+structure such as that of preorders or quantales---is part of the \emph{art} of
+mathematics.  There is no prescribed way to categorify, and the success of a
+chosen categorification is often empirical: its richer structure should allow us more
+insights into the subject we want to model.
+
+As another example, an empirically pleasing way to categorify preorders is to
+categorify them as, well, categories.  In this case, rather than the brute
+property ``there exists a morphism $a\to b$,'' denoted $a\leq b$ or
+$\cat{P}(a,b)=\true$, we instead say ``here is a set of morphisms $a\to b$.'' We
+get a hom-set rather than a hom-Boolean. In fact---to state this in a way
+straight out of the primordial ooze---just as preorders are $\Bool$-categories,
+ordinary categories are actually $\Cat{Set}$-categories.
+%
+\index{primordial ooze}
+%For example, we have seen that preorders are categories in which there
+%is only one morphism $a\to b$: so if I can name two morphisms, we immediately
+%know they are equal.  One way to categorify this is to say that rather than
+%saying they \emph{are} equal, a brute property, we say ``I can supply an
+%equivalence between any two morphisms,'' the equivalence being a structure.
+%This categorification of the concept of preorder, however, does not happen to be a useful
+%one, and this is exactly the problem with categorification: there is no unique
+%way to categorify. The notion of categorification is not a mathematical one. It
+%seems one must use empirical evidence to say which categorifications are
+%``pleasing.''
+
+%
+\index{categorification|)}
+
+%---- Subsection ----%
+\subsection{A reflection on wiring diagrams}%
+\label{subsec.reflection_wds}%
+\index{wiring diagram|(}
+
+Suppose we have a preorder. We introduced a very simple sort of wiring diagram in
+\cref{ssec.wirdia2}. These allowed us to draw a box 
+\[
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}] at (0,0) (a) {$\le$};
+	\node[bb={1}{1}, fit=(a)] (outer) {};
+	\begin{scope}[font=\tiny]
+		\draw (outer_in1') to node[above=-2pt] {$x_0$} (a_in1);
+  	\draw (a_out1) to node[above=-2pt] {$x_1$} (outer_out1);
+	\end{scope}
+\end{tikzpicture}
+\]
+whenever $x_0 \le x_1$. Chaining these together, we could prove facts in our
+preorder. For example
+\[
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}] at (0,0) (a) {$\le$};
+	\node[bb={1}{1}] at (3,0) (b) {$\le$};
+	\node[bb={1}{1}] at (6,0) (c) {$\le$};
+	\node[bb={1}{1}, fit=(a) (b) (c)] (outer) {};
+	\begin{scope}[font=\tiny]
+		\draw (outer_in1') to node[above=-2pt] {$x_0$} (a_in1);
+  	\draw (a_out1) to node[above=-2pt] {$x_1$} (b_in1);
+  	\draw (b_out1) to node[above=-2pt] {$x_2$} (c_in1);
+  	\draw (c_out1) to node[above=-2pt] {$x_3$} (outer_out1');
+	\end{scope}
+\end{tikzpicture}
+\]
+provides a proof that $x_0\leq x_3$ (the exterior box) using three facts (the
+interior boxes), $x_0\leq x_1$, $x_1\leq x_2$, and $x_2\leq x_3$.
+
+%
+\index{wiring diagram!for categories}
+As categorified preorders, categories have basically the same sort of wiring
+diagram as preorders---namely sequences of boxes inside a box. But since we have
+replaced the fact that $x_0 \le x_1$ with the structure of a \emph{set} of
+morphisms, we need to be able to label our boxes with morphism names:
+\[
+\begin{tikzpicture}[oriented WD, align=center, bb port length=0ex, bb penetrate=0ex]
+	\node[bb={1}{1}] (f) {$f$};
+	\node[bb={1}{1}, fit=(f)] (outer) {};
+	\draw (outer_in1') to node[above, font=\tiny] {$A$} (f_in1);
+	\draw (f_out1) to node[above, font=\tiny] {$B$} (outer_out1); 
+\end{tikzpicture}
+\]
+Suppose given additional morphisms $g\colon B\to C$, and $h\colon C\to D$.
+Representing these each as boxes like we did for $f$, we might be tempted to
+stick them together to form a new box:
+\[
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}] at (0,0) (a) {$f$};
+	\node[bb={1}{1}] at (3,0) (b) {$g$};
+	\node[bb={1}{1}] at (6,0) (c) {$h$};
+	\node[bb={1}{1}, fit=(a) (b) (c)] (outer) {};
+	\begin{scope}[font=\tiny]
+		\draw (outer_in1') to node[above=-2pt] {$A$} (a_in1);
+  	\draw (a_out1) to node[above=-2pt] {$B$} (b_in1);
+  	\draw (b_out1) to node[above=-2pt] {$C$} (c_in1);
+  	\draw (c_out1) to node[above=-2pt] {$D$} (outer_out1');
+	\end{scope}
+\end{tikzpicture}
+\]
+Ideally this would also be a morphism in our category: after all, we have said
+that we can represent morphisms with boxes with one input and one output. But
+wait, you say! We don't know which morphism it is. Is it $f\cp (g \cp h)$? Or
+$(f \cp g) \cp h$? It's good that you are so careful. Luckily, we are saved by
+the properties that a category must have. Associativity says $f\cp (g \cp h)=(f
+\cp g) \cp h$, so it doesn't matter which way we chose to try to decode the box.
+
+Similarly, the identity morphism on an object $x$ is drawn as on the left below,
+but we will see that it is not harmful to draw $\id_x$ in any of the following
+three ways:%
+\index{identity!in wiring diagrams}
+\[
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}] (empty) {{\color{white}$\leq$}};
+	\draw (empty_in1) to (empty_out1);
+	\node[font=\tiny] at ($(empty_in1)+(-4pt,0)$) {$x$};
+	\node[font=\tiny] at ($(empty_out1)+(4pt,0)$) {$x$};
+\end{tikzpicture}
+\hspace{1in}
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}, dotted] (empty) {{\color{white}$\leq$}};
+	\draw (empty_in1) to (empty_out1);
+	\node[font=\tiny] at ($(empty_in1)+(-4pt,0)$) {$x$};
+	\node[font=\tiny] at ($(empty_out1)+(4pt,0)$) {$x$};
+\end{tikzpicture}
+\hspace{1in}
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}, white]  (empty) {{\color{white}$\leq$}};
+	\draw (empty_in1) to (empty_out1);
+	\node[font=\tiny] at ($(empty_in1)+(-4pt,0)$) {$x$};
+	\node[font=\tiny] at ($(empty_out1)+(4pt,0)$) {$x$};
+\end{tikzpicture}
+\]
+By \cref{def.category} the morphisms in a category satisfy two properties, called the unitality property and the associativity property. The unitality says that $\id_x\cp f=f=f\cp\id_y$ for any $f\colon x\to y$.%
+\index{associativity}%
+\index{unitality} In terms of diagrams this would say 
+\[
+\begin{tikzpicture}[oriented WD, bb medium, bb port length=0]
+	\node[bb={1}{1}, dotted] (a) {{\color{white}$f$}};
+	\node[bb={1}{1}, right=1 of a] (b) {$f$};
+	\node[bb={1}{1}, fit=(a) (b)] (outer) {};
+	\begin{scope}[font=\tiny]
+		\draw (outer_in1') to node[above=-2pt] {$x$} (a_in1);
+		\draw (a_in1) to (a_out1);
+  	\draw (a_out1) to node[above=-2pt] {$x$} (b_in1);
+  	\draw (b_out1) to node[above=-2pt] {$y$} (outer_out1');
+	\end{scope}
+%	
+	\node[bb={1}{1}, right=14 of a] (c) {$f$};
+	\node[bb={1}{1}, dotted, right=1 of c] (d) {{\color{white}$f$}};
+	\node[bb={1}{1}, fit=(c) (d)] (outer2) {};
+	\begin{scope}[font=\tiny]
+		\draw (outer2_in1') to node[above=-2pt] {$x$} (c_in1);
+  	\draw (c_out1) to node[above=-2pt] {$y$} (d_in1);
+		\draw (d_in1) to (d_out1);
+  	\draw (d_out1) to node[above=-2pt] {$y$} (outer2_out1');
+	\end{scope}
+%
+	\node[bb={1}{1}] at ($(b)!.5!(c)$) (m) {$f$};
+	\node[bb={1}{1}, fit=(m)] (outerm) {};
+	\begin{scope}[font=\tiny]
+		\draw (outerm_in1') to node[above=-2pt] {$x$} (m_in1);
+  	\draw (m_out1) to node[above=-2pt] {$y$} (outerm_out1');
+	\end{scope}
+%
+	\node at ($(outer.east)!.5!(outerm.west)$) {=};
+	\node at ($(outer2.west)!.5!(outerm.east)$) {=};
+\end{tikzpicture}
+\]
+This means you can insert or discard any identity morphism you see in a wiring
+diagram.  From this perspective, the coherence laws of a category---that is, the
+associativity law and the unitality law---are precisely what are needed to
+ensure we can lengthen and shorten wires without ambiguity.%
+\index{associativity}%
+\index{unitality}
+
+In \cref{ssec.wirdia2}, we also saw wiring diagrams for monoidal preorders. Here we
+were allowed to draw boxes which can have multiple typed inputs and outputs, but
+with no choice of label (always $\leq$):
+\[
+\begin{tikzpicture}[oriented WD, align=center, bb port length=0ex, bb penetrate=0ex]
+	\node[bb={3}{2}] (f) {$\le$};
+	\node[bb={3}{2}, fit=(f)] (outer) {};
+	\draw (outer.west|-f_in1) to node[above, font=\tiny, pos=.4] {$A_1$} (f_in1);
+	\draw (outer.west|-f_in2) to node[inner xsep=1pt, fill=white, font=\tiny, pos=.4] {$A_2$} (f_in2);
+	\draw (outer.west|-f_in3) to node[below, font=\tiny, pos=.4] {$A_3$} (f_in3);
+	\draw (f_out1) to node[above, font=\tiny, pos=.5] {$B_1$} (outer.east|-f_out1); 
+	\draw (f_out2) to node[below, font=\tiny, pos=.5] {$B_2$} (outer.east|-f_out2); 
+\end{tikzpicture}
+\]
+If we combine these ideas, we will obtain a categorification of symmetric monoidal preorders: symmetric monoidal categories. A
+symmetric monoidal category is an algebraic structure in which we have
+labelled boxes with multiple typed inputs and outputs:
+\[
+\begin{tikzpicture}[oriented WD, align=center, bb port length=0ex, bb penetrate=0ex]
+	\node[bb={3}{2}] (f) {$f$};
+	\node[bb={3}{2}, fit=(f)] (outer) {};
+	\draw (outer.west|-f_in1) to node[above, font=\tiny, pos=.4] {$A_1$} (f_in1);
+	\draw (outer.west|-f_in2) to node[inner xsep=1pt, fill=white, font=\tiny, pos=.4] {$A_2$} (f_in2);
+	\draw (outer.west|-f_in3) to node[below, font=\tiny, pos=.4] {$A_3$} (f_in3);
+	\draw (f_out1) to node[above, font=\tiny, pos=.5] {$B_1$} (outer.east|-f_out1); 
+	\draw (f_out2) to node[below, font=\tiny, pos=.5] {$B_2$} (outer.east|-f_out2); 
+\end{tikzpicture}
+\]
+Furthermore, a symmetric monoidal category has a composition rule and a monoidal
+product, which permit us to combine these boxes to interpret diagrams like this:
+\[
+\begin{tikzpicture}[oriented WD]
+	\node[bb={1}{2}] (X11) {$f$};
+	\node[bb={2}{2}, below right=of X11] (X12) {$g$};
+	\node[bb={2}{1}, above right=of X12] (X13) {$h$};
+	\node[bb={0}{0}, fit={($(X11.north west)+(.3,1.5)$) (X12)  ($(X13.east)+(-.3,0)$)}] (Y1) {};
+	\begin{scope}[font=\small]
+  	\draw (Y1.west|-X11_in1) to node[above] {$A$} (X11_in1);	
+  	\draw (Y1.west|-X12_in2) to node[above] {$B$} (X12_in2);
+  	\draw (X11_out1) to node[above] {$C$} (X13_in1);
+  	\draw (X11_out2) to node[above=5pt] {$D$} (X12_in1);
+  	\draw (X12_out1) to node[above=5pt] {$E$} (X13_in2);
+  	\draw (X12_out2) to node[above] {$F$} (X12_out2-|Y1.east);
+  	\draw (X13_out1) to node[above] {$G$} (X13_out1-|Y1.east);
+	\end{scope}
+\end{tikzpicture}
+\]
+Finally, this structure must obey coherence laws, analogous to associativity and
+unitality in categories, that allow such diagrams to be unambiguously
+interpreted. In the next section we will be a bit more formal, but it is useful
+to keep in mind that, when we say our data must be ``well behaved,'' this is all we
+mean.
+%
+\index{wiring diagram!for monoidal categories}
+%
+\index{wiring diagram|)}%
+\index{coherence!conditions}
+
+%---- Subsection ----%
+\subsection{Monoidal categories}%
+\index{monoidal category|(}
+
+We defined $\cat{V}$-categories, for a symmetric monoidal preorder $\cat{V}$ in \cref{def.cat_enriched_mpos}. Just like preorders turned out to be special kinds of categories (see \cref{subsubsec.pos_free_spectrum}), monoidal preorders are special kinds of monoidal categories. And just like we can consider $\cat{V}$-categories for a monoidal preorder, we can also consider $\cat{V}$-categories when $\cat{V}$ is a monoidal category. This is another sort of categorification.
+
+We will soon meet the monoidal category $(\smset,\{1\},\times)$. The monoidal
+product will take two sets, $S$ and $T$, and return the set $S\times
+T=\{(s,t)\mid s\in S, t\in T\}$. But whereas for monoidal preorders we had the
+brute associative property $(p\otimes q)\otimes r=p\otimes (q\otimes r)$, the
+corresponding idea in $\smset$ is not quite true:%
+\index{associativity!property vs.\ structure}
+\begin{align*}
+& S \times (T \times U) :=\big\{\big(s,(t,u)\big)\,\big|\, s\in S, t\in T, u\in U\big\}
+	\\
+	\quad =^?\quad &
+(S \times T) \times U:=\big\{\big((s,t),u\big)\,\big|\, s\in S, t\in T, u\in U\big\}.
+\end{align*}
+They are slightly different sets: the first contains pairs consisting of an
+elements in $S$ and an element in $T\times U$, while the second contains pairs
+consisting of an element in $S \times T$ and an element in $U$. The sets are not
+equal, but they are clearly isomorphic, i.e.\ the difference between them is
+``just a matter of bookkeeping.'' We thus need a structure---a bookkeeping
+isomorphism---to keep track of the associativity:
+\[
+	\alpha_{s,t,u}\colon\{(s,(t,u))\mid s\in S, t\in T, u\in U\}
+	\To{\cong}
+	\{((s,t),u)\mid s\in S, t\in T, u\in U\}.
+\]
+%
+\index{coherence!as bookkeeping}
+
+There are a couple things to mention before we dive into these ideas. First,
+just because you replace brute things and properties with structures, it does
+not mean that you no longer have brute things and properties: new ones emerge!
+Not only that, but second, the new brute stuff tends to be more complex than
+what you started with. For example, above we replaced the associativity equation
+with an isomorphism $\alpha_{s,t,u}$, but now we need a more complex property to
+ensure that all these $\alpha$'s behave reasonably! The only way out of this morass is to
+add infinitely much structure, which leads one to ``$\infty$-categories,'' but
+we will not discuss that here.
+
+Instead, we will continue with our categorification of monoidal preorders, starting
+with a rough definition of symmetric monoidal categories. It's rough in the
+sense that we suppress the technical bookkeeping, hiding it under the name
+``well behaved.''
+
+\begin{roughDef}%
+\label{rdef.sym_mon_cat}%
+\index{category!monoidal structure on}%
+\index{product!monoidal}
+Let $\cat{C}$ be a category. A \emph{symmetric monoidal structure} on $\cat{C}$ consists of the following constituents:
+\begin{enumerate}[label=(\roman*)]
+	\item an object $I\in\Ob(\cat{C})$ called the \emph{monoidal unit}, and
+	\item a functor $\otimes\colon\cat{C}\times\cat{C}\to\cat{C}$, called the \emph{monoidal product}
+\end{enumerate}
+subject to well-behaved, natural isomorphisms
+\begin{enumerate}[label=(\alph*)]
+	\item $\lambda_c\colon I\otimes c\cong c$ for every $c\in\Ob(\cat{C})$,
+	\item $\rho_c\colon c\otimes I\cong c$ for every $c\in\Ob(\cat{C})$,
+	\item $\alpha_{c,d,e}\colon (c\otimes d)\otimes e\cong c\otimes(d\otimes e)$ for every $c,d,e\in\Ob(\cat{C})$, and
+	\item $\sigma_{c,d}\colon c\otimes	d\cong d \otimes c$ for every $c,d\in\Ob(\cat{C})$, called the \emph{swap map}, such that $\sigma\circ\sigma=\id$.
+\end{enumerate}
+A category equipped with a symmetric monoidal structure is called a
+\emph{symmetric monoidal category}.
+\end{roughDef}
+
+
+\begin{remark} %
+\label{rem.strict_mon_cat}%
+\index{coherence!Mac Lane's theorem}
+If the isomorphisms in (a), (b), and (c)---but 
+\emph{not} (d)---are replaced by equalities, then we say that the monoidal
+structure is \emph{strict}, and this is a complete (non-rough) definition of
+\emph{symmetric strict monoidal category}. In fact, symmetric strict monoidal
+categories are almost the same thing as symmetric monoidal categories, via a
+result known as Mac Lane's coherence theorem. An upshot of this theorem is that
+we can, when useful to us, pretend that our monoidal categories are strict: for
+example, we implicitly do this when we draw wiring diagrams. Ask your friendly
+neighborhood category theorist to explain how! 
+\end{remark}
+
+\begin{remark}
+For those yet to find a friendly expert category theorist, we make the following
+remark. A complete (non-rough) definition of symmetric monoidal category is that
+a symmetric monoidal category is a category equipped with an equivalence to
+(the underlying category of) a symmetric strict monoidal category. This can be
+unpacked, using \cref{rem.strict_mon_cat} and our comment about equivalence of
+categories in \cref{rem.preorder_boolcats2}, but we don't expect you to do
+so. Instead, we hope this gives you more incentive to ask a friendly expert
+category theorist!
+\end{remark}
+
+\begin{exercise} %
+\label{exc.mon_preorder_is_cat}%
+\index{preorder!symmetric monoidal}
+Check that monoidal categories indeed generalize monoidal preorders: a monoidal preorder is a
+monoidal category $(\cat{P},I,\otimes)$ where, for every $p,q\in\cat{P}$, the
+set $\cat{P}(p,q)$ has at most one element. 
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.set_as_mon_cat}
+As we said above, there is a monoidal structure on $\Cat{Set}$ where the monoidal unit is some choice of singleton set, say $I\coloneqq\{1\}$, and the monoidal product is $\otimes\coloneqq\times$. What it means that $\times$ is a functor is that:
+\begin{itemize}
+	\item For any pair of objects, i.e.\ sets, $(S,T)\in\Ob(\Cat{Set}\times\Cat{Set})$, one obtains a set $(S\times T)\in\Ob(\Cat{Set})$. We know what it is: the set of pairs $\{(s,t)\mid s\in S, t\in T\}$.
+	\item For any pair of morphisms, i.e.\ functions, $f\colon S\to S'$ and $g\colon T\to T'$, one obtains a function $(f\times g)\colon(S\times T)\to (S'\times T')$. It works pointwise: $(f\times g)(s,t)\coloneqq(f(s),g(t))$.
+	\item These should preserve identities: $\id_S\times\id_T=\id_{S\times T}$ for any sets $S,T$.
+	\item These should preserve composition: for any functions $S\To{f}S'\To{f'}S''$ and $T\To{g}T'\To{g'}T''$, one has
+	\[
+	(f\times g)\cp(f'\times g')=(f\cp g)\times(f'\cp g').
+      \]
+\end{itemize}
+
+The four conditions, (a), (b), (c), and (d) give isomorphisms $\{1\}\times S\cong S$, etc. These maps are obvious in the case of $\Cat{Set}$, e.g. the function $\{(1,s)\mid s\in S\}\to S$ sending $(1,s)$ to $s$. We have been calling such things bookkeeping.
+\end{example}
+
+%We now combine the notion of monoidal monotone maps between monoidal preorders and functors between categories, and thus define a notion of monoidal functor between monoidal categories. 
+
+
+\begin{exercise} %
+\label{exc.read_string_diag}
+Consider the monoidal category $(\Cat{Set},1,\times)$, together with the diagram
+\[
+\begin{tikzpicture}[oriented WD, string decoration={}]
+	\node[bb={1}{2}] (X11) {$f$};
+	\node[bb={2}{2}, below right=of X11] (X12) {$g$};
+	\node[bb={2}{1}, above right=of X12] (X13) {$h$};
+	\node[bb={0}{0}, fit={($(X11.north west)+(.3,1.5)$) (X12)  ($(X13.east)+(-.3,0)$)}] (Y1) {};
+	\begin{scope}[font=\small]
+  	\draw[ar] (Y1.west|-X11_in1) to node[above] {$A$} (X11_in1);	
+  	\draw[ar] (Y1.west|-X12_in2) to node[above] {$B$} (X12_in2);
+  	\draw[ar] (X11_out1) to node[above] {$C$} (X13_in1);
+  	\draw[ar] (X11_out2) to node[above=5pt] {$D$} (X12_in1);
+  	\draw[ar] (X12_out1) to node[above=5pt] {$E$} (X13_in2);
+  	\draw[ar] (X12_out2) to node[above] {$F$} (X12_out2-|Y1.east);
+  	\draw[ar] (X13_out1) to node[above] {$G$} (X13_out1-|Y1.east);
+	\end{scope}
+\end{tikzpicture}
+\]
+Suppose that $A=B=C=D=F=G=\ZZ$ and $E=\BB=\{\true,\false\}$, 
+and suppose that $f_C(a)=|a|$, $f_D(a)=a*5$, $g_E(d,b)= ``d\leq b$,'' $g_F(d,b)=d-b$, and $h(c,e)=\tn{if }e\tn{ then }c\tn{ else }1-c$.
+\begin{enumerate}
+	\item What are $g_E(5,3)$ and $g_F(5,3)$?
+	\item What are $g_E(3,5)$ and $g_F(3,5)$?
+	\item What is $h(5,\true)$?
+	\item What is $h(-5,\true)$?
+	\item What is $h(-5,\false)$?
+\end{enumerate}
+The whole diagram now defines a function $A\times B\to G\times F$; call it $q$.
+\begin{enumerate}[resume]
+	\item What are $q_G(-2,3)$ and $q_F(-2,3)$?
+	\item What are $q_G(2,3)$ and $q_F(2,3)$?
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+We will see more monoidal categories throughout the remainder of this book. %
+\index{monoidal category|)}
+
+%---- Subsection ----%
+\subsection{Categories enriched in a symmetric monoidal category}
+%
+\label{subsec.SMC_enrichment}
+We will not need this again, but we once promised to explain why
+$\cat{V}$-categories, where $\cat{V}$ is a symmetric monoidal preorder, deserve to
+be seen as types of categories. The reason, as we have hinted, is that
+categories should really be called $\smset$-categories. But wait, $\smset$ is not a
+preorder! We'll have to generalize---categorify---$\cat{V}$-categories.
+
+We now give a rough definition of categories enriched in a symmetric monoidal category $\cat{V}$. As in \cref{rdef.sym_mon_cat}, we suppress some technical parts in this sketch, hiding them under the name ``usual associative and unital laws.''
+
+\begin{roughDef}%
+\label{def.enriched_in_mon_cat}%
+\index{enriched category!general
+  definition}
+\showhide
+{%Show
+Let $\cat{V}$ be a symmetric monoidal category, as in \cref{rdef.sym_mon_cat}. To
+specify a \emph{category enriched in $\cat{V}$}, or a \emph{$\cat{V}$-category},
+denoted $\cat{X}$,\begin{enumerate}[label=(\roman*)]
+	\item one specifies a collection $\Ob(\cat{X})$, elements of which are called \emph{objects};
+	\item for every pair $x,y\in\Ob(\cat{X})$, one specifies an object $\cat{X}(x,y)\in\cat{V}$, called the \emph{hom-object} for $x,y$;%
+\index{hom object}
+	\item for every $x\in\Ob(\cat{X})$, one specifies a morphism $\id_x\colon I\to\cat{X}(x,x)$ in $\cat{V}$, called the \emph{identity element};%
+\index{identity!in enriched categories|see {enriched category, identity in}}%
+\index{enriched category!identity in}
+	\item for each $x,y,z\in\Ob(\cat{X})$, one specifies a morphism $\cp\colon\cat{X}(x,y)\otimes\cat{X}(y,z)\to\cat{X}(x,z)$, called the \emph{composition morphism}.%
+\index{composition!in enriched categories|see {enriched categories, composition in}}%
+\index{enriched category!composition in}
+\end{enumerate}
+These constituents are required to satisfy the usual associative and unital laws.%
+\index{associativity!in enriched categories}%
+\index{unitality!in enriched categories}
+}
+{%Hide
+Let $\cat{V}$ be a symmetric monoidal category, as in \cref{rdef.sym_mon_cat}. A \emph{category enriched in $\cat{V}$}, or a \emph{$\cat{V}$-category}, denoted $\cat{X}$, consists of the following constituents:
+\begin{enumerate}[%
+\label=(\roman*)]
+	\item a set $\Ob(\cat{X})$, elements of which are called \emph{objects};
+	\item for every pair $x,y\in\Ob(\cat{X})$, an object $\cat{X}(x,y)\in\cat{V}$, called the \emph{hom-object} for $x,y$;
+	\item for every $x\in\Ob(\cat{X})$, a morphism $\id_x\colon I\to\cat{X}(x,x)$ in $\cat{V}$, called the \emph{identity element};
+	\item for each $x,y,z\in\Ob(\cat{X})$, a morphism $\cp\colon\cat{X}(x,y)\otimes\cat{X}(y,z)\to\cat{X}(x,z)$, called the \emph{composition morphism}.
+\end{enumerate}
+These constituents are required to make the following diagrams commute:
+\[
+\begin{tikzcd}
+	\cat{X}(x,y)\otimes I\ar[d,"{\cat{X}(x,y)\otimes\id_y}"']\ar[r,"\cong"]&\cat{X}(x,y)\\
+	\cat{X}(x,y)\otimes\cat{X}(y,y)\ar[r, "\cp"']&\cat{X}(x,y)\ar[u, equal]
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}
+	I\otimes\cat{X}(x,y)\ar[d,"{\id_x\otimes\cat{X}(x,y)}"']\ar[r,"\cong"]&\cat{X}(x,y)\\
+	\cat{X}(x,x)\otimes\cat{X}(x,y)\ar[r, "\cp"']&\cat{X}(x,y)\ar[u, equal]
+\end{tikzcd}
+\]
+\[
+\begin{tikzcd}[column sep=-17pt]
+	\cat{X}(w,x)\otimes(\cat{X}(x,y)\otimes\cat{X}(y,z))\ar[rr,"\cong"]\ar[d,"{\cat{X}(w,x)\otimes\cp}"']
+	&&
+	(\cat{X}(w,x)\otimes\cat{X}(x,y))\otimes\cat{X}(y,z)\ar[d,"{\cp\otimes\cat{X}(y,z)}"]
+	\\
+	\cat{X}(w,x)\otimes\cat{X}(x,z)\ar[dr,"\cp"']
+	&&
+	\cat{X}(w,y)\otimes\cat{X}(y,z)\ar[dl,"\cp"]
+	\\
+	&\cat{X}(w,z)
+\end{tikzcd}
+\]
+}
+\end{roughDef}
+
+The precise, non-rough, definition can be found in other sources, e.g.\ \cite{Nlab:symmeric-monoidal-category}, \cite{wiki:Symmetric-monoidal-category}, \cite{Kelly:1982a}. 
+
+
+\begin{exercise} %
+\label{exc.cat_is_set_enriched}
+Recall from \cref{ex.set_as_mon_cat} that $\cat{V}=(\smset,\{1\},\times)$ is a
+symmetric monoidal category. This means we can apply
+\cref{def.enriched_in_mon_cat}. Does the (rough) definition roughly agree with
+the definition of category given in \cref{def.category}? Or is there a subtle
+difference?
+\end{exercise}
+
+\begin{remark} %
+\label{rem.cats_and_vcats2}%
+\index{enriched categories}
+We first defined $\cat{V}$-categories in \cref{def.cat_enriched_mpos}, where
+$\cat{V}$ was required to be a monoidal preorder. To check we're not abusing our
+terms, it's a good idea to make sure that $\cat{V}$-categories as per
+\cref{def.cat_enriched_mpos} are still $\cat{V}$-categories as per
+\cref{def.enriched_in_mon_cat}. 
+
+The first thing to observe is that every symmetric monoidal preorder is a symmetric
+monoidal category (\cref{exc.mon_preorder_is_cat}). So given a symmetric monoidal
+preorder $\cat{V}$, we can apply \cref{def.enriched_in_mon_cat}.
+The required data (i) and (ii) then get us off to a good start: both definitions of
+$\cat{V}$-category require objects and hom-objects, and they are specified in
+the same way. On the other hand, \cref{def.enriched_in_mon_cat} requires two
+additional pieces of data: (iii) identity elements and (iv) composition
+morphisms. Where do these come from?%
+\index{hom object}
+
+In the case of preorders, there is at most one morphism between any two objects, so
+we do not need to choose an identity element and a composition morphism.
+Instead, we just need to make sure that an identity element and a composition
+morphism exist. This is exactly what properties (a) and (b) of
+\cref{def.cat_enriched_mpos} say. 
+
+For example, the requirement (iii) that a $\cat{V}$-category $\cat{X}$ has a
+chosen identity element $\id_x\colon I \to \cat{X}(x,x)$ for the object $x$
+simply becomes the requirement (a) that $I \le \cat{X}(x,x)$ is true in
+$\cat{V}$. This is typical of the story of categorification: what were mere
+properties in \cref{def.cat_enriched_mpos} have become structures in
+\cref{def.enriched_in_mon_cat}.
+\end{remark}
+
+\begin{exercise} %
+\label{exc.metric_space_identities}
+What are identity elements in Lawvere metric spaces (that is,
+$\Cost$-categories)? How do we interpret this in terms of distances?
+\end{exercise}
+
+%-------- Section --------%
+\section{Profunctors form a compact closed category}%
+\index{profunctors!compact closed category of}%
+\index{compact closed category|(}
+
+In this section we will define compact closed categories and show that $\Feas$, and more generally $\cat{V}$-profunctors, form such a thing. Compact-closed categories are monoidal categories whose wiring diagrams allow feedback. The wiring diagrams look like this:
+\begin{equation}%
+\label{eqn.generic_compact_closed_diag}
+\begin{tikzpicture}[oriented WD, bbx=1cm, bb port sep=1, bb port length=0, baseline=(Z)]
+	\node[bb={2}{2}] (X11) {$f_1$};
+	\node[bb={3}{3}, below right=of X11] (X12) {$f_2$};
+	\node[bb={2}{1}, above right=of X12] (X13) {$f_3$};
+	\node[bb={2}{2}, below right = -1 and 1.5 of X12] (X21) {$f_4$};
+	\node[bb={1}{2}, above right=-1 and 1 of X21] (X22) {$f_5$};
+  \node[bb={2}{2}, fit = {($(X11.north east)+(-1,2)$) (X12) (X13) ($(X21.south)$) ($(X22.east)+(.5,0)$)}] (Z) {};
+	\draw[ar] (X21_out1) to (X22_in1);
+	\draw[ar] let \p1=(X22.north east), \p2=(X21.north west), \n1={\y1+\bby}, \n2=\bbportlen in
+          (X22_out1) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (X21_in1);
+	\draw[ar] (X11_out1) to (X13_in1);
+	\draw[ar] (X11_out2) to (X12_in1);
+	\draw[ar] (X12_out1) to (X13_in2);
+	\draw[ar] (Z_in1'|-X11_in2) to (X11_in2);	
+	\draw[ar] (Z_in2'|-X12_in2) to (X12_in2);
+	\draw[ar] (X12_out2) to (X21_in2);
+	\draw[ar] (X21_out2) to (Z_out2'|-X21_out2);
+	\draw[ar] let \p1=(X12.south east), \p2=(X12.south west), \n1={\y1-\bby}, \n2=\bbportlen in
+	  (X12_out3) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (X12_in3);
+	\draw[ar] let \p1=(X22.north east), \p2=(X11.north west), \n1={\y2+\bby}, \n2=\bbportlen in
+          (X22_out2) to[in=0] (\x1+\n2,\n1) -- (\x2-\n2,\n1) to[out=180] (X11_in1);
+	\draw[ar] (X13_out1) to (Z_out1'|-X13_out1);
+\end{tikzpicture}
+\end{equation}
+It's been a while since we thought about co-design, but these were the kinds of wiring diagrams we drew, e.g.\ connecting the chassis, the motor, and the battery in \cref{eqn.chassis}. Compact closed categories are symmetric monoidal categories, with a bit more structure that allow us to formally interpret the sorts of feedback that occur in co-design problems. This same structure shows up in many other fields, including quantum mechanics and dynamical systems.%
+\index{wiring diagram}
+
+In \cref{eqn.styles_of_WD,subsec.SMPs_science} we discussed various flavors of
+wiring diagrams, including those with icons for splitting and terminating wires.%
+\index{icon}
+For compact-closed categories, our additional icons allow us to bend outputs
+into inputs, and vice versa. To keep track of this, however, we draw arrows on
+our wire, which can either point forwards or backwards. For example, we can draw this
+\begin{equation}%
+\label{eqn.sound_fury}%
+\index{icon}
+\begin{tikzpicture}[oriented WD, baseline=(pair)]
+	\node[bb={1}{2}] (P1) {Person 1};
+	\node[bb={2}{1}, right=1 of P1] (P2) {Person 2};
+	\node[draw, fit=(P1) (P2), inner xsep=50pt] (pair) {};
+	\begin{scope}[font=\footnotesize]
+  	\draw[ar] (pair.west|-P1_in1) to node[below] {pain} (P1_in1);
+  	\draw[ar] (P2_in1) to node[above] {sound} (P1_out1);
+  	\draw[ar] (P1_out2) to node[below] {fury} (P2_in2);
+		\draw[ar] (P2_out1) to node[below] {complaint} (P2_out1-|pair.east);
+	\end{scope}
+\end{tikzpicture}
+\end{equation}
+We then add icons---called a cap and a cup---allowing any wire to reverse
+direction from forwards to backwards and from backwards to forwards.%
+\index{icon!cup and cap}
+\begin{equation}%
+\label{eqn.cap_cup}
+\begin{tikzpicture}[decoration={markings, mark=at position 0.5 with {\arrow{Stealth};}}, x=1cm, font=\footnotesize, baseline=(A)]
+	\draw[postaction={decorate}] (0,0) to node[below] {sound} (1,0);
+	\draw (1,0) arc (-90:90:.5cm);
+	\draw[postaction={decorate}] (1,1) to node[above] {sound} (0,1);
+%
+	\draw[postaction={decorate}] (3,0) to node[below] {sound} (4,0);
+	\draw (3,1) arc (90:270:.5cm);
+	\draw[postaction={decorate}] (4,1) to node[above] {sound} (3,1);
+	\node (A) at (0,.5) {};
+\end{tikzpicture}
+\end{equation}
+Thus we can draw the following
+\[
+\begin{tikzpicture}[oriented WD]
+	\node[bb={2}{1}] (P1) {Person 1};
+	\node[bb={1}{2}, right=1 of P1] (P2) {Person 2};
+	\node[draw, fit={($(P1.north west)+(0,2)$) (P2)}, inner xsep=50pt] (pair) {};
+	\begin{scope}[font=\footnotesize]
+  	\draw[ar] (pair.west|-P1_in2) to node[below] {pain} (P1_in2);
+  	\draw[ar] (P1_out1) to node[below] {fury} (P2_in1);
+  	\draw[ar] let \p1=(P2.north east), \p2=(P1.north west), \n1=\bbportlen, \n2=\bby in
+			(P2_out1) to[in=0] (\x1+\n1, \y1+\n2) to[in=0,out=180] node[above] {sound} (\x2-\n1,\y2+\n2) to[out=180] (P1_in1);
+		\draw[ar] (P2_out2) to node[below] {complaint} (P2_out2-|pair.east);
+	\end{scope}
+\end{tikzpicture}
+\]
+and its meaning is equivalent to that of \cref{eqn.sound_fury}.
+
+We will begin by giving the axioms for a compact closed category. Then we will look again at feasibility relations in co-design---and more generally at enriched profunctors---and show that they indeed form a compact closed category.%
+\index{profunctor!enriched|see {profunctor}}
+
+%---- Subsection ----%
+\subsection{Compact closed categories}
+
+As we said, compact closed categories are symmetric monoidal
+categories (see \cref{rdef.sym_mon_cat}) with extra structure.
+
+\begin{definition}%
+\label{def.compact_closed}%
+\index{category!compact closed|see {compact closed category}}%
+\index{closed category!compact|see {compact closed category}}%
+\index{compact closed category}
+	Let $(\cat{C},I,\otimes)$ be a symmetric monoidal category, and $c\in\Ob(\cat{C})$ an object. A \emph{dual for $c$} consists of three constituents
+	\begin{enumerate}[label=(\roman*)]
+		\item an object $c^*\in\Ob(\cat{C})$, called the \emph{dual of $c$},%
+\index{dual!object}
+		\item a morphism $\eta_c\colon I\to c^*\otimes c$, called the \emph{unit for $c$},%
+\index{unit}
+		\item a morphism $\epsilon_c\colon c\otimes c^*\to I$, called the \emph{counit for $c$}.%
+\index{counit}%
+\index{compact closed category!duals in}
+	\end{enumerate}
+These are required to satisfy two equations for every $c\in\Ob(\cat{C})$, which we draw as commutative diagrams:
+\begin{equation}%
+\label{eqn.yanking}
+\begin{tikzcd}
+	c\ar[d, "\cong"']\ar[r, equals]&c\\
+	c\otimes I\ar[d,"c\otimes\eta_c"']&	I\otimes c\ar[u, "\cong"']\\
+	c\otimes(c^*\otimes c)\ar[r,"\cong"']&(c\otimes c^*)\otimes c\ar[u,"\epsilon_c\otimes c"']\\
+\end{tikzcd}
+\hspace{.8in}
+\begin{tikzcd}
+	c^*\ar[d, "\cong"']\ar[r, equals]&c^*\\
+	I\otimes c^*\ar[d,"\eta_c\otimes c^*"']&	c^*\otimes I\ar[u, "\cong"']\\
+	(c^*\otimes c)\otimes c^*\ar[r,"\cong"']&c^*\otimes (c\otimes c^*)\ar[u,"c^*\otimes \epsilon_c"']\\
+\end{tikzcd}
+\end{equation}
+These equations are sometimes called the \emph{snake equations}.%
+\index{snake
+equations}
+
+If for every object $c\in\Ob(\cat{C})$ there exists a dual $c^*$ for $c$, then we say that $(\cat{C},I,\otimes)$ is \emph{compact closed}.
+\end{definition}
+
+In a compact closed category, each wire is equipped with a direction. For any object $c$, a forward-pointing wire labeled $c$ is considered equivalent to a backward-pointing wire labeled $c^*$, i.e. $\To{c}$ is the same as $\From{c^*}$. The cup and cap discussed above are in fact the unit and counit morphisms; they are drawn as follows.
+\[
+\begin{tikzpicture}[decoration={markings, mark=at position 0.5 with {\arrow{Stealth};}}, x=1cm]
+	\draw[postaction={decorate}] (1,0) to node[below] {$c$} (0,0);
+	\draw (0,0) arc (270:90:.5cm);
+	\node[left] at (-.5,.5) {$\eta_c$};
+	\draw[postaction={decorate}] (0,1) to node[above] {$c$} (1,1);
+%
+	\draw[postaction={decorate}] (4,0) to node[below] {$c$} (5,0);
+	\draw (5,0) arc (-90:90:.5cm);
+	\node[right] at (5.5,.5) {$\epsilon_c$};
+	\draw[postaction={decorate}] (5,1) to node[above] {$c$} (4,1);
+\end{tikzpicture}
+\]
+In wiring diagrams, the snake equations \eqref{eqn.yanking} are then drawn as follows:
+\[
+\begin{tikzpicture}[decoration={markings, mark=at position 0.5 with {\arrow{Stealth};}}, x=1cm]
+	\draw (-2,-1) to node[above, pos=.2, font=\tiny] {$c$} (0,-1);
+	\draw[postaction={decorate}] (0,-1) to (1,-1);
+	\draw (1,-1) arc (-90:90:.5cm);
+	\draw[postaction={decorate}] (1,0) to (0,0);
+	\draw (0,0) arc (270:90:.5cm);
+	\draw[postaction={decorate}] (0,1) to (1,1);
+	\draw (1,1) to node[above, pos=.8, font=\tiny] {$c$} (3,1);
+%
+	\draw[dotted] (-1,-1.6) -- (-1,1.6);
+	\draw[dotted] (.5,-1.6) -- (.5,1.6);
+	\draw[dotted] (2,-1.6) -- (2,1.6);
+	\node at (-.25,-1.6) {$c\otimes\eta_c$};
+	\node at (1.25,-1.6) {$\epsilon_c\otimes c$};
+\end{tikzpicture}
+\hspace{1in}
+\begin{tikzpicture}[decoration={markings, mark=at position 0.5 with {\arrow{Stealth};}}, x=1cm]
+	\draw (3,-1) to node[above, pos=.2, font=\tiny] {$c$} (1,-1);
+	\draw[postaction={decorate}] (1,-1) to (0,-1);
+	\draw (0,-1) arc (270:90:.5cm);
+	\draw[postaction={decorate}] (0,0) to (1,0);
+	\draw (1,0) arc (-90:90:.5cm);
+	\draw[postaction={decorate}] (1,1) to (0,1);
+	\draw (0,1) to node[above, pos=.8, font=\tiny] {$c$} (-2,1);
+%
+	\draw[dotted] (-1,-1.6) -- (-1,1.6);
+	\draw[dotted] (.5,-1.6) -- (.5,1.6);
+	\draw[dotted] (2,-1.6) -- (2,1.6);
+	\node at (-.25,-1.6) {$\eta_c\otimes c^*$};
+	\node at (1.25,-1.6) {$c^*\otimes\epsilon_c$};	
+\end{tikzpicture}
+\]
+Note that the pictures in \cref{eqn.cap_cup} correspond to $\epsilon_{\text{sound}}$ and $\eta_{\text{sound}^*}$\space. 
+
+Recall the notion of monoidal closed preorder; a monoidal category can also be monoidal
+closed. This means that for every pair of objects $c,d\in\Ob(\cat{C})$ there is
+an object $c\multimap d$ and an isomorphism $\cat{C}(b\otimes
+c,d)\cong\cat{C}(b,c\multimap d)$, natural in $b$. While we will not provide a
+full proof here, compact closed categories are so-named because they are a
+special type of monoidal closed category.
+
+\begin{proposition}%
+\label{prop.double_dual}%
+\index{closed category!compact implies monoidal}
+If $\cat{C}$ is a compact closed category, then
+\begin{enumerate}
+	\item $\cat{C}$ is monoidal closed;
+\end{enumerate}
+and for any object $c\in\Ob(\cat{C})$,
+\begin{enumerate}[resume]
+	\item if $c^*$ and $c'$ are both duals to $c$ then there is an
+	isomorphism $c^*\cong c'$; and
+	\item there is an isomorphism between $c$ and its double-dual, $c\cong c^{**}$.%
+\index{dual!double}
+\end{enumerate}
+\end{proposition}
+To prove 1., the key idea is that for any $c$ and $d$, the object $c \multimap
+d$ is given by $c^{*} \otimes d$, and the natural isomorphism $\cat{C}(b\otimes
+c,d)\cong\cat{C}(b,c\multimap d)$ is given by precomposing with $\id_b\otimes
+\eta_c$.
+
+Before returning to co-design, we give another example of a compact closed
+category, called $\Cat{Corel}$, which we'll see again in the chapters to come.
+
+\begin{example} %
+\label{ex.corel}%
+\index{corelation}%
+\index{equivalence relation!as
+  corelation}
+  Recall, from \cref{def.equivalence_relation}, that an equivalence relation on
+  a set $A$ is a reflexive, symmetric, and transitive binary relation on $A$.
+  Given two finite sets, $A$ and $B$, a \emph{corelation} $A \to B$ is an
+  equivalence relation on $A\dju B$. 
+  
+  
+  So, for example, here is a corelation from a set $A$ having five elements to a set
+  $B$ having six elements; two elements are equivalent if they are encircled by the
+  same dashed line.
+  \[
+  \begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [contact, outer sep=5pt] (0) at (-2, 1) {};
+		\node [contact, outer sep=5pt] (1) at (-2, 0.5) {};
+		\node [contact, outer sep=5pt] (2) at (-2, -0) {};
+		\node [contact, outer sep=5pt] (3) at (-2, -0.5) {};
+		\node [contact, outer sep=5pt] (4) at (-2, -1) {};
+		\node [contact, outer sep=5pt] (5) at (1, 1.25) {};
+		\node [contact, outer sep=5pt] (6) at (1, 0.75) {};
+		\node [contact, outer sep=5pt] (7) at (1, 0.25) {};
+		\node [contact, outer sep=5pt] (8) at (1, -0.25) {};
+		\node [contact, outer sep=5pt] (9) at (1, -0.75) {};
+		\node [contact, outer sep=5pt] (10) at (1, -1.25) {};
+		\node [style=none] (11) at (-2.75, -0) {$A$};
+		\node [style=none] (12) at (1.75, -0) {$B$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=0, anchor=north west) --
+   (node cs:name=1, anchor=south west) --
+   (node cs:name=6, anchor=south east) --
+   (node cs:name=5, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=2, anchor=north west) --
+   (node cs:name=3, anchor=south west) --
+   (node cs:name=3, anchor=south east) --
+   (node cs:name=2, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=4, anchor=north west) --
+   (node cs:name=4, anchor=south west) --
+   (node cs:name=10, anchor=south east) --
+   (node cs:name=9, anchor=north east) --
+   cycle;
+   		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=7, anchor=north west) --
+   (node cs:name=7, anchor=south west) --
+   (node cs:name=7, anchor=south east) --
+   (node cs:name=7, anchor=north east) --
+   cycle;
+   		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=8, anchor=north west) --
+   (node cs:name=8, anchor=south west) --
+   (node cs:name=8, anchor=south east) --
+   (node cs:name=8, anchor=north east) --
+   cycle;
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+
+  There exists a category, denoted $\corel{}$, where the objects are finite
+  sets, and where a morphism from $A \to B$ is a corelation $A \to B$. 
+  The composition rule is simpler to look at than to write down formally.%
+  \tablefootnote{
+  To compose corelations $\alpha\colon A \to B$
+  and $\beta\colon B \to C$, we need to construct an equivalence relation
+  $\alpha\cp\beta$ on $A\dju C$. To do so requires three steps: (i) consider $\alpha$ and $\beta$ as
+  relations on $A\dju B \dju C$, (ii) take the transitive closure of their
+  union, and then (iii) restrict to an equivalence relation on $A\dju C$. Here is the formal description. Note that as binary relations, we have $\alpha \subseteq (A\dju B)
+  \times (A\dju B)$, and $\beta\subseteq (B\dju C) \times (B\dju C)$. We also
+  have three inclusions: $\iota_{A\dju B}\colon A \dju B \to A \dju B \dju C$,
+  $\iota_{B\dju C}\colon B \dju C \to A \dju B \dju C$, and $\iota_{A\dju
+  C}\colon A \dju C \to A \dju B \dju C$. Recalling our notation from \cref{sec.galois_connections}, we define
+  \[
+    \alpha\cp\beta \coloneq \iota^\ast_{A\dju C}((\iota_{A\dju B})_!(\alpha)\vee
+    (\iota_{B\dju C})_!(\beta)).
+  \]
+  }
+  If in addition to the corelation $\alpha\colon A \to B$ above we have
+another corelation $\beta\colon B \to C$
+\[
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-2.75, -0) {$B$};
+		\node [style=none] (1) at (1.75, 0) {$C$};
+		\node [contact, outer sep=5pt] (2) at (-2, 1.25) {};
+		\node [contact, outer sep=5pt] (3) at (-2, 0.75) {};
+		\node [contact, outer sep=5pt] (4) at (-2, 0.25) {};
+		\node [contact, outer sep=5pt] (5) at (-2, -0.25) {};
+		\node [contact, outer sep=5pt] (6) at (-2, -0.75) {};
+		\node [contact, outer sep=5pt] (7) at (-2, -1.25) {};
+		\node [contact, outer sep=5pt] (8) at (1, 1) {};
+		\node [contact, outer sep=5pt] (9) at (1, 0.5) {};
+		\node [contact, outer sep=5pt] (10) at (1, -0) {};
+		\node [contact, outer sep=5pt] (11) at (1, -0.5) {};
+		\node [contact, outer sep=5pt] (12) at (1, -1) {};
+	\end{pgfonlayer}
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=2, anchor=north west) --
+   (node cs:name=3, anchor=south west) --
+   (node cs:name=8, anchor=south east) --
+   (node cs:name=8, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=4, anchor=north west) --
+   (node cs:name=4, anchor=south west) --
+   (node cs:name=4, anchor=south east) --
+   (node cs:name=4, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=5, anchor=north west) --
+   (node cs:name=6, anchor=south west) --
+   (node cs:name=11, anchor=south east) --
+   (node cs:name=10, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=7, anchor=north west) --
+   (node cs:name=7, anchor=south west) --
+   (node cs:name=12, anchor=south east) --
+   (node cs:name=12, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=9, anchor=north west) --
+   (node cs:name=9, anchor=south west) --
+   (node cs:name=9, anchor=south east) --
+   (node cs:name=9, anchor=north east) --
+   cycle;
+\end{tikzpicture}
+\]
+Then the composite $\beta\circ\alpha$ of our two corelations is given by
+\vspace{-1ex}
+\[
+  \begin{aligned}
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [contact, outer sep=5pt] (-2) at (1, 1.25) {};
+		\node [contact, outer sep=5pt] (-1) at (1, 0.75) {};
+		\node [contact, outer sep=5pt] (0) at (1, 0.25) {};
+		\node [contact, outer sep=5pt] (1) at (1, -0.25) {};
+		\node [contact, outer sep=5pt] (2) at (1, -0.75) {};
+		\node [contact, outer sep=5pt] (3) at (1, -1.25) {};
+		\node [contact, outer sep=5pt] (6) at (-2, 1) {};
+		\node [contact, outer sep=5pt] (7) at (-2, -0.5) {};
+		\node [contact, outer sep=5pt] (8) at (-2, 0.5) {};
+		\node [contact, outer sep=5pt] (9) at (-2, -0) {};
+		\node [contact, outer sep=5pt] (10) at (-2, -1) {};
+		\node [contact, outer sep=5pt] (11) at (4, -0) {};
+		\node [contact, outer sep=5pt] (12) at (4, -1) {};
+		\node [contact, outer sep=5pt] (13) at (4, -0.5) {};
+		\node [contact, outer sep=5pt] (14) at (4, 0.5) {};
+		\node [contact, outer sep=5pt] (19) at (4, 1) {};
+		\node [style=none] (20) at (1, -1.75) {$B$};
+		\node [style=none] (4) at (-2, -1.75) {$A$};
+		\node [style=none] (5) at (4, -1.75) {$C$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=6, anchor=north west) --
+   (node cs:name=8, anchor=south west) --
+   (node cs:name=-1, anchor=south east) --
+   (node cs:name=-2, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=9, anchor=north west) --
+   (node cs:name=7, anchor=south west) --
+   (node cs:name=7, anchor=south east) --
+   (node cs:name=9, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=10, anchor=north west) --
+   (node cs:name=10, anchor=south west) --
+   (node cs:name=3, anchor=south east) --
+   (node cs:name=2, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=-2, anchor=north west) --
+   (node cs:name=-1, anchor=south west) --
+   (node cs:name=19, anchor=south east) --
+   (node cs:name=19, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=0, anchor=north west) --
+   (node cs:name=0, anchor=south west) --
+   (node cs:name=0, anchor=south east) --
+   (node cs:name=0, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=1, anchor=north west) --
+   (node cs:name=1, anchor=south west) --
+   (node cs:name=1, anchor=south east) --
+   (node cs:name=1, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=1, anchor=north west) --
+   (node cs:name=2, anchor=south west) --
+   (node cs:name=13, anchor=south east) --
+   (node cs:name=11, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=3, anchor=north west) --
+   (node cs:name=3, anchor=south west) --
+   (node cs:name=12, anchor=south east) --
+   (node cs:name=12, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=14, anchor=north west) --
+   (node cs:name=14, anchor=south west) --
+   (node cs:name=14, anchor=south east) --
+   (node cs:name=14, anchor=north east) --
+   cycle;
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\qquad
+  =
+\qquad
+\begin{aligned}
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node at (0,1.25) {};
+		\node [style=none] (4) at (-2, -1.75) {$A$};
+		\node [style=none] (5) at (1, -1.75) {$C$};
+		\node [contact, outer sep=5pt] (2) at (-2, 1) {};
+		\node [contact, outer sep=5pt] (3) at (-2, -0.5) {};
+		\node [contact, outer sep=5pt] (4) at (-2, 0.5) {};
+		\node [contact, outer sep=5pt] (5) at (-2, -0) {};
+		\node [contact, outer sep=5pt] (6) at (-2, -1) {};
+		\node [contact, outer sep=5pt] (7) at (1, -0) {};
+		\node [contact, outer sep=5pt] (8) at (1, -1) {};
+		\node [contact, outer sep=5pt] (9) at (1, -0.5) {};
+		\node [contact, outer sep=5pt] (10) at (1, 0.5) {};
+		\node [contact, outer sep=5pt] (13) at (1, 1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=2, anchor=north west) --
+   (node cs:name=4, anchor=south west) --
+   (node cs:name=13, anchor=south east) --
+   (node cs:name=13, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=5, anchor=north west) --
+   (node cs:name=3, anchor=south west) --
+   (node cs:name=3, anchor=south east) --
+   (node cs:name=5, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=6, anchor=north west) --
+   (node cs:name=6, anchor=south west) --
+   (node cs:name=8, anchor=south east) --
+   (node cs:name=7, anchor=north east) --
+   cycle;
+		\draw [rounded corners=5pt, dashed] 
+   (node cs:name=10, anchor=north west) --
+   (node cs:name=10, anchor=south west) --
+   (node cs:name=10, anchor=south east) --
+   (node cs:name=10, anchor=north east) --
+   cycle;
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\]
+That is, two elements are equivalent in the composite corelation if we may
+travel from one to the other staying within equivalence classes of either
+$\alpha$ or $\beta$.
+
+The category $\corel{}$ may be equipped with the symmetric monoidal structure
+$(\varnothing, \dju)$.  This monoidal category is compact closed, with every
+finite set its own dual.%
+\index{dual!self}  Indeed, note that for any finite set $A$ there is an
+equivalence relation on $A \dju A\coloneq\{(a,1), (a,2) \,|\, a \in A\}$ where
+each part simply consists of the two elements $(a,1)$ and $(a,2)$ for each $a
+\in A$. The unit on a finite set $A$ is the corelation $\eta_A\colon \varnothing
+\to A \dju A$ specified by this equivalence relation; similarly the counit on
+$A$ is the corelation $\epsilon_A\colon A \dju A \to \varnothing$ specifed by
+this same equivalence relation.
+\end{example}
+
+\begin{exercise} %
+\label{exc.corelations}
+Consider the set $\ul{3}=\{1,2,3\}$.
+\begin{enumerate}
+	\item Draw a picture of the unit corelation $\varnothing\to\ul{3}\sqcup\ul{3}$.
+	\item Draw a picture of the counit corelation $\ul{3}\sqcup\ul{3}\to\varnothing$.
+	\item Check that the snake equations \eqref{eqn.yanking} hold. (Since every object is its own dual, you only need to check one of them.)
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+  
+%---- Subsection ----%
+\subsection{$\Feas$ as a compact closed category}
+%
+\index{co-design}%
+\index{feasibility relation!compact closed category of|(}
+We close the chapter by returning to co-design and showing that $\Feas$ has a compact closed structure. This is what allows us to draw the kinds of wiring diagrams we saw in \cref{eqn.chassis,eqn.generic_compact_closed_diag,eqn.sound_fury}: it is what puts actual mathematics behind these pictures.
+
+Instead of just detailing this compact closed structure for $\Feas =
+\Prof_\Bool$, it's no extra work to prove that for any skeletal (unital,
+commutative) quantale $(\cat{V},I,\otimes)$ the profunctor category
+$\Prof_\cat{V}$ of \cref{thm.quantale_prof} is compact closed, so we'll discuss
+this general fact.
+
+\begin{theorem}
+Let $\cat{V}$ be a skeletal quantale. The category $\Prof_\cat{V}$ can be given
+the structure of a compact closed category, with monoidal product given by the
+product of $\cat{V}$-categories.
+\end{theorem}
+
+Indeed, all we need to do is construct the monoidal structure and duals for
+objects. Let's sketch how this goes.
+
+\paragraph{Monoidal products in $\Prof_\cat{V}$ are just product categories.}
+%
+\index{product!of categories}
+
+In terms of wiring diagrams, the monoidal structure looks like stacking wires or boxes on top of one another, with no new interaction.%
+\index{stacking|see {monoidal product}}
+\[
+\begin{tikzpicture}[oriented WD, bbx=1cm, bb port sep=1]
+	\node[bb={2}{1}] (A) {$\Phi$};
+	\node[bb={2}{2}, below=1 of A] (B) {$\Psi$};
+	\node[bb={0}{0}, fit=(A) (B), inner ysep=20pt, bb name=$\Phi\otimes\Psi$] (outer) {};
+\begin{scope}[shorten <=-3pt, ar]
+	\draw[ar] (outer.west|-A_in1) -- (A_in1);
+	\draw[ar] (outer.west|-A_in2) -- (A_in2);
+	\draw[ar] (outer.west|-B_in1) -- (B_in1);
+	\draw[ar] (outer.west|-B_in2) -- (B_in2);
+\end{scope}
+\begin{scope}[shorten >=-3pt]
+	\draw[ar] (A_out1) to (A_out1-|outer.east);
+	\draw[ar] (B_out1-|outer.east) to (B_out1);
+	\draw[ar] (B_out2) to (B_out2-|outer.east);
+\end{scope}
+\end{tikzpicture}
+\]
+We take our monoidal product on $\Prof_\cat{V}$ to be that given by the product of $\cat{V}$-categories; the definition was given in \cref{def.enriched_prod}, and we worked out several examples there. To recall, the formula for the hom-sets in $\cat{X}\times\cat{Y}$ is given by
+\[(\cat{X}\times\cat{Y})((x,y),(x',y'))\coloneqq\cat{X}(x,x')\otimes\cat{Y}(y,y').\]
+But monoidal products need to be given on morphisms also, and the morphisms in $\Prof_\cat{V}$ are $\cat{V}$-profunctors. So given $\cat{V}$-profunctors $\Phi\colon\cat{X}_1\tickar\cat{X}_2$ and $\Psi\colon\cat{Y}_1\tickar\cat{Y}_2$, one defines a $\cat{V}$-profunctor $(\Phi\times\Psi)\colon\cat{X}_1\times\cat{Y}_1\tickar\cat{X}_2\times\cat{Y}_2$ by
+\[(\Phi\times\Psi)((x_1,y_1),(x_2,y_2))\coloneqq\Phi(x_1,x_2)\otimes\Psi(y_1,y_2).\]
+
+\begin{exercise}%
+\label{exc.explain_monoidal_prod_feas}
+Interpret the monoidal products in $\Prof_{\Bool}$ in terms of feasibility. That
+is, preorders represent resources ordered by availability ($x\leq x'$ means that
+$x$ is available given $x'$) and a profunctor is a feasibility relation. Explain
+why $\cat{X}\times\cat{Y}$ makes sense as the monoidal product of resource
+preorders $\cat{X}$ and $\cat{Y}$ and why $\Phi\times\Psi$ makes sense as the monoidal product of feasibility relations $\Phi$ and $\Psi$.
+\end{exercise}
+
+\paragraph{The monoidal unit in $\Prof_\cat{V}$ is $\Cat{1}$.}
+
+To define a monoidal structure on $\Prof_\cat{V}$, we need not only a monoidal product---as defined above---but also a monoidal unit. Recall the $\cat{V}$-category $\Cat{1}$; it has one object, say $1$, and $\cat{1}(1,1)=I$ is the monoidal unit of $\cat{V}$. We take $\Cat{1}$ to be the monoidal unit of $\Prof_\cat{V}$.
+
+\begin{exercise} %
+\label{exc.prof_monoidal_unit}
+In order for $\Cat{1}$ to be a monoidal unit, there are supposed to be
+isomorphisms $\cat{X}\times\Cat{1}\tickar\cat{X}$ and
+$\Cat{1}\times\cat{X}\tickar\cat{X}$ in $\Prof_\cat{V}$, for any $\cat{V}$-category $\cat{X}$. What
+are they?
+\end{exercise}
+
+\paragraph{Duals in $\Prof_\cat{V}$ are just opposite categories.}%
+\index{opposite category!as dual}
+
+In order to regard $\Prof_\cat{V}$ as a compact closed category
+(\cref{def.compact_closed}), it remains to specify duals and the corresponding
+cup and cap.%
+\index{dual!category as opposite, in $\Prof$}
+
+Duals are easy: for every $\cat{V}$-category $\cat{X}$, its dual is its opposite
+category $\cat{X}\op$ (see \cref{def.enriched_op}).  The unit and counit then
+look like identities. To elaborate, the unit is a $\cat{V}$-profunctor
+$\eta_{\cat{X}}\colon\Cat{1}\tickar\cat{X}\op\times\cat{X}$. By definition, this
+is a $\cat{V}$-functor
+\[
+\eta_{\cat{X}}\colon\Cat{1}\times\cat{X}\op\times\cat{X}\to\cat{V};
+\]
+we define it by $\eta_{\cat{X}}(1,x,x')\coloneqq\cat{X}(x,x')$. Similarly, the
+counit is the profunctor
+$\epsilon_{\cat{X}}\colon(\cat{X}\times\cat{X}\op)\tickar\Cat{1}$, defined by
+$\epsilon_{\cat{X}}(x,x',1)\coloneqq\cat{X}(x,x')$.
+
+\begin{exercise} %
+\label{exc.prof_duals}
+Check these proposed units and counits do indeed obey the snake equations
+\cref{eqn.yanking}.
+\end{exercise}
+
+%
+\index{feasibility relation!compact closed category of|)}
+%
+\index{compact closed category|)}
+
+%-------- Section --------%
+
+\section{Summary and further reading}
+
+This chapter introduced three important ideas in category theory: profunctors,
+categorification, and monoidal categories. Let's talk about them in turn.
+
+Profunctors generalize binary relations. In particular, we saw that the idea of
+profunctor over a monoidal preorder gave us the additional power necessary to
+formalize the idea of a feasibility relation between resource preorders. The idea
+of a feasibility relation is due to Andrea Censi; he called them \emph{monotone
+codesign problems}. The basic idea is explained in \cite{Censi:2015a}, where he
+also gives a programming language to specify and solve codesign problems. In
+\cite{censi:2017a}, Censi further discusses how to use estimation to make
+solving codesign problems computationally efficient.
+
+We also saw profunctors over the preorder $\Cost$, and how to think of these as
+bridges between Lawvere metric space. We referred earlier to Lawvere's paper
+\cite{Lawvere:1973a}; plenty more on $\Cost$-profunctors can be found there.
+
+Profunctors, however are vastly more general than the two examples we have
+discussed; $\cat{V}$-profunctors can be defined not only when $\cat{V}$ is a
+preorder, but for any symmetric monoidal category. A delightful, detailed
+exposition of profunctors and related concepts such as equipments, companions
+and conjoints, symmetric monoidal bicategories can be found in
+\cite{Shulman:2008a,Shulman:2010a}.
+
+We have not defined symmetric monoidal bicategories, but you would be correct if
+you guessed this is a sort of categorification of symmetric monoidal
+categories. Baez and Dolan tell the subtle story of categorifying categories to
+get ever \emph{higher} categories in \cite{Baez.Dolan:1998}. Crane and Yetter
+give a number of examples of categorification in \cite{Crane.Yetter:1996a}.
+
+Finally, we talked about monoidal categories and compact closed categories.
+Monoidal categories are a classic, central topic in category theory, and a quick
+introduction can be found in \cite{MacLane:1998a}. Wiring diagrams play a huge
+role in this book and in applied category theory in general; while informally
+used for years, these were first formalized in the case of monoidal categories.
+You can find the details here
+\cite{Joyal.Street:1993a,Joyal.Street.Verity:1996a}.
+
+Compact closed categories are a special type of structured monoidal category;
+there are many others. For a broad introduction to the different flavors of
+monoidal category, detailed through their various styles of wiring diagram, see
+\cite{selinger2010survey}.%
+\index{wiring diagram!styles of}
+
+%
+\index{co-design|)}
+
+%Petri nets as free monoidal categories on a signature (so morphisms in the free prop on some generating set $G$ are executions in the Petri net with one place and transitions given by $G$).
+\end{document}

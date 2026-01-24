@@ -1,0 +1,2616 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+
+\setcounter{chapter}{2}%Just finished 2.
+%------------ Chapter ------------%
+\chapter[Databases: Categories, functors, and (co)limits]{Databases:\\Categories, functors, and universal constructions}%
+\label{chap.databases}
+
+%\settocdepth{subsubsection}
+%\tableofcontents*
+
+%-------- Section --------%
+\section{What is a database?}%
+\label{sec.C2_motivation}
+%
+\index{database|(}
+
+Integrating data from disparate sources is a major problem in industry today. A
+study in 2008 \cite{bernstein.Hass:2008a} showed that data integration accounts for 40\% of IT (information technology) budgets, and that the market for
+data integration software was \$2.5 billion in 2007 and increasing at a rate of
+more than 8\% per year. In other words, it is a major problem; but what is it?
+
+%---- Subsection ----%
+%\subsection{What is a database?}
+
+\paragraph{A database is a system of interlocking tables.}%
+\index{database!as interlocking tables}
+
+Data becomes information when it is stored \emph{in} a given \emph{formation}. That is, the numbers and letters don't mean anything until they are organized, often into a system of interlocking tables. An organized system of interlocking tables is called a database. Here is a favorite example:
+
+\begin{equation}%
+\label{eqn.fav_ex_db}
+\begin{tabular}{ c | c  c  c}
+  \textbf{Employee}&\textbf{FName}&\textbf{WorksIn}&\textbf{Mngr}\\\hline
+  1&Alan&101&2\\
+  2&Ruth&101&2\\
+  3&Kris&102&3
+\end{tabular}
+\hspace{.6in}
+\begin{tabular}{ c | c  c}
+  \textbf{Department}&\textbf{DName}&\textbf{Secr}\\\hline
+  101&Sales&1\\
+  102&IT&3\\~
+\end{tabular}
+\end{equation}
+
+These two tables interlock by use of a special left-hand column, demarcated by a vertical line; it is called the ID column. The ID column of the first table is called `Employee,' and the ID column of the second table is called `Department.' The entries in the ID column---e.g.\ 1, 2, 3 or 101, 102---are like row labels; they indicate a whole row of the table they're in. Thus each row label must be unique (no two rows in a table can have the same label), so that it can unambiguously specify its row.%
+\index{database!ID columns of}
+
+Each table's ID column, and the set of unique identifiers found therein, is what allows for the interlocking mentioned above. Indeed, other entries in various tables can reference rows in a given table by use of its ID column. For example, each entry in the WorksIn column references a department for each employee; each entry in the Mngr (manager) column references an employee for each employee, and each entry in the Secr (secretary) column references an employee for each department. Managing all this cross-referencing is the purpose of databases.
+
+Looking back at \cref{eqn.fav_ex_db}, one might notice that every non-ID column, found in either table, is a reference to a label of some sort. Some of these, namely WorksIn, Mngr, and Secr, are \emph{internal references}, often called \emph{foreign keys}; they refer to rows (keys) in the ID column of some (foreign) table.%
+\index{foreign key|see {database, foreign key}}
+Others, namely FName and DName, are \emph{external references}; they refer to strings or integers, which can also be thought of as labels, whose meaning is known more broadly. Internal reference labels can be changed as long as the change is consistent---1 could be replaced by 1001 everywhere without changing the meaning---whereas external reference labels certainly cannot! Changing Ruth to Bruce everywhere would change how people understood the data.
+
+The reference structure for a given database---i.e.\ how tables interlock via foreign keys---tells us something about what information was intended to be stored in it. One may visualize the reference structure for \cref{eqn.fav_ex_db} graphically as follows:
+\begin{equation}%
+\label{eqn.free_schema}
+\text{easySchema}\coloneqq
+\boxCD{
+\begin{tikzcd}[row sep=large, ampersand replacement=\&]
+  	\LTO{Employee}\ar[rr, shift left, "\text{WorksIn}"]\ar[dr, bend right, "\text{FName}"']\ar[loop left, "\text{Mngr}"]\&\&
+  	\LTO{Department}\ar[ll, shift left, "\text{Secr}"]\ar[dl, bend left, "\text{DName}"]\\
+  	\&\LTO[\circ]{string}
+\end{tikzcd}
+}
+\end{equation}
+This is a kind of ``Hasse diagram for a database,'' much like the Hasse diagrams for preorders in \cref{rem.Hasse}. How should you read it?
+%
+\index{database schema}
+
+The two tables from \cref{eqn.fav_ex_db} are represented in the graph \eqref{eqn.free_schema} by the
+two black nodes, which are given the same name as the ID columns: Employee and Department. There is
+another node---drawn white rather than black---which represents the external reference type of strings, like ``Alan,'' ``Alpha,'' and ``Sales". The arrows in the diagram represent non-ID columns of the tables; they point in the direction of reference: WorksIn refers an employee to a department.
+
+\begin{exercise}%
+\label{exc.fks_arrows}%
+\index{database!foreign key}
+	Count the number of non-ID columns in \cref{eqn.fav_ex_db}. Count the number of arrows (foreign keys) in \cref{eqn.free_schema}. They should be the same number in this case; is this a coincidence?
+\end{exercise}
+
+%
+\index{database schema!free}%
+\index{free!schema}%
+\index{Hasse diagram!database schema as}
+A Hasse-style diagram like the one in \cref{eqn.free_schema} can be called a \emph{database schema}; it represents how the information is being organized, the formation in which the data is kept. One may add rules, sometimes called `business rules' to the schema, in order to ensure the integrity of the data. If these rules are violated, one knows that data being entered does not conform to  the way the database designers intended. For example, the designers may enforce rules saying 
+\begin{itemize}
+	\item every department's secretary must work in that department;
+	\item every employee's manager must work in the same department as the employee.
+\end{itemize}
+Doing so changes the schema, say from `easySchema' \eqref{eqn.free_schema} to `mySchema' below.
+\begin{equation}%
+\label{eqn.mySchema}
+\text{mySchema}\coloneqq
+\boxCD{
+\begin{tikzcd}[row sep=large, ampersand replacement = \&]
+ 	\LTO{Employee}\ar[rr, shift left, "\text{WorksIn}"]\ar[dr, bend right, "\text{FName}"']\ar[loop left, "\text{Mngr}"]\&\&
+  \LTO{Department}\ar[ll, shift left, "\text{Secr}"]\ar[dl, bend left, "\text{DName}"]\\
+  \&\LTO[\circ]{string}
+\end{tikzcd}
+\\~\\\footnotesize
+  Department.Secr.WorksIn = Department\\
+	Employee.Mngr.WorksIn = Employee.WorksIn  
+}
+\end{equation}
+In other words, the difference is that $\mathrm{easySchema}$ plus constraints equals $\mathrm{mySchema}$.%
+\index{database!constraints}%
+\index{database schema!as category presentation}
+
+We will soon see that database schemas are categories $\cat{C}$, that the data itself is given by a `set-valued' functor $\cat{C}\to\smset$, and that databases can be mapped to each other via functors $\cat{C}\to\cat{D}$. In other words, there is a relatively large overlap between database theory and category theory. This has been worked out in a number of papers; see \cref{sec.ch2_further_reading}. It has also been implemented in working software, called FQL, which stands for \emph{functorial query language}. Here is example FQL code for the schema shown above:
+
+\footnotesize
+\begin{verbatim}
+   schema mySchema = { 
+      nodes
+         Employee, Department;
+      attributes
+         DName : Department -> string,
+         FName : Employee   -> string;
+      arrows
+         Mngr    : Employee   -> Employee,
+         WorksIn : Employee   -> Department,
+         Secr    : Department -> Employee;
+      equations  
+         Department.Secr.WorksIn = Department,
+         Employee.Mngr.WorksIn   = Employee.WorksIn;
+   }
+\end{verbatim}
+\normalsize
+%
+\index{functorial query language, FQL}
+
+%---- Subsection ----%
+%\subsection{Communication between databases}
+
+\paragraph{Communication between databases.}%
+\index{database!communication between}
+
+We have said that databases are designed to store information about something. But different people or organizations might view the same sort of thing in different ways. For example, one bank stores its financial records according to European standards and another does so according to Japanese standards. If these two banks merge into one, they will need to be able to share their data despite differences in the shape of their database schemas.
+
+Such problems are huge and intricate in general, because databases often comprise hundreds or thousands of interlocking tables. Moreover, these problems occur more frequently than just when companies want to merge. It is quite common that a given company moves data between databases on a daily basis. The reason is that different ways of organizing information are convenient for different purposes. Just like we pack our clothes in a suitcase when traveling but use a closet at home, there is generally not one best way to organize anything.
+
+Category theory provides a mathematical approach for translating between these
+different organizational forms. That is, it formalizes a sort of automated
+reorganizing process called \emph{data migration}, which takes data that fits
+snugly in one schema and moves it into another.%
+\index{database!data migration}
+
+Here is a simple case. Imagine an airline company has two different databases, perhaps created at different times, that hold roughly the same data. 
+\begin{equation}%
+\label{eqn.airline_schemas}
+\begin{tikzpicture}[commutative diagrams/every diagram, inner sep=10pt, baseline=(A)]
+	\matrix[matrix of math nodes, name=A, row sep=25pt, column sep=15pt, commutative diagrams/every cell] {
+		&
+			|(AD)|\LTO[\circ]{\$}
+		\\
+			|(AE)|\LTO{Economy}
+		&&
+			|(AF)|\LTO{First Class}
+		\\
+		&
+			|(AS)|\LTO[\circ]{string}
+		\\
+	};
+%
+	\path[commutative diagrams/.cd, every arrow, every label, font=\scriptsize]
+		(AE) edge["Price"]     (AD)
+				 edge["Position"'] (AS)
+		(AF) edge["Price"']    (AD)
+				 edge["Position"]  (AS);
+	\node[draw, fit=(AE) (AD) (AF) (AS)] (A box) {};
+	\node[left=0 of A box] {$A\coloneqq$};
+%%
+	\matrix[matrix of math nodes, name=B, row sep=25pt, commutative diagrams/every cell, matrix anchor=south, right=3 of A.south east] {
+			|(BD)|\LTO[\circ]{\$}
+		\\
+			|(BAS)|\LTO{Airline Seat}
+		\\
+			|(BS)|\LTO[\circ]{string}
+		\\
+	};
+%
+	\path[commutative diagrams/.cd, every arrow, every label, font=\scriptsize]
+		(BAS) edge["Price"']    (BD)
+				 edge["Position"] (BS);
+	\node[draw, fit=(BAS) (BD) (BS)] (B box) {};				
+	\node[right=0 of B box] {$=:B$};
+%
+%	\draw[functor] (A box) to node[above] {$F$} (B box);
+\end{tikzpicture}
+\end{equation}%
+\index{database schema!mapping between}
+Schema $A$ has more detail than schema $B$---an airline seat may be in first class or economy---but they are roughly the same. We will see that they can be connected by a functor, and that data conforming to $A$ can be migrated through this functor to schema $B$ and vice versa.
+
+The statistics at the beginning of this section show that this sort of problem---when occurring at enterprise scale---continues to prove difficult and expensive. If one attempts to move data from a source schema to a target schema, the migrated data could fail to fit into the target schema or fail to satisfy some of its constraints. This happens surprisingly often in the world of business: a night may be spent moving data, and the next morning it is found to have arrived broken and unsuitable for further use. In fact, it is believed that over half of database migration projects fail.
+
+In this chapter, we will discuss a category-theoretic method for migrating data. Using categories and functors, one can prove up front that a given data migration will not fail, i.e.\ that the result is guaranteed to fit into the target schema and satisfy all its constraints.
+
+The material in this chapter gets to the heart of category theory: in particular, we discuss categories, functors, natural transformations, adjunctions, limits, and colimits. In fact, many of these ideas have been present in the discussion above:
+\begin{itemize}
+	\item The schema pictures, e.g.\ \cref{eqn.mySchema} depict categories $\cat{C}$.
+	\item The instances, e.g.\ \cref{eqn.fav_ex_db} are functors from $\cat{C}$ to a certain category called $\smset$.
+	\item The implicit mapping in \cref{eqn.airline_schemas}, which takes economy and first class seats in $A$ to airline seats in $B$, constitutes a functor $A\to B$.
+	\item The notion of data migration for moving data between schemas is formalized by  adjoint functors.
+\end{itemize}
+
+We begin in \cref{sec.categories} with the definition of categories and a bunch of different sorts of examples. In \cref{sec.cat_fun_nt_db} we bring back databases, in particular their instances and the maps between them, by discussing functors and natural transformations. In \cref{sec.adjunctions_mig} we discuss data migration by way of adjunctions, which generalize the Galois connections we introduced in \cref{sec.galois_connections}. Finally in \cref{sec.bonus_lims_colims} we give a bonus section on limits and colimits.%
+\footnote{By ``bonus,'' we mean that although not strictly essential
+to the understanding of this particular chapter, limits and colimits will show up throughout the book and throughout
+one's interaction with category theory, and we think the reader will especially
+benefit from this material in the long run.}
+
+%
+\index{database|)}
+
+%-------- Section --------%
+\section{Categories}%
+\label{sec.categories}%
+\index{category|(}
+
+A category $\cat{C}$ consists of four pieces of data---objects, morphisms,
+identities, and a composition rule---satisfying two properties.
+
+\begin{definition}%
+\label{def.category}%
+\index{category}
+To specify a \emph{category} $\cat{C}$:
+\begin{enumerate}[label=(\roman*)]
+	\item one specifies a collection%
+	\tablefootnote{Here, a \emph{collection} can be thought of as a bunch of things, just like a set,
+	but that may be too large to formally be a set. An example is the
+	collection of all sets, which would run afoul of Russell's paradox if it
+	were itself a set.}
+	$\Ob(\cat{C})$, elements of which are called
+	\emph{objects}.%
+\index{collection}%
+\index{category!object in}
+	\item for every two objects $c,d$, one specifies a set $\cat{C}(c,d)$,%
+	\tablefootnote{This set $\cat{C}(c,d)$ is often denoted
+	$\Hom_{\cat{C}}(c,d)$, and called the ``hom-set from $c$ to $d$.'' The
+	word ``hom'' stands for homomorphism, of which the word ``morphism'' is
+	a shortened version.%
+\index{hom-set}} 
+	elements of which are called \emph{morphisms} from
+	$c$ to $d$.%
+\index{category!morphism in}
+	\item for every object $c\in \Ob(\cat{C})$, one specifies a morphism $\id_c\in
+	\cat{C}(c,c)$, called the \emph{identity morphism} on
+	$c$.%
+\index{identity!morphism}%
+\index{morphism!identity}
+	\item for every three objects $c,d,e\in\Ob(\cat{C})$ and morphisms $f\in
+	\cat{C}(c,d)$ and $g\in \cat{C}(d,e)$, one specifies a morphism $f\cp g\in \cat{C}(c,e)$, called \emph{the composite of $f$ and $g$}.%
+\index{category!composition in}%
+\index{category!identity in}%
+\index{composition!in a category|see {category, composition in}}
+\end{enumerate}
+We will sometimes write an object $c \in \cat{C}$, instead of $c \in
+\Ob(\cat{C})$. It will also be convenient to denote elements $f\in\cat{C}(c,d)$
+as $f\colon c\to d$. Here, $c$ is called the \emph{domain} of $f$, and $d$ is
+called the \emph{codomain} of $f$.%
+\index{domain|see {morphism, domain}}%
+\index{codomain|see {morphism, codomain}}%
+\index{morphism!domain}%
+\index{morphism!codomain}
+
+These constituents are required to satisfy two conditions:
+\begin{enumerate}[label=(\alph*)]
+	\item \emph{unitality}: for any morphism $f\colon c\to d$, composing with the identities at $c$ or $d$ does nothing: $\id_c\cp f=f$ and $f\cp \id_d=f$.
+	\item \emph{associativity}: for any three morphisms $f\colon c_0\to
+	c_1$, $g\colon c_1\to c_2$, and $h\colon c_2\to c_3$, the following are
+	equal: $(f\cp g)\cp h=f\cp (g\cp h)$. We write this composite simply as $f\cp g\cp h$.
+\end{enumerate}
+\end{definition}%
+\index{unitality}%
+\index{associativity!of morphism composition}
+
+Our next goal is to give lots of examples of categories. Our first source of
+examples is that of free and finitely-presented categories, which generalize the
+notion of Hasse diagram from \cref{rem.Hasse}.
+
+% Subsubsection %
+\subsection{Free categories}%
+\label{subsubsec.path_cats}%
+Recall from \cref{def.graph} that a graph consists of two types of thing: vertices and arrows. From there one can define
+paths, which are just head-to-tail sequences of arrows. Every path $p$ has a start
+vertex and an end vertex; if $p$ goes from $v$ to $w$, we write $p\colon v\to w$. To every vertex $v$, there is a trivial path, containing no arrows,%
+\index{trivial path}
+starting and ending at $v$; we often denote it by $\id_v$ or simply by $v$. We may also concatenate paths: given $p\colon v\to w$ and $q\colon w\to x$, their concatenation is denoted $p\cp q$, and it goes $v\to x$.
+
+In \cref{chap.preorders}, we used graphs to depict preorders $(V,\leq)$: the vertices form the elements of the preorder, and we say that $v\leq w$ if there is a path from $v$ to $w$ in $G$.
+We will now use graphs in a very similar way to depict certain categories, known
+as \emph{free categories}. Then we will explain a strong relationship between
+preorders and categories in \cref{subsubsec.pos_free_spectrum}.
+
+\begin{definition}%
+\label{def.free_category}%
+\index{category!free}%
+\index{free!category}%
+\index{graph!free category on}
+For any graph $G = (V,A,s,t)$, we can define a category $\free(G)$,
+called the \emph{free category on $G$}, whose objects are the vertices $V$ and
+whose morphisms from $c$ to $d$ are the paths from $c$ to $d$. The identity
+morphism on an object $c$ is simply the trivial path at $c$. Composition is given by concatenation of paths.%
+\index{identity!morphism}%
+\index{morphism!in free category}
+\end{definition}
+
+For example, we define $\Cat{2}$ to be the free category generated by the graph shown below:
+\begin{equation}%
+\label{eqn.graphs_1_2}
+\Cat{2}\coloneqq\free\left(\;\raisebox{-.05in}{\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{v_1}\ar[r, "f_1"]\&\LMO{v_2}
+\end{tikzcd}
+}}
+\;\right)
+\end{equation}
+It has two objects $v_1$ and $v_2$,
+and three morphisms: $\id_{v_1}\colon v_1 \to v_1$, $f_1\colon v_1 \to v_2$,
+and $\id_{v_2}\colon v_2 \to v_2$. Here $\id_{v_1}$ is the path of length 0
+starting and ending at $v_1$, $f_1$ is the path of length 1 consisting
+of just the arrow $f_1$, and $\id_{v_2}$ is the length 0 path at $v_2$. As our
+notation suggests, $\id_{v_1}$ is the identity morphism for the object $v_1$, and
+similarly $\id_{v_2}$ for $v_2$. As composition is given by concatenation, we
+have, for example $\id_{v_1}\cp f_1 =f_1$, $\id_{v_2}\cp \id_{v_2}=\id_{v_2}$, and so
+on.
+
+From now on, we may elide the difference between a graph and the corresponding free category $\free(G)$, at least when the one we mean is clear enough from context.
+
+\begin{exercise}%
+\label{exc.free_cat}
+For $\free(G)$ to really be a category, we must check that this data we
+specified obeys the unitality and associativity properties. Check that these
+are obeyed for any graph $G$.%
+\index{associativity}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.free_cat2}
+The free category on the graph shown here:%
+\footnote{As mentioned above, we elide the difference between the graph and the corresponding free category.}
+\begin{equation}%
+\label{eqn.graphs_rand9851}
+\Cat{3}\coloneqq{\color{black!20!white}\mathbf{Free}\bigg(}\;\raisebox{-.05in}{\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{v_1}\ar[r, "f_1"]\&\LMO{v_2}\ar[r, "f_2"]\&\LMO{v_3}
+\end{tikzcd}
+}}
+{\color{black!20!white}\;\bigg)}
+\end{equation}
+has three objects and six morphisms: the three vertices and six paths in the graph.
+
+Create six names, one for each of the six morphisms in $\Cat{3}$. Write down a six-by-six table, label the rows and columns by the six names you chose.
+\begin{enumerate}
+	\item Fill out the table by writing the name of the composite in each cell, when there is a composite.
+	\item Where are the identities?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.Cat_n}%
+\index{ordinals!as categories}
+Let's make some definitions, based on the pattern above:
+\begin{enumerate}
+	\item What is the category $\Cat{1}$? That is, what are its objects and morphisms?
+	\item What is the category $\Cat{0}$?
+	\item What is the formula for the number of morphisms in $\Cat{n}$ for arbitrary $n\in\NN$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}[Natural numbers as a free category]
+  %
+\label{ex.monoid_nats}%
+\index{natural numbers!as free category}
+Consider the following graph:
+\begin{equation}%
+\label{eqn.loop_graph}
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO[under]{z}\ar[loop above, "s"]
+\end{tikzcd}
+}
+\end{equation}
+It has only one vertex and one arrow, but it has infinitely many paths. Indeed, it
+has a unique path of length $n$ for every natural number $n\in\NN$. That is,
+$\Set{Path}=\{z, s, (s\cp s), (s\cp s\cp s), \ldots\}$, where we write $z$ for the
+length 0 path on $z$; it represents the morphism $\id_z$. There is a one-to-one correspondence between $\Set{Path}$
+and the natural numbers, $\NN=\{0,1,2,3,\ldots\}$.
+
+This is an example of a category with one object. A category with one object is called a
+\emph{monoid}%
+\index{monoid}, a notion we first discussed in \cref{ex.monoid}. There we said that a monoid is a tuple $(M,*,e)$ where $*\colon M\times M\to M$ is a function and $e\in M$ is an element, and $m*1=m=1*m$ and $(m*n)*p=m*(n*p)$.%
+\index{monoid!as one-object category}
+
+The two notions may superficially look different, but it is easy to describe the connection. Given a category $\cat{C}$ with one object, say $\bullet$, let $M\coloneqq\cat{C}(\bullet,\bullet)$, let $e=\id_{\bullet}$, and let $*\colon\cat{C}(\bullet,\bullet)\times\cat{C}(\bullet,\bullet)\to\cat{C}(\bullet,\bullet)$ be the composition operation $*=\cp$. The associativity and unitality requirements for the monoid will be satisfied because $\cat{C}$ is a category.%
+\index{associativity}%
+\index{unitality}
+\end{example}
+
+\begin{exercise}%
+\label{exc.nat_comp}
+In \cref{ex.monoid_nats} we identified the paths of the loop graph \eqref{eqn.loop_graph} with numbers $n\in\NN$. Paths can be concatenated. Given numbers $m,n\in\NN$, what number corresponds to the concatenation of their associated paths?
+\end{exercise}
+
+% Subsubsection %
+\subsection{Presenting categories via path equations}
+%
+\label{subsec.presenting_cats}
+%
+\index{category!presentation of}
+
+So for any graph $G$, there is a free category on $G$. But we don't have to stop
+there: we can add equations between paths in the graph, and still get a
+category. We are only allowed to equate two paths $p$ and $q$ when they are \emph{parallel}, meaning they have the same source vertex and the same target vertex.
+
+A finite graph with path equations is called a \emph{finite presentation} for a
+category, and the category that results is known as a \emph{finitely-presented category}.
+Here are two examples:
+\[
+\mathrm{Free\_square}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, "f"]\ar[d, "g"']\&\LMO{B}\ar[d, "h"]\\
+	\LMO[under]{C}\ar[r, "i"']\&\LMO[under]{D}
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{no equations}
+}
+\hspace{.8in}
+\mathrm{Comm\_square}\coloneqq
+\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, "f"]\ar[d, "g"']\&\LMO{B}\ar[d, "h"]\\
+	\LMO[under]{C}\ar[r, "i"']\&\LMO[under]{D}
+\end{tikzcd}
+  \\~\\\footnotesize
+  $f\cp h=g\cp i$
+}
+\]
+Both of these are presentations of categories: in the left-hand one, there are no equations so it presents a free category, as discussed in \cref{subsubsec.path_cats}. The free square category has ten morphisms, because every path is a unique morphism.
+
+\begin{exercise}%
+\label{exc.label_free_square}~
+\begin{enumerate}
+	\item Write down the ten paths in the free square category above.
+	\item Name two different paths that are parallel.
+	\item Name two different paths that are not parallel.
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+On the other hand, the category presented on the right has only nine morphisms,
+because $f\cp h$ and $g\cp i$ are made equal. This category is called the
+``commutative square.''%
+\index{commutative square} Its morphisms are
+\[
+\{A, B, C, D, f, g, h, i, f\cp h\}
+\]
+One might say ``the missing one is $g\cp i$,'' but that is not quite right: $g\cp i$ is there too, because it is equal to $f\cp h$. As usual, $A$ denotes $\id_A$, etc.
+
+\begin{exercise}%
+\label{exc.cat_gens_rels}
+Write down all the morphisms in the category presented by the following diagram:
+\[
+\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, "f"]\ar[d, "g"']\ar[dr, "j" description]\&\LMO{B}\ar[d, "h"]\\
+	\LMO[under]{C}\ar[r, "i"']\&\LMO[under]{D}
+\end{tikzcd}
+\\~\\\footnotesize
+  $f\cp h=j=g\cp i$
+}
+\]
+\end{exercise}
+
+\begin{example} %
+\label{ex.group_of_order_2}%
+\index{group}
+We should also be aware that enforcing an equation between two morphisms often
+implies additional equations. Here are two more examples of presentations, in
+which this phenomenon occurs:
+\[
+\cat{C}\coloneqq\boxCD{\begin{tikzcd}[ampersand replacement=\&]
+	\LMO[under]{z}\ar[loop above, "s"]
+\end{tikzcd}
+\\~\\\footnotesize
+$s\cp s=z$
+}
+\hspace{1in}
+\cat{D}\coloneqq\boxCD{\begin{tikzcd}[ampersand replacement=\&]
+	\LMO[under]{z}\ar[loop above, "s"]
+\end{tikzcd}
+\\~\\\footnotesize
+$s\cp s\cp s\cp s=s\cp s$
+}
+\]
+In $\cat{C}$ we have the equation $s\cp s = z$. But this implies $s \cp s \cp s
+= z \cp s = s$! And similarly we have $s \cp s \cp s \cp s = z \cp z = z$. The
+set of morphisms in $\cat{C}$ is in fact merely $\{z,s\}$, with composition
+described by $s\cp s= z \cp z =z$, and $z \cp s = s \cp z =s$. In group theory, one would speak of a group called $\zz/2\zz$.%
+\index{presentation!of monoid}
+\end{example}
+
+\begin{exercise}%
+\label{exc.group2}
+Write down all the morphisms in the category $\cat{D}$ from \cref{ex.group_of_order_2}.
+\end{exercise}
+
+\begin{remark}%
+\label{rem.db_schemas_are_cats}%
+\index{database schema!as category presentation}
+We can now see that the schemas in \cref{sec.C2_motivation}, e.g.\ \cref{eqn.free_schema,eqn.mySchema} are finite presentations of categories. We will come back to this idea in \cref{sec.cat_fun_nt_db}.
+\end{remark}
+
+% Subsubsection %
+\subsection{Preorders and free categories: two ends of a spectrum}%
+\label{subsubsec.pos_free_spectrum}
+
+Now that we have used graphs to depict preorders in \cref{chap.preorders} and categories above, one may want
+to know the relationship between these two uses. The main idea we want to explain now is that
+\begin{quote}
+``A preorder is a category where every two parallel arrows are the same.''
+\end{quote}
+Thus any preorder can be regarded as a category, and any category can be somehow ``crushed down'' into a preorder. Let's discuss these ideas.
+
+\paragraph{Preorders as categories.}%
+\index{preorder!as category}
+
+Suppose $(P,\leq)$ is a preorder. It specifies a category $\cat{P}$ as follows. The
+objects of $\cat{P}$ are precisely the elements of $P$; that is,
+$\Ob(\cat{P})=P$. As for morphisms, $\cat{P}$ has exactly one morphism $p\to q$ if
+$p\leq q$ and no morphisms $p\to q$ if $p\not\leq q$. The fact that $\leq$ is reflexive ensures that every object has an identity, and the fact that $\leq$ is transitive ensures that morphisms can be composed. We call $\cat{P}$ the \emph{category corresponding to the preorder $(P,\leq)$}.%
+\index{reflexivity!as identity in a preorder}%
+\index{transitivity!as composition in a preorder}
+
+In fact, a Hasse diagram for a preorder can be thought of a presentation of
+a category where, for all vertices $p$ and $q$, every two paths from $p\to q$ are
+declared equal. For example, in \cref{eqn.parts_of_3} we saw a Hasse diagram
+that was like the graph on the left:
+\[
+\boxCD{
+\begin{tikzcd}[row sep=15pt, ampersand replacement=\&]
+	\&\bullet\\
+	\bullet\ar[ur]\&\bullet\ar[u]\&\bullet\ar[ul]\\
+	\&\bullet\ar[lu]\ar[u]\ar[ru]
+\end{tikzcd}
+  \\~\\\footnotesize
+}
+\hspace{.6in}
+\boxCD[red]{
+\begin{tikzcd}[row sep=15pt, ampersand replacement=\&]
+	\&\bullet\\
+	\bullet\ar[ur,"d"]\&\bullet\ar[u,"e"]\&\bullet\ar[ul,"f"']\\
+	\&\bullet\ar[lu, "a"]\ar[u,"b"]\ar[ru,"c"']
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{\color{red}no equations?}
+}
+\hspace{.6in}
+\boxCD{
+\begin{tikzcd}[row sep=15pt, ampersand replacement=\&]
+	\&\bullet\\
+	\bullet\ar[ur,"d"]\&\bullet\ar[u,"e"]\&\bullet\ar[ul,"f"']\\
+	\&\bullet\ar[lu, "a"]\ar[u,"b"]\ar[ru,"c"']
+\end{tikzcd}
+\\~\\\footnotesize
+  $a\cp d = b\cp e = c\cp f$
+}
+\]
+The Hasse diagram (left) might look the most like the free category presentation
+(middle) which has no equations, but that is not correct. The free category has
+three morphisms (paths) from bottom object to top object, whereas preorders are
+categories with \emph{at most one} morphism between two given objects. Instead,
+the diagram on the right, with these paths from bottom to top made equal, is the
+correct presentation for the preorder on the left.
+
+\begin{exercise}%
+\label{exc.graph_to_preorder}
+What equations would you need to add to the graphs below in order to present the associated preorders?
+\[
+G_1=\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=20pt]
+	\bullet\ar[r, shift left, "f"]\ar[r, shift right, "g"']\&\bullet
+\end{tikzcd}
+}
+\hspace{.4in}
+G_2=\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\bullet\ar[loop above, "f"]
+\end{tikzcd}
+}
+\hspace{.4in}
+G_3=\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=20pt]
+	\bullet\ar[r, "f"]\ar[d, "g"']\&\bullet\ar[d, "h"]\\
+	\bullet\ar[r, "i"']\&\bullet
+\end{tikzcd}
+}
+\hspace{.4in}
+G_4=\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=20pt]
+	\bullet\ar[r, "f"]\ar[d, "g"']\&\bullet\ar[d, "h"]\\
+	\bullet\&\bullet
+\end{tikzcd}
+}
+\qedhere
+\]
+\end{exercise}
+
+\paragraph{The preorder reflection of a category.}%
+\index{category!preorder reflection of}
+
+Given any category $\cat{C}$, one can obtain a preorder $(C,\leq)$ from it by destroying the distinction between any two parallel morphisms. That is, let $C\coloneqq\Ob(\cat{C})$, and put $c_1\leq c_2$ iff $\cat{C}(c_1,c_2)\neq\varnothing$. If there is one, or two, or fifty, or infinitely many morphisms $c_1\to c_2$ in $\cat{C}$, the preorder reflection does not see the difference. But it does see the difference between some morphisms and no morphisms.%
+\index{morphism!inequality as mere existence of}
+
+\begin{exercise}%
+\label{exc.preorder_refl_N}
+What is the preorder reflection of the category $\NN$ from \cref{ex.monoid_nats}?
+\end{exercise}
+
+We have only discussed adjoint functors between preorders, but soon we will discuss adjoints in general. Here is a statement you might not understand exactly, but it's true; you can ask a category theory expert about it and they should be able to explain it to you:
+\begin{quote}
+Considering a preorder as a category is right adjoint to turning a category into a preorder by preorder reflection.
+\end{quote}%
+\index{adjunction!examples of}
+
+\begin{remark}[Ends of a spectrum]
+The main point of this subsection is that both preorders and free categories are specified by a graph without path equations, but they denote opposite ends of a spectrum. In both cases, the vertices of the graph become the objects of a category and the paths become morphisms. But in the case of free categories, there are no equations so each path becomes a different morphism. In the case of preorders, all parallel paths become the same morphism. Every category presentation, i.e.\ graph with some equations, lies somewhere in between the free category (no equations) and its preorder reflection (all possible equations).
+\end{remark}
+
+% Subsubsection %
+\subsection{Important categories in mathematics} %
+\label{subsec.important_cats}
+We have been talking about category presentations, but there are categories that are best understood directly, not by way of presentations. Recall the definition of category from \cref{def.category}. The most important category in mathematics is the category of sets.
+
+\begin{definition}%
+\label{def.category_of_sets}%
+\index{sets!category of}%
+\index{category!of sets}
+The \emph{category of sets}, denoted $\smset$, is defined as follows.
+\begin{enumerate}[label=(\roman*)]
+	\item $\Ob(\smset)$ is the collection of all sets.
+	\item If $S$ and $T$ are sets, then $\smset(S,T)=\{f\colon S\to T\mid f\text{ is a function}\}$.
+	\item For each set $S$, the identity morphism is the function $\id_S\colon S\to S$ given by $\id_S(s)\coloneqq s$ for each $s\in S$.
+	\item Given $f\colon S\to T$ and $g\colon T\to U$, their composite is the function $f\cp g\colon S\to U$ given by $(f\cp g)(s)\coloneqq g(f(s))$.
+\end{enumerate}
+These definitions satisfy the unitality and associativity conditions, so $\smset$ is indeed a category.%
+\index{associativity!of function composition}%
+\index{unitality!of identity functions}
+\end{definition}
+
+Closely related is the category $\finset$. This is the category whose
+objects are finite sets and whose morphisms are functions between them.
+%
+\index{category!of finite sets}
+
+\begin{exercise}%
+\label{exc.exponential_practice}
+	Let $\ord{2}=\{1,2\}$ and $\ord{3}=\{1,2,3\}$. These are objects in the
+	category $\smset$ discussed in \cref{def.category_of_sets}. Write down all the elements of the set $\smset(\ord{2},\ord{3})$; there should be nine.
+\end{exercise}
+
+\begin{remark} %
+\label{rem.cats_and_vcats1}%
+\index{enriched category!vs category}
+You may have wondered what categories have to do with
+$\cat{V}$-categories (\cref{def.cat_enriched_mpos}); perhaps you think the
+definitions hardly look alike. Despite the term `enriched category',
+$\cat{V}$-categories are not categories with extra structure. While some sorts
+of $\cat{V}$-categories, such as $\Bool$-categories, i.e.\ preorders, can naturally be
+seen as categories, other sorts, such as $\Cost$-categories, cannot.
+
+The reason for the importance of $\smset$ is that, if we generalize the
+definition of enriched category (\cref{def.cat_enriched_mpos}), we find that
+categories in the sense of \cref{def.category} are exactly $\smset$-categories---so categories are
+$\cat{V}$-categories for a very special choice of $\cat{V}$. We'll come back to
+this in \cref{subsec.SMC_enrichment}.  For now, we simply remark that just like
+a deep understanding of the category $\Cost$---for example, knowing that it is a
+quantale---yields insight into Lawvere metric spaces, so the study of $\smset$
+yields insights into categories. 
+\end{remark}
+
+There are many other categories that mathematicians care about:
+\begin{itemize}%
+\index{category!examples of}
+	\item $\Cat{Top}$: the category of topological spaces (neighborhood)
+	\item $\Cat{Grph}$: the category of graphs (connection)
+	\item $\Cat{Meas}$: the category of measure spaces (amount)
+	\item $\Cat{Mon}$: the category of monoids (action)
+	\item $\Cat{Grp}$: the category of groups (reversible action, symmetry)
+	\item $\Cat{Cat}$: the category of categories (action in context, structure)
+\end{itemize}
+But in fact, this does not at all do justice to the diversity of categories mathematicians
+think about. They work with whatever category they find fits their purpose at
+the time, like `the category of connected Riemannian manifolds of dimension at most
+4'.
+
+Here is one more source of examples: take any category you already have and reverse all its morphisms; the result is again a category.
+\begin{example}%
+\label{def.opposite_cat}%
+\index{category!opposite of}%
+\index{opposite!category|see {category, opposite}}
+Let $\cat{C}$ be a category. Its \emph{opposite}, denoted $\cat{C}\op$, is the category with the same objects, $\Ob(\cat{C}\op)\coloneqq\Ob(\cat{C})$, and for any two objects $c,d\in\Ob(\cat{C})$, one has $\cat{C}\op(c,d)\coloneqq\cat{C}(d,c)$. Identities and composition are as in $\cat{C}$.
+\end{example}
+
+% Subsubsection %
+\subsection{Isomorphisms in a category}%
+\index{isomorphism|(}
+
+The previous sections have all been about examples of categories: free categories, presented categories, and important categories in math. In this section, we briefly switch gears and talk about an important concept in category theory, namely the concept of isomorphism.
+
+In a category, there is often the idea that two objects are interchangeable. For
+example, in the category $\smset$, one can exchange the set $\{\blacksquare,\square\}$ for the set $\{0,1\}$
+and everything will be the same, other than the names for the elements. Similarly, if one has a preorder with elements $a,b$, such that $a \le b$ and $b \le a$, i.e.\ $a\cong b$, then $a$ and $b$ are essentially the same. How so? Well they act the same, in that for any other object $c$, we know that $c \le a$ iff $c
+\le b$, and $c\ge a$ iff $c\geq b$. The notion of isomorphism formalizes this notion of interchangeability.
+
+\begin{definition}%
+\index{isomorphism}
+An \emph{isomorphism} is a morphism $f\colon A \to B$ such that there exists a
+morphism $g\colon B \to A$ satisfying $f\cp g=\id_A$ and $g\cp f=\id_B$. In this case
+we call $f$ and $g$ \emph{inverses}, and we often write $g=f\inv$, or
+equivalently $f=g\inv$. We also say that $A$ and $B$ are \emph{isomorphic}
+objects.
+\end{definition}%
+\index{morphism!invertible}
+
+\begin{example}%
+\label{ex.simple_iso}
+The set $A\coloneqq\{a,b,c\}$ and the set $\ord{3}=\{1,2,3\}$ are isomorphic; that is, there exists an isomorphism $f\colon A\to \ord{3}$ given by $f(a)=2$, $f(b)=1$, $f(c)=3$. The isomorphisms in the category $\smset$ are the bijections.%
+\index{isomorphism!bijection as}
+\end{example}
+
+Recall that the cardinality of a finite set is the number of elements in it. This can be understood in terms of isomorphisms in $\finset$. Namely, for any finite set $A\in\finset$, its cardinality is the number $n\in\nn$ such that there exists an isomorphism $A\cong\ord{n}$.%
+\index{cardinality!and isomorphisms} Georg Cantor defined the cardinality of any set $X$ to be its isomorphism class, meaning the equivalence class consisting of all sets that are isomorphic to $X$. 
+
+\begin{exercise}%
+\label{exc.iso_practice}
+\begin{enumerate}
+	\item What is the inverse $f\inv\colon\ord{3}\to A$ of the function $f$ given in \cref{ex.simple_iso}?
+	\item How many distinct isomorphisms are there $A\to\ord{3}$?
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.id_iso}
+Show that in any given category $\cat{C}$, for any given object $c\in\cat{C}$, the identity $\id_c$ is an isomorphism.
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.monoid_group}%
+\index{group}%
+\index{monoid!group as}
+Recall Examples \ref{ex.monoid_nats} and \ref{ex.group_of_order_2}. A monoid in
+which every morphism is an isomorphism is known as a \emph{group}. 
+\begin{enumerate}
+  \item Is the monoid in \cref{ex.monoid_nats} a group?
+  \item What about the monoid $\cat{C}$ in \cref{ex.group_of_order_2}?
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\index{free!category}%
+\label{exc.iso_free_cat}
+Let $G$ be a graph, and let $\free(G)$ be the corresponding free category. Somebody tells you that the only isomorphisms in $\free(G)$ are the identity morphisms. Is that person correct? Why or why not?
+\end{exercise}
+
+\begin{example}
+In this example, we will see that it is possible for $g$ and $f$ to be almost---but not quite---inverses, in a certain sense.
+
+Consider the functions $f\colon\ord{2}\to\ord{3}$ and $g\colon\ord{3}\to\ord{2}$ drawn below:
+\[
+\begin{tikzpicture}[y=.35cm, short=-2pt]
+	\node[label={[above=-5pt, font=\tiny]:$1$}] (A1) {$\bullet$};
+	\node[below=1 of A1, label={[above=-5pt, font=\tiny]:$2$}] (A2) {$\bullet$};
+	\node[ellipse, draw, inner sep=0pt, fit=(A1) (A2)] (A) {};
+%
+	\node[above right=0 and 1 of A1, label={[above=-5pt, font=\tiny]:$1$}] (B1) {$\bullet$};
+	\node[below=1 of B1, label={[above=-5pt, font=\tiny]:$2$}] (B2) {$\bullet$};
+	\node[below=1 of B2, label={[above=-5pt, font=\tiny]:$3$}] (B3) {$\bullet$};
+	\node[ellipse, draw, inner sep=0pt, fit=(B1) (B3)] (B) {};
+%
+	\node[right=3 of B1, label={[above=-5pt, font=\tiny]:$1$}] (C1) {$\bullet$};
+	\node[below=1 of C1, label={[above=-5pt, font=\tiny]:$2$}] (C2) {$\bullet$};
+	\node[below=1 of C2, label={[above=-5pt, font=\tiny]:$3$}] (C3) {$\bullet$};
+	\node[ellipse, draw, inner sep=0pt, fit=(C1) (C3)] (C) {};
+%
+	\node[right=6 of A1, label={[above=-5pt, font=\tiny]:$1$}] (D1) {$\bullet$};
+	\node[below=1 of D1, label={[above=-5pt, font=\tiny]:$2$}] (D2) {$\bullet$};
+	\node[ellipse, draw, inner sep=0pt, fit=(D1) (D2)] (D) {};
+%
+	\draw[mapsto] (A1) to (B1);
+	\draw[mapsto] (A2) to (B3);
+	\draw[mapsto] (C1) to (D1);
+	\draw[mapsto] (C2) to (D1);
+	\draw[mapsto] (C3) to (D2);
+\end{tikzpicture}
+\]
+Then the reader should be able to instantly check that $f\cp g=\id_{\ord{2}}$ but
+$g\cp f\neq\id_{\ord{3}}$. Thus $f$ and $g$ are not inverses and hence not
+isomorphisms. We won't need this terminology, but category theorists would say that $f$ and $g$ form a \emph{retraction}.%
+\index{retraction}
+\end{example}
+
+%
+\index{isomorphism|)}%
+\index{category|)}
+
+%-------- Section --------%
+\section{Functors, natural transformations, and databases}%
+\label{sec.cat_fun_nt_db}
+
+In \cref{sec.C2_motivation} we showed some database schemas: graphs with path equations. Then in \cref{subsec.presenting_cats} we said that graphs with path equations correspond to finitely-presented categories. Now we want to explain what the data in a database is, as a way to introduce functors. To do so, we begin by noticing that sets and functions---the objects and morphisms in the category $\smset$---can be captured by particularly simple databases.
+
+%---- Subsection ----%
+\subsection{Sets and functions as databases}
+%
+\index{database!schema|see {database schema}}%
+\index{category!as database schema}%
+\index{schema|see database schema}
+
+The first observation is that any set can be understood as a table with only one column: the ID column.
+\[
+\begin{tabular}{ c |}
+  \textbf{Planet of Sol}\\\hline
+  Mercury\\
+	Venus\\
+	Earth\\
+	Mars\\
+	Jupiter\\
+	Saturn\\
+	Uranus\\
+	Neptune
+\end{tabular}
+\hspace{.7in}
+\begin{tabular}{ c |}
+  \textbf{Prime number}\\\hline
+  2\\
+	3\\
+	5\\
+	7\\
+	11\\
+	13\\
+	17\\
+	$\vdots$
+\end{tabular}
+\hspace{.7in}
+\begin{tabular}{ c |}
+  \textbf{Flying pig}\\\hline
+  ~\\
+	~\\
+	~\\
+	~\\
+	~\\
+	~\\
+	~\\
+	~
+\end{tabular}
+\]
+Rather than put the elements of the set between braces, e.g.\ $\{2,3,5,7,11,\ldots\}$, we write them down as rows in a table.
+
+In databases, single-column tables are often called controlled vocabularies, or master data. Now to be honest, we can only write out every single entry in a table when its set of rows is finite. A database practitioner might find the idea of our prime number table a bit unrealistic. But we're mathematicians, so since the idea makes perfect sense abstractly, we will continue to think of sets as one-column tables.
+
+The above databases have schemas consisting of just one vertex:
+\[
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Planet of Sol}
+\end{tikzcd}
+}
+\hspace{1in}
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Prime number}
+\end{tikzcd}
+}
+\hspace{1in}
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Flying pig}
+\end{tikzcd}
+}
+\]
+Obviously, there's really not much difference between these schemas, other than the label of the unique vertex. So we could say ``sets are databases whose schema consists of a single vertex.'' Let's move on to functions.
+
+A function $f\colon A\to B$ can almost be depicted as a two-column table
+\[
+\begin{tabular}{ c | c}
+  \textbf{Beatle}&\textbf{Played}\\\hline
+  George&Lead guitar\\
+  John&Rhythm guitar\\
+  Paul&Bass guitar\\
+  Ringo&Drums
+\end{tabular}
+\]
+except it is unclear whether the elements of the right-hand column exhaust all of $B$. What if there are rock-and-roll instruments out there that none of the Beatles played? So a function $f\colon A\to B$ requires two tables, one for $A$ and its $f$ column, and one for $B$:
+\[
+\begin{tabular}{ c | c}
+  \textbf{Beatle}&\textbf{Played}\\\hline
+  George&Lead guitar\\
+  John&Rhythm guitar\\
+  Paul&Bass guitar\\
+  Ringo&Drums\\
+  ~
+\end{tabular}
+\hspace{1in}
+\begin{tabular}{ c |}
+  \textbf{Rock-and-roll instrument}\\\hline
+  Bass guitar\\
+  Drums\\
+  Keyboard\\
+  Lead guitar\\
+  Rhythm guitar
+ \end{tabular}
+\]
+Thus the database schema for any function is just a labeled version of $\Cat{2}$:%
+\index{function!as database instance}
+\[
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Beatle}\ar[r, "\text{Played}"]\&\LTO{\parbox{.7in}{\centering Rock-and-roll\\\vspace{-.1in}instrument}}
+\end{tikzcd}
+}
+\]
+The lesson is that an instance of a database takes a presentation of a category,
+and turns every vertex into a set, and every arrow into a function. As such, it
+describes a map from the presented category to the category $\smset$. In
+\cref{subsec.enriched_functors} we saw that maps of $\cat{V}$-categories are
+known as $\cat{V}$-functors. Similarly, we call maps of plain old categories,
+functors.
+
+%---- Subsection ----%
+\subsection{Functors}%
+\label{sec.functors}%
+\index{functor|(}
+
+A functor is a mapping between categories. It sends objects to objects and morphisms to morphisms, all while preserving identities and composition. Here is the formal definition.
+
+\begin{definition}%
+\index{functor}
+Let $\cat{C}$ and $\cat{D}$ be categories. To specify a \emph{functor from $\cat{C}$ to $\cat{D}$}, denoted $F\colon\cat{C}\to\cat{D}$, 
+\begin{enumerate}[label=(\roman*)]
+	\item for every object $c\in\Ob(\cat{C})$, one specifies an object $F(c)\in\Ob(\cat{D})$;
+	\item for every morphism $f\colon c_1\to c_2$ in $\cat{C}$, one specifies a morphism $F(f)\colon F(c_1)\to F(c_2)$ in $\cat{D}$.
+\end{enumerate}
+The above constituents must satisfy two properties:
+\begin{enumerate}[label=(\alph*)]
+	\item for every object $c\in\Ob(\cat{C})$, we have $F(\id_c)=\id_{F(c)}$.
+	\item for every three objects $c_1,c_2,c_3\in\Ob(\cat{C})$ and two morphisms $f\in\cat{C}(c_1,c_2)$, $g\in\cat{C}(c_2,c_3)$, the equation $F(f\cp g)=F(f)\cp F(g)$ holds in $\cat{D}$.
+\end{enumerate}
+\end{definition}
+
+\begin{example}
+For example, here we draw three functors $F\colon\Cat{2}\to\Cat{3}$:
+\[
+\begin{tikzpicture}[x=.7in, y=.25in, inner sep=5pt, short=0pt]
+	\foreach \i in {0,1,2}{
+  	\node (A\i-n0) at (3*\i,-1) {$\LMO{m_0}$};
+  	\node (A\i-n1) at (3*\i,-3) {$\LMO[under]{m_1}$};
+  	\draw[->] (A\i-n0) to node[left=-2pt, font=\scriptsize] {$f_1$} (A\i-n1);
+  	\node[draw, inner ysep=1pt, fit=(A\i-n0) (A\i-n1)] (A\i) {};
+  %
+  	\node (B\i-n0) at (3*\i+1,0) {$\LMO{n_0}$};
+  	\node (B\i-n1) at (3*\i+1,-2) {$\LMO{n_1}$};
+  	\node (B\i-n2) at (3*\i+1,-4) {$\LMO{n_2}$};
+  	\draw[->] (B\i-n0) to node[right=-2pt, font=\scriptsize] {$g_1$} (B\i-n1);
+  	\draw[->] (B\i-n1) to node[right=-2pt, font=\scriptsize] {$g_2$} (B\i-n2);
+  	\node[draw, inner ysep=1pt, fit=(B\i-n0) (B\i-n2)] (B\i) {};
+	}
+	%
+	\begin{scope}[mapsto]
+  	\draw (A0-n0) -- (B0-n0);
+  	\draw (A0-n1) -- (B0-n0);
+  	%
+		\draw (A1-n0) -- (B1-n0);
+  	\draw (A1-n1) -- (B1-n1);
+  	%
+		\draw (A2-n0) -- (B2-n0);
+  	\draw (A2-n1) -- (B2-n2);
+	\end{scope}
+\end{tikzpicture}
+\]
+In each case, the dotted arrows show what the functor $F$ does to the vertices in $\Cat{2}$; once that information is specified, it turns out---in this special case---that what $F$ does to the three paths in $\Cat{2}$ is completely determined. In the left-hand diagram, $F$ sends every path to the trivial path, i.e.\ the identity on $n_0$. In the middle diagram $F(m_0)=n_0$, $F(f_1)=g_1$, and $F(m_1)=n_1$. In the right-hand diagram, $F(m_0)=n_0$, $F(m_1)=n_2$, and $F(f_1)=g_1\cp g_2$.%
+\index{trivial path}
+\end{example}
+
+\begin{exercise}%
+\label{exc.all_functors}
+Above we wrote down three functors $\Cat{2}\to\Cat{3}$. Find and write down all
+the remaining functors $\Cat{2}\to\Cat{3}$.
+\end{exercise}
+
+\begin{example}%
+\index{commutative square}%
+\label{ex.free_comm_sq}
+Recall the categories presented by $\mathrm{Free\_square}$ and
+$\mathrm{Comm\_square}$ in \cref{subsec.presenting_cats}. Here they are again,
+with $'$ added to the labels in $\mathrm{Free\_square}$ to help distinguish
+them:
+\[
+\mathrm{Free\_square}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A'}\ar[r, "f'"]\ar[d, "g'"']\&\LMO{B'}\ar[d, "h'"]\\
+	\LMO[under]{C'}\ar[r, "i'"']\&\LMO[under]{D'}
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{no equations}
+}
+\hspace{.4in}
+\mathrm{Comm\_square}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, "f"]\ar[d, "g"']\&\LMO{B}\ar[d, "h"]\\
+	\LMO[under]{C}\ar[r, "i"']\&\LMO[under]{D}
+\end{tikzcd}
+  \\~\\\footnotesize
+  $f\cp h=g\cp i$
+}
+\]
+There are lots of functors from the free square category (let's call it
+$\cat{F}$) to the commutative square category (let's call it $\cat{C}$). 
+
+However, there is exactly one functor $F\colon\cat{F}\to\cat{C}$ that
+sends $A'$ to $A$, $B'$ to $B$, $C'$ to $C$, and $D'$ to $D$. That is, once we
+have made this decision about how $F$ acts on objects, each of the ten paths in $\cat{F}$ is forced to go to a certain path in $\cat{C}$: the one with the right source and target.
+\end{example}
+
+\begin{exercise}%
+\label{exc.functor_on_morphisms}
+Say where each of the ten morphisms in $\cat{F}$ is sent under the functor $F$ from \cref{ex.free_comm_sq}.
+\end{exercise}
+
+All of our example functors so far have been completely determined by what they do on objects, but this is usually not the case.
+
+\begin{exercise}%
+\label{exc.functors_morphisms_practice}
+Consider the free categories $\cat{C}=\fbox{$\bullet\to\bullet$}$ and $\cat{D}=\fbox{$\bullet\tto\bullet$}$. Give two functors $F,G\colon\cat{C}\to\cat{D}$ that act the same on objects but differently on morphisms.
+\end{exercise}
+
+\begin{example}
+There are also lots of functors from the commutative square category $\cat{C}$ to the free square category $\cat{F}$, but \emph{none} that sends $A$ to $A'$, $B$ to $B'$, $C$ to $C'$, and $D$ to $D'$. The reason is that if $F$ were such a functor, then since $f\cp h=g\cp i$ in $\cat{C}$, we would have $F(f\cp h)=F(g\cp i)$, but then the rules of functors would let us reason as follows:
+\[f'\cp h'=F(f)\cp F(h)=F(f\cp h)=F(g\cp i)=F(g)\cp F(i)=g'\cp i'\]
+The resulting equation, $f'\cp h'=g'\cp i'$ does not hold in $\cat{F}$ because it is a free category (there are ``no equations''): every two paths are considered different morphisms. Thus our proposed $F$ is not a functor.
+\end{example}
+
+\begin{example}[Functors between preorders are monotone maps]
+%
+\label{ex.preorder_functor}%
+\index{monotone map!as functor}
+Recall from \cref{subsubsec.pos_free_spectrum} that preorders are categories with
+at most one morphism between any two objects. A functor between preorders is
+exactly a monotone map.
+
+For example, consider the preorder $(\NN,\leq)$ considered as a category $\cat{N}$ with objects $\Ob(\cat{N})=\NN$ and a unique morphism $m\to n$ iff $m\leq n$. A functor $F\colon\cat{N}\to\cat{N}$ sends each object $n\in\NN$ to an object $F(n)\in\NN$. It must send morphisms in $\cat{N}$ to morphisms in $\NN$. This means if there is a morphism $m\to n$ then there had better be a morphism $F(m)\to F(n)$. In other words, if $m\leq n$, then we had better have $F(m)\leq F(n)$. But as long as $m\leq n$ implies $F(m)\leq F(n)$, we have a functor.
+
+Thus a functor $F\colon\cat{N}\to\cat{N}$ and a monotone map $\NN\to\NN$ are the same thing.
+\end{example}
+
+\begin{exercise}[The category of categories]%
+\label{exc.cat_of_cats}%
+\index{primordial ooze}%
+\index{identity!functor}%
+\index{category of categories|see {category, of categories}}%
+\index{category!of categories}
+Back in the primordial ooze, there is a category $\Cat{Cat}$ in which \emph{the
+objects are themselves categories}. Your task here is to construct this
+category.
+\begin{enumerate}
+  \item Given any category $\cat{C}$, show that there exists a functor $\id_{\cat{C}}\colon
+  \cat{C} \to \cat{C}$, known as the \emph{identity functor on $\cat{C}$}, that
+  maps each object to itself and each morphism to itself.
+\end{enumerate}
+Note that a functor $\cat{C} \to \cat{D}$ consists of a function from $\Ob(\cat{C})$ to $\Ob(\cat{D})$ and for each pair of objects $c_1,c_2 \in \cat{C}$ a function from $\cat{C}(c_1,c_2)$ to $\cat{D}(F(c_1),F(c_2))$. 
+\begin{enumerate}[resume]
+  \item Show that given
+  $F\colon \cat{C} \to \cat{D}$ and $G\colon \cat{D} \to \cat{E}$, we can define a
+  new functor $(F\cp G)\colon \cat{C} \to \cat{E}$ just by composing functions. 
+  \item Show that there is a category, call it $\Cat{Cat}$, where the objects are categories, morphisms
+  are functors, and identities and composition are given as above.
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+%
+\index{functor|)}
+
+%---- Subsection ----%
+\subsection{Database instances as $\smset$-valued functors}%
+\index{database!instance|(}
+
+
+Let $\cat{C}$ be a category, and recall the category $\smset$ from \cref{def.category_of_sets}. A functor $F\colon\cat{C}\to\smset$ is known as a \emph{set-valued functor} on $\cat{C}$. Much of database theory (not how to make them fast, but what they are and what you do with them) can be cast in this light.
+
+Indeed, we already saw in \cref{rem.db_schemas_are_cats} that any database schema can be regarded as (presenting) a 
+category $\cat{C}$. The next thing to notice is that the data itself---any
+instance of the database---is given by a set-valued functor
+$I\colon\cat{C}\to\smset$. The only additional detail is that for any white
+node, such as $c=\LTO[\circ]{string}$, we want to force $I$ to map to the set of
+strings. We suppress this detail in the following definition.
+
+\begin{definition}%
+\label{rdef.instance}%
+\index{category!finitely presented|see {presentation of}}%
+\index{database schema}%
+\index{category!presentation of}
+Let $\cat{C}$ be a schema, i.e.\ a finitely-presented category. A
+\emph{$\cat{C}$-instance} is a functor
+$I\colon\cat{C}\to\smset$.%
+\tablefootnote{Warning: a $\cat{C}$-instance is a state of the database ``at an instant in time.'' The term ``instance'' should not be confused with its usage in object oriented programming, which would correspond more to what we call a row $r\in I(c)$.}
+\end{definition}
+
+\begin{exercise}%
+\label{ex.set_1}
+Let $\Cat{1}$ denote the category with one object, called 1, one identity morphism $\id_1$, and no other morphisms. For any functor $F\colon\Cat{1}\to\smset$ one can extract a set $F(1)$. Show that for any set $S$, there is a functor $F_S\colon\Cat{1}\to\smset$ such that $F_S(1)=S$.
+\end{exercise}
+
+The above exercise reaffirms that the set of planets, the set of prime numbers, and the set of flying pigs are all set-valued functors---instances---on the schema $\Cat{1}$. Similarly, set-valued functors on the category $\Cat{2}$ are functions. All our examples so far are for the situation where the schema is a free category (no equations). Let's try an example of a category that is not free.
+
+\begin{example}
+Consider the following category:
+\begin{equation}%
+\label{eqn.idempotent}
+\cat{C}\coloneqq\boxCD{\begin{tikzcd}[ampersand replacement=\&]
+	\LMO[under]{z}\ar[loop above, "s"]
+\end{tikzcd}
+\\~\\\footnotesize
+$s\cp s=s$
+}
+\end{equation}
+What is a set-valued functor $F\colon\cat{C}\to\smset$? It will consist of a set $Z\coloneqq F(z)$ and a function $S\coloneqq F(s)\colon Z\to Z$, subject to the requirement that $S\cp S=S$. Here are some examples
+\begin{itemize}
+	\item $Z$ is the set of US citizens, and $S$ sends each citizen to her
+	or his president. The president's president is her- or him-self.
+	\item $Z=\NN$ is the set of natural numbers and $S$ sends each number to $0$. In particular, 0 goes to itself.
+	\item $Z$ is the set of all well-formed arithmetic expressions, such as $13+(2*4)$ or $-5$, that one can write using integers and the symbols $+,-,*,(,)$. The function $S$ evaluates the expression to return an integer, which is itself a well-formed expression. The evaluation of an integer is itself.
+	\item $Z=\NN_{\geq 2}$, and $S$ sends $n$ to its smallest prime factor. The smallest prime factor of a prime is itself.
+\end{itemize}
+\[
+\begin{array}{ c | c}
+  \NN_{\geq2}&\textbf{\small smallest prime factor}\\\hline
+	2&2\\
+	3&3\\
+	4&2\\
+  \vdots&\vdots\\
+  49&7\\
+  50&2\\
+  51&3\\
+  \vdots&\vdots
+\end{array}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.schema_sense}
+Above, we thought of the sort of data that would make sense for the schema \eqref{eqn.idempotent}. Give an example of the sort of data that would make sense for the following schemas:\qquad
+\begin{enumerate*}[itemjoin=\hspace{1in}]
+\item \boxCD{\begin{tikzcd}[ampersand replacement=\&]
+	\LMO[under]{z}\ar[loop above, "s"]
+\end{tikzcd}
+\\~\\\footnotesize
+$s\cp s=z$
+}
+\item
+\boxCD{\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{a}\ar[r, "f"]\&\LMO{b}\ar[r, shift left, "g"]\ar[r, shift right, "h"']\&\LMO{c}
+\end{tikzcd}
+\\~\\\footnotesize
+$f\cp g=f\cp h$
+}
+\qedhere
+\end{enumerate*}
+\end{exercise}
+
+The main idea is this: a database schema is a category, and an instance on that schema---the data itself---is a set-valued functor. All the constraints, or business rules, are ensured by the rules of functors, namely that functors preserve composition.%
+\footnote{One can put more complex constraints, called \emph{embedded dependencies}, on a database; these correspond category theoretically to what are called ``lifting problems'' in category theory.%
+\index{database!constraints}%
+\index{lifting problems} See \cite{Spivak:2014c} for more on this.}
+
+%
+\index{database!instance|)}
+
+%---- Subsection ----%
+\subsection{Natural transformations}%
+\index{natural transformation|(}
+
+If $\cat{C}$ is a schema---i.e.\ a finitely-presented category---then there are many database instances on it, which we can organize into a category. But this is part of a larger story, namely that of natural transformations. An abstract picture to have in mind is this:
+\[
+\begin{tikzcd}[column sep=large]
+	\cat{C} 
+	\ar[r, bend left, "F"{name=up}]
+	\ar[r, bend right, "G"'{name=down}]
+	&\cat{D}.
+        \ar[from=up, to=down, Rightarrow, shorten <=5pt,
+	shorten >=5pt,"\scriptstyle\alpha"]
+\end{tikzcd}
+\]
+
+\begin{definition}%
+\label{def.natural_transformation}
+Let $\cat{C}$ and $\cat{D}$ be categories, and let $F,G\colon\cat{C}\to\cat{D}$
+be functors. To specify a \emph{natural transformation} $\alpha\colon F\Rightarrow G$,
+\begin{enumerate}[label=(\roman*)]
+	\item for each object $c\in\cat{C}$, one specifies a morphism $\alpha_c\colon F(c)\to G(c)$ in $\cat{D}$, called the \emph{$c$-component of $\alpha$}.%
+\index{natural transformation!component of}
+\end{enumerate}
+These components must satisfy the following, called the \emph{naturality condition}:
+\begin{enumerate}[label=(\alph*)]
+	\item for every morphism $f\colon c\to d$ in $\cat{C}$, the following equation must hold:
+\[F(f)\cp\alpha_d=\alpha_c\cp G(f).\]	
+\end{enumerate}
+
+A natural transformation $\alpha\colon F\to G$ is called a \emph{natural isomorphism} if each component $\alpha_c$ is an isomorphism in $\cat{D}$.
+\end{definition}
+%
+\index{natural transformation!naturality condition}%
+\index{commutative diagram}%
+\index{commutative
+square}%
+\index{diagram!commutative}
+
+The naturality condition can also be written as a so-called \emph{commutative diagram}. A
+diagram in a category is drawn as a graph whose vertices and arrows are labeled by objects and morphisms in the category. For example, here is a diagram that's relevant to the naturality condition in \cref{def.natural_transformation}:
+\begin{equation}%
+\label{eqn.naturality_condition}
+\begin{tikzcd}
+	F(c)\ar[r, "\alpha_c"]\ar[d, "F(f)"']&G(c)\ar[d, "G(f)"]\\
+	F(d)\ar[r, "\alpha_d"']&G(d)
+\end{tikzcd}
+\end{equation}
+
+\begin{definition}%
+\label{def.diagram_commutes}%
+\index{diagram!as functor}%
+\index{functor!diagram as}%
+\index{category!indexing}
+A \emph{diagram} $D$ in $\cat{C}$ is a functor
+$D\colon\cat{J} \to \cat{C}$ from any category $\cat{J}$, called the \emph{indexing category} of the diagram $D$. We say that $D$ \emph{commutes} if $D(f)=D(f')$ holds for every parallel pair of morphisms $f,f'\colon a \to b$ in $\cat{J}$.%
+\tablefootnote{We could package this formally by saying that $D$ commutes iff it factors through the preorder reflection of $\cat{J}$.}
+\end{definition}
+
+In terms of \cref{eqn.naturality_condition}, the only case of two parallel morphisms is that of $F(c)\tto G(d)$, so to say that the diagram commutes is to say that $F(f)\cp\alpha_d=\alpha_c\cp G(f)$. This is exactly the naturality
+condition from \cref{def.natural_transformation}.
+
+
+\begin{example}
+A representative picture is as follows:
+\[
+\begin{tikzpicture}[x=.7in, y=.3in, inner sep=5pt,short=0pt]
+	\node (1) at (0,0) {$\LMO{1}$};
+	\node (2) at (1,0) {$\LMO{2}$};
+	\draw[->] (1) to node[above=-2pt, font=\scriptsize] {$f$} (2);
+  	\node[draw, fit=(1) (2)] (box) {};
+		\node[left=0 of box] {$\cat{C}\coloneqq$};
+  %
+  	\node (a) at (2.8,0) {$\LMO{u}$};
+  	\node[blue] (b) at (3.5,1) {$\LMO{v}$};
+  	\node[blue] (c) at (4.5,1) {$\LMO{w}$};
+  	\node[red] (d) at (3.5,-1) {$\LMO{x}$};
+  	\node[red] (e) at (4.5,-1) {$\LMO{y}$};
+  	\node (f) at (5.2,0) {$\LMO{z}$};
+  	\draw[->] (a) to node[above, font=\scriptsize] {$a$} (b);
+  	\draw[->] (a) to node[below, font=\scriptsize] {$b$} (d);
+  	\draw[->,blue] (b) to node[below=-2pt, font=\scriptsize] {$d$} (c);
+  	\draw[->,green!50!black] (b) to node[right=-2pt, font=\scriptsize] {$c$} (d);
+  	\draw[->,red] (d) to node[above=-2pt, font=\scriptsize] {$e$} (e);
+  	\draw[->,green!50!black] (c) to node[left=-2pt, font=\scriptsize] {$g$} (e);
+  	\draw[->] (c) to node[above, font=\scriptsize] {$h$} (f);
+  	\draw[->] (e) to node[below, font=\scriptsize] {$k$} (f);	
+  	\node[draw, fit=(a) (b) (c) (d) (e) (f)] (box) {};
+		\node[right=0 of box] {$=:\cat{D}$};
+	%
+	\begin{scope}[mapsto, thick, bend left=25]
+  	\draw (1) to node[below=-1pt] {$F$} (b);
+  	\draw (2) to (c);
+	\end{scope}
+	\begin{scope}[densely dotted, thick, ->, red, bend right=25]
+  	\draw (1) to node[above=-2pt] {$G$} (d);
+  	\draw (2) to (e);
+	\end{scope}
+\end{tikzpicture}
+\]
+We have depicted, in blue and red respectively, two functors $F,G
+\colon \cat{C} \to \cat{D}$. A natural transformation $\alpha\colon F
+\Rightarrow G$ is given by choosing components $\alpha_1\colon v\to x$ and
+$\alpha_2\colon w\to y$. We have highlighted the only choice for each in green;
+namely, $\alpha_1=c$ and $\alpha_2=g$.
+
+The key point is that the functors $F$ and $G$ are ways of viewing the category
+$\cat{C}$ as lying inside the category $\cat{D}$. The natural transformation
+$\alpha$, then, is a way of relating these two views using the morphisms in
+$\cat{D}$. Does this help you to see and appreciate the notation
+$
+\begin{tikzcd}[column sep=large]
+	\cat{C}\ar[r, bend left=18pt, "F"]\ar[r, bend right=18pt, "G"']\ar[r, phantom, "\scriptstyle\alpha\!\Downarrow\;"]&
+	\cat{D}?
+\end{tikzcd}
+$
+\end{example}%
+\index{natural transformation!component of}
+
+\begin{example}%
+\label{ex.1_inst}
+We said in \cref{ex.set_1} that a functor $\Cat{1}\to\smset$ can be identified with a set. So suppose $A$ and $B$ are sets considered as functors $A,B\colon\Cat{1}\to\smset$. A natural transformation between these functors is just a function between the sets.
+\end{example}
+
+\begin{definition}%
+\label{def.functor_cat}%
+\index{category!of functors}
+Let $\cat{C}$ and $\cat{D}$ be categories. We denote by $\cat{D}^{\cat{C}}$ the category whose objects are functors $F\colon\cat{C}\to\cat{D}$ and whose morphisms $\cat{D}^{\cat{C}}(F,G)$ are the natural transformations $\alpha\colon F\to G$. This category $\cat{D}^\cat{C}$ is called the \emph{functor category}, or the \emph{category of functors from $\cat{C}$ to $\cat{D}$}.
+\end{definition}
+
+\begin{exercise}%
+\label{exc.exponential_cat}
+Let's look more deeply at how $\cat{D}^{\cat{C}}$ is a category.
+\begin{enumerate}
+	\item Figure out how to compose natural transformations. (Hint: an expert tells you ``for each object $c\in\cat{C}$, compose the $c$-components.'')
+	\item Propose an identity natural transformation on any object
+	$F\in\cat{D}^\cat{C}$, and check that it is unital (i.e. that it obeys
+	condition (a) of \cref{def.category}).%
+\index{identity!natural transformation}%
+\index{natural transformation!identity}
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}
+In our new language, \cref{ex.1_inst} says that $\smset^{\Cat{1}}$ is equivalent to $\smset$.
+\end{example}
+
+\begin{example}
+Let $\cat{N}$ denote the category associated to the preorder $(\NN,\leq)$, and recall from \cref{ex.preorder_functor} that we can identify a functor $F\colon\cat{N}\to\cat{N}$ with a non-decreasing sequence $(F_0,F_1,F_2,\ldots)$ of natural numbers, i.e.\ $F_0\leq F_1\leq F_2\leq\cdots$. If $G$ is another functor, considered as a non-decreasing sequence, then what is a natural transformation $\alpha\colon F\to G$?
+
+Since there is at most one morphism between two objects in a preorder, each
+component $\alpha_n\colon F_n\to G_n$ has no data, it just tells us a fact: that
+$F_n\leq G_n$. And the naturality condition is vacuous: every square in a
+preorder commutes. So a natural transformation between $F$ and $G$ exists iff
+$F_n\leq G_n$ for each $n$, and any two natural transformations $F\Rightarrow G$
+are the same. In other words, the category $\cat{N}^\cat{N}$ is itself a preorder; namely the preorder of monotone maps $\nn\to\nn$.
+\end{example}%
+\index{natural transformation!between monotone maps}
+
+\begin{exercise}%
+\label{exc.true_false_preorder_nt}
+Let $\cat{C}$ be an arbitrary category and let $\cat{P}$ be a preorder, thought of as a category. Consider the following statements:
+\begin{enumerate}
+	\item For any two functors $F,G\colon\cat{C}\to\cat{P}$, there is at most one natural transformation $F\to G$.
+	\item For any two functors $F,G\colon\cat{P}\to\cat{C}$, there is at most one natural transformation $F\to G$.
+\end{enumerate}
+For each, if it is true, say why; if it is false, give a counterexample.
+\end{exercise}
+
+\begin{remark} %
+\label{rem.preorder_boolcats2}%
+\index{equivalence of categories}
+Recall that in \cref{rem.preorder_boolcats} we said the category of preorders is
+equivalent to the category of $\Bool$-categories. We can now state the precise meaning
+of this sentence. First, there exists a category $\Cat{PrO}$ in which the
+objects are preorders and the morphisms are monotone maps. Second, there exists a
+category $\Bool\textrm{-}\Cat{Cat}$ in which the objects are $\Bool$-categories and the
+morphisms are $\Bool$-functors. We call these two categories equivalent because
+there exist functors $F\colon \Cat{PrO} \to \Bool\textrm{-}\Cat{Cat}$ and $G\colon
+\Bool\textrm{-}\Cat{Cat} \to \Cat{PrO}$ such that there exist natural isomorphisms $F\cp G
+\cong \id_{\Cat{PrO}}$ and $G\cp F \cong \id_{\Bool\textrm{-}\Cat{Cat}}$ in the sense of \cref{def.natural_transformation}.
+\end{remark}
+
+
+%
+\index{natural transformation|)}
+
+%---- Subsection ----%
+\subsection{The category of instances on a schema} %
+\label{subsec.instances_cat}%
+\index{database!instance}%
+\index{category!of instances on a database schema}
+
+\begin{definition}%
+\label{def.instance}%
+\index{database!instance homomorphism}
+Suppose that $\cat{C}$ is a database schema and $I,J\colon\cat{C}\to\smset$ are database instances. An \emph{instance homomorphism} between them is a natural transformation $\alpha\colon I\to J$. Write $\cat{C}\inst\coloneqq\smset^\cat{C}$ to denote the functor category as defined in \cref{def.functor_cat}.
+\end{definition}
+
+We saw in \cref{ex.1_inst} that $\Cat{1}\inst$ is equivalent to the category
+$\smset$. In this subsection, we will show that there is a schema whose instances are graphs and whose instance homomorphisms are graph homomorphisms.%
+\index{graphs!homomorphism of}
+
+\paragraph{Extended example: the category of graphs as a functor category.}
+%
+\index{graph!as $\smset$-valued functor} %
+\index{primordial ooze}%
+\index{graphs!database schema for|(}
+
+You may find yourself back in the primordial ooze (first discussed in
+\cref{subsec.preorders_Bool_enriched}), because while previously we have been
+using graphs to present categories, now we obtain graphs themselves as database
+instances on a specific schema (which is itself a graph):%
+\index{category!of graphs}
+\[
+\Cat{Gr}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Arrow}\ar[r, shift left, "\text{source}"]\ar[r, shift right, "\text{target}"']\&\LTO{Vertex}
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{no equations}
+}
+\]
+Here's an example $\Cat{Gr}$-instance, i.e.\ set-valued functor $I\colon\Cat{Gr}\to\smset$, in table form:%
+\index{functor!set@$\smset$-valued}
+\begin{equation}%
+\label{eqn.sample_Gr_instance}
+\begin{tabular}{ c | c c}
+  \textbf{Arrow}&\textbf{source}&\textbf{target}\\\hline
+	$a$&1&2\\
+	$b$&1&3\\
+	$c$&1&3\\
+	$d$&2&2\\
+	$e$&2&3
+\end{tabular}
+\hspace{1in}
+\begin{tabular}{ c |}
+	\textbf{Vertex}\\\hline
+	1\\
+	2\\
+	3\\
+	4\\
+	~
+\end{tabular}
+\end{equation}
+Here $I(\mathrm{Arrow})=\{a,b,c,d,e\}$, and $I(\mathrm{Vertex})=\{1,2,3,4\}$. One can draw the instance $I$ as a graph:
+\[
+I=\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{1}\ar[r, "a"]\ar[dr, shift left, "b"]\ar[dr, shift right, "c"']\&
+	\LMO{2}\ar[d, "e"]\ar[loop right, "d"]\\
+	\&\LMO{3}\&\LMO{4}
+\end{tikzcd}
+}
+\]
+Every row in the Vertex table is drawn as a vertex, and every row in the Arrow table is drawn as an arrow, connecting its specified source and target. Every possible graph can be written as a database instance on the schema $\Cat{Gr}$, and every possible $\Cat{Gr}$-instance can be represented as a graph.
+
+\begin{exercise}%
+\label{exc.graph_instance}
+In \cref{eqn.free_schema}, a graph is shown (forget the distinction between white and black nodes). Write down the corresponding $\Cat{Gr}$-instance, as in \cref{eqn.sample_Gr_instance}. (Do not be concerned that you are in the primordial ooze.)
+\end{exercise}
+
+Thus the objects in the category $\Cat{Gr}\inst$ are graphs. The morphisms
+in $\Cat{Gr}\inst$ are called \emph{graph homomorphisms}.\index{graph!homomorphism} Let's unwind this. Suppose that $G,H\colon\Cat{Gr}\to\smset$ are functors (i.e.\ $\Cat{Gr}$-instances); that is, they are objects $G,H\in\Cat{Gr}\inst$. A morphism $G\to H$ is a natural transformation $\alpha\colon G\to H$ between them; what does that entail?%
+\index{natural transformation!graph homomorphism as}
+
+By \cref{def.natural_transformation}, since $\Cat{Gr}$ has two objects, $\alpha$ consists of two components,
+\[
+  \alpha_{\Set{Vertex}}\colon G(\Set{Vertex})\to H(\Set{Vertex})
+  \qquad\text{ and }\qquad
+  \alpha_{\Set{Arrow}}\colon G(\Set{Arrow})\to H(\Set{Arrow}),
+\]
+both of which are morphisms in $\smset$. In other words, $\alpha$ consists of a function from vertices of $G$ to vertices of $H$ and a function from arrows of $G$ to arrows of $H$. For these functions to constitute a graph homomorphism, they must ``respect source and target'' in the precise sense that the naturality condition, \cref{eqn.naturality_condition} holds. That is, for every morphism in $\Cat{Gr}$, namely $\text{source}$ and $\text{target}$, the following diagrams must commute:
+\[
+\begin{tikzcd}[column sep=large]
+	G(\text{Arrow})\ar[r, "\alpha_{\Set{Arrow}}"]\ar[d, "G(\text{source})"']&
+	H(\text{Arrow})\ar[d, "H(\text{source})"]\\
+	G(\text{Vertex})\ar[r, "\alpha_{\Set{Vertex}}"']&
+	H(\text{Vertex})
+\end{tikzcd}
+\hspace{.8in}
+\begin{tikzcd}[column sep=large]
+	G(\text{Arrow})\ar[r, "\alpha_{\Set{Arrow}}"]\ar[d, "G(\text{target})"']&
+	H(\text{Arrow})\ar[d, "H(\text{target})"]\\
+	G(\text{Vertex})\ar[r, "\alpha_{\Set{Vertex}}"']&
+	H(\text{Vertex})
+\end{tikzcd}
+\]
+These may look complicated, but they say exactly what we want. We want the functions $\alpha_{\Set{Vertex}}$ and $\alpha_{\Set{Arrow}}$ to respect source and targets in $G$ and $H$. The left diagram says ``start with an arrow in $G$. You can either apply $\alpha$ to the arrow and then take its source in $H$, or you can take its source in $G$ and then apply $\alpha$ to that vertex; either way you get the same answer.'' The right-hand diagram says the same thing about targets.
+
+\begin{example}%
+\label{ex.two_graphs_as_instances}
+Consider the graphs $G$ and $H$ shown below
+\[
+G\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{1}\ar[r, "a"]\& \LMO{2}\ar[r, "b"]\& \LMO{3}
+\end{tikzcd}
+}
+\hspace{.7in}
+H\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{4}\ar[r, shift right, "c"']\ar[r, shift left, "d"]\& \LMO{5}\ar[loop right, "e"]
+\end{tikzcd}
+}
+\]
+
+Here they are, written as database instances---i.e.\ set-valued functors---on $\Cat{Gr}$:%
+\index{functor!set@$\smset$-valued}
+\[
+\begin{array}{c c c c c}
+	G\coloneqq&&
+	\begin{array}{c | c c}
+		\textbf{Arrow}&\textbf{source}&\textbf{target}\\
+		a&1&2\\
+		b&2&3\\
+		~
+	\end{array}
+	&&
+	\begin{array}{c |}
+		\textbf{Vertex}\\
+		1\\
+		2\\
+		3\\
+	\end{array}
+	\\
+	H\coloneqq&
+	\begin{array}{c | c c}
+		\color{gray}{\textbf{Arrow}}&\color{gray}{\textbf{source}}&\color{gray}{\textbf{target}}\\
+		c&4&5\\
+		d&4&5\\
+		e&5&5
+	\end{array}
+	&&
+	\begin{array}{c |}
+		\color{gray}{\textbf{Vertex}}\\
+		4\\
+		5\\
+		~
+	\end{array}
+\end{array}
+\]
+The top row is $G$ and the bottom row is $H$. They are offset so you can more easily complete the following exercise.
+\end{example}
+
+\begin{exercise}%
+\index{graphs !homomorphism of}%
+\label{exc.unique_alpha}
+We claim that---with $G,H$ as in \cref{ex.two_graphs_as_instances}---there is exactly one graph homomorphism $\alpha\colon G\to H$ such that $\alpha_{\Set{Arrow}}(a)=d$.
+\begin{enumerate}
+	\item What is the other value of $\alpha_{\Set{Arrow}}$, and what are the three values of $\alpha_{\Set{Vertex}}$?
+	\item In your own copy of the tables of \cref{ex.two_graphs_as_instances}, draw $\alpha_{\Set{Arrow}}$ as two lines connecting the cells in the ID column of $G(\Set{Arrow})$ to those in the ID column of $H(\Set{Arrow})$. Similarly, draw $\alpha_{\Set{Vertex}}$ as connecting lines.
+	\item Check the source column and target column and make sure that the matches are natural, i.e.\ that ``alpha-then-source equals source-then-alpha'' and similarly for ``target.''
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+
+
+%-------- Section --------%
+\section{Adjunctions and data migration}%
+\label{sec.adjunctions_mig}%
+\index{adjunction|(}%
+\index{data migration}%
+\index{functor!set@$\smset$-valued}
+
+We have talked about how set-valued functors on a schema can be understood as filling that schema with data. But there are also functors between schemas. When the two sorts of functors are composed, data is migrated. This is the simplest form of data migration; more complex ways to migrate data come from using adjoints. All of the above is the subject of this section.
+
+%---- Subsection ----%
+\subsection{Pulling back data along a functor}%
+\label{subsec.pullback_data}
+%
+\index{data migration!pullback}
+
+To begin, we will migrate data between the graph-indexing schema $\Cat{Gr}$ and the loop schema, which we call $\Cat{DDS}$, shown below
+\[
+\Cat{Gr}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=50pt]
+	\LTO{Arrow}\ar[r, shift left, "\text{source}"]\ar[r, shift right, "\text{target}"']\&\LTO{Vertex}
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{no equations}
+}
+\hspace{1in}
+\Cat{DDS}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LTO{State}\ar[loop below, "\text{next}"]
+\end{tikzcd}
+\\~\\\footnotesize
+\textit{no equations}
+}
+\]
+We begin by writing down a sample instance $I\colon\Cat{DDS}\to\smset$ on this schema:
+\begin{equation}%
+\label{eqn.state_table}
+\begin{array}{c | c}
+	\textbf{State}&\textbf{next}\\\hline
+	1 & 4\\
+	2 & 4\\
+	3 & 5\\
+	4 & 5\\
+	5 & 5\\
+	6 & 7\\
+	7 & 6
+\end{array}
+\end{equation}
+We call the schema $\Cat{DDS}$ to stand for discrete dynamical system.%
+\index{discrete dynamical system} Indeed, we may think of the data in the
+$\Cat{DDS}$-instance of \cref{eqn.state_table} as listing the states and
+movements of a deterministic machine: at every point in time the machine is in
+one of the listed states, and given the machine in one of the states, in the
+next instant it moves to a uniquely determined next state.
+
+Our goal is to migrate the data in \cref{eqn.state_table} to data on $\Cat{Gr}$;
+this will give us the data of a graph and so allow us to visualise our machine.
+
+We will use a functor connecting these schemas in order to move data between them. The reader can create any functor she likes, but we will use a specific functor $F\colon\Cat{Gr}\to\Cat{DDS}$ to migrate data in a way that makes sense to us, the authors. Here we draw $F$, using colors to hopefully aid understanding:
+\[
+\begin{tikzpicture}[color=blue]
+	\node (Arrow) {$\LTO{Arrow}$};
+	\node[below=of Arrow] (Vertex) {$\LTO{Vertex}$};
+	\draw[->] 
+		($(Arrow.south)+(-3pt,0)$) to node[left, font=\scriptsize] (source) {source} 
+		($(Vertex.north)+(-3pt,0)$);
+	\draw[->, color=red]
+		($(Arrow.south)+(3pt,0)$) to node[right, font=\scriptsize] (target) {target} 
+		($(Vertex.north)+(3pt,0)$);
+	\node[draw, color=black, fit=(Arrow) (Vertex) (source) (target)] (Gr) {};
+	\node[below=0 of Gr, black] {$\Cat{Gr}$};
+%
+	\node[right=2 of target] (State) {$\LTO{State}$} edge [loop below, red] node[font=\scriptsize] (next) {next} ();
+	\node[draw, color=black, fit=(State) (next)] (DDS) {};
+	\node[below=0 of DDS, black] {$\Cat{DDS}$};
+%
+	\draw[functor, black] (Gr.east|-target) to node[above, font=\scriptsize] {$F$} (DDS.west|-State);
+\end{tikzpicture}
+\]
+The functor $F$ sends both objects of $\Cat{Gr}$ to the `State' object of
+$\Cat{DDS}$ (as it must). On morphisms, it sends the `source' morphism to the identity morphism on `State', and the `target' morphism to the morphism `next'.
+
+A sample database instance on $\Cat{DDS}$ was given in \cref{eqn.state_table};
+recall this is a functor $I\colon\Cat{DDS}\to\smset$. So now we have two functors as follows:
+\begin{equation}%
+\label{eqn.Gr_dds_pb}
+\begin{tikzcd}
+	\Cat{Gr}\ar[r, "F"]&\Cat{DDS}\ar[r, "I"]&\smset.
+\end{tikzcd}
+\end{equation}
+Objects in $\Cat{Gr}$ are sent by $F$ to objects in $\Cat{DDS}$, which are sent by $I$ to objects in $\smset$, which are sets. Morphisms in $\Cat{Gr}$ are sent by $F$ to morphisms in $\Cat{DDS}$, which are sent by $I$ to morphisms in $\smset$, which are functions. This defines a composite functor $F\cp I\colon\Cat{Gr}\to\smset$. Both $F$ and $I$ respect identities and composition, so $F\cp I$ does too. Thus we have obtained an instance on $\Cat{Gr}$, i.e.\ we have converted our discrete dynamical system from \cref{eqn.state_table} into a graph! What graph is it? %
+\index{dynamical system!discrete}
+
+For an instance on $\Cat{Gr}$, we need to fill an Arrow table and a Vertex table. Both of these are sent by $F$ to State, so let's fill both with the rows of State in \cref{eqn.state_table}. Similarly, since $F$ sends `source' to the identity and sends `target' to `next', we obtain the following tables:
+\[
+\begin{tabular}{ c | c c}
+  \textbf{Arrow}&\textbf{source}&\textbf{target}\\\hline
+	1&1&4\\
+	2&2&4\\
+	3&3&5\\
+	4&4&5\\
+	5&5&5\\
+	6&6&7\\
+	7&7&6
+\end{tabular}
+\hspace{1in}
+\begin{tabular}{ c |}
+	\textbf{Vertex}\\\hline
+	1\\
+	2\\
+	3\\
+	4\\
+	5\\
+	6\\
+	7
+\end{tabular}
+\]
+Now that we have a graph, we can draw it.
+\[
+\boxCD{
+\begin{tikzcd}[column sep=20pt, row sep=5, pos=.1, ampersand replacement=\&]
+	\&\LMO{1}\ar[dr, "1"']\&\&\LMO{2}\ar[dl,"2"]\\
+	\LMO{3}\ar[dr, "3"']\&\&\LMO{4}\ar[dl, "4"]\&\&\LMO{6}\ar[r, bend left, pos=.5, "6"]\&[20pt]\LMO{7}\ar[l, bend left, pos=.5, "7"]\\
+	\&\LMO[under]{5}\ar[loop below, looseness=5, pos=.5, "5"]
+\end{tikzcd}
+}
+\]
+Each arrow is labeled by its source vertex, as if to say, ``What I do next is determined by what I am now.''
+
+\begin{exercise}%
+\label{exc.dds_graph}
+Consider the functor $G\colon\Cat{Gr}\to\Cat{DDS}$ given by sending `source' to `next' and sending `target' to the identity on `State'. Migrate the same data, called $I$ in \cref{eqn.state_table}, using the functor $G$. Write down the tables and draw the corresponding graph.
+\end{exercise}
+
+We refer to the above procedure---basically just composing functors as in \cref{eqn.Gr_dds_pb}---as ``pulling back data along a functor.'' We just now pulled
+back data $I$ along functor $F$.%
+\index{pullback!along a map}
+
+\begin{definition}%
+\label{def.pullback_along}
+Let $\cat{C}$ and $\cat{D}$ be categories and let $F\colon\cat{C}\to\cat{D}$ be
+a functor. For any set-valued functor $I\colon\cat{D}\to\smset$, we refer to the
+composite functor $F\cp I\colon\cat{C}\to\smset$ as the \emph{pullback of $I$ along $F$}.%
+\index{functor!set@$\smset$-valued}%
+\index{data migration!pullback}%
+\index{functor!data migration|see {data migration}}
+
+Given a natural transformation $\alpha\colon I\Rightarrow J$, there is a natural
+transformation $\alpha_F\colon F\cp I\Rightarrow F\cp J$, whose component $(F\cp I)(c)\to (F\cp J)(c)$ for any $c\in\Ob(\cat{C})$ is given by $(\alpha_F)_c\coloneqq\alpha_{Fc}$.
+\[
+\begin{tikzcd}[column sep=large]
+	\cat{C}
+	\ar[r, "F"]
+	&\cat{D} 
+	\ar[r, bend left, "I"{name=up}]
+	\ar[r, bend right, "J"'{name=down}]
+	&\smset
+        \ar[from=up, to=down, Rightarrow, shorten <=5pt,
+	shorten >=5pt,"\scriptstyle\alpha"]
+\end{tikzcd}
+\hspace{1cm}
+\leadsto
+\hspace{1cm}
+\begin{tikzcd}[column sep=large]
+	\cat{C}
+	\ar[r, bend left, "F\cp I"{name=up, pos=.55}]
+	\ar[r, bend right, "F\cp J"'{name=down, pos=.55}]
+	&\smset
+        \ar[from=up, to=down, Rightarrow, shorten <=5pt,
+	shorten >=5pt,"\scriptstyle\alpha_F"]
+\end{tikzcd}
+\]
+
+This uses the data of $F$ to define a functor
+$\Delta_F\colon\cat{D}\inst\to\cat{C}\inst.$
+\end{definition}
+
+Note that the term pullback is also used for a certain sort of limit, for more
+details see \cref{rem.pullbackpullback}.
+
+%
+\index{graphs!database schema for|)}
+
+%---- Subsection ----%
+\subsection{Adjunctions}%
+\label{subsec.adjoints_lims_colims}
+
+In \cref{sec.galois_connections} we discussed Galois connections, which are
+adjunctions between preorders.  Now that we've defined categories and functors, we
+can discuss adjunctions in general. The relevance to databases is that the
+data migration functor $\Delta$ from \cref{def.pullback_along} always has two
+adjoints of its own: a left adjoint which we denote $\Sigma$ and a right adjoint
+which we denote $\Pi$. %
+\index{data migration!adjoints}%
+\index{adjunction!examples of}
+
+Recall that an adjunction between preorders $P$ and $Q$ is a pair of monotone maps
+$f\colon P \to Q$ and $g\colon Q \to P$ that are \emph{almost} inverses: we have 
+\begin{equation}%
+\label{eqn.preorder_adjunction_revisit}
+f(p) \le q \mbox{ if and only if } p \le g(q).
+\end{equation}
+Recall from \cref{subsubsec.pos_free_spectrum} that in a preorder $P$, a hom-set
+$P(a,b)$ has one element when $a \le b$, and no elements otherwise. We can thus rephrase \cref{eqn.preorder_adjunction_revisit} as an isomorphism of sets $Q(f(p),q) \cong P(p,g(q))$: either both are one-element sets or both are 0-element sets. 
+This suggests how to define adjunctions in the general case.
+
+\begin{definition}%
+\label{def.adjoints}%
+\index{adjunction}%
+\index{adjoint|see {adjunction}}
+Let $\cat C$ and $\cat D$ be categories, and $L\colon \cat C \to \cat D$ and $R
+\colon \cat D \to \cat C$ be
+functors. We say that \emph{$L$ is left adjoint to $R$} (and that \emph{$R$ is
+right adjoint to $L$}) if, for any $c\in\cat{C}$ and $d\in\cat{D}$, there is an isomorphism of hom-sets
+\[\alpha_{c,d}\colon\cat{C}(c,R(d))\To{\cong}\cat{D}(L(c),d)\]
+that is natural in $c$ and $d$.%
+\tablefootnote{This naturality is between functors
+  $\cat{C}\op\times\cat{D}\to\smset$. It says that for any morphisms $f\colon
+  c'\to c$ in $\cat{C}$ and $g\colon d\to d'$ in $\cat{D}$, the following
+  diagram commutes:
+\[
+\begin{tikzcd}[sep=large, ampersand replacement=\&]
+	\cat{C}(c,Rd) \ar[d, "{\cat C(f,Rg)}"'] \ar[r, "\alpha_{c,d}"] \&
+	\cat{D}(Lc,d) \ar[d, "{\cat D(Lf,g)}"] \\
+	\cat{C}(c',Rd') \ar[r, "\alpha_{c',d'}"'] \&
+	\cat{D}(Lc',d')
+\end{tikzcd}
+\]
+}
+
+Given a morphism $f\colon c\to R(d)$ in $\cat{C}$, its image $g\coloneqq\alpha_{c,d}(f)$ is called its \emph{mate}. Similarly, the mate of $g\colon L(c)\to d$ is $f$.
+
+To denote an adjunction we write $L \dashv R$, or in diagrams,
+\[
+\adj{\cat{C}}{L}{R}{\cat{D}}
+\] 
+with the $\Rightarrow$ in the direction of the left adjoint. 
+\end{definition}
+
+\begin{example}
+Recall that every preorder $\cat{P}$ can be regarded as a category. Galois connections between preorders and adjunctions between the corresponding categories are exactly the same thing.
+\end{example}
+
+\begin{example}%
+\label{ex.currying}%
+\index{currying}
+Let $B\in\Ob(\smset)$ be any set. There is an adjunction called `currying
+$B$,' after the logician Haskell Curry:
+\[
+\adj{\smset}{-\times B}{(-)^B}{\smset}
+\hspace{1in}
+\smset(A\times B,C)\cong\smset(A,C^B)
+\]
+Abstractly we write it as on the left, but what this means is that for any sets
+$A,C$, there is a natural isomorphism as on the right.
+
+To explain this, we need to talk about exponential objects in $\smset$. Suppose
+that $B$ and $C$ are sets. Then the set of functions $B\to C$ is also a set;
+let's denote it $C^B$. It's written this way because if $C$ has $10$ elements and $B$ has $3$ elements then $C^B$ has $10^3$ elements, and more generally for any two finite sets $|C^B|=|C|^{|B|}$.
+
+The idea of currying is that given sets $A$, $B$, and $C$, there is a one-to-one
+correspondence between functions $(A\times B)\to C$ and functions $A\to C^B$.
+Intuitively, if I have a function $f$ of two variables $a,b$, I can ``put off''
+entering the second variable: if you give me just $a$, I'll return a function
+$B\to C$ that's waiting for the $B$ input. This is the curried version of $f$. As one might guess, there is a formal connection between exponential objects and what we called hom-elements $b\multimap c$ in \cref{def.monoidal_closed}.
+\end{example}
+
+\begin{exercise}%
+\label{exc.currying_practice}
+In \cref{ex.currying}, we discussed an adjunction between functors $-\times B$
+and $(-)^B$. But we only said how these functors worked on objects: for an arbitrary set
+$X$, they return sets $X\times B$ and $X^B$ respectively.
+\begin{enumerate}
+	\item Given a morphism $f\colon X\to Y$, what morphism should $-\times B\colon X\times B\to Y\times B$ return?
+	\item Given a morphism $f\colon X\to Y$, what morphism should $(-)^B\colon X^B\to Y^B$ return?
+	\item Consider the function $+\colon\NN\times\NN\to\NN$, which sends
+	$(a,b)\mapsto a+b$. Currying $+$, we get a certain function
+	$p\colon\NN\to\NN^\NN$. What is $p(3)$?
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.adjunctions}%
+\index{adjunction!examples of}
+If you know some abstract algebra or topology, here are some other examples of adjunctions.
+\begin{enumerate}
+	\item Free constructions: given any set you get a free group, free monoid, free ring, free vector space, etc.; each of these is a left adjoint. The corresponding right adjoint takes a group, a monoid, a ring, a vector space etc.\ and forgets the algebraic structure to return the underlying set. %
+\index{group!free}
+\index{monoid!free}
+\index{ring!free}
+\index{vector space!free}
+	
+	\item Similarly, given a graph you get a free preorder or a free
+	category, as we discussed in \cref{subsubsec.pos_free_spectrum}; each is
+	a left adjoint. The corresponding right adjoint is the underlying graph
+	of a preorder or of a category.
+	\index{preorder!free}
+	\index{category!free}
+
+	\item Discrete things: given any set you get a discrete preorder,
+	discrete graph, discrete metric space, discrete category, discrete
+	topological space; each of
+	these is a left adjoint. The corresponding right adjoint is again
+	underlying set. 
+	\index{preorder!discrete}
+	\index{graph!discrete}
+	\index{metric space!discrete}
+	\index{category!discrete}
+	\index{topology!discrete}
+
+	\item Codiscrete things: given any set you get a codiscrete preorder,
+	complete graph, codiscrete category, codiscrete topological space; each
+	of these is a right adjoint. The corresponding left adjoint is the
+	underlying set.
+	\index{preorder!codiscrete}
+	\index{graph!complete}
+	\index{category!codiscrete}
+	\index{topology!codiscrete}
+
+	\item Given a group, you can quotient by its commutator subgroup to get an abelian group; this is a left adjoint. The right adjoint is the inclusion of abelian groups into groups.
+	\index{group!commutator subgroup}
+	\qedhere%
+\index{quotient}
+\end{enumerate}
+\end{example}
+
+% Subsubsection %
+\subsection{Left and right pushforward functors, $\Sigma$ and $\Pi$}%
+\index{data migration|(}
+Given $F\colon\cat{C}\to\cat{D}$, the data migration functor $\Delta_F$ turns
+$\cat{D}$-instances into $\cat{C}$-instances. This functor has both a left and a
+right adjoint:%
+\index{data migration!left pushforward}%
+\index{data migration!right pushforward}
+\[
+\begin{tikzcd}[column sep=70pt]
+	\cat{C}\inst\ar[r, shift left=8pt, bend left=8pt, "\Sigma_F"]\ar[r, shift right=8pt, bend right=8pt, "\Pi_F"']
+	\ar[r, shift left=7.5pt, Rightarrow, shorten <=22pt,
+	shorten >=22pt]
+	&
+	\cat{D}\inst\ar[l, "\Delta_F" description]
+	\ar[l, shift left=7.5pt, Rightarrow, shorten <=22pt,
+	shorten >=22pt]
+\end{tikzcd}
+\]
+Using the names $\Sigma$ and $\Pi$ in this context is fairly standard in category theory. In the case of
+databases, they have the following helpful mnemonic:
+\[
+\begin{tabular}{c | p{.8in} p{1.1in} p{1.5in}}
+	\textbf{Migration Functor}&\textbf{Pronounced}&\textbf{Reminiscent of}&\textbf{Database idea}\\\hline
+	$\Delta$ & Delta & Duplicate\qquad~ or destroy&Duplicate or destroy tables or columns\\
+	$\Sigma$ & Sigma & Sum & Union (sum up) data\\\\
+	$\Pi$ & Pi & Product & Pair%
+\footnote{This is more commonly called ``join''
+	by database programmers.} and query data 
+\end{tabular}%
+\index{union!and data migration}
+\]
+
+Just like we used $\Delta_F$ to pull back any discrete dynamical system along $F\colon\Cat{Gr}\to\Cat{DDS}$ and get a graph,
+the migration functors $\Sigma_F$ and $\Pi_F$ can be used to turn any graph into a
+discrete dynamical system. That is, given an instance
+$J\colon\Cat{Gr}\to\smset$, we can get instances $\Sigma_F(J)$ and $\Pi_F(J)$ on $\Cat{DDS}$. This, however, is quite
+technical, and we leave it to the adventurous reader to compute an example, with
+help perhaps from \cite{Spivak:2014a}, which explores the definitions of
+$\Sigma$ and $\Pi$ in detail. A less technical shortcut is simply to code up the
+computation in the open-source FQL software.%
+\index{discrete dynamical system!induced graph of}%
+\index{dynamical system!discrete|see {discrete dynamical system}}
+
+To get the basic idea across without getting mired in technical details, here we
+shall instead discuss a very simple example. Recall the schemas from
+\cref{eqn.airline_schemas}. We can set up a functor between them, the one sending black dots to black dots and white dots to white dots:
+\[
+\begin{tikzpicture}[commutative diagrams/every diagram, inner sep=10pt]
+	\matrix[matrix of math nodes, name=A, row sep=20pt, commutative diagrams/every cell] {
+		&
+			|(AD)|\LTO[\circ]{\$}
+		\\
+			|(AE)|\LTO{Economy}
+		&&
+			|(AF)|\LTO{First Class}
+		\\
+		&
+			|(AS)|\LTO[\circ]{string}
+		\\
+	};
+%
+	\path[commutative diagrams/.cd, every arrow, every label, font=\scriptsize]
+		(AE) edge["Price"]     (AD)
+				 edge["Position"'] (AS)
+		(AF) edge["Price"']    (AD)
+				 edge["Position"]  (AS);
+	\node[draw, inner ysep=0pt, fit=(AE) (AD) (AF) (AS)] (A box) {};
+	\node[left=0 of A box] {$A\coloneqq$};
+%%
+	\matrix[matrix of math nodes, name=B, row sep=20pt, commutative diagrams/every cell, matrix anchor=south, right=3 of A.south east] {
+			|(BD)|\LTO[\circ]{\$}
+		\\
+			|(BAS)|\LTO{Airline Seat}
+		\\
+			|(BS)|\LTO[\circ]{string}
+		\\
+	};
+%
+	\path[commutative diagrams/.cd, every arrow, every label, font=\scriptsize]
+		(BAS) edge["Price"']    (BD)
+				 edge["Position"] (BS);
+	\node[draw, inner ysep=0pt, fit=(BAS) (BD) (BS)] (B box) {};				
+	\node[right=0 of B box] {$=:B$};
+	\draw[functor] (A box.east) to node[above, font=\scriptsize] {$F$} (B box.west);
+\end{tikzpicture}
+\]
+With this functor $F$ in hand, we can transform any $B$-instance into an
+$A$-instance using $\Delta_F$. Whereas $\Delta$ was interesting in the case of
+turning discrete dynamical systems into graphs in \cref{subsec.pullback_data},
+it is not very interesting in this case. Indeed, it will just copy---$\Delta$
+for duplicate---the rows in Airline seat into both Economy and First Class. 
+
+$\Delta_F$ has two adjoints, $\Sigma_F$ and $\Pi_F$, both of which transform
+any $A$-instance $I$ into a $B$-instance. The functor $\Sigma_F$ does what one
+would most expect from reading the names on each object: it will put into Airline Seat the union of Economy and First Class:
+\[\Sigma_F(I)(\mathrm{Airline\ Seat})=I(\mathrm{Economy})\sqcup I(\mathrm{First\ Class}).\]
+
+The functor $\Pi_F$ puts into Airline Seat the set of those pairs $(e,f)$ where
+$e$ is an Economy seat, $f$ is a First Class seat, and $e$ and $f$ have the same
+price and position. In this particular example, one imagines that there should
+be no such seats in a valid instance $I$, in which case
+$\Pi_F(I)(\mathrm{Airline\ Seat})$ would be empty. But in other uses of these
+same schemas, $\Pi_F$ can be a useful operation. For example, in the schema $A$
+replace the label `Economy' by `Rewards Program', and in $B$ replace `Airline
+Seat' by `First Class Seats'. Then the operation $\Pi_F$ finds those first class
+seats that are also rewards program seats. This operation is a kind of database
+query; querying is the operation that databases are built
+for.%
+\index{database!query}
+
+The moral is that complex data migrations can be specified by constructing
+functors $F$ between schemas and using the ``induced'' functors $\Delta_F$, $\Sigma_F$, and $\Pi_F$.
+Indeed, in practice essentially all useful migrations can be built up from these. Hence the language of categories provides a framework for specifying
+and reasoning about data migrations.
+
+% Subsubsection %
+\subsection{Single set summaries of databases}%
+\index{summaries!limits and colimits as}
+
+To give a stronger idea of the flavor of $\Sigma$ and $\Pi$, we consider another
+special case, namely where the target category $\cat{D}$ is equal to $\Cat{1}$; see \cref{exc.Cat_n}.
+In this case, there is exactly one functor $\cat{C}\to\Cat{1}$ for any
+$\cat{C}$; let's denote it
+\begin{equation}%
+\label{eqn.terminal_functor}
+	!\colon\cat{C}\to\Cat{1}.
+\end{equation}
+
+\begin{exercise} %
+\label{ex.terminal_cat}
+Describe the functor $!\colon \cat{C} \to \Cat{1}$ from \cref{eqn.terminal_functor}. Where does it send each
+object? What about each morphism?
+\end{exercise}
+
+We want to consider the data migration functors
+$\Sigma_!\colon\cat{C}\inst\to\Cat{1}\inst$ and
+$\Pi_!\colon\cat{C}\inst\to\Cat{1}\inst$. In \cref{ex.1_inst}, we saw that an
+instance on $\Cat{1}$ is the same thing as a set. So let's identify
+$\Cat{1}\inst$ with $\smset$, and hence discuss
+\[
+	\Sigma_!\colon\cat{C}\inst\to\smset
+	\qquad\text{and}\qquad
+	\Pi_!\colon\cat{C}\inst\to\smset.
+\]
+Given any schema $\cat{C}$ and instance $I\colon\cat{C}\to\smset$, we will get
+sets $\Sigma_!(I)$ and $\Pi_!(I)$. Thinking of these sets as database instances,
+each corresponds to a single one-column table---a controlled
+vocabulary---summarizing an entire database instance on the schema $\cat{C}$.
+
+Consider the following schema
+\begin{equation}%
+\label{eqn.graph_email}
+\cat{G}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=60pt]
+	\LTO{Email}\ar[r, shift left, "\text{sent\_by}"]\ar[r, shift right, "\text{received\_by}"']\&\LTO{Address}
+\end{tikzcd}
+  \\~\\\footnotesize
+  \textit{no equations}
+}
+\end{equation}
+Here's a sample instance $I\colon\cat{G}\to\smset$:
+\[
+\begin{tabular}{ c | c c}
+  \textbf{Email}&\textbf{sent\_by}&\textbf{received\_by}\\\hline
+	Em\_1 & Bob & Grace\\
+	Em\_2 & Grace & Pat\\
+	Em\_3 & Bob & Emmy\\
+	Em\_4 & Sue & Doug\\
+	Em\_5 & Doug & Sue\\
+	Em\_6 & Bob & Bob
+\end{tabular}
+\hspace{1in}
+\begin{tabular}{ c |}
+	\textbf{Address}\\\hline
+	Bob\\
+	Doug\\
+	Emmy\\
+	Grace\\
+	Pat\\
+	Sue
+\end{tabular}
+\] 
+
+\begin{exercise}%
+\label{exc.draw_graph}
+Note that $\cat{G}$ from \cref{eqn.graph_email} is isomorphic to the schema $\Cat{Gr}$. In
+\cref{subsec.instances_cat} we saw that instances on $\Cat{Gr}$ are graphs. Draw
+the above instance $I$ as a graph.
+\end{exercise}
+
+%Of course, $\cat{G}$ is isomorphic to the schema $\Cat{Gr}$, so we can draw this instance as a graph:
+%\[
+%\boxCD{
+%\begin{tikzcd}[ampersand replacement=\&]
+%	\LTO{Bob}\ar[loop above, "6"]\ar[r, "1"]\ar[d, "3"']\&\LTO{Grace}\ar[r, "2"]\&\LTO{Pat}\\
+%	\LTO{Emmy}\&\LTO{Sue}\ar[r, shift left, "4"]\&\LTO{Doug}\ar[l, shift left, "5"]
+%\end{tikzcd}
+%}
+%\]
+
+Now we have a unique functor $!\colon\cat{G}\to\Cat{1}$, and we want to say what $\Sigma_!(I)$ and $\Pi_!(I)$ give us as single-set summaries. First, $\Sigma_!(I)$ tells us all the emailing groups---the ``connected components''---in $I$:
+\[
+\begin{tabular}{ c |}
+	\textbf{1}\\\hline
+	Bob-Grace-Pat-Emmy\\
+	Sue-Doug
+\end{tabular}
+\]
+This form of summary, involving identifying entries into common groups, or
+quotients, is typical of $\Sigma$-operations. \index{quotient!as data migration}
+
+The functor $\Pi_!(I)$ lists the emails from $I$ which were sent from a person to
+her- or him-self.
+\[
+\begin{tabular}{ c |}
+	\textbf{1}\\\hline
+	Em\_6
+\end{tabular}
+\]
+This is again a sort of query, selecting the entries that fit the criterion of
+self-to-self emails. Again, this is typical of $\Pi$-operations.
+
+Where do these facts---that $\Pi_!$ and $\Sigma_!$ act the way we said---come
+from? Everything follows from the definition of adjoint functors
+(\ref{def.adjoints}): indeed we hope this, together with the examples given in \cref{ex.adjunctions}, give the reader some idea of how general and useful adjunctions are, both in mathematics and in database theory.
+
+One more point: while we will not spell out the details, we note that these
+operations are also examples of constructions known as colimits and limits in
+$\smset$. We end this chapter with bonus material, exploring these key category theoretic
+constructions. The reader should keep in mind that, in general and not just for
+functors to $\Cat{1}$, $\Sigma$-operations are built from colimits in $\smset$,
+and $\Pi$-operations are built from limits in $\smset$.
+
+%
+\index{adjunction|)}
+
+%-------- Section --------%
+\section{Bonus: An introduction to limits and colimits}%
+\label{sec.bonus_lims_colims}%
+\index{limit|(}
+
+What do products of sets, the results of $\Pi_!$-operations on database instances, and meets in a preorder all have in
+common? The answer, as we shall see, is that they are all examples of limits. Similarly, disjoint unions of sets, the results of $\Sigma_!$-operations on database instances, and joins in a preorder are all colimits. Let's begin with limits.%
+\index{union!disjoint}
+
+Recall that $\Pi_!$ takes a database instance $I\colon \cat{C} \to \smset$ and turns it
+into a set $\Pi_!(I)$. More generally, a limit turns a functor $F\colon \cat{C} \to
+\cat{D}$ into an object of $\cat{D}$. 
+
+%---- Subsection ----%
+\subsection{Terminal objects and products} %
+\label{subsec.terminals_products}
+
+Terminal objects and products are each a sort of limit. Let's discuss them in turn.
+
+\paragraph{Terminal objects.}%
+\index{limit!terminal object as}%
+\index{terminal object!as limit}
+The most basic limit is a terminal object.
+\begin{definition}%
+\index{terminal object}
+Let $\cat{C}$ be a category. Then an object $Z$ in $\cat{C}$ is a \emph{terminal
+object} if, for each object $C$ of $\cat{C}$, there exists a unique morphism
+$!\colon C \to Z$.
+\end{definition}
+
+Since this \emph{unique} morphism exists \emph{for all} objects in $\cat{C}$, we
+say that terminal objects have a \emph{universal property}.%
+\index{universal property}%
+\index{terminal object!universal property of}
+
+\begin{example}
+In $\smset$, any set with exactly one element is a terminal object. Why?
+Consider some such set $\{\bullet\}$. Then for any other set $C$ we need to
+check that there is exactly one function $!\colon C \to \{\bullet\}$. This
+unique function is the one that does the only thing that can be done: it maps
+each element $c \in C$ to the element $\bullet \in \{\bullet\}$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.terminal_in_preorder}
+Let $(P,\le)$ be a preorder, let $z\in P$ be an element, and let $\cat{P}$ be the corresponding category (see \cref{subsubsec.pos_free_spectrum}). Show that $z$ is a terminal object in $\cat{P}$ if and
+only if it is a \emph{top element} in $P$: that is, if and only if for all $c \in P$ we have $c \le
+z$.
+\end{exercise}%
+\index{top element|see {terminal object}}
+
+\begin{exercise}%
+\label{exc.terminal_cat}
+Name a terminal object in the category $\Cat{Cat}$. (Hint: recall
+\cref{ex.terminal_cat}.)
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.cat_wo_terminal}
+Not every category has a terminal object. Find one that doesn't.
+\end{exercise}
+
+\begin{proposition}
+All terminal objects in a category $\cat{C}$ are isomorphic.
+\end{proposition}
+\begin{proof}
+This is a simple, but powerful standard argument. Suppose $Z$ and $Z'$ are both
+terminal objects in some category $\cat{C}$. Then there exist (unique) maps
+$a\colon Z \to Z'$ and $b\colon Z' \to Z$. Composing these, we get a map $a\cp
+b\colon Z \to Z$. Now since $Z$ is terminal, this map $Z \to Z$ must be unique.
+But $\id_Z$ is also such a map. So we must have $a\cp b = \id_Z$.  Similarly, we
+find that $b \cp a= \id_{Z'}$. Thus $a$ is an isomorphism, with inverse $b$.
+\end{proof}
+
+\begin{remark}[``The limit'' vs.\ ``a
+  limit'']%
+\label{rem.the_vs_a}%
+\index{universal property}%
+\index{unique up to unique isomorphism}
+Not only are all terminal objects isomorphic, there is a unique isomorphism between any two. We hence say ``terminal objects are unique up to unique isomorphism.'' To a category theorist, this is
+very nearly the same thing as saying ``all terminal objects are equal.'' Thus we often abuse terminology and talk of `the' terminal object, rather than ``a'' terminal
+object. We will do the same for any sort of limit or colimit, e.g.\ speak of ``the product'' of two sets, rather than ``a product.'' We saw a similar phenomenon in \cref{def.meets_joins}.
+\end{remark}
+
+\paragraph{Products.} Products are slightly more complicated to formalize than terminal objects, but they are familiar in practice.
+
+\begin{definition}%
+\index{product!in a category}%
+\index{limit!product as}
+Let $\cat{C}$ be a category, and let $X,Y$ be objects in $\cat{C}$. A
+\emph{product} of $X$ and $Y$ is an object, denoted $X\times Y$, together with
+morphisms $p_X\colon X\times Y \to X$ and $p_Y\colon X \times Y \to Y$ such that
+for all objects $C$ together with morphisms $f\colon C \to X$ and $g\colon C \to
+Y$, there exists a unique morphism $C \to X \times Y$, denoted $\pair{f,g}$, for which the following diagram commutes:
+\[
+\begin{tikzcd}[row sep=small]
+& C \ar[dl,"f",swap] \ar[dr, "g"] \ar[dd,"\pair{f,g}",dotted]\\
+X && Y \\
+& X\times Y \ar[ul, "p_X"] \ar[ur,"p_Y",swap]
+\end{tikzcd}
+\]
+\end{definition}
+
+We will try to bring this down to earth in \cref{ex.product_in_set}. Before we do, note that $X\times Y$ is an object equipped with morphisms to $X$ and $Y$. Roughly speaking, it is like ``the best object-equipped-with-morphisms-to-$X$-and-$Y$'' in all of $\cat{C}$, in the sense that any other object-equipped-with-morphisms-to-$X$-and-$Y$ maps to it uniquely. This is called a \emph{universal property}. It's customary to use a dotted line
+to indicate the unique morphism that exists because of some universal property.
+
+\begin{example}%
+\label{ex.product_in_set}%
+\index{product!of sets}
+In $\smset$, a product of two sets $X$ and $Y$ is their usual cartesian product
+\[
+X \times Y\coloneqq \{(x,y) \mid x \in X, y \in Y\},
+\]
+which comes with two projections $p_X\colon X\times Y\to X$ and $p_Y\colon X\times Y\to Y$, given by $p_X(x,y)\coloneqq x$ and $p_Y(x,y)\coloneqq y$.
+
+Given any set $C$ with functions $f\colon C \to X$ and $g\colon C \to Y$, the
+unique map from $C$ to $X\times Y$ such that the required diagram commutes is
+given by $\langle f,g\rangle(c)\coloneqq (f(c),g(c))$.
+
+Here is a picture of the product $\ord{6} \times \ord{4}$ of sets $\ord{6}$ and
+$\ord{4}$.
+\[
+\begin{tikzpicture}[y=.9cm, rounded corners, shorten <=2pt, shorten >=2pt, baseline=(allf)]
+	\foreach \i in {1,...,6}{
+		\foreach \j in {1,...,4} {
+			\node (ij\i\j) at (\i,\j) {$\LMO{(\i,\j)}$};
+			\ifthenelse{\i=1}{\node (j\j) at (-1,\j) {$\LMO{\j}$};}{};
+		}
+		\node (i\i) at (\i,-1) {$\LMO{\i}$};
+	}
+	\node[draw, inner ysep=0pt, fit=(i1) (i6)] (i) {};
+	\node[draw, inner ysep=0pt, fit=(j1) (j4)] (j) {};
+	\node[draw, inner ysep=0pt, fit=(ij11) (ij64)] (ij) {};
+	\draw[->, thick] (ij) -- (i);
+	\draw[->, thick] (ij) -- (j);
+%
+	\begin{scope}[gray]
+  	\node (X) at (8,6) {$C$};
+  	\draw[->, bend left=10pt] (X) to node[right=5pt] (allf) {$\forall f$} (i.north east);
+  	\draw[->, bend right=10pt] (X) to node[above=5pt] {$\forall g$} (j.north east);
+  	\draw[->] (X) to node[fill=white] {$\exists!$}(ij.north east);
+	\end{scope}
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\index{meet}%
+\label{exc.meet_product}%
+\index{product!meet as}
+Let $(P,\le)$ be a preorder, let $x,y \in P$ be elements, and let $\cat{P}$ be the corresponding category. Show that the product $x\times y$ in $\cat{P}$ agrees with their meet $x\wedge y$ in $P$.
+\end{exercise}
+
+\begin{example}%
+\index{product!of categories}
+Given two categories $\cat{C}$ and $\cat{D}$, their product $\cat{C} \times
+\cat{D}$ may be given as follows. The objects of this category are pairs
+$(c,d)$, where $c$ is an object of $\cat{C}$ and $d$ is an object of $\cat{D}$.
+Similarly, morphisms $(c,d) \to (c',d')$ are pairs $(f,g)$ where $f\colon c \to
+c'$ is a morphism in $\cat{C}$ and $g\colon d \to d'$ is a morphism in
+$\cat{D}$. Composition of morphisms is simply given by composing each entry in
+the pair separately, so $(f,g)\cp (f',g')=(f\cp f',g\cp g')$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.product_cats}
+\begin{enumerate}
+  \item What are the identity morphisms in a product category $\cat{C}\times\cat{D}$?
+  \item Why is composition in a product category associative?%
+\index{associativity!in product category}
+  \item What is the product category $\Cat{1} \times \Cat{2}$?
+  \item What is the product category $\cat{P} \times \cat{Q}$ when $P$ and $Q$ are preorders and $\cat{P}$ and $\cat{Q}$ are the corresponding categories?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+These two constructions, terminal objects and products, are subsumed by the
+notion of limit.
+
+%---- Subsection ----%
+\subsection{Limits}
+
+We'll get a little abstract. Consider the definition of product. This says that
+given any pair of maps $X \xleftarrow{f} C \xrightarrow{g} Y$, there exists a
+unique map $C \to X\times Y$ such that certain diagrams commute. This has the
+flavor of being terminal---there is a unique map to $X\times Y$---but it seems a bit more
+complicated. How are the two ideas related?
+
+It turns out that products \emph{are} terminal objects, but of a different
+category, which we'll call $\Cat{Cone}(X,Y)$, \emph{the category of cones
+over $X$ and $Y$ in $\cat{C}$}. We will see in \cref{exc.prod_as_term_cone} that $X \xleftarrow{p_X} X\times Y\xrightarrow{p_Y} Y$ is a
+terminal object in $\Cat{Cone}(X,Y)$.%
+\index{category!of cones}
+
+An object of $\Cat{Cone}(X,Y)$ is simply a pair of maps $X \xleftarrow{f} C
+\xrightarrow{g} Y$. A morphism from $X \xleftarrow{f} C
+\xrightarrow{g} Y$ to $X \xleftarrow{f'} C' \xrightarrow{g'} Y$ in $\Cat{Cone}(X,Y)$
+is a morphism $a\colon C \to C'$ in $\cat{C}$ such that the following diagram commutes:
+\[
+\begin{tikzcd}[row sep=small]
+& C \ar[dl,"f",swap] \ar[dr, "g"] \ar[dd,"a"]\\
+X && Y \\
+& C' \ar[ul, "f'"] \ar[ur,"g'",swap]
+\end{tikzcd}
+\]
+
+\begin{exercise}%
+\label{exc.prod_as_term_cone}
+Check that a product $X \xleftarrow{p_X} X\times Y\xrightarrow{p_Y} Y$ is
+exactly the same as a terminal object in $\Cat{Cone}(X,Y)$.
+\end{exercise}
+
+We're now ready for the abstract definition. Don't worry if the details are
+unclear; the main point is that it is possible to unify terminal objects, maximal
+elements, and meets, products of sets, preorders, and categories, and many other familiar
+friends under the scope of a single definition. In fact, they're all just terminal objects in different categories.
+
+Recall from \cref{def.diagram_commutes} that formally speaking, a diagram in $\cat{C}$ is just a functor $D\colon\cat{J}\to\cat{C}$. Here $\cat{J}$ is called the \emph{indexing category} of the diagram $D$.%
+\index{category!indexing}
+
+\begin{definition}%
+\label{def.cones_limits}%
+\index{limit}%
+\index{terminal object!limit as}
+Let $D\colon \cat{J}\to \cat{C}$ be a diagram. A \emph{cone} $(C,c_\ast)$ over $D$ consists of 
+\begin{enumerate}[label=(\roman*)]
+\item an object $C \in \cat{C}$;
+\item for each object $j \in \cat{J}$, a morphism $c_j\colon C \to D(j)$.
+\end{enumerate}
+To be a cone, these must satisfy the following property:
+\begin{enumerate}[label=(\alph*)]
+\item for each $f\colon j \to k$ in $\cat{J}$, we have $c_k=c_j\cp D(f)$.
+\end{enumerate}
+%
+\index{cone}
+
+A \emph{morphism of cones} $(C,c_\ast) \to (C',c'_\ast)$ is a morphism $a\colon C \to
+C'$ in $\cat{C}$ such that for all $j \in \cat{J}$ we have $c_j=a\cp c'_j$.
+Cones over $D$, and their morphisms, form a category $\Cat{Cone}(D)$.
+
+The \emph{limit} of $D$, denoted $\lim(D)$, is the terminal object in the category
+$\Cat{Cone}(D)$. Say it is the cone $\lim(D)=(C,c_*)$; we refer to $C$ as the \emph{limit object} and the map $c_j$ for any $j\in\cat{J}$ as the \emph{$j^{\tn{th}}$ projection map}.
+\end{definition}
+
+For visualization purposes, if $\cat{J}$ is the free category on the graph
+\[
+\boxCD{
+  \begin{tikzcd}[sep=small, ampersand replacement=\&]
+    1\ar[dr]\&\&3\ar[ld]\ar[dr, bend left]\ar[dr, bend right]\\
+    \&2\&\&4\ar[r]\&5
+  \end{tikzcd}
+}
+\]
+with five objects and five non-identity morphisms, then we may draw a diagram
+$D\colon\cat{J}\to\cat{C}$ inside $\cat{C}$ as on the left below, and a cone on
+it as on the right:
+\[
+\boxCD{
+  \begin{tikzcd}[sep=small, ampersand replacement=\&]
+  	{\color{white}C}\\[10pt]
+    D_1\ar[dr]\&\&D_3\ar[ld]\ar[dr, bend left]\ar[dr, bend right]\\
+    \&D_2\&\&D_4\ar[r]\&D_5
+  \end{tikzcd}
+}
+\hspace{.8in}
+\boxCD{
+  \begin{tikzcd}[sep=small, ampersand replacement=\&]
+		\&\&C\ar[dll, bend right, "c_1"']\ar[ddl, bend right, "c_2"']\ar[d, "c_3"]\ar[ddr, bend left, "c_4"]\ar[ddrr, bend left, "c_5"]\\[10pt]
+    D_1\ar[dr]\&\&D_3\ar[ld]\ar[dr, bend left]\ar[dr, bend right]\\
+    \&D_2\&\&D_4\ar[r]\&D_5
+  \end{tikzcd}
+}
+\]
+Here, any two parallel paths that start at $C$ are considered the same. Note
+that both these diagrams depict a collection of objects and morphisms inside the category
+$\cat{C}$.
+
+\begin{example}
+Terminal objects are limits where the indexing category is empty, $\cat{J}=\varnothing$.
+\end{example}
+
+\begin{example}%
+\label{ex.prods_as_lims}%
+\index{product!as limit}
+  Products are limits where the indexing category consists of two objects $v, w$
+  and no arrows, $\cat{J}=\fbox{$\LMO{v}\quad\LMO{w}$}$.
+\end{example}
+
+%---- Subsection ----%
+\subsection{Finite limits in $\smset$}
+
+Recall that this discussion was inspired by wanting to understand
+$\Pi$-operations, and in particular $\Pi_!$. We can now see that a database
+instance $I \colon \cat{C} \to \smset$ is a diagram in $\smset$. The functor
+$\Pi_!$ takes the limit of this diagram. In this subsection we give a formula
+describing the result. This captures \emph{all finite limits in $\smset$}.
+
+In database theory, we work with categories $\cat{C}$ that are presented by a
+finite graph plus equations. We won't explain the details, but it's in fact
+enough just to work with the graph part: as far as limits are concerned, the
+equations in $\cat{C}$ don't matter. For consistency with the rest of this
+section, let's denote the database schema by $\cat{J}$ instead of $\cat{C}$.
+
+\begin{theorem} %
+\label{thm.set_limits}%
+\index{limit!formula for finite limits in
+  $\smset$}%
+\index{functor!set@$\smset$-valued}
+Let $\cat{J}$ be a category presented by the finite graph $(V,A,s,t)$ together with
+some equations, and let $D\colon \cat{J} \to \smset$ be a set-valued functor. Write $V=\{v_1,\ldots,v_n\}$. The set
+\begin{multline*}
+  \lim_\cat{J} D \coloneqq \big\{(d_1,\ldots,d_n)\mid d_i\in D(v_i)\text{ for all }1\leq i\leq n\text{ and }\\
+  \text{for all }a\colon v_i\to v_j\in A, \text{ we have } D(a)(d_i)=d_j\big\}.
+\end{multline*}
+together with the projection maps $p_i\colon(\lim_\cat{J} D)\to D(v_i)$ given by $p_i(d_1,\ldots,d_n)\coloneqq d_i$, is a limit of $D$.
+\end{theorem}
+
+
+\begin{example}
+   If $J$ is the empty graph \fbox{\color{white}$\LMO{}$}, then $n=0$: there are no vertices. There is
+   exactly one empty tuple $(\ )$, which vacuously satisfies the properties, so
+   we've constructed the limit as the singleton set $\{ (\ ) \}$ consisting of
+   just the empty tuple. Thus the limit of the empty diagram, i.e.\ the terminal object in $\smset$ is the singleton set. See \cref{rem.the_vs_a}.
+\end{example}
+  
+\begin{exercise}%
+\label{exc.limit_formula_products}
+Show that the limit formula in \cref{thm.set_limits} works for products. See \cref{ex.prods_as_lims}.
+\end{exercise}
+
+\begin{exercise}  
+  If $D\colon\Cat{1}\to\smset$ is a functor, what is the limit of $D$? Compute it using \cref{thm.set_limits}, and check your answer against \cref{def.cones_limits}.
+\end{exercise}
+
+\paragraph{Pullbacks.}%
+\index{limit!pullback as}
+%
+\index{pullback!as limit}
+
+In particular, the condition that the limit of $D\colon\cat{J}\to\smset$ selects tuples $(d_1,\dots,d_n)$
+such that $D(a)(d_i)=d_j$ for each morphism $a\colon i\to j$ in $\cat{J}$ allows us to use limits to select data that satisfies
+certain equations or constraints. This is what allows us to express queries in
+terms of limits. Here is an example.%
+\index{database!query}
+
+\begin{example}%
+\label{ex.pullback}
+  If $J$ is presented by the \emph{cospan} graph
+  \fbox{$\LMO{x}\Too{f}\LMO{a}\Fromm{g}\LMO{y}$}, then its limit is
+  known as a \emph{pullback}. Given the diagram $X \xrightarrow{f} A
+  \xleftarrow{g} Y$, the pullback is the cone shown on the left below:
+  \[
+  \begin{tikzcd}
+  	C\ar[d, "c_x"']\ar[r, "c_y"]\ar[dr, description, "c_a"]&Y\ar[d, "g"]\\
+		X\ar[r, "f"']&A
+  \end{tikzcd}
+\hspace{1in}
+  \begin{tikzcd}
+  	X\times_AY\ar[d, "c_x"']\ar[r, "c_y"]&Y\ar[d, "g"]\\
+		X\ar[r, "f"']&A\ar[ul, phantom, very near end, "\lrcorner"]
+  \end{tikzcd}
+  \]
+  The fact that the diagram commutes means that the diagonal arrow $c_a$ is in some sense superfluous, so one generally denotes pullbacks by dropping the diagonal arrow, naming the cone point $X\times_AY$, and adding the $\lrcorner$ symbol, as shown to the right above.
+  
+  Here is a picture to help us unpack the definition in $\smset$. We take $X
+  =\ord{6}$, $Y=\ord{4}$, and $A$ to be the set of colors
+  $\{\textrm{red},\textrm{blue},\textrm{black}\}$.
+\[
+\begin{tikzpicture}[rounded corners, y=5ex, shorten <=2pt, shorten >=2pt]
+	\foreach \i in {1,...,6}{
+		\tikzmath{
+			if or(or(\i==1, \i==3), \i==4) then {let \coli=red; let \ci=1;} else {
+				if or(\i==2, \i==6) then {let \coli=blue; let \ci=2;} else {let \coli=black; let \ci=3;};
+			};
+		}
+		\foreach \j in {1,...,4} {
+			\tikzmath{
+				if or(\j==2, \j==4) then {let \colj=red; let \cj=1;} else {
+					if \j==3 then {let \colj=blue; let \cj=2;} else {let \colj=black; let \cj=3;};
+				};
+			}
+			\ifthenelse{\ci=\cj}
+				{\node[\coli] (ij\i\j) at (\i,\j) {$\LMO{(\i,\j)}$};}
+				{\node[white] (ij\i\j) at (\i,\j) {$\LMO{(\i,\j)}$};};
+			\ifthenelse{\i=1}{\node[\colj] (j\j) at (-1,\j) {$\LMO{\j}$};}{};
+		}
+		\node[\coli] (i\i) at (\i,-1) {$\LMO{\i}$};
+	}
+	\node[draw, inner ysep=0, fit=(i1) (i6)] (i) {};
+	\node[draw, inner ysep=0, fit=(j1) (j4)] (j) {};
+	\node[draw, inner ysep=0, fit=(ij11) (ij64)] (ij) {};
+	\draw[->, thick] (ij) -- (i);
+	\draw[->, thick] (ij) -- (j);
+\end{tikzpicture}
+\]
+The functions $f\colon \ord{6} \to A$ and $g\colon \ord{4} \to A$ are expressed in
+the coloring of the dots: for example, $g(2)=g(4)=\textrm{red}$, while
+$f(5)=\textrm{black}$. The pullback selects pairs $(i,j) \in \ord{6} \times
+\ord{4}$ such that $f(i)$ and $g(j)$ have the same color.
+\end{example}
+
+\begin{remark} \label{rem.pullbackpullback}
+  As mentioned following \cref{def.pullback_along}, this definition of pullback
+  is not to be confused with the pullback of a set-valued functor along a
+  functor; they are for now best thought of as different concepts which
+  accidentally have the same name. Due to the power of the primordial ooze,
+  however, the pullback along a functor is a special case of pullback as the
+  limit of a cospan: it can be understood as the pullback of a certain cospan in
+  $\smcat$.  To unpack this, however, requires the notions of category of
+  elements and discrete opfibration; ask your friendly neighborhood category
+  theorist.
+\end{remark}
+%
+\index{limit|)}
+
+%---- Subsection ----%
+\subsection{A brief note on colimits}
+%
+\label{subsec.brief_colimits}%
+\index{colimit}
+Just like upper bounds have a dual concept---namely that of lower bounds---so
+limits have a dual concept: colimits. To expose the reader to this concept, we
+provide a succinct definition of these using opposite categories and opposite
+functors. The point, however, is just exposure; we will return to explore
+colimits in detail in \cref{chap.hypergraph_cats}.%
+\index{dual notions!colimits and limits as}
+
+\begin{exercise}%
+\label{exc.opposite_functor}
+Recall from \cref{def.opposite_cat} that every category $\cat{C}$ has an
+opposite $\cat{C}\op$. Let $F\colon \cat{C} \to \cat{D}$ be a functor. How
+should we define its opposite, $F\op\colon \cat{C}\op \to \cat{D}\op$? That is,
+how should $F\op$ act on objects, and how should it act on morphisms?
+\end{exercise}
+
+
+\begin{definition}%
+\label{def.colimit}%
+\index{cocone}
+Given a category $\cat{C}$ we say that a \emph{cocone} in $\cat{C}$ is a cone
+in $\cat{C}\op$.
+
+Given a diagram $D \colon \cat{J} \to \cat{C}$, we may take the limit of the
+functor $D\op \colon \cat{J}\op \to \cat{C}\op$. This is a cone in $\cat{C}\op$,
+and so by definition a cocone in $\cat{C}$. The \emph{colimit} of $D$ is this
+cocone.
+\end{definition}
+
+\cref{def.colimit} is like a compressed file: useful for transmitting quickly, but completely useless for working with, unless you can successfully unpack it. We will unpack it later in \cref{chap.hypergraph_cats} when we discuss electric circuits. 
+
+%---- Section ----%
+\section{Summary and further reading}%
+\label{sec.ch2_further_reading}
+
+Congratulations on making it through one of the longest chapters in the book! We
+apologize for the length, but this chapter had a lot of work to do. Namely it
+introduced the ``big three'' of category theory---categories, functors, and
+natural transformations---as well as discussed adjunctions, limits, and very briefly colimits.
+
+That's really quite a bit of material. For more on all these subjects, one can
+consult any standard book on category theory, of which there are many. The bible
+(old, important, seminal, and requires a priest to explain it) is
+\cite{MacLane:1998a}; another thorough introduction is \cite{Borceux:1994a}; a
+logical perspective is given in \cite{Awodey:2010a}; a computer science
+perspective is given in \cite{Barr.Wells:1990a} and \cite{Pierce:1991} and
+\cite{Walters:1992}; math students should probably read \cite{Leinster:2014a} or
+\cite{Riehl:2017a} or \cite{Grandis:2018}; a general audience might start with \cite{Spivak:2014a}.
+
+We presented categories from a database perspective, because data is pretty ubiquitous in our world. A database schema---i.e.\ a system of interlocking tables---can be captured by a category $\cat{C}$, and filling it with data corresponds to a functor $\cat{C}\to\smset$. Here $\smset$ is the category of sets, perhaps the most important category to mathematicians.
+
+The perspective of using category theory to model databases has been rediscovered several times. It seems to have first been discussed by various authors around the mid-90's \cite{Islam.Phoa:1994a,Cadish.Diskin:1995a,Piessens.Steegmans:1995a,Tuijn.Gyssens:1996a}. Bob Rosebrugh and collaborators took it much further in a series of papers including \cite{Fleming.Gunther.Rosebrugh:2003a,Johnson.Rosebrugh:2002a,Rosebrugh.Wood:1992a}. Most of these authors tend to focus on sketches, which are more expressive categories. Spivak rediscovered the idea again quite a bit later, but focused on categories rather than sketches, so as to have all three data migration functors $\Delta,\Sigma,\Pi$; see \cite{spivakfunctorial2012,Spivak.Wisnesky:2015a}. The version of this story presented in the chapter, including the white and black nodes in schemas, is part of a larger theory of algebraic databases, where a programming language such as Java or Haskell is attached to a database. The technical details are worked out in \cite{Schultz.Spivak.Vasilakopoulou.Wisnesky:2017a}, and its use in database integration projects can be found in \cite{Schultz.Wisnesky:2015a,Wisnesky.Spivak.Schultz.Subrahmanian:2015a,}.
+
+Before we leave this chapter, we want to emphasize two things: coherence conditions and universal constructions.
+
+\paragraph{Coherence conditions.}%
+\index{coherence}
+In the definitions of category, functor, and natural transformations, we have
+data (indexed by (i)) that is required to satisfy certain properties (indexed by
+(a)). Indeed, for categories it was about associativity and unitality of
+composition, for functors it was about respecting composition and identities,
+and for natural transformations it was the naturality condition. These
+conditions are often called \emph{coherence conditions}: we want the various
+structures to cohere, to work well together, rather than to flop around
+unattached.%
+\index{associativity!as coherence condition}%
+\index{unitality!as coherence condition}
+
+Understanding why these particular structures and coherence conditions are ``the right ones'' is more science than mathematics: we empirically observe that certain combinations result in ideas that are both widely applicable and also strongly compositional. That is, we become satisfied with coherence conditions when they result in beautiful mathematics down the road.
+
+\paragraph{Universal constructions.}%
+\index{universal property}
+
+Universal constructions are one of the most important themes of category theory. Roughly speaking, one gives some specified shape in a category and says ``find me the best solution!'' And category theory comes back and says ``do you want me to approximate from the left or the right (colimit or limit)?'' You respond, and either there is a best solution or there is not. If there is, it's called the (co)limit; if there's not we say ``the (co)limit does not exist.'' 
+
+Even data migration fits this form. We say ``find me the closest thing in $\cat{D}$ that matches my $\cat{C}$-instance using my functor $F\colon\cat{C}\to\cat{D}$.'' In fact this approach---known as Kan extensions---subsumes the others. One of the two founders of category theory, Saunders Mac Lane, has a section in his book \cite{MacLane:1998a} called ``All concepts are Kan extensions,'' a big statement, no?
+%
+\index{Kan extension}
+
+\end{document}

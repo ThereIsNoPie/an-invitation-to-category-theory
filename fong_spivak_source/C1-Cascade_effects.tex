@@ -1,0 +1,3006 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+%
+\index{applied category theory|(}
+
+\setcounter{chapter}{0}%Just finished 0.
+
+
+%------------ Chapter ------------%
+\chapter[Generative effects: Orders and adjunctions]{Generative effects:\\Orders and Galois connections} %
+\label{chap.preorders}
+
+
+In this book, we explore a wide variety of situations---in the world of science, engineering, and commerce---where we see something we might call \emph{compositionality}. These are cases in which systems or relationships can be combined to form new systems or relationships. In each case we find category-theoretic constructs---developed for their use in pure math---which beautifully describe the compositionality of the situation.%
+\index{compositionality}
+
+This chapter, being the first of the book, must serve this goal in two capacities. First, it must provide motivating examples of compositionality, as well as the relevant categorical formulations. Second, it must provide the mathematical foundation for the rest of the book. Since we are starting with minimal assumptions about the reader's background, we must begin slowly and build up throughout the book. As a result, examples in the early chapters are necessarily simplified. However, we hope the reader will already begin to see the sort of structural approach to modeling that category theory brings to the fore.
+
+%-------- Section --------%
+\section{More than the sum of their parts}%
+\label{sec.motivate_1}
+
+
+We motivate this first chapter by noticing that while many real-world structures
+are compositional, the results of observing them are often not. The reason is that observation is inherently ``lossy'': in order to extract information from something, one must drop the details. For example, one stores a real number by rounding it to some precision. But if the details are actually relevant in a given system operation, then the observed result of that operation will not be as expected. This is clear in the case of roundoff error, but it also shows up in non-numerical domains: observing a complex system is rarely enough to predict its behavior because the observation is lossy.
+
+A central theme in category theory is the study of structures and
+structure-preserving maps.%
+\index{map!structure preserving} A map $f\colon X\to Y$ is a kind of observation of object $X$ via a specified relationship it has with another object, $Y$. For example, think of $X$ as the subject of an experiment and $Y$ as a meter connected to $X$, which allows us to extract certain features of $X$ by looking at the reaction of $Y$.
+
+Asking which aspects of $X$ one wants
+to preserve under the observation $f$ becomes the question ``what category are you working
+in?.'' As an example, there are many functions $f$ from $\RR$ to $\RR$, and we can think of them as observations: rather than view $x$ ``directly'', we only observe $f(x)$. Out of all the functions $f\colon\rr\to\rr$, only
+some of them preserve the order of numbers, only some of them preserve the distance between numbers, only
+some of them preserve the sum of numbers, etc. Let's check in with an exercise; a solution can be found in \cref{chap.preorders}.
+
+\begin{exercise}%
+\label{exc.function_pres} %
+\index{function}%
+\index{function!structure preserving}
+Some terminology: a function $f\colon \RR\to\RR$ is said to be
+\begin{enumerate}[label=(\alph*)]
+	\item \emph{order-preserving} if $x\leq y$ implies $f(x)\leq f(y)$, for all $x,y\in\RR$;%
+	\footnote{We are often taught to view functions $f\colon\rr\to\rr$ as plots on an $(x,y)$-axis, where $x$ is the domain (independent) variable and $y$ is the codomain (dependent) variable. In this book, we do not adhere to that naming convention; e.g.\ in \cref{exc.function_pres}, both $x$ and $y$ are being ``plugged in'' as input to $f$. As an example consider the function $f(x)=x^2$. Then $f$ being order-preserving would say that for any $x,y\in\RR$, if $x\leq y$ then $x^2\leq y^2$; is that true?}
+	\item \emph{metric-preserving} if $|x-y|=|f(x)-f(y)|$;
+	\item \emph{addition-preserving} if $f(x+y)=f(x)+f(y)$.
+\end{enumerate}
+For each of the three properties defined above---call it \emph{foo}---find an $f$ that is \emph{foo}-preserving and
+an example of an $f$ that is not \emph{foo}-preserving.
+\end{exercise}
+
+In category theory we want to keep control over which aspects of our systems are being preserved under various observations. As we said above, the less structure is preserved by our observation of a system, the more ``surprises'' occur when we observe its operations. One might call these surprises \emph{generative effects}.
+%
+\index{generative effect}
+
+In using category theory
+to explore generative effects, we follow the basic ideas from work by Adam \cite{Adam:2017a}. He goes much more deeply into the issue than we can here; see \cref{ch1.further_reading}. But as mentioned above, we must also use this chapter to give an order-theoretic warm-up for the full-fledged category theory to come.
+
+%---- Subsection ----%
+\subsection{A first look at generative effects}%
+\label{subsec.first_look_gen}
+
+To explore the notion of a generative effect we need a sort of system, a sort of observation, and a system-level operation that is not preserved by the observation. Let's start with a simple example.
+
+\paragraph{A simple system.}
+
+Consider three points; we'll call them $\bullet$, $\circ$ and $\ast$. In this example, a \emph{system} will simply be a way of connecting these points
+together. We might think of our points as sites on a power grid, with a system
+describing connection by power lines, or as people susceptible to some disease,
+with a system describing interactions that can lead to contagion. As an abstract example of a system,
+there is a system where $\bullet$ and $\circ$ are connected, but neither are
+connected to $\ast$. We shall draw this like so:%
+\index{connectedness}
+\[
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\]
+Connections are symmetric, so if $a$ is connected to $b$, then
+$b$ is connected to $a$. Connections are also transitive, meaning that if
+$a$ is connected to $b$, and $b$ is connected to $c$, then $a$ is connected to
+$c$; that is, all $a$, $b$, and $c$ are connected. Friendship is not transitive---my friend's friend is not necessarily my friend---but possible communication of a concept or a disease is.
+
+Here we depict two more systems, one in which none of the points are connected, and one in which all three points are connected.
+\[
+\begin{tikzpicture}
+  \node (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \node [draw, fit=(a), rounded corners=10, inner sep=3pt] {};
+  \node [draw, fit=(b), rounded corners=10, inner sep=3pt] {};
+  \node [draw, fit=(c), rounded corners=10, inner sep=3pt] {};
+%
+  \node[right=4 of a] (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \draw [rounded corners=11pt] 
+     ($(a)+(150:.6)$) --
+     ($(c)+(-90:.6)$) --
+     ($(b)+(30:.6)$) --
+     cycle;
+\end{tikzpicture}
+\]
+There are five systems in all, and we depict them just below.
+
+Now that we have defined the sort of system we want to discuss, suppose that Alice is observing this system. Her observation of interest, which we call $\Phi$, extracts a single feature from a system, namely whether the point $\bullet$ is
+connected to the point $\ast$; this is what she wants to know. Her observation of the system will be an assignment of either $\true$ or $\false$; she assigns $\true$ if $\bullet$ is connected to $\ast$, and $\false$
+otherwise. So $\Phi$ assigns the value $\true$ to the following two systems:
+\[
+\begin{tikzpicture}
+  \node (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \draw [rounded corners=9pt] 
+     ($(a)+(135:.45)$) --
+     ($(a)+(-135:.45)$) --
+     ($(b)+(-45:.45)$) --
+     ($(b)+(45:.45)$) --
+     cycle;
+  \draw [rounded corners=9pt] 
+     ($(c)+(135:.45)$) --
+     ($(c)+(-135:.45)$) --
+     ($(c)+(-45:.45)$) --
+     ($(c)+(45:.45)$) --
+     cycle;
+%
+  \node[right=4 of a] (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \draw [rounded corners=11pt] 
+     ($(a)+(150:.6)$) --
+     ($(c)+(-90:.6)$) --
+     ($(b)+(30:.6)$) --
+     cycle;
+\end{tikzpicture}
+\]
+and $\Phi$ assigns the value $\false$ to the three remaining systems:
+\begin{equation}%
+\label{eqn.false_systems}
+  \begin{aligned}
+\begin{tikzpicture}
+  \node (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \node [draw, fit=(a), rounded corners=10, inner sep=3pt] {};
+  \node [draw, fit=(b), rounded corners=10, inner sep=3pt] {};
+  \node [draw, fit=(c), rounded corners=10, inner sep=3pt] {};
+%
+  \node [right=3 of a] (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \draw [rounded corners=9pt] 
+     ($(a)+(75:.45)$) --
+     ($(a)+(-195:.45)$) --
+     ($(c)+(-105:.45)$) --
+     ($(c)+(-15:.45)$) --
+     cycle;
+  \draw [rounded corners=9pt] 
+     ($(b)+(135:.45)$) --
+     ($(b)+(-135:.45)$) --
+     ($(b)+(-45:.45)$) --
+     ($(b)+(45:.45)$) --
+     cycle;
+%
+  \node [right=3 of a] (a) {$\bullet$};
+  \path (a)++(0:1) node (b) {$\ast$};
+  \path (a)++(-60:1) node (c) {$\circ$};
+  \draw [rounded corners=9pt] 
+     ($(b)+(15:.45)$) --
+     ($(b)+(-255:.45)$) --
+     ($(c)+(-165:.45)$) --
+     ($(c)+(-75:.45)$) --
+     cycle;
+  \draw [rounded corners=9pt] 
+     ($(a)+(135:.45)$) --
+     ($(a)+(-135:.45)$) --
+     ($(a)+(-45:.45)$) --
+     ($(a)+(45:.45)$) --
+     cycle;
+  \end{tikzpicture}
+\end{aligned}
+\end{equation}
+
+The last piece of setup is to give a sort of operation that Alice wants to perform on the systems themselves. It's a very common operation---one that will come up many times throughout the book---called \emph{join}. If the reader has been following the story arc, the expectation here is that Alice's connectivity observation will not be compositional with respect to the operation of system joining; that is, there will be generative effects. Let's see what this means.
+
+\paragraph{Joining our simple systems.}%
+\index{join|(}
+
+Joining two systems $A$ and $B$ is performed simply by combining their
+connections.  That is, we shall say the \emph{join} of systems $A$ and $B$,
+denote it $A \vee B$, has a connection between points $x$ and $y$ if there are
+some points $z_1, \dots, z_n$ such that each of the following are true in at
+least one of $A$ or $B$: $x$ is connected to $z_1$, $z_i$ is connected to
+$z_{i+1}$, and $z_n$ is connected to $y$. In a three-point system, the above
+definition is overkill, but we want to say something that works for systems with
+any number of elements. The high-level way to say it is ``take the transitive
+closure of the union of the connections in $A$ and $B$.'' In our three-element
+system, it means for example that%
+\index{union}
+\[
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\node [draw, fit=(a), rounded corners=10, inner sep=3pt] {};
+\node [draw, fit=(b), rounded corners=10, inner sep=3pt] {};
+\node [draw, fit=(c), rounded corners=10, inner sep=3pt] {};
+\end{tikzpicture}
+\end{aligned}
+\;\;\;\vee\;\;\;
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\;\;\;=\;\;\;
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\]
+and
+\begin{equation}%
+\label{eqn.generative}
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\;\;\;\vee\;\;\;
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(b)+(15:.45)$) --
+   ($(b)+(-255:.45)$) --
+   ($(c)+(-165:.45)$) --
+   ($(c)+(-75:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(a)+(135:.45)$) --
+   ($(a)+(-135:.45)$) --
+   ($(a)+(-45:.45)$) --
+   ($(a)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\;\;\;=\;\;\;
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=11pt] 
+   ($(a)+(150:.6)$) --
+   ($(c)+(-90:.6)$) --
+   ($(b)+(30:.6)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\end{equation}
+
+\begin{exercise}%
+\label{exc.joining_systems}
+What is the result of joining the following two systems?
+\[
+\begin{tikzpicture}[x=1cm%, baseline=(vee)
+  ]
+	\node (a11) {$\LMO{11}$};
+	\node[right=.5 of a11] (a12) {$\LMO{12}$};
+	\node[right=.5 of a12] (a13) {$\LMO{13}$};
+	\node[below=.5 of a11] (a21) {$\LMO{21}$};
+	\node[below=.5 of a12] (a22) {$\LMO{22}$};
+	\node[below=.5 of a13] (a23) {$\LMO{23}$};
+	\draw [rounded corners=9pt] 
+     ($(a11)+(135:.45)$) --
+     ($(a11)+(-135:.45)$) --
+     ($(a12)+(-45:.45)$) --
+     ($(a12)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a22)+(135:.45)$) --
+     ($(a22)+(-135:.45)$) --
+     ($(a23)+(-45:.45)$) --
+     ($(a23)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a13)+(135:.45)$) --
+     ($(a13)+(-135:.45)$) --
+     ($(a13)+(-45:.45)$) --
+     ($(a13)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a21)+(135:.45)$) --
+     ($(a21)+(-135:.45)$) --
+     ($(a21)+(-45:.45)$) --
+     ($(a21)+(45:.45)$) --     
+     cycle;
+	\node[inner sep=10pt, draw, fit=(a11) (a23)] (a) {};
+%
+	\node[right=5 of a11] (b11) {$\LMO{11}$};
+	\node[right=.5 of b11] (b12) {$\LMO{12}$};
+	\node[right=.5 of b12] (b13) {$\LMO{13}$};
+	\node[below=.5 of b11] (b21) {$\LMO{21}$};
+	\node[below=.5 of b12] (b22) {$\LMO{22}$};
+	\node[below=.5 of b13] (b23) {$\LMO{23}$};
+	\draw [rounded corners=9pt] 
+     ($(b11)+(135:.45)$) --
+     ($(b11)+(-135:.45)$) --
+     ($(b11)+(-45:.45)$) --
+     ($(b11)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(b21)+(135:.45)$) --
+     ($(b21)+(-135:.45)$) --
+     ($(b21)+(-45:.45)$) --
+     ($(b21)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(b12)+(135:.45)$) --
+     ($(b22)+(-135:.45)$) --
+     ($(b22)+(-45:.45)$) --
+     ($(b12)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(b13)+(135:.45)$) --
+     ($(b23)+(-135:.45)$) --
+     ($(b23)+(-45:.45)$) --
+     ($(b13)+(45:.45)$) --     
+     cycle;
+	\node[inner sep=10pt, draw, fit=(b11) (b23)] (b) {};
+	\node at ($(a)!.5!(b)$) (vee) {$\vee$};
+\end{tikzpicture}
+\qedhere
+\]
+\end{exercise}
+
+We are now ready to see the generative effect.%
+\index{generative effect} We don't want to build it up too much---this example has been made as simple as possible---but we will see that Alice's observation fails to preserve the join operation. We've been denoting her observation---measuring whether $\bullet$ and $\ast$ are connected---by the symbol $\Phi$; it returns a boolean result, either $\true$ or $\false$.%
+\index{booleans}
+
+We see above in \cref{eqn.false_systems} that
+$\Phi(\resizebox{!}{2ex}{
+\begin{tikzpicture}[font=\huge]
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt, very thick] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt, very thick] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+})
+=
+\Phi(\resizebox{!}{2ex}{
+\begin{tikzpicture}[font=\huge]
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt, very thick] 
+   ($(b)+(15:.45)$) --
+   ($(b)+(-255:.45)$) --
+   ($(c)+(-165:.45)$) --
+   ($(c)+(-75:.45)$) --
+   cycle;
+\draw [rounded corners=9pt, very thick] 
+   ($(a)+(135:.45)$) --
+   ($(a)+(-135:.45)$) --
+   ($(a)+(-45:.45)$) --
+   ($(a)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+})
+= \false$: in both cases $\bullet$ is not
+connected to $\ast$. On the other hand, when we join these two systems as in \cref{eqn.generative}, we see that
+$\Phi(\resizebox{!}{2ex}{
+\begin{tikzpicture}[font=\huge]
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt, very thick] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt, very thick] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+}
+\vee
+\resizebox{!}{2ex}{
+\begin{tikzpicture}[font=\huge]
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt, very thick] 
+   ($(b)+(15:.45)$) --
+   ($(b)+(-255:.45)$) --
+   ($(c)+(-165:.45)$) --
+   ($(c)+(-75:.45)$) --
+   cycle;
+\draw [rounded corners=9pt, very thick] 
+   ($(a)+(135:.45)$) --
+   ($(a)+(-135:.45)$) --
+   ($(a)+(-45:.45)$) --
+   ($(a)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+})
+=
+\Phi(
+\resizebox{!}{2ex}{
+\begin{tikzpicture}[font=\huge]
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=11pt, very thick] 
+   ($(a)+(150:.6)$) --
+   ($(c)+(-90:.6)$) --
+   ($(b)+(30:.6)$) --
+   cycle;
+\end{tikzpicture}
+}) 
+= \true$: in the joined system, $\bullet$ \emph{is} connected to $\ast$.%
+\label{page.generativity}
+%There is no operation on the booleans $\true,\false$ that will always follow suit with the joining of systems: 
+The question that Alice is interested in, that of $\Phi$, is inherently lossy with respect to join, and there is no way to fix it without a more detailed observation, one that includes not only $\ast$ and $\bullet$ but also $\circ$. 
+
+While this was a simple example, it should be noted that whether the potential for such effects exist---i.e.\ determining whether an observation is operation-preserving---can be incredibly important information to know. For example, Alice could be in charge of putting together the views of two
+local authorities regarding possible contagion between an infected person $\bullet$ and
+a vulnerable person $\ast$. Alice has noticed that if they separately extract information from their raw data and combine the results, it gives a different answer than if they combine their raw data and extract information from it.
+
+%
+\index{join|)}
+%---- Subsection ----%
+\subsection{Ordering systems}
+
+Category theory is all about organizing and layering structures. In this section we will explain how the operation of joining systems can be derived from a more basic structure: order. We will see that while joining is not preserved by Alice's connectivity observation $\Phi$, order is.%
+\index{joins!preservation of}%
+\index{order!preservation of}%
+\index{order|seealso {preorder}}
+
+To begin, we note that
+the systems themselves are ordered in a hierarchy. Given systems $A$ and $B$, we
+say that $A \le B$ if, whenever $x$ is connected to $y$ in $A$, then $x$ is
+connected to $y$ in $B$. For example,
+\[
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\node [draw, fit=(a), rounded corners=10, inner sep=3pt] {};
+\node [draw, fit=(b), rounded corners=10, inner sep=3pt] {};
+\node [draw, fit=(c), rounded corners=10, inner sep=3pt] {};
+\end{tikzpicture}
+\end{aligned}
+\le
+\begin{aligned}
+\begin{tikzpicture}
+\node (a) {$\bullet$};
+\path (a)++(0:1) node (b) {$\ast$};
+\path (a)++(-60:1) node (c) {$\circ$};
+\draw [rounded corners=9pt] 
+   ($(a)+(75:.45)$) --
+   ($(a)+(-195:.45)$) --
+   ($(c)+(-105:.45)$) --
+   ($(c)+(-15:.45)$) --
+   cycle;
+\draw [rounded corners=9pt] 
+   ($(b)+(135:.45)$) --
+   ($(b)+(-135:.45)$) --
+   ($(b)+(-45:.45)$) --
+   ($(b)+(45:.45)$) --
+   cycle;
+\end{tikzpicture}
+\end{aligned}
+\]
+This notion of $\leq$ leads to the following diagram:
+\begin{equation}%
+\label{eqn.parts_of_3}
+\begin{tikzpicture}[baseline=(cent)]
+	\node[coordinate] (cent) {};
+  \node at ($(cent)+(0,3)$) (all) {
+  \begin{tikzpicture}
+    \node (a) {$\bullet$};
+    \path (a)++(0:1) node (b) {$\ast$};
+    \path (a)++(-60:1) node (c) {$\circ$};
+    \draw [rounded corners=11pt] 
+       ($(a)+(150:.6)$) --
+       ($(c)+(-90:.6)$) --
+       ($(b)+(30:.6)$) --
+       cycle;
+  \end{tikzpicture}
+  };
+  \node at (cent) (ab) {
+  \begin{tikzpicture}
+    \node (a) {$\bullet$};
+    \path (a)++(0:1) node (b) {$\ast$};
+    \path (a)++(-60:1) node (c) {$\circ$};
+    \draw [rounded corners=9pt] 
+       ($(a)+(135:.45)$) --
+       ($(a)+(-135:.45)$) --
+       ($(b)+(-45:.45)$) --
+       ($(b)+(45:.45)$) --
+       cycle;
+    \draw [rounded corners=9pt] 
+       ($(c)+(135:.45)$) --
+       ($(c)+(-135:.45)$) --
+       ($(c)+(-45:.45)$) --
+       ($(c)+(45:.45)$) --
+       cycle;
+  \end{tikzpicture}
+  };
+  \node at ($(ab)+(-3,0)$) (ac) {
+  \begin{tikzpicture}
+    \node (a) {$\bullet$};
+    \path (a)++(0:1) node (b) {$\ast$};
+    \path (a)++(-60:1) node (c) {$\circ$};
+    \draw [rounded corners=9pt] 
+       ($(a)+(75:.45)$) --
+       ($(a)+(-195:.45)$) --
+       ($(c)+(-105:.45)$) --
+       ($(c)+(-15:.45)$) --
+       cycle;
+    \draw [rounded corners=9pt] 
+       ($(b)+(135:.45)$) --
+       ($(b)+(-135:.45)$) --
+       ($(b)+(-45:.45)$) --
+       ($(b)+(45:.45)$) --
+       cycle;
+  \end{tikzpicture}
+  };
+  \node at ($(ab)+(3,0)$) (bc) {
+  \begin{tikzpicture}
+    \node (a) {$\bullet$};
+    \path (a)++(0:1) node (b) {$\ast$};
+    \path (a)++(-60:1) node (c) {$\circ$};
+    \draw [rounded corners=9pt] 
+       ($(b)+(15:.45)$) --
+       ($(b)+(-255:.45)$) --
+       ($(c)+(-165:.45)$) --
+       ($(c)+(-75:.45)$) --
+       cycle;
+    \draw [rounded corners=9pt] 
+       ($(a)+(135:.45)$) --
+       ($(a)+(-135:.45)$) --
+       ($(a)+(-45:.45)$) --
+       ($(a)+(45:.45)$) --
+       cycle;
+  \end{tikzpicture}
+  };
+  \node at ($(ab)+(0,-3)$) (none) {
+  \begin{tikzpicture}
+    \node (a) {$\bullet$};
+    \path (a)++(0:1) node (b) {$\ast$};
+    \path (a)++(-60:1) node (c) {$\circ$};
+    \node [draw, fit=(a), rounded corners=10, inner sep=3pt] {};
+    \node [draw, fit=(b), rounded corners=10, inner sep=3pt] {};
+    \node [draw, fit=(c), rounded corners=10, inner sep=3pt] {};
+    \end{tikzpicture}
+    };
+    \draw[->] (none) -- (ab);
+    \draw[->] (none) -- (ac);
+    \draw[->] (none) -- (bc);
+    \draw[->] (ab) -- (all);
+    \draw[->] (ac) -- (all);
+    \draw[->] (bc) -- (all);
+\end{tikzpicture}
+\end{equation}
+where an arrow from system $A$ to system $B$ means $A \le B$. Such diagrams are known as \emph{Hasse diagrams}.%
+\index{Hasse diagram!for preorders}
+%
+\index{Hasse diagram}
+
+As we were saying above, the notion of join is derived from this order. Indeed for any two systems $A$ and $B$ in the Hasse diagram \eqref{eqn.parts_of_3}, the joined system $A \vee B$ is the smallest system that is bigger than both $A$ and $B$. That is, $A\leq (A\vee B)$ and $B\leq (A\vee B)$, and for any $C$, if  $A \le C$ and $B \le C$ then $(A\vee B)\leq C$. Let's walk through this with an exercise.
+
+\begin{exercise}%
+\label{exc.partitions_practice}
+\begin{enumerate}
+	\item Write down all the partitions of a two element set $\{\bullet,\ast\}$, order them as above, and draw the Hasse diagram.
+	\item Now do the same thing for a four element-set, say $\{1,2,3,4\}$. There should be 15 partitions.
+\end{enumerate}
+Choose any two systems in your 15-element Hasse diagram, call them $A$ and $B$. 
+\begin{enumerate}[resume]
+	\item What is $A\vee B$, using the definition given in the paragraph above \cref{eqn.generative}?
+	\item Is it true that $A\leq (A\vee B)$ and $B\leq (A\vee B)$?
+	\item What are all the systems $C$ for which both $A\leq C$ and $B\leq C$.
+	\item Is it true that in each case, $(A\vee B)\leq C$?
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+The set $\BB=\{\true, \false\}$ of booleans also has an order, $\false \le \true$:
+\[
+\begin{tikzpicture}
+\node (t) {$\true$};
+\node at ($(t)+(0,-1)$) (f) {$\false$};
+\draw[->] (f) -- (t);
+\end{tikzpicture}
+\]
+Thus $\false\leq\false$, $\false\leq\true$, and $\true\leq\true$, but
+$\true\not\leq\false$. In other words, $A\leq B$ if $A$ implies $B$.%
+\footnote{In mathematical logic, $\false$ implies $\true$ but $\true$ does not imply $\false$. That is ``$P$ implies $Q$'' means, ``if $P$ is true, then $Q$ is true too, but if $P$ is not true, I'm making no claims.''%
+\index{logic!implication in}}
+%
+\index{booleans!as set}
+
+For any $A,B$ in $\BB$, we can again write $A \vee B$ to mean the least element that is greater than both $A$ and $B$.
+\begin{exercise}%
+\label{exc.boolean_vee_practice}
+Using the order $\false\leq\true$ on $\BB=\{\true,\false\}$, what is:
+\begin{enumerate}
+	\item $\true \vee \false$?
+	\item $\false \vee \true$?
+	\item $\true \vee \true$?
+	\item $\false \vee \false$?
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Let's return to our systems with $\bullet$, $\circ$, and $\ast$, and Alice's
+``$\bullet$ is connected to $\ast$'' function, which we called $\Phi$. It takes
+any such system and returns either $\true$ or $\false$. Note that the map $\Phi$
+preserves the $\leq$ order: if $A\leq B$ and there is a connection between
+$\bullet$ and $\ast$ in $A$, then there is such a connection in $B$ too. The
+possibility of a generative effect is captured in the inequality
+\begin{equation}%
+\label{eqn.generative_def}
+\Phi(A) \vee \Phi(B) \leq \Phi(A\vee B).
+\end{equation}
+We saw on page~\pageref{page.generativity} that this can be a strict inequality: we showed two systems $A$ and $B$
+with $\Phi(A)=\Phi(B)=\false$, so $\Phi(A)\vee\Phi(B)=\false$, but where
+$\Phi(A\vee B)=\true$. In this case, a generative effect exists.%
+\index{generative effect}
+
+These ideas capture the most basic ideas in category theory. Most directly, we have seen that the map $\Phi$ preserves some structure but not others: it preserves order but not join. In fact, we have seen here hints of more complex notions from category theory, without making them explicit; these include the notions of category, functor, colimit, and adjunction. In this
+chapter we will explore these ideas in the elementary setting of ordered sets.
+
+%Key point of chapter: introduce ideas of relationship structure (here order
+%structure, more generally categorical structure). Talk about how maps must
+%preserve this (monotone maps/functors). Show it is useful for defining upper
+%bounds, colimits. Give example to show connection with powerful machinery like
+%cohomology.
+
+%-------- Section --------%
+\section{What is order?} %
+\label{sec.preorders}
+
+Above we informally spoke of two different ordered sets: the order on system
+connectivity and the order on booleans $\false\leq\true$. Then we related these
+two ordered sets by means of Alice's observation $\Phi$. Before continuing, we need
+to make such ideas more precise. We begin in \cref{sec.sets_and_rels} with a
+review of sets and relations. In \cref{subsec.def_preorder} we will give the
+definition of a preorder---short for preordered set---and a good number
+of examples.
+
+%---- Subsection ----%
+\subsection{Review of sets, relations, and functions}%
+\label{sec.sets_and_rels}%
+\index{set|(}
+
+We will not give a definition of \emph{set} here, but informally we will think of a set as
+a collection of things, known as elements. These things could be all the leaves
+on a certain tree, or the names of your favorite fruits, or simply some symbols $a$,
+$b$, $c$. For example, we write $A=\{h,1\}$ to denote the set, called $A$, that
+contains exactly two elements, one called $h$ and one called $1$. The set $\{h,h,1,h,1\}$ is exactly the same as $A$ because they both contain the same elements, $h$ and $1$, and repeating an element more than once in the notation doesn't change the set.%
+\footnote{If you want a notion where ``$h,1$'' is different than ``$h,h,1,h,1$'', you can use something called \emph{bags}, where the number of times an element is listed matters, or \emph{lists}, where order also matters. All of these are important concepts in applied category theory, but sets will come up the most for us.}
+For an arbitrary set $X$, we write $x \in X$ if $x$ is
+element of $X$; so we have $h\in A$ and $1\in A$, but $0\not\in A$.
+
+\begin{example}
+Here are some important sets from mathematics---and the notation we will use---that will appear again in this book.%
+\index{notation!for common sets}
+\begin{itemize}
+	\item $\varnothing$ denotes the empty set; it has no elements.%
+\index{set!empty}
+	\item $\{1\}$ denotes a set with one element; it has one element, $1$.%
+\index{set!one element}
+	\item $\bb$ denotes the set of \emph{booleans}; it has two elements, $\true$ and $\false$.%
+\index{set!booleans as}%
+\index{booleans!as set}
+	\item $\nn$ denotes the set of \emph{natural numbers}; it has elements $0,1,2,3,\ldots,90^{717},\ldots$.%
+\index{set!natural numbers as}
+\index{natural numbers as!as set}
+	\item $\ord{n}$, for any $n\in\nn$, denotes the \emph{$n^{\text{th}}$ ordinal}; it has $n$ elements $1,2,\ldots,n$. For example, $\ord{0}=\varnothing$, $\ord{1}=\{1\}$, and $\ord{5}=\{1,2,3,4,5\}$.%
+\index{set!$n\th$ ordinal as}
+	\item $\zz$, the set of \emph{integers}; it has elements $\ldots,-2,-1,0,1,2,\ldots,90^{717},\ldots$.%
+\index{set!integers as}
+	\item $\rr$, the set of \emph{real numbers}; it has elements like $\pi, 3.14, 5*\sqrt{2}, e, e^2, -1457, 90^{717}$, etc.%
+\index{set!real numbers as}%
+\index{real numbers!as set}
+\end{itemize}
+\end{example}
+
+Given sets $X$ and $Y$, we say that $X$ is a \emph{subset} of $Y$, and write
+$X\ss Y$, if every element in $X$ is also in $Y$. For example $\{h\}\ss A$. Note
+that the empty set $\varnothing\coloneqq\{\}$ is a subset of every other set.%
+	\footnote{When we write $Z\coloneqq \foo$, it means ``assign the meaning
+	$\foo$ to variable $Z$'', whereas $Z=\foo$ means simply that $Z$ is
+	equal to $\foo$, perhaps as discovered via some calculation. In
+	particular, $Z\coloneqq \foo$ implies $Z=\foo$ but not vice versa;
+	indeed it \emph{would not} be proper to write $3+2\coloneqq 5$ or
+	$\{\}\coloneqq \varnothing$.
+}
+ Given a set $Y$ and a property $P$ that is either true or false for each element of $Y$, we write $\{y\in Y\mid P(y)\}$ to mean the subset of those $y$'s that satisfy $P$.%
+\index{subset}%
+\index{subset|seealso {power set}}%
+\index{notation!set builder}
+
+\begin{exercise}%
+\label{exc.comprehension_comprehension}
+\begin{enumerate}
+	\item Is it true that $\nn=\{n\in\zz\mid n\geq 0\}$?
+	\item Is it true that $\nn=\{n\in\zz\mid n\geq 1\}$?
+	\item Is it true that $\varnothing=\{n\in\zz\mid 1<n<2\}$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+If both $X_1$ and $X_2$ are subsets of $Y$, their \emph{union}, denoted $X_1\cup X_2$, is also a subset of $Y$, namely the one containing the elements in $X_1$ and the elements in $X_2$ but no more. For example if $Y=\{1,2,3,4\}$ and $X_1=\{1,2\}$ and $X_2=\{2,4\}$, then $X_1\cup X_2=\{1,2,4\}$. Note that $\varnothing\cup X=X$ for any $X\ss Y$.%
+\index{union}
+
+Similarly, if both $X_1$ and $X_2$ are subsets of $Y$, then their \emph{intersection}, denoted $X_1\cap X_2$, is also a subset of $Y$, namely the one containing all the elements of $Y$ that are both in $X_1$ and in $X_2$, and no others. So $\{1,2,3\}\cap\{2,5\}=\{2\}$.%
+\index{intersection}
+
+What if we need to union or intersect a lot of subsets? For example, consider the sets $X_0=\varnothing$, $X_1=\{1\}$, $X_2=\{1,2\}$, etc. as subsets of $\nn$, and we want to know what the union of all of them is. This union is written $\bigcup_{n\in\nn}X_n$, and it is the subset of $\nn$ that contains every element of every $X_n$, but no others. Namely, $\bigcup_{n\in\nn}X_n=\{n\in \nn\mid n\geq 1\}$. Similarly one can write $\bigcap_{n\in\nn}X_n$ for the intersection of all of them, which will be empty in the above case.
+
+Given two sets $X$ and $Y$, the \emph{product} $X \times Y$ of
+$X$ and $Y$ is the set of pairs $(x,y)$, where $x \in X$ and $y \in Y$.%
+\index{product!of sets}
+
+Finally, we may want to take a \emph{disjoint} union of two sets, even if they
+have elements in common. Given two sets $X$ and $Y$, their \emph{disjoint union}
+$X \dju Y$ is the set of pairs of the form $(x,1)$ or $(y,2)$, where $x \in X$
+and $y \in Y$.
+\index{union!disjoint}
+
+\begin{exercise}%
+\label{exc.subsets_products}
+	Let $A\coloneqq\{h,1\}$ and $B\coloneqq\{1,2,3\}$.
+	\begin{enumerate}
+		\item There are eight subsets of $B$; write them out.
+		\item Take any two nonempty subsets of $B$ and write out their union.
+		\item There are six elements in $A\times B$; write them out.
+	\qedhere
+		\item There are five elements of $A \dju B$; write them out.
+		\item If we consider $A$ and $B$ as subsets of the set
+	$\{h,1,2,3\}$, there are four elements of $A \cup B$; write them out.
+	\end{enumerate}
+\end{exercise}
+%
+\index{set|)}
+
+Relationships between different sets---for example between the set of trees in your neighborhood and the set of your favorite fruits---are captured using subsets and product sets.
+
+\begin{definition}%
+\index{relation}
+Let $X$ and $Y$ be sets. A \emph{relation between $X$ and $Y$} is a subset $R\subseteq X
+\times Y$. A \emph{binary relation on $X$} is a relation between $X$ and $X$, i.e.\ a subset $R\ss X\times X$.%
+\index{relation!binary}%
+\index{binary relation|see {relation, binary}}
+\end{definition}
+
+It is convenient to use something called \emph{infix notation} for binary relations $R\ss A\times A$. This means one picks a symbol, say $\star$, and writes $a\star b$ to mean $(a,b)\in R$.
+%
+\index{infix notation}%
+\index{notation!infix|see {infix}}
+
+\begin{example}%
+\index{relation!binary}
+There is a binary relation on $\RR$ with infix notation $\leq$. Rather than writing $(5,6)\in R$, we write $5\leq 6$.
+
+Other examples of infix notation for relations are $=$, $\approx$, $<$, $>$. In number theory, they are interested in whether one number divides without remainder into another number; this relation is denoted with infix notation $|$, so $5|10$.
+\end{example}%
+\index{divides relation}%
+\index{infix notation}
+
+%
+\paragraph{Partitions and equivalence relations.}%
+\index{equivalence relation!and partition|(}
+
+We can now define partitions more formally.
+
+\begin{definition}%
+\label{def.partition}%
+\index{partition}
+If $A$ is a set, a \emph{partition} of $A$ consists of a set $P$ and, for each $p\in P$, a nonempty subset $A_p\ss A$, such that 
+\begin{equation}%
+\label{eqn.condition_part}
+  A=\bigcup_{p\in P}A_p
+  \qquad\text{and}\qquad
+  \text{if }p\neq q\text{ then }A_p\cap A_q=\varnothing.
+\end{equation}
+We may denote the partition by $\{A_p\}_{p\in P}$. We refer to $P$ as the set of \emph{part labels} and if $p\in P$ is a part label, we refer to $A_p$ as the \emph{$p^{\tn{th}}$ part}. The condition \eqref{eqn.condition_part} says that each element $a\in A$ is in exactly one part.
+
+We consider two different partitions $\{A_p\}_{p\in P}$ and $\{A'_{p'}\}_{p'\in P'}$ of $A$ to be the same if for each $p\in P$ there exists a $p'\in P'$ with $A_p=A'_{p'}$. In other words, if two ways to divide $A$ into parts are exactly the same---the only change is in the labels---then we don't make a distinction between them.%
+\index{partition!label irrelevance of}
+\end{definition}
+
+\begin{exercise}%
+\label{exc.proof_re_parts}
+Suppose that $A$ is a set and $\{A_p\}_{p\in P}$ and $\{A'_{p'}\}_{p'\in P'}$ are two partitions of $A$ such that for each $p\in P$ there exists a $p'\in P'$ with $A_p=A'_{p'}$.
+\begin{enumerate}
+	\item Show that for each $p\in P$ there is at most one $p'\in P'$ such that $A_p=A'_{p'}$
+	\item Show that for each $p'\in P'$ there is a $p\in P$ such that $A_p=A'_{p'}$.
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.equiv_rel_practice}
+Consider the partition shown below:
+\[
+\begin{tikzpicture}[x=1cm]
+	\node (a11) {$\LMO{11}$};
+	\node[right=.5 of a11] (a12) {$\LMO{12}$};
+	\node[right=.5 of a12] (a13) {$\LMO{13}$};
+	\node[below=.5 of a11] (a21) {$\LMO{21}$};
+	\node[below=.5 of a12] (a22) {$\LMO{22}$};
+	\node[below=.5 of a13] (a23) {$\LMO{23}$};
+	\draw [rounded corners=9pt] 
+     ($(a11)+(135:.45)$) --
+     ($(a11)+(-135:.45)$) --
+     ($(a12)+(-45:.45)$) --
+     ($(a12)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a22)+(135:.45)$) --
+     ($(a22)+(-135:.45)$) --
+     ($(a23)+(-45:.45)$) --
+     ($(a23)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a13)+(135:.45)$) --
+     ($(a13)+(-135:.45)$) --
+     ($(a13)+(-45:.45)$) --
+     ($(a13)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a21)+(135:.45)$) --
+     ($(a21)+(-135:.45)$) --
+     ($(a21)+(-45:.45)$) --
+     ($(a21)+(45:.45)$) --     
+     cycle;
+	\node[inner sep=10pt, draw, fit=(a11) (a23)] (a) {};
+\end{tikzpicture}
+\]
+For any two elements $a,b\in\{11,12,13,21,22,23\}$, let's allow ourselves to write a twiddle symbol $a\sim b$ between them if $a$ and $b$ are both in the same part. Write down every pair of elements $(a,b)$ that are in the same part. There should be 10.%
+\footnote{Hint: whenever someone speaks of ``two elements $a,b$ in a set $A$'', the two elements may be the same!}%
+\index{partition!part of}
+\end{exercise}
+
+
+
+We will see in \cref{prop.equivalence_partition} that there is a strong relationship between partitions and something called equivalence relations, which we define next.
+
+\begin{definition}%
+\label{def.equivalence_relation}%
+\index{equivalence relation}%
+\index{relation!equivalence|see {equivalence relation}}
+Let $A$ be a set. An \emph{equivalence relation} on $A$ is a binary relation, let's give it infix notation $\sim$,%
+\index{equivalence relation!as binary relation}
+ satisfying the following three properties:
+\begin{enumerate}[label=(\alph*)]
+	\item $a\sim a$, for all $a\in A$,
+	\item $a\sim b$ iff\footnote{`Iff' is short for `if and only if'.} $b\sim a$, for all $a,b\in A$, and
+	\item if $a\sim b$ and $b\sim c$ then $a\sim c$, for all $a,b,c\in A$.
+\end{enumerate}
+These properties are called \emph{reflexivity}, \emph{symmetry}, and \emph{transitivity}, respectively.
+%
+\index{reflexivity}%
+\index{symmetry}%
+\index{transitivity}%
+\index{infix notation}
+\end{definition}
+
+\begin{proposition}%
+\label{prop.equivalence_partition}%
+\index{partition!associated equivalence relation of}
+Let $A$ be a set. There is a one-to-one correspondence between the ways to partition $A$ and the equivalence relations on $A$.
+\end{proposition}
+\begin{proof}
+We first show that every partition gives rise to an equivalence relation, and then that every equivalence relation gives rise to a partition. Our two constructions will be mutually inverse, proving the proposition.
+
+Suppose we are given a partition $\{A_p\}_{p\in P}$; we define a relation $\sim$ and show it is an equivalence relation. Define $a\sim b$ to mean that $a$ and $b$ are in the same part: there is some $p\in P$ such that $a\in A_p$ and $b\in A_p$. It is obvious that $a$ is in the same part as itself. Similarly, it is obvious that if $a$ is in the same part as $b$ then $b$ is in the same part as $a$, and that if further $b$ is in the same part as $c$ then $a$ is in the same part as $c$. Thus $\sim$ is an equivalence relation as defined in \cref{def.equivalence_relation}.
+
+Suppose given an equivalence relation $\sim$; we will form a partition on $A$ by saying what the parts are. Say that a subset $X\ss A$ is $(\sim)$-closed if, for every $x\in X$ and $x'\sim x$, we have $x'\in X$. Say that a subset $X\ss A$ is $(\sim)$-connected if it is nonempty and $x\sim y$ for every $x,y\in X$. Then the parts corresponding to $\sim$ are exactly the $(\sim)$-closed, $(\sim)$-connected subsets. It is not hard to check that these indeed form a partition.%
+\index{connected}
+\end{proof}
+
+\begin{exercise}%
+\label{exc.equiv_part_proof}
+Let's complete the ``it's not hard to check'' part in the proof of \cref{prop.equivalence_partition}. Suppose that $\sim$ is
+an equivalence relation on a set $A$, and let $P$ be the set of $(\sim)$-closed and
+$(\sim)$-connected subsets $\{A_p\}_{p\in P}$.
+\begin{enumerate}
+	\item Show that each part $A_p$ is nonempty.
+	\item Show that if $p\neq q$, i.e.\ if $A_p$ and $A_q$ are not exactly the same set, then $A_p\cap A_q=\varnothing$.
+	\item Show that $A=\bigcup_{p\in P}A_p$.
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{definition}
+\label{def.quotient}
+\index{quotient}
+Given a set $A$ and an equivalence relation $\sim$ on $A$, we say that the
+\emph{quotient} $A/\sim$ of $A$ under $\sim$ is the set of parts of the
+corresponding partition.
+\end{definition}
+
+
+%
+\index{equivalence relation!and partition|)}
+
+\paragraph{Functions.} The most frequently used sort of relation between sets is
+that of functions.%
+\index{relation!function as}
+
+\begin{definition}%
+\label{def.function}%
+\index{function}
+Let $S$ and $T$ be sets. A \emph{function from $S$ to $T$} is a subset $F\ss
+S\times T$ such that for all $s\in S$ there exists a unique $t\in T$ with
+$(s,t)\in F$.%
+\index{function!as relation}
+
+The function $F$ is often denoted $F\colon S\to T$. From now on, we write $F(s)=t$, or sometimes $s\mapsto t$, to mean $(s,t)\in F$. For any $t\in T$, the \emph{preimage of $t$ along $F$} is the subset $\{s\in S\mid F(s)=t\}$.%
+\index{preimage}
+
+A function is called \emph{surjective}%
+\index{function!surjective}, or a
+\emph{surjection}, if
+%it satisfies the converse of existence:
+for all $t\in T$
+there exists $s\in S$ with $F(s)=t$. A function is called
+\emph{injective}%
+\index{function!injective}, or an \emph{injection}, if
+% it satisfies the converse of uniqueness: 
+for all $t\in T$ and $s_1,s_2\in S$ with
+$F(s_1)=t$ and $F(s_2)=t$, we have $s_1=s_2$. A function is called
+\emph{bijective}%
+\index{function!bijective} if it is both surjective and
+injective.%
+\index{function!injective}%
+\index{function!bijective}%
+\index{function!surjective}
+\end{definition}
+
+We use various decorations on arrows, $\to, \surj, \inj, \To{\cong}$ to denote these special sorts of functions. Here is a table with the name, arrow decoration, and an example of each sort of function:
+\[
+\begin{tabular}{>{\centering\arraybackslash}m{1.3in}>{\centering\arraybackslash}m{1.3in}>{\centering\arraybackslash}m{1.3in}>{\centering\arraybackslash}m{1.3in}}
+	arbitrary function&
+	surjective function&
+	injective function&
+	bijective function\\
+	$\ord{3}\to \ord{3}$&
+	$\ord{3}\surj\ord{2}$&
+	$\ord{2}\inj \ord{3}$&
+	$\ord{3}\To{\cong}\ord{3}$\\
+  \begin{tikzpicture}[short=-2pt]
+		\foreach \x in {0,...,2} 
+			{\draw (0+3,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X02)] (X0) {};
+		\foreach \x in {0,...,2} 
+			{\draw (1+3,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y02)] (Y0) {};
+		\draw[mapsto] (X00) -- (Y01);
+		\draw[mapsto] (X01) to (Y01);
+		\draw[mapsto] (X02) to (Y02);
+  \end{tikzpicture}&
+  \begin{tikzpicture}[short=-2pt]
+		\foreach \x in {0,...,2} 
+			{\draw (0+3,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X02)] (X0) {};
+		\foreach \x in {0,...,1} 
+			{\draw (1+3,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y01)] (Y0) {};
+		\draw[mapsto] (X00) to (Y00);
+		\draw[mapsto] (X01) to (Y01);
+		\draw[mapsto] (X02) to (Y01);
+  \end{tikzpicture}&
+  \begin{tikzpicture}[short=-2pt]
+		\foreach \x in {0,...,1} 
+			{\draw (0+3,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X01)] (X0) {};
+		\foreach \x in {0,...,2} 
+			{\draw (1+3,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y02)] (Y0) {};
+		\draw[mapsto] (X00) to (Y00);
+		\draw[mapsto] (X01) to (Y02);
+  \end{tikzpicture}&
+  \begin{tikzpicture}[short=-2pt]
+		\foreach \x in {0,...,2} 
+			{\draw (0+3,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X02)] (X0) {};
+		\foreach \x in {0,...,2} 
+			{\draw (1+3,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y02)] (Y0) {};
+		\draw[mapsto] (X00) to (Y01);
+		\draw[mapsto] (X01) to (Y02);
+		\draw[mapsto] (X02) to (Y00);
+  \end{tikzpicture}  
+\end{tabular}
+\]
+
+
+\begin{example}%
+\label{ex.identity}%
+\index{function!identity}%
+\index{identity!function}
+An important but very simple sort of function is the \emph{identity function} on a set $X$, denoted $\id_X$. It is the bijective function $\id_X(x)=x$.
+\[
+\begin{tikzpicture}[short=-2pt]
+		\foreach \x in {0,...,2} 
+			{\draw (0+3,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X02)] (X0) {};
+		\foreach \x in {0,...,2} 
+			{\draw (1+3,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y02)] (Y0) {};
+		\draw[mapsto] (X00) to (Y00);
+		\draw[mapsto] (X01) to (Y01);
+		\draw[mapsto] (X02) to (Y02);
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+For notational consistency with \cref{def.function}, the arrows in
+\cref{ex.identity} might be drawn as $\mapsto$ rather than
+$\color{blue}\dashrightarrow$. The $\color{blue}\dashrightarrow$-style arrows
+were drawn because we thought it was prettier, i.e.\ easier on the eye. Beauty
+is important too; an imbalanced preference for strict correctness over beauty
+becomes \emph{pedantry}. But outside of pictures, we will be careful.
+
+\begin{exercise}%
+\label{exc.inj_surj_fun}
+In the following, do not use any examples already drawn above.
+\begin{enumerate}
+	\item Find two sets $A$ and $B$ and a function $f\colon A\to B$ that is injective but not surjective.
+	\item Find two sets $A$ and $B$ and a function $f\colon A\to B$ that is surjective but not injective.
+\end{enumerate}
+Now consider the four relations shown here:
+\[
+\begin{tikzpicture}[short=-2pt]
+	\foreach \f in {0,...,3} {
+		\foreach \x in {0,...,2} 
+			{\draw (0+3*\f,.4-.4*\x) node (X\f\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X\f0) (X\f2)] (X\f) {};
+		\foreach \x in {0,...,2} 
+			{\draw (1+3*\f,.4-.4*\x) node (Y\f\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y\f0) (Y\f2)] (Y\f) {};
+	}
+		\draw[mapsto] (X00) to (Y00);
+		\draw[mapsto] (X01) to (Y00);
+		\draw[mapsto] (X02) to (Y01);
+		%
+		\draw[mapsto] (X10) to (Y10);
+		\draw[mapsto] (X10) to (Y11);
+		\draw[mapsto] (X11) to (Y12);
+		%
+		\draw[mapsto] (X21) to (Y21);
+		\draw[mapsto] (X22) to (Y20);
+%		%
+		\draw[mapsto] (X30) to (Y32);
+		\draw[mapsto] (X31) to (Y30);
+		\draw[mapsto] (X32) to (Y31);
+\end{tikzpicture}
+\]
+For each relation, answer the following two questions.
+\begin{enumerate}[resume]
+	\item Is it a function?
+	\item If not, why not? If so, is it injective, surjective, both (i.e.\ bijective), or neither?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.map_to_empty}
+Suppose that $A$ is a set and $f\colon A\to\varnothing$ is a function to the empty set. Show that $A$ is empty.%
+\index{set!empty}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.partition_and_surjections}%
+\index{partition!as
+  surjection}
+A partition on a set $A$ can also be understood in terms of surjective functions
+out of $A$. Given a surjective function $f\colon A\surj P$, where $P$ is any
+other set, the preimages $f\inv(p)\ss A$, one for each element $p\in
+P$, form a partition of $A$. Here is an example.%
+\index{preimage}
+
+Consider the partition of $S\coloneqq\{11, 12, 13, 21, 22, 23\}$ shown below:
+\[
+\begin{tikzpicture}[x=1cm]
+	\node (a11) {$\LMO{11}$};
+	\node[right=.5 of a11] (a12) {$\LMO{12}$};
+	\node[right=.5 of a12] (a13) {$\LMO{13}$};
+	\node[below=.5 of a11] (a21) {$\LMO{21}$};
+	\node[below=.5 of a12] (a22) {$\LMO{22}$};
+	\node[below=.5 of a13] (a23) {$\LMO{23}$};
+	\draw [rounded corners=9pt] 
+     ($(a11)+(135:.45)$) --
+     ($(a11)+(-135:.45)$) --
+     ($(a12)+(-45:.45)$) --
+     ($(a12)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a22)+(135:.45)$) --
+     ($(a22)+(-135:.45)$) --
+     ($(a23)+(-45:.45)$) --
+     ($(a23)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a13)+(135:.45)$) --
+     ($(a13)+(-135:.45)$) --
+     ($(a13)+(-45:.45)$) --
+     ($(a13)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a21)+(135:.45)$) --
+     ($(a21)+(-135:.45)$) --
+     ($(a21)+(-45:.45)$) --
+     ($(a21)+(45:.45)$) --     
+     cycle;
+	\node[inner sep=10pt, draw, fit=(a11) (a23)] (a) {};
+	\node[left=0pt of a] {$S\coloneqq$};
+\end{tikzpicture}
+\]
+It has been partitioned into four parts, so let $P=\{a,b,c,d\}$ and let $f\colon S\surj P$ be given by
+\[
+  f(11)=a, \quad f(12)=a,\quad f(13)=b,\quad f(21)=c,\quad f(22)=d, \quad f(23)=d
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.part_surj}
+Write down a surjection corresponding to each of the five partitions in \cref{eqn.parts_of_3}.
+\end{exercise}
+
+\begin{definition}%
+\label{def.composite_fn}%
+\index{function!composite}
+If $F\colon X\to Y$ is a function and $G\colon Y\to Z$ is a function, their
+\emph{composite} is the function $X\to Z$ defined to be $G(F(x))$ for any $x\in
+X$. It is often denoted $G\circ F$, but we prefer to denote it $F\cp G$. It takes any element $x\in X$, evaluates $F$ to get an element $F(x)\in Y$ and then evaluates $G$ to get an element $G(F(x))$.
+\end{definition}
+
+\begin{example}
+If $X$ is any set and $x\in X$ is any element, we can think of $x$ as a function $\singleton\to X$, namely the function sending $1$ to $x$. For example, the three functions $\singleton\to\{1,2,3\}$ shown below correspond to the three elements of $\{1,2,3\}$:
+\[
+\begin{tikzpicture}[short=-2pt]
+	\foreach \f in {1,...,3} {
+		\draw (0+3*\f,0) node (X\f0) {$\bullet$};
+		\node[draw, ellipse, inner sep=0pt, fit=(X\f0)] (X\f) {};
+		\foreach \x in {1,...,3} {
+			\draw (1+3*\f,.8-.4*\x) node[label={[below right=0]:\tiny\x}] (Y\f\x) {$\bullet$};
+		}
+		\draw[mapsto] (X\f0) to (Y\f\f);
+		\node[draw, ellipse, inner sep=0pt, fit=(Y\f1) (Y\f3)] (Y\f) {};
+	}
+\end{tikzpicture}
+\]
+Suppose given a function $F\colon X\to Y$ and an element of $X$, thought of as a function $x\colon\singleton\to X$. Then evaluating $F$ at $x$ is given by the composite, $F(x)=x\cp F$.
+\end{example}
+
+%---- Subsection ----%
+\subsection{Preorders}%
+\label{subsec.def_preorder}%
+\index{preorder|(}
+
+In \cref{sec.motivate_1}, we several times used the symbol $\leq$ to denote a sort of order. Here is a formal definition of what it means for a set to have an order.
+
+\begin{definition}%
+\label{def.preorder}%
+\index{preorder}%
+\index{relation!preorder|see {preorder}}
+A \emph{preorder relation} on a set $X$ is a binary relation on $X$, here denoted with infix notation $\leq$, such that %
+\index{preorder relation!as binary relation}
+\begin{enumerate}[label=(\alph*)]
+\item $x \le x$; and 
+\item if $x \le y$ and $y \le z$, then $x \le z$.
+\end{enumerate}
+The first condition is called \emph{reflexivity}%
+\index{reflexivity} and the second is called \emph{transitivity}%
+\index{transitivity}. If $x\leq y$ and $y\leq x$, we write $x\cong y$ and say $x$ and $y$ are \emph{equivalent}. We call a pair $(X,\le)$ consisting of a set equipped with a preorder relation a \emph{preorder}.%
+\end{definition}%
+\index{equivalence relation!generated by a preorder}%
+\index{infix notation}
+
+\begin{remark}
+  Observe that reflexivity and transitivity are familiar from \cref{def.equivalence_relation}: preorders are just equivalence relations without the symmetry condition.
+\end{remark}%
+\index{equivalence relation!as symmetric preorder}%
+\index{symmetry}
+
+\begin{example}[Discrete preorders]%
+\label{ex.disc_preorder}%
+\index{preorder!discrete}
+Every set $X$ can be considered as a discrete preorder $(X,=)$. This means that the only order relations on $X$ are of the form $x \le x$; if $x \ne y$ then neither $x \le y$ or $y \le x$ hold.
+
+We depict discrete preorders as simply a collection of points:
+\[
+\begin{tikzpicture}
+  	\node (0) at (0,0) {$\bullet$};
+  	\node (1) at (2,0) {$\bullet$};
+  	\node (2) at (4,0) {$\bullet$};
+  	\node[draw, fit=(0) (1) (2)] (A) {};
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\begin{example}[Codiscrete preorders]%
+\label{ex.codisc_preorder}%
+\index{preorder!codiscrete}
+From every set we may also construct its codiscrete preorder $(X,\le)$ by
+equipping it with the total binary relation $X\times X \subseteq X \times X$.
+This is a very trivial structure: it means that for \emph{all} $x$ and $y$ in
+$X$ we have $x \le y$ (and hence also $y \le x$).
+\end{example}
+
+\begin{example}[Booleans]%
+\label{ex.boolean_order}%
+\index{booleans!as preorder}
+  The booleans $\bb =\{\false,\true\}$ form a preorder with $\false \le \true$.
+\[
+\begin{tikzpicture}
+  	\node (0) at (0,0) {$\false$};
+  	\node (1) at (0,1) {$\true$};
+  	\node[draw, fit=(0) (1)] (A) {};
+	\draw[->] (0) to (1);
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\begin{remark}[Partial orders are skeletal preorders] %
+\label{rem.partial_orders}
+  %
+\label{rem.skeletal_preorder}%
+\index{preorder!skeletal}%
+\index{preorder!partial order as}
+A preorder is a \emph{partial order} if we additionally have that
+\begin{enumerate}
+  \item[(c)] $x \cong y$ implies $x =y$.  
+\end{enumerate}
+
+In category theory terminology, the requirement that $x \cong y$ implies $x =y$
+is known as \emph{skeletality}, so partial orders are \emph{skeletal
+preorders}.%
+\index{skeleton}
+For short, we also use the term \emph{poset}, a contraction of partially ordered
+set.%
+\index{poset|see {partial order}}%
+\index{partial order}%
+\index{partial order|seealso {preorder, skeletal}}    
+
+The difference between preorders and partial orders is rather minor. A partial order already is a preorder, and every preorder can be made into a partial order by equating any two elements $x,y$ for which $x\cong y$, i.e.\ for which $x\leq y$ and $y\leq x$.
+
+For example, any discrete preorder is already a partial order, while any
+codiscrete preorder simply becomes the unique partial order on a one element
+set.
+\end{remark}
+
+We have already introduced a few examples of preorders using Hasse diagrams. It
+will be convenient to continue to do this, so let us be a bit more formal about
+what we mean. First, we need to define a graph.
+
+\begin{definition} %
+\label{def.graph}%
+\index{graph}%
+\index{graph!vertex}%
+\index{graph!arrow}
+A \emph{graph} $G=(V,A,s,t)$ consists of a set $V$ whose elements are called
+\emph{vertices}, a set $A$ whose elements are called \emph{arrows}, and two
+functions $s,t\colon A \to V$ known as the \emph{source} and \emph{target}
+functions respectively. Given $a \in A$ with $s(a)=v$ and $t(a)=w$, we say that
+$a$ is an arrow from $v$ to $w$.
+
+By a \emph{path} in $G$ we mean any sequence of
+arrows such that the target of one arrow is the source of the next. This
+includes sequences of length 1, which are just arrows $a\in A$ in $G$, and
+sequences of length 0, which just start and end at the same vertex $v$, without
+traversing any arrows. %
+\index{graph!paths in}
+\end{definition}
+
+\begin{example}%
+\label{ex.my_first_graph}
+Here is a picture of a graph:
+\[
+G=\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{1}\ar[r, "a"]\ar[dr, shift left, "b"]\ar[dr, shift right, "c"']\&
+	\LMO{2}\ar[d, "e"]\ar[loop right, "d"]\\
+	\&\LMO{3}\&\LMO{4}
+\end{tikzcd}
+}
+\]
+It has $V=\{1,2,3,4\}$ and $A=\{a,b,c,d,e\}$. The source and target functions, $s,t\colon A\to V$ are given by the following partially-filled-in tables (see \cref{exc.understanding_graphs}):
+\[
+\begin{array}{l || l | l}
+	\textbf{arrow }a&\textbf{source }s(a)\in V&\textbf{target }t(a)\in V\\\hline
+	a&1&\?\\
+	b&1&3\\
+	c&\?&\?\\
+	d&\?&\?\\
+	e&\?&\?
+\end{array}
+\]
+
+There is one path from 2 to 3, namely the arrow $e$ is a path of length 1. There are no paths from $4$ to 3, but there is one path from $4$ to $4$, namely the path of length 0. There are infinitely many paths $1\to 2$ because one can loop and loop and loop through $d$ as many times as one pleases.
+\end{example}
+
+\begin{exercise}%
+\label{exc.understanding_graphs}
+Fill in the table from \cref{ex.my_first_graph}.
+\end{exercise}
+
+\begin{remark}%
+\label{rem.Hasse}%
+\index{Hasse diagram}%
+\index{preorder!presentation of}%
+\index{presentation!of preorder}
+From every graph we can get a preorder. Indeed, a Hasse diagram is a graph
+$G=(V,A,s,t)$ that gives a \emph{presentation} of a preorder $(P,\leq)$. The
+elements of $P$ are the vertices $V$ in $G$, and the order $\leq$ is given by $v\leq
+w$ iff\footnote{\index{iff}The word `iff' is a common mathematical shorthand
+for the phrase ``if and only if'', and we use it to connect two statements that
+each imply the other, and hence are logically equivalent.} there is a path $v\to w$. For any vertex $v$, there is always a path $v\to v$,
+and this translates into the reflexivity law from \cref{def.preorder}. The fact
+that paths $u\to v$ and $v\to w$ can be concatenated to a path $u\to w$
+translates into the transitivity law.
+\end{remark}
+
+\begin{exercise}%
+\label{exc.graph_to_hasse}
+	What preorder relation $(P,\leq)$ is depicted by the graph $G$ in \cref{ex.my_first_graph}? That is, what are the elements of $P$ and write down every pair $(p_1,p_2)$ for which $p_1\leq p_2$.
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.points_as_hasse}
+Does a collection of points, like the one in \cref{ex.disc_preorder}, count as a Hasse diagram? 
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.order_parts_practice}
+Let $X$ be the set of partitions of $\{\bullet,\circ,\ast\}$; it has five elements and an order by coarseness, as shown in the Hasse diagram \cref{eqn.parts_of_3}. Write down every pair $(x,y)$ of elements in $X$ such that $x\leq y$. There should be 12.
+\end{exercise}
+
+\begin{remark}
+In \cref{rem.partial_orders} we discussed partial orders---preorders with the property that whenever two elements are equivalent, they are the same---and then said that this property is fairly inconsequential: any preorder can be converted to a partial order that's ``equivalent'' category-theoretically. A partial order is like a preorder with a fancy haircut: some mathematicians might not even notice it.
+
+However, there are other types of preorders that are more special and noticeable. For example, a \emph{total order} has the following additional property:
+\begin{enumerate}
+\item[(d)] for all $x,y$, either $x\leq y$ or $y\leq x$.  
+\end{enumerate}
+%
+\index{total order}
+We say two elements $x,y$ of a preorder are \emph{comparable} if either $x\leq y$ or $y\leq x$, so a total order is a preorder where \emph{every} two elements are comparable.%
+\index{comparable}
+\end{remark}
+
+\begin{exercise}%
+\label{exc.discrete_preorder_comparable}
+Is it correct to say that a discrete preorder is one where \emph{no} two elements are comparable?
+\end{exercise}
+
+\begin{example}[Natural numbers]%
+\label{ex.orders_on_N}%
+\index{natural numbers}
+The natural numbers $\nn\coloneqq\{0,1,2,3,\ldots\}$ are a preorder with the order given by the usual size
+ordering, e.g.\ $0\leq 1$ and $5\leq 100$. This is a total order: either $m\leq n$ or $n\leq m$ for all $m,n$. One can see that its Hasse diagram looks like a line:
+\[
+\begin{tikzcd}
+	\LMO{0}\ar[r]&\LMO{1}\ar[r]&\LMO{2}\ar[r]&\LMO{3}\ar[r]&\cdots
+\end{tikzcd}
+\]
+What made \cref{eqn.parts_of_3} not look like a line is that there are non-comparable elements $a$ and $b$---namely all those in the middle row---which satisfy neither $a\leq b$ nor $b\leq a$.
+
+Note that for any set $S$, there are many different ways of assigning an order to $S$.
+Indeed, for the set $\nn$, we could also use the discrete ordering: only write $n\leq m$ if $n=m$. Another ordering is the reverse ordering, like $5\leq 3$ and $3\leq 2$, like how golf is scored (5 is worse than 3).
+
+Yet another ordering on $\nn$ is given by division: we say that $n \le m$ if $n$ divides into $m$ without remainder.
+In this ordering $2 \le 4$, for example, but $2\not\leq 3$, since there is a remainder when $2$
+is divided into $3$.
+\end{example}%
+\index{divides relation!as preorder}%
+\index{relation!divides|see {divides relation}}
+
+\begin{exercise}%
+\label{exc.total_order1}
+Write down the numbers $1,2,\ldots,10$ and draw an arrow $a\to b$ if $a$ divides perfectly into $b$. Is it a total order?
+\end{exercise}
+
+\begin{example}[Real numbers]%
+\index{real numbers}
+  The real numbers $\rr$ also form a preorder with the ``usual ordering'', e.g.\ $-500\leq -499\leq 0\leq \sqrt{2}\leq 100/3$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.total_order2}%
+\index{order!total}
+Is the usual $\leq$ ordering on the set $\rr$ of real numbers a total order?
+\end{exercise}
+
+
+\begin{example}[Partition from preorder]%
+\label{ex:part_from_preorder}
+  %
+\index{partition!from preorder}%
+\index{equivalence relation!and partition}
+Given a preorder, i.e.\ a pre-ordered set $(P,\leq)$, we defined the notion of equivalence of elements, denoted $x\cong y$, to mean $x\leq y$ and $y\leq x$. This is an equivalence relation, so it induces a partition on $P$. (The phrase ``A induces B'' means that we have an automatic way to turn an A into a B. In this case, we're saying that we have an automatic way to turn equivalence relations into partitions, which we do; see \cref{prop.equivalence_partition}.)
+
+For example, the preorder whose Hasse diagram is drawn on the left corresponds to the partition drawn on the right.%
+\index{Hasse diagram}
+\[
+\begin{tikzpicture}[baseline=(C.south)]
+	\foreach \i in {1,2,3,4} {
+  	\node at (\i,0) (P1\i) {$\bullet$};
+  	\node at (\i,-1) (P2\i) {$\bullet$};
+  	\node at (6+\i,0) (C1\i) {$\bullet$};
+  	\node at (6+\i,-1) (C2\i) {$\bullet$};
+		\node[font=\scriptsize] at (P1\i.north) (Plab1\i) {$1\i$};
+		\node[font=\scriptsize] at (P2\i.south) (Plab2\i) {$2\i$};
+		\node[font=\scriptsize] at (C1\i.north) (Clab1\i) {$1\i$};
+		\node[font=\scriptsize] at (C2\i.south) (Clab2\i) {$2\i$};
+	}
+	\node[inner sep=10pt, draw, fit=(Plab11) (Plab24)] (P) {};
+	\node[inner sep=10pt, draw, fit=(Clab11) (Clab24)] (C) {};
+%
+	\draw [->]
+  	(P11) edge (P12)
+  	(P12) edge (P13) edge (P22)
+		(P13) edge[bend left] (P23)
+		(P14) edge (P13)
+		(P21) edge (P11)
+		(P22) edge (P21) edge (P23)
+		(P23) edge[bend left] (P13) edge (P24)
+ 	;
+%
+	\draw [rounded corners=9pt] 
+     ($(C11)+(135:.6)$) --
+     ($(C21)+(-135:.6)$) --
+     ($(C22)+(-45:.6)$) --
+     ($(C12)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(C13)+(135:.6)$) --
+     ($(C23)+(-135:.6)$) --
+     ($(C23)+(-45:.6)$) --
+     ($(C13)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(C14)+(135:.6)$) --
+     ($(C14)+(-135:.6)$) --
+     ($(C14)+(-45:.6)$) --
+     ($(C14)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(C24)+(135:.6)$) --
+     ($(C24)+(-135:.6)$) --
+     ($(C24)+(-45:.6)$) --
+     ($(C24)+(45:.6)$) --     
+     cycle;
+\end{tikzpicture}
+\]
+\end{example}
+
+\begin{example}[Power set]%
+\label{ex.powerset}%
+\index{power set}
+Given a set $X$, the set of subsets of $X$ is known as the \emph{power set} of
+$X$; we denote it $\powset(X)$. The
+power set can naturally be given an order by inclusion of subsets (and from now
+on, whenever we speak of the power set as an ordered set, this is the order we
+mean).
+
+For example, taking $X =\{0,1,2\}$, we depict $\powset(X)$ as%
+\index{Hasse diagram}
+\[
+\begin{tikzpicture}[y=.9cm, font=\small]
+  	\node (012) at (0,3) {$X$};
+	\node (01) at (-2,2) {$\{0,1\}$};
+	\node (02) at (0,2) {$\{0,2\}$};
+	\node (12) at (2,2) {$\{1,2\}$};
+	\node (0) at (-2,1) {$\{0\}$};
+	\node (1) at (0,1) {$\{1\}$};
+	\node (2) at (2,1) {$\{2\}$};
+  	\node (h) at (0,0) {$\varnothing$};
+  	\node[draw, fit=(012) (01) (12) (h)] (A) {};
+	\draw[->] (h) to (0);
+	\draw[->] (h) to (1);
+	\draw[->] (h) to (2);
+	\draw[->] (0) to (01);
+	\draw[->] (0) to (02);
+	\draw[->] (1) to (01);
+	\draw[->] (1) to (12);
+	\draw[->] (2) to (02);
+	\draw[->] (2) to (12);
+	\draw[->] (01) to (012);
+	\draw[->] (02) to (012);
+	\draw[->] (12) to (012);
+\end{tikzpicture}
+\]
+See the cube? The Hasse diagram for the power set of a finite set, say
+$\powset\{1,2,\ldots,n\}$,\footnote{Note that we omit the parentheses here,
+  writing $\powset X$ instead of $\powset(X)$; throughout this book we will
+omit parentheses if we judge the presentation is cleaner and it is unlikely to cause confusion.} 
+ always looks like a cube of dimension $n$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.powerset_Hasse}%
+\index{Hasse diagram}
+Draw the Hasse diagrams for $\powset(\varnothing)$, $\powset\{1\}$, and $\powset\{1,2\}$.
+\end{exercise}
+
+\begin{example}[Partitions]%
+\label{ex.partitions}%
+\index{preorder!of partitions}
+We talked about getting a partition from a preorder; now let's think about how we might order the set $\prt{A}$ of \emph{all partitions} of $A$, for some set $A$. In fact, we have done this before in \cref{eqn.parts_of_3}.
+%As we discussed in \cref{prop.equivalence_partition}, partitions of $A$ can be identified with equivalence relations on $A$.
+Namely, we order on partitions by fineness: a partition $P$ is \emph{finer} than a
+partition $Q$ if, for every part $p\in P$ there is a part $q\in Q$ such that $A_p\ss A_q$. We could also say that $Q$ is \emph{coarser} than $P$.
+
+Recall from \cref{ex.partition_and_surjections} that partitions on $A$ can be thought of as surjective functions out of $A$. Then $f\colon A\surj P$ is finer than $g\colon A\surj Q$ if there is a function $h\colon P\to Q$ such that $f\cp h=g$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.partitions_and_functions}
+For any set $S$ there is a coarsest partition, having just one part. What surjective function does it correspond to?
+
+There is also a finest partition, where everything is in its own partition. What surjective function does it correspond to?
+\end{exercise}
+
+\begin{example}[Upper sets]%
+\index{upper set}%
+\label{ex.upper_set}
+  Given a preorder $(P,\le)$, an \emph{upper set} in $P$ is a subset $U$ of $P$ satisfying the condition that
+  if $p \in U$ and $p \le q$, then $q \in U$. ``If $p$ is an element then so is anything bigger.''
+  Write $\upset(P)$ for the set of
+  upper sets in $P$. We can give the set $\upset$ an order by letting $U \le V$ if $U$ is
+  contained in $V$.
+
+  For example, if $(\bb,\leq)$ is the booleans (\cref{ex.boolean_order}), then its preorder of uppersets $\upset(\bb)$ is%
+\index{Hasse diagram}
+\[
+\begin{tikzpicture}
+  \node (0) at (0,0) {$\varnothing$};
+	\node (1) at (0,1) {$\{\true\}$};
+	\node (2) at (0,2) {$\{\true,\false\}$};
+  \node[draw, fit=(0) (1) (2)] (A) {};
+	\draw[->] (0) to (1);
+	\draw[->] (1) to (2);
+\end{tikzpicture}
+\]
+The subset $\{\false\}\ss\bb$ is not an upper set, because $\false\leq\true$ and $\true \notin \{\false\}$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.uppersets_on_discrete}
+  Prove that the preorder of upper sets on a discrete preorder (see \cref{ex.disc_preorder}) on a set $X$ is simply the power
+  set $\powset(X)$.%
+\index{power set}
+\end{exercise}
+
+\begin{example}[Product preorder]%
+\index{product!of preorders}%
+\label{ex.product_preorder}
+  Given preorders $(P,\le)$ and $(Q,\le)$, we may define a preorder structure on
+  the product set $P\times Q$ by setting $(p,q) \le (p',q')$ if and only if $p
+  \le p'$ and $q \le q'$. We call this the \emph{product preorder}. This is a basic
+  example of a more general construction known as the product of categories.
+\end{example}
+
+\begin{exercise}%
+\label{exc.product_preorder}
+Draw the Hasse diagram for the product of the two preorders drawn below:%
+\index{Hasse diagram}
+\[
+\boxCD{
+\begin{tikzcd}[column sep=0, ampersand replacement=\&]
+	\LMO{c}\&\&\LMO{b}\\
+	\&\LMO[under]{a}\ar[ul]\ar[ur]
+\end{tikzcd}
+}
+\hspace{.5in}
+\boxCD{
+\begin{tikzcd}
+	\LMO{2}\\
+	\LMO[under]{1}\ar[u]
+\end{tikzcd}
+}
+\]
+For bonus points, compute the upper set preorder on the result.
+\end{exercise}
+
+\begin{example}[Opposite preorder]%
+\label{ex.opposite}%
+\index{opposite!preorder}
+  Given a preorder $(P,\le)$, we may define the opposite preorder $(P,\leq\op)$ to have the same set
+  of elements, but with $p\leq\op q$ if and only if $q \le p$.
+\end{example}
+
+%
+\index{preorder|)}
+%-------- Section --------%
+\subsection{Monotone maps}%
+\index{map!monotone|(}%
+\index{map!order-preserving|see {map, monotone}}
+
+We have said that the categorical perspective emphasizes relationships between
+things. For example, a preorder is a setting---or world---in which we have one sort of
+relationship, $\leq$, and any two objects may be, or may not be, so-related.
+Jumping up a level, the categorical perspective emphasizes that preorders
+themselves---each a miniature world composed of many relationships---can be related to one another.%
+\index{level shift}
+
+The most important sort of relationship between
+preorders is called a \emph{monotone map}. These are functions that preserve preorder
+relations---in some sense mappings that respect $\leq$---and are hence considered the right notion of \emph{structure-preserving map} for preorders.%
+\index{map!structure preserving}
+
+\begin{definition}%
+\index{map!monotone}%
+\index{monotone map|seealso {map, monotone}}%
+\index{map!monotone|seealso {monotone map}}
+A \emph{monotone map} between
+preorders $(A,\leq_A)$ and $(B,\leq_B)$ is a function $f\colon A \to B$ such that, for all elements $x,y\in A$, if $x \leq_A
+y$ then $f(x) \leq_B f(y)$.
+\end{definition}
+
+A monotone map $A\to B$ between two preorders associates to each element of preorder $A$ an element of the preorder $B$. We depict this by drawing a dotted arrow from each
+element $x\in A$ to its image $f(x)\in B$. Note that the order must be preserved in order to count as a valid monotone map, so if element $x$ is above
+element $y$ in the lefthand preorder $A$, then the image $f(x)$ will be
+above the image $f(y)$ in the righthand preorder.
+\[
+\begin{tikzpicture}[x=.6in, y=.4in, inner sep=5pt]
+  	\node (a) at (0,4) {$\bullet$};
+  	\node (b) at (0,3) {$\bullet$};
+  	\node (c) at (-1,2) {$\bullet$};
+  	\node (d) at (1,2) {$\bullet$};
+  	\node (e) at (0,1) {$\bullet$};
+  	\node[draw, fit=(a) (b) (c) (d) (e)] (A) {};
+  	\draw[->] (b) to (a);
+  	\draw[->] (c) to (b);
+  	\draw[->] (d) to (b);
+  	\draw[->] (e) to (c);
+  	\draw[->] (e) to (d);
+  	\node (B0) at (4,4) {$\bullet$};
+  	\node (B1) at (4,2.5) {$\bullet$};
+  	\node (B2) at (4,1) {$\bullet$};
+  	\draw[->] (B2) to (B1);
+  	\draw[->] (B1) to (B0);
+  	\node[draw, fit=(B0) (B1) (B2)] (B) {};
+	\begin{scope}[mapsto]
+    \draw (a) -- (B0);
+  	\draw (b) to[out=0,in=170] (B1);
+  	\draw (c) to[out=10,in=180] (B1);
+  	\draw (d) to[out=0,in=196] (B1);
+  	\draw (e) -- (B2);
+	\end{scope}
+\end{tikzpicture}
+\]
+
+\begin{example}
+Let $\bb$ and $\nn$ be the preorders of booleans from \cref{ex.boolean_order} and $\nn$ the preorder of natural numbers from \cref{ex.orders_on_N}. The map $\bb \to \nn$ sending $\false$ to $17$ and $\true$ to $24$ is a monotone map, because it preserves order.
+\[
+\begin{tikzcd}[column sep=small]
+	&&&&
+	\false\ar[r]\ar[dl, dashed, blue]&
+	\true\ar[drr, dashed, blue]\\
+  0\ar[r]&
+  1\ar[r]&
+  \cdots\ar[r]&
+  17\ar[r]&
+  18\ar[r]&
+  \cdots\ar[r]&
+  23\ar[r]&
+  24\ar[r]&
+  \cdots
+\end{tikzcd}
+\]
+\end{example}
+
+\begin{example}[The tree of life]%
+\index{tree of life}
+Consider the set of all animal classifications, for example `tiger', `mammal',
+`sapiens', `carnivore', etc.. These are ordered by specificity: since `tiger' is a type
+of `mammal', we write tiger $\le$ mammal. The result is a preorder, which in fact forms a tree, often called the tree of life. At the top of the following diagram we see a small part of it:
+\[
+\begin{tikzpicture}[y=3ex, text height=1ex, text depth=1ex, font=\small]
+	\node[label={[above=-7pt]:sapiens}] (sapiens) {$\bullet$};
+	\node[below = 1 of sapiens, label={[above=-7pt]:habilis}] (habilis) {$\bullet$};
+	\node[below = 1 of habilis, label={[above=-7pt]:lion}] (lion) {$\bullet$};
+	\node[below = 1 of lion, label={[above=-7pt]:tiger}] (tiger) {$\bullet$};
+	\node[right= 2 of habilis, label={[above=-7pt]:homo}] (homo) {$\bullet$};
+	\node[right= 2 of lion, label={[above=-7pt]:panthera}] (panthera) {$\bullet$};
+	\node[right= 2 of homo, label={[above=-7pt]:primate}] (primate) {$\bullet$};
+	\node[right= 2 of panthera, label={[above=-7pt]:carnivore}] (carnivore) {$\bullet$};
+	\node[right= 2 of carnivore, label={[above=-7pt]:mammal}] (mammal) {$\bullet$};
+	\node[draw, inner sep=15pt, fit=(sapiens) (tiger.north) (mammal)] {};
+%
+	\draw[->] (sapiens) -- (homo);
+	\draw[->] (habilis) -- (homo);
+	\draw[->] (lion) -- (panthera);
+	\draw[->] (tiger) -- (panthera);
+	\draw[->] (panthera) -- (carnivore);
+	\draw[->] (homo) -- (primate);
+	\draw[->] (primate) -- (mammal);
+	\draw[->] (carnivore) -- (mammal);
+%
+	\node[below=4 of tiger, label={[above=-7pt]:species}] (species) {$\bullet$};
+	\node[right=1.5 of species, label={[above=-7pt]:genus}] (genus) {$\bullet$};
+	\node[right=1.5 of genus, label={[above=-7pt]:family}] (family) {$\bullet$};
+	\node[right=1.5 of family, label={[above=-7pt]:order}] (order) {$\bullet$};
+	\node[right=1.5 of order, label={[above=-7pt]:class}] (class) {$\bullet$};
+	\node[right=1.5 of class, label={[above=-7pt]:phylum}] (phylum) {$\bullet$};
+	\node[right=1.5 of phylum, label={[above=-7pt]:kingdom}] (kingdom) {$\bullet$};
+	\node[draw, inner sep=15, fit=(species.north west) (kingdom.north east)] {};
+%
+	\draw[->] (species) -- (genus);
+	\draw[->] (genus) -- (family);
+	\draw[->] (family) -- (order);
+	\draw[->] (order) -- (class);
+	\draw[->] (class) -- (phylum);
+	\draw[->] (phylum) -- (kingdom);
+%
+\begin{scope}[mapsto, bend right, shorten >=12pt, shorten <=-2pt]
+	\draw (sapiens) to (species.north);
+	\draw (habilis) to (species.north);
+	\draw (lion) to (species.north);
+	\draw (tiger) to (species.north);
+	\draw (homo) to (genus.north);
+	\draw (panthera) to (genus.north);
+	\draw (primate) to (order.north);
+	\draw (carnivore) to (order.north);
+	\draw (mammal) to (class.north);
+\end{scope}
+\end{tikzpicture}
+\]
+At the bottom we see the hierarchical structure as a preorder. The dashed arrows show a monotone map, call it $F$, from the classifications to the hierarchy. It is monotone because it preserves order: whenever there is a path $x\to y$ upstairs, there is a path $F(x)\to F(y)$ downstairs.
+\end{example}
+
+
+\begin{example}%
+\label{ex.card_as_monotone}
+  Given a finite set $X$, recall the power set $\powset(X)$ and its natural
+  order relation from \cref{ex.powerset}. The map $\lvert\cdot\rvert\colon \powset(X) \to \nn$ sending
+  each subset $S$ to its number of elements $\lvert S\rvert$, also called its
+  \emph{cardinality}%
+\index{cardinality}, is a monotone map.%
+\index{power set}
+\end{example}
+
+\begin{exercise}%
+\label{exc.card_as_monotone}
+Let $X=\{0,1,2\}$.
+\begin{enumerate}
+	\item Draw the Hasse diagram for $\powset(X)$.
+	\item Draw the Hasse diagram for the preorder $0\leq 1\leq 2\leq 3$.
+	\item Draw the cardinality map $\lvert \cdot \rvert$ from \cref{ex.card_as_monotone} as dashed lines between them.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{example}%
+\label{ex.upset_monotone_powset}
+  Recall the notion of upper set from \cref{ex.upper_set}. Given a preorder
+  $(P,\le)$, the map $\upset(P) \to \powset(P)$ sending each upper set of
+  $(P,\le)$ to itself---considered as a subset of $P$---is a monotone map.
+\end{example}
+
+\begin{exercise}%
+\label{exc.upset_monotone_powset}
+Consider the preorder $\bb$. The Hasse diagram for $\upset(\bb)$ was drawn in \cref{ex.upper_set}, and you drew the Hasse diagram for $\powset(\bb)$ in \cref{exc.powerset_Hasse}. Now draw the monotone map between them, as described in \cref{ex.upset_monotone_powset}.
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.upper_set}
+  Let $(P,\leq)$ be a preorder, and recall the notion of opposite preorder from \cref{ex.opposite}.
+\begin{enumerate}
+	\item Show that the set $\uparrow p\coloneqq\{p'\in P\mid p\leq p'\}$ is an upper set, for any $p\in P$.
+	\item Show that this construction defines a monotone map $\uparrow\colon P\op\to\upset(P)$.
+	\item Show that if $p \le p'$ in $P$ if and only if $\upclose(p')
+	\subseteq \upclose(p)$. 
+	\item Draw a picture of the map $\uparrow$ in the case where $P$ is the preorder $(b\geq a\leq c)$ from \cref{ex.product_preorder}.
+\end{enumerate}
+This is known as the \emph{Yoneda lemma} for preorders.%
+\index{Yoneda lemma!for preorders} The if and only if
+condition proved in part 3 implies that, up to equivalence, to know an element
+is the same as knowing its upper set---that is, knowing its web of
+relationships with the other elements of the preorder. The general Yoneda lemma
+is a powerful tool in category theory, and a fascinating philosophical idea
+besides.
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.monotone_from_discrete}
+As you yourself well know, a monotone map $f\colon\mbox{$(P,\leq_P)$}\to\mbox{$(Q,\leq_Q)$}$ consists of a function $f\colon P\to Q$ that satisfies a ``monotonicity'' property. Show that when $(P,\leq_P)$ is a discrete preorder, then \emph{every} function $P\to Q$ satisfies the monotonicity property, regardless of the order $\leq_Q$.%
+\index{preorder!discrete}
+\end{exercise}
+
+\begin{example}%
+\label{ex.ptnmonotone}%
+\index{partition}
+Recall from \cref{ex.partitions} that given a set $X$ we define $\prt X$ to be
+the set of partitions on $X$, and that a partition may be defined using a
+surjective function $s\colon X \surj P$ for some set $P$.
+
+Any surjective function $f\colon X \surj Y$ induces a monotone map
+$f^\ast\colon \prt Y \to \prt X$, going ``backwards.'' It is defined by sending
+a partition $s\colon Y \surj P$ to the composite $f\cp s\colon X \surj P$.%
+\tablefootnote{We will later see that any function $f\colon X\to Y$, not necessarily surjective, induces a monotone map $f^*\colon\prt Y\to \prt X$, but it involves an extra step. See \cref{subsec.back_to_parts}.}
+\end{example}
+
+\begin{exercise}%
+\label{exc.f^*_partitions}
+Choose two sets $X$ and $Y$ with at least three elements each and choose a
+surjective, non-identity function $f\colon X\surj Y$ between them. Write down two
+different partitions $P$ and $Q$ of $Y$, and then find $f^*(P)$ and $f^*(Q)$.
+\end{exercise}
+
+The following proposition, \cref{prop.id_and_comp_monotones}, is straightforward to check. Recall the definition of the identity function from \cref{ex.identity} and the definition of composition from \cref{def.composite_fn}.%
+\index{identity!function|seealso {function, identity}}
+
+\begin{proposition}%
+\label{prop.id_and_comp_monotones}%
+\index{category!of preorders}
+For any preorder $(P,\leq_P)$, the identity function is monotone.
+
+If $(Q,\leq_Q)$ and $(R,\leq_R)$ are preorders and $f\colon P\to Q$ and $g\colon Q\to R$ are monotone, then $(f\cp g)\colon P\to R$ is also monotone.
+\end{proposition}
+
+\begin{exercise}%
+\label{exc.check_id_comp_monotone}
+Check the two claims made in \cref{prop.id_and_comp_monotones}.
+\end{exercise}
+
+\begin{example}%
+\label{ex.dagger_preorder}%
+\index{preorder!dagger|see {dagger}}%
+\index{dagger}
+Recall again the definition of opposite preorder from \cref{ex.opposite}. The
+identity function $\id_P\colon P \to P$ is a monotone map $(P,\le) \to (P,
+\leq\op)$ if and only if for all $p,q \in P$ we have $q \le p$ whenever $p\le
+q$. For historical reasons connected to linear algebra, when this is true, we
+call $(P,\le)$ a \emph{dagger preorder}. 
+
+But in fact, we have seen dagger preorders before in another guise. Indeed, if $(P,\leq)$ is a dagger preorder, then the relation $\leq$ is symmetric: $p \le q$ if and only if
+$q \le p$, and it is also reflexive and transitive by definition of preorder. So in fact $\leq$ is an equivalence relation (\cref{def.equivalence_relation}).
+\end{example}%
+\index{symmetry!and dagger}
+
+\begin{exercise}%
+\label{exc.skeletal_dagger_preorder}%
+\index{preorder!skeletal}
+Recall the notion of skeletal preorders (\cref{rem.skeletal_preorder}) and discrete preorders
+(\cref{ex.disc_preorder}). Show that a skeletal dagger preorder is just a discrete preorder, and hence can be identified with a set.%
+\end{exercise}
+\begin{remark}
+  We say that an $A$ ``can be identified with'' a $B$ when any $A$ gives us a unique $B$ and any $B$ gives us a unique $A$, and both round-trips---from an $A$ to a $B$ and back to an $A$, or from a $B$ to an $A$ and back to a $B$---return us where we started. For example, any discrete preorder $(P,\leq)$ has an underlying set $P$, and any set $P$ can be made into a discrete preorder ($p_1\leq p_2$ iff $p_1=p_2$), and the round-trips return us where we started. So what's the difference? It's like the notion of \emph{object-permanence} from child development jargon: we can recognize ``the same chair, just moved from one room to another.'' A chair in the room of sets can be moved to a chair in the room of preorders. The lighting is different but the chair is the same.
+
+Eventually, we will be able to understand this notion in terms of \emph{equivalence of categories}, which are related to isomorphisms, which we will explore next in \cref{def.preorder_isomorphism}.
+\end{remark}
+
+\begin{definition}%
+\label{def.preorder_isomorphism}%
+\index{isomorphism!of preorders}
+Let $(P,\leq_P)$ and $(Q,\leq_Q)$ be preorders. A monotone function $f\colon P\to Q$ is called an \emph{isomorphism} if there exists a monotone function $g\colon Q\to P$ such that $f\cp g=\id_P$ and $g\cp f=\id_Q$. This means that for any $p\in P$ and $q\in Q$, we have
+\[
+	p= g(f(p))
+	\qquad\text{and}\qquad
+	q=f(g(q)).
+\]
+We refer to $g$ as the \emph{inverse} of $f$, and vice versa: $f$ is the inverse of $g$.
+
+If there is an isomorphism $P\to Q$, we say that $P$ and $Q$ are \emph{isomorphic}.
+\end{definition}
+
+An isomorphism between preorders is basically just a relabeling of the elements.
+
+\begin{example}
+Here are the Hasse diagrams for three preorders $P$, $Q$, and $R$, all of which are isomorphic:
+\[
+P\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, row sep=0, column sep=small]
+	\&\LMO{e}\\[15pt]
+	\&\LMO{d}\ar[u]\\
+	\LMO{c}\ar[ur]\&\&\LMO{b}\ar[ul]\\
+	\&\LMO{a}\ar[ur]\ar[ul]
+\end{tikzcd}
+}
+\hspace{.7in}
+Q\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\&\LMO{z}\\
+	\LMO{x}\ar[r]\&\LMO{y}\ar[u]\\
+	\LMO{v}\ar[u]\ar[r]\&\LMO{w}\ar[u]
+\end{tikzcd}
+}
+\hspace{.7in}
+R\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\&\LMO{z}\\
+	\LMO{x}\ar[ur]\ar[r]\&\LMO{y}\ar[u]\\
+	\LMO{v}\ar[u]\ar[r]\&\LMO{w}\ar[u]
+\end{tikzcd}
+}
+\]
+The map $f\colon P\to Q$ given by $f(a)=v$, $f(b)=w$, $f(c)=x$, $f(d)=y$, and $f(e)=z$ has an inverse.
+
+In fact $Q$ and $R$ are the same preorder. One may be confused by the fact that there is an arrow $x\to z$ in the Hasse diagram for $R$ and not one in $Q$, but in fact this arrow is superfluous. By the transitivity property of preorders (\cref{def.preorder}), since $x\leq y$ and $y\leq z$, we must have $x\leq z$, whether it is drawn or not. Similarly, we could have drawn an arrow $v\to y$ in either $Q$ or $R$ and it would not have changed the preorder.
+\end{example}
+
+Recall the preorder $\bb=\{\false,\true\}$, where $\false\leq\true$. As simple as this preorder is, it is also one of the most important.%
+\index{booleans!as preorder}
+
+\begin{exercise}%
+\label{exc.weird_Phi}
+  Show that the map $\Phi$ from \cref{subsec.first_look_gen}, which was roughly
+  given by `Is $\bullet$ connected to $\ast$?'  is a monotone map
+  $\prt{\{\ast,\bullet,\circ\}} \to\bb$; see also \cref{eqn.parts_of_3}.
+\end{exercise}
+
+\begin{proposition}%
+\label{prop.upperset_presheaf}%
+\index{upper set}
+  Let $P$ be a preorder. Monotone maps $P \to \bb$ are in one-to-one
+  correspondence with upper sets of $P$.
+\end{proposition}
+\begin{proof}
+  Let $f\colon P \to \bb$ be a monotone map. We will show that the subset $f\inv(\true)\ss P$ is an upper set. Suppose
+$p \in f\inv(\true)$ and $p \le q$; then $\true = f(p) \le f(q)$. But in $\BB$, if $\true\leq f(q)$ then $\true=f(q)$. This implies $q \in f\inv(\true)$ and thus shows that
+$f\inv(\true)$ is an upper set.
+
+Conversely, if $U$ is an upper set in $P$, define $f_U\colon P \to \bb$ such
+that $f_U(p) =\true$ when $p \in U$, and $f_U(p) = \false$ when $p\not\in U$. This is a monotone
+map, because if $p \le q$, then either $p \in U$, so $q \in U$ and $f(p) = \true= f(q)$,
+or $p \notin U$, so $f(p) =\false \le f(q)$.
+
+These two constructions are mutually inverse, and hence prove the proposition.
+\end{proof}
+
+\begin{exercise}[Pullback map]%
+\index{pullback!along a map}%
+\label{exc.pullback_upset}
+  Let $P$ and $Q$ be preorders, and $f\colon P \to Q$ be a monotone map. Then we
+  can define a monotone map $f^\ast\colon\upset(Q) \to \upset(P)$ sending an
+  upper set $U \subseteq Q$ to the upper set $f\inv (U) \subseteq P$. We call this the
+  \emph{pullback along $f$}.
+
+  Viewing upper sets as a monotone maps to $\bb$ as in \cref{prop.upperset_presheaf}, the pullback can be understood in terms of composition. Indeed, show
+  that the $f^\ast$ is defined by taking $u\colon Q \to \bb$ to $(f\cp u)
+  \colon P \to \bb$. 
+\end{exercise}
+
+%
+\index{map!monotone|)}
+
+%-------- Section --------%
+\section{Meets and joins}%
+\label{sec.meets_joins}%
+\index{join|(}%
+\index{meet|(}
+
+As we have said, a preorder is a set $P$ endowed with an order $\leq$ relating the
+elements. With respect to this order, certain elements of $P$ may have distinctive characterizations, either absolutely or in relation to other elements. We have discussed joins before, but we discuss them again
+now that we have built up some formalism.
+
+%---- Subsection ----%
+\subsection{Definition and basic examples}%
+\index{real numbers!as preorder}
+Consider the preorder $(\RR,\leq)$ of real numbers ordered in the usual way. The
+subset $\NN\ss\RR$ has many lower bounds, namely $-1.5$ is a lower bound: every element of $\nn$ is bigger than $-1.5$. But within all lower bounds for $\nn\ss\rr$, one is distinctive: a \emph{greatest lower bound}---also called a \emph{meet}---namely 0. It is a lower bound, and there is no lower bound for $\nn$ that is above it. However, the set $\nn\ss\rr$ has no upper bound, and certainly no least upper bound---which would be called a \emph{join}. On the other hand, the set
+\[
+  \left\{\frac{1}{n+1}\;\;\middle|\;\; n\in\NN\right\}
+  =
+  \left\{\,1,\,\frac12,\,\frac13,\,\frac14,\,\ldots\,\right\}\ss\rr
+\]
+has both a greatest lower bound (meet), namely 0, and a least upper bound (join), namely 1.
+
+These notions will have correlates in category theory, called limits and
+colimits, which we will discuss in \cref{chap.databases}. More generally, we
+say these distinctive characterizations are \emph{universal properties}, since,
+for example, a greatest lower bound is greatest among \emph{all} lower bounds.
+For now, however, we simply want to make the definition of greatest lower
+bounds and least upper bounds, called meets and joins, precise.%
+\index{universal property}%
+\index{least upper bound}%
+\index{greatest lower bound}
+
+\begin{exercise}%
+\label{exc.0_glb}
+\begin{enumerate}
+	\item Why is $0$ a lower bound for $\{\frac{1}{n+1}\mid n\in\NN\}\ss\rr$?
+	\item Why is $0$ a \emph{greatest} lower bound (meet)?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{definition}%
+\label{def.meets_joins}%
+\index{meet}%
+\index{join}
+  Let $(P,\le)$ be a preorder, and let $A\ss P$ be a subset. We say that an
+  element $p \in P$ is a \emph{meet} of $A$ if 
+  \begin{enumerate}[label=(\alph*)]
+    \item for all $a \in A$, we have $p \le a$, and 
+    \item for all $q$ such that $q \le a$ for all $a \in A$, we have that $q \le p$. 
+  \end{enumerate} 
+  We write $p = \bigwedge A$, $p=\bigwedge_{a\in A}a$, or, if the dummy variable $a$ is clear from context, just $p=\bigwedge_A a$. If $A$ just consists
+  of two elements, say $A=\{a, b\}$, we can denote $\bigwedge A$ simply by $a
+  \wedge b$.%
+%  \footnote{This is an abuse of notation; see \cref{rem.meet_abuse}.}
+
+  Similarly, we say that $p$ is a \emph{join} of $A$ if
+  \begin{enumerate}[label=(\alph*)]
+  	\item for all $a \in A$ we have $a \le p$, and
+		\item for all $q$ such that $a \le q$ for all $a
+\in A$, we have that $p \le q$.
+	\end{enumerate}
+	We write $p = \bigvee A$ or $p=\bigvee_{a\in A}a$, or when $A =\{a,b\}$ we may simply write $p=a\vee b$.
+\end{definition}
+
+\begin{remark}%
+\label{rem.meet_abuse}
+In \cref{def.meets_joins}, we committed a seemingly egregious abuse of notation. We will see next in \cref{ex.two_meets} that there could be two different meets of $A\ss P$, say $p=\bigwedge A$ and $q=\bigwedge A$ with $p\neq q$, which does not make sense if $p\neq q$!
+
+But in fact, as we use the symbol $\bigwedge A$, this abuse won't matter
+because any two meets $p,q$ are automatically isomorphic: the very definition
+of meet forces both $p\leq q$ and $q\leq p$, and thus we have $p\cong q$. So
+for any $x\in P$, we have $p\leq x$ iff $q\leq x$ and $x\leq p$ iff $x\leq q$.
+Thus as long as we are only interested in elements of $P$ based on their
+relationships to other elements (and in category theory, this is the case: we
+should only care about things based on how they interact with other things,
+rather than on some sort of ``internal essence''), the distinction between $p$
+and $q$ will never matter.
+    
+This foreshadows a major theme of---as well as standard abuse of notation
+in---category theory, where any two things defined by the same universal
+property are automatically equivalent in a way known as `unique up to unique
+isomorphism'%
+\index{unique up to unique isomorphism}; this means that we
+generally do not run into trouble if we pretend they are equal. We'll pick up
+this theme of `the' vs `a' again in \cref{rem.the_vs_a}.
+\end{remark}
+
+\begin{example}[Meets or joins may not exist]
+Note that, in an arbitrary preorder $(P,\leq)$, a subset $A$ need not have a
+meet or a join. Consider the three element set $P=\{p,q,r\}$ with the discrete ordering. The set $A=\{p,q\}$ does not have a join in $P$ because if $x$ was a join, we would need $p\leq x$ and $q\leq x$, and there is no such element $x$.
+\end{example}
+
+\begin{example}[Multiple meets or joins may exist]%
+\label{ex.two_meets}
+It may also be the case that a subset $A$ has more than one meet or
+join. Here is an example.
+\[
+\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, row sep=0, column sep=30pt]
+  \LMO{a}\&\LMO{b}\\[20pt]
+  \LMO{c} \ar[u]\ar[ur] \ar[bend right=15, r]\&\LMO{d}\ar[ul]\ar[u] \ar[bend
+	right=15, l]
+\end{tikzcd}
+}
+\]
+Let $A$ be the subset $\{a,b\}$ in the preorder specified by this Hasse
+diagram. Then both $c$ and $d$ are meets of $A$: any element less than both
+$a$ and $b$ is also less than $c$, and also less than $d$. Note that, as in \cref{rem.meet_abuse}, $c\leq d$ and $d\leq c$, so $c \cong d$. Such will always the case when there is more than one meet: any two meets of the same subset will be isomorphic.
+\end{example}
+
+\begin{exercise}%
+\label{exc.wedge_element}
+Let $(P,\leq)$ be a preorder and $p\in P$ an element. Consider the set $A=\{p\}$ with one element.
+\begin{enumerate}
+	\item Show that $\bigwedge A\cong p$.
+	\item Show that if $P$ is in fact a partial order, then $\bigwedge A=p$.
+	\item Are the analogous facts true when $\bigwedge$ is replaced by $\bigvee$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}
+In any partial order $P$, we have $p \vee p =p \wedge p = p$. The reason is that
+our notation says $p\vee p$ means $\bigvee\{p,p\}$. But $\{p,p\}=\{p\}$ (see
+\cref{sec.sets_and_rels}), so $p\vee p=p$ by \cref{exc.wedge_element}.
+\end{example}
+
+\begin{example}%
+\index{intersection!as meet}%
+\index{union!as join}
+  In a power set $\powset(X)$, the meet of a collection of subsets, say $A,B\ss X$ is their intersection $A\wedge B=A\cap B$,
+  while the join is their union, $A\vee B=A\cup B$.
+  \[
+  \begin{tikzpicture}[decoration={brace, amplitude=5pt}]
+  	\node[circle, draw, inner sep=13pt] (a) {A};
+  	\node[circle, draw, inner sep=13pt, right=10pt of a.center] (b) {B};
+		\coordinate (helper) at ($(a.north)+(0,2pt)$);
+		\draw[decorate, thick] (a.west|-helper) to node[above=5pt] {$A\vee B$} (b.east|-helper);
+		\node[rotate=90, font=\tiny] at ($(a)!.5!(b)$) {$A\wedge B$};
+  \end{tikzpicture}
+  \]
+  Perhaps this justifies the terminology: the joining of two sets is their union, the meeting of two sets is their intersection.
+\end{example}
+
+\begin{example} %
+\label{ex.bool_meet_join}%
+\index{booleans!meets and joins in}
+  In the booleans $\bb =\{\false,\true\}$ (\cref{ex.boolean_order}), the meet of any two elements is given by
+  AND and the join of any two elements is given by OR (recall \cref{exc.boolean_vee_practice}).
+\end{example}
+
+\begin{example} %
+\label{ex.join_is_supremum}%
+\index{supremum}%
+\index{infimum}
+In a total order, the meet of a set is its infimum, while the join of a set is
+its supremum. Note that $\bb$ is a total order, and this generalizes
+\cref{ex.bool_meet_join}.
+\end{example}
+
+\begin{exercise}%
+\label{exc.division_meet}%
+\index{divides relation}%
+\index{least common multiple}%
+\index{greatest common divisor}
+Recall the division ordering on $\nn$ from \cref{ex.orders_on_N}: we write $n
+\vert m$ if $n$ divides perfectly into $m$. The meet of any two numbers in this
+preorder has a common name, that you may have learned when you were around 10
+years old; what is it? Similarly the join of any two numbers has a common name;
+what is it?
+\end{exercise}
+
+\begin{proposition}%
+\label{prop.containment_meet_join}
+Suppose $(P,\leq)$ is a preorder and $A\ss B\ss P$ are subsets that have meets. Then $\bigwedge B\leq \bigwedge A$.
+
+Similarly, if $A$ and $B$ have joins, then $\bigvee A\leq \bigvee B$.
+\end{proposition}
+\begin{proof}
+Let $m=\bigwedge A$ and $n=\bigwedge B$. Then for any $a\in A$ we also have $a\in B$, so $n\leq a$ because $n$ is a lower bound for $B$. Thus $n$ is also a lower bound for $A$ and hence $n\leq m$, because $m$ is $A$'s greatest lower bound. The second claim is proved similarly.
+\end{proof}
+
+%
+\index{meet|)}%
+\index{join|)}
+
+%---- Subsection ----%
+\subsection{Back to observations and generative effects}
+
+In the thesis \cite{Adam:2017a}, Adam thinks of monotone maps as observations. A monotone map $\Phi\colon P\to Q$ is a phenomenon (we might say ``feature'') of $P$ as observed by $Q$. He defines the \emph{generative effect} of such a map $\Phi$ to be its failure to preserve joins (or more generally, for categories, its failure to preserve colimits).%
+\index{generative effect}
+
+\begin{definition}%
+\index{meets!preservation of}
+  We say that a monotone map $f\colon P \to Q$ \emph{preserves meets} if
+$f(a \wedge b) \cong f(a) \wedge f(b)$ for all $a,b\in P$. We similarly say $f$
+\emph{preserves joins} if $f(a \vee b) \cong f(a) \vee f(b)$ for all $a,b\in P$.
+\end{definition}
+
+\begin{definition}%
+\index{generative effect}%
+\label{def.gen_effect}
+  We say that a monotone map $f\colon P \to Q$ \emph{has a generative
+  effect} if there exist elements $a,b\in P$ such that
+  \[
+    f(a) \vee f(b) \ncong f(a \vee b).
+  \]
+\end{definition}
+
+In \cref{def.gen_effect}, if we think of $\Phi$ as a observation or measurement of the systems $a$ and $b$, then
+the left hand side $f(a) \vee f(b)$ may be interpreted as the combination of the observation of $a$ with
+the observation of $b$. On the other hand, the right hand side $f(a \vee b)$ is the observation of the
+combined system $a \vee b$. The inequality implies that we see something when we observe the combined system that we could not expect by merely combining our observations of the pieces. That is, that there are generative effects from the
+interconnection of the two systems.
+
+\begin{exercise}%
+\label{exc.more_stuff}
+In \cref{def.gen_effect}, we defined generativity of $f$ as the inequality $f(a \vee b)\neq f(a)\vee f(b)$, but in the subsequent text we seemed to imply there would be not just a difference, but \emph{more stuff} in $f(a \vee b)$ than in $f(a)\vee f(b)$.
+
+Prove that for any monotone map $f\colon P\to Q$, if $a,b\in P$ have a join and $f(a),f(b)\in Q$ have a join, then indeed $f(a)\vee f(b)\leq f(a \vee b)$.
+\end{exercise}
+
+In his work on generative effects, Adam restricts his attention to generative maps that
+preserve meets (but do not preserve joins). The preservation of meets
+implies that the map $\Phi$ behaves well when restricting to subsystems, even
+though it can throw up surprises when joining systems.
+
+This discussion naturally leads into Galois connections, which are pairs of monotone maps between preorders, one of which preserves all joins and the other of which preserves all meets.
+
+%-------- Section --------%
+\section{Galois connections} %
+\label{sec.galois_connections}%
+\index{Galois connection|(}%
+\index{adjunction!of preorders|(}
+
+The preservation of meets and joins, and in particular issues concerning generative effects, is tightly related to the theory of \emph{Galois connections}, which is a special case of a more general theory we will discuss later, namely that of \emph{adjunctions}. We will use some adjunction terminology when describing Galois connections.
+
+%---- Subsection ----%
+\subsection{Definition and examples of Galois connections}%
+\label{subsec.def_ex_Galois}
+Galois connections between preorders were first considered by \'Evariste
+Galois---who didn't call them by that name---in the context of a connection he
+found between ``field extensions'' and ``automorphism groups.'' We will not
+discuss this further, but the idea is that given two preorders $P$ and $Q$, a
+Galois connection is a pair of maps back and forth---from $P$ to $Q$ and from
+$Q$ to $P$---with certain properties, which make it like a relaxed version of
+isomorphisms. To be a bit more precise, preorder isomorphisms are examples of
+Galois connections, but Galois connections need not be preorder isomorphisms.%
+\index{isomorphism!adjunction as relaxed version of}
+
+\begin{definition}%
+\label{def.galois}%
+\index{Galois connection}%
+\index{adjunction!Galois connection as}
+A \emph{Galois connection} between preorders $P$ and $Q$ is a pair of monotone maps
+$f\colon P \to Q$ and $g\colon Q \to P$ such that 
+\begin{equation}%
+\label{eqn.galois_connection}
+  f(p) \le q \quad\text{ if and only if }\quad p \le g(q).
+\end{equation}
+We say that $f$ is the \emph{left adjoint} and $g$ is the \emph{right adjoint}
+of the Galois connection.
+\end{definition}
+
+\begin{example}%
+\label{ex.adjoint_to_3times}%
+\index{ceiling function}%
+\index{floor function}%
+\index{adjunction!examples of}
+Consider the map $(3\times-)\colon \zz \to \rr$ which sends $x \in \zz$ to $3x$, which we can consider as a real number $3x\in\zz\ss\rr$. Let's find a left adjoint for the map $(3\times-)$.
+
+Write $\ceil{z}$ for the smallest natural number above $z \in
+\rr$, and write $\floor{z}$ for the largest integer below $z \in
+\rr$, e.g.\ $\ceil{3.14}=4$ and $\floor{3.14}=3$.%
+\footnote{By ``above'' and ``below,'' we mean \emph{greater than or equal to} or \emph{less than or equal to}; the latter being a mouthful. Anyway, $\floor{3}=3=\ceil{3}$.}
+As the left adjoint $\rr\to\zz$, let's see if $\ceil{-/3}$ works.
+
+It is easily checked that  
+\[
+  \ceil{x/3} \le y \mbox{ if and only if } x \le 3y.
+\]
+Success! Thus we have a Galois connection between $\ceil{-/3}$ and
+$(3\times-)$. 
+\end{example}
+
+\begin{exercise}%
+\label{exc.right_adj_3times}
+In \cref{ex.adjoint_to_3times} we found a left adjoint for the monotone map $(3\times-)\colon \zz \to \rr$. Now find a right adjoint for the same map, and show it is correct.
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.galois_linear_ord}
+Consider the preorder $P=Q=\ord{3}$.
+\begin{enumerate}
+	\item Let $f,g$ be the monotone maps shown below:
+\[
+\begin{tikzcd}
+	P\ar[d, blue, "f"']&\LMO{1}\ar[r]\ar[d, ->, dashed, bend right, blue]&\LMO{2}\ar[r]\ar[dl, ->, dashed, bend right, blue]&\LMO{3}\ar[d, ->, dashed, bend right, blue]&P\\
+	Q&\LMO[under]{1}\ar[r]\ar[ur, ->, dashed, bend right, red]&\LMO[under]{2}\ar[r]\ar[u, ->, dashed, bend right, red]&\LMO[under]{3}\ar[u, ->, dashed, bend right, red]&Q\ar[u, red, "g"']
+\end{tikzcd}
+\]
+Is it the case that $f$ is left adjoint to $g$? Check that for each $1\leq p,q\leq 3$, one has $f(p)\leq q$ iff $p\leq g(q)$.
+	\item Let $f,g$ be the monotone maps shown below:
+\[
+\begin{tikzcd}
+	P\ar[d, blue, "f"']&\LMO{1}\ar[r]\ar[d, ->, dashed, bend right, blue]&\LMO{2}\ar[r]\ar[d, ->, dashed, bend right, blue]&\LMO{3}\ar[d, ->, dashed, bend right, blue]&P\\
+	Q&\LMO[under]{1}\ar[r]\ar[ur, ->, dashed, bend right, red]&\LMO[under]{2}\ar[r]\ar[u, ->, dashed, bend right, red]&\LMO[under]{3}\ar[u, ->, dashed, bend right, red]&Q\ar[u, red, "g"']
+\end{tikzcd}
+\]
+Is it the case that $f$ is left adjoint to $g$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{remark}%
+\index{total order}
+The pictures in \cref{exc.galois_linear_ord} suggest the following idea. If $P$
+and $Q$ are total orders and $f\colon P\to Q$ and $g\colon Q\to P$ are drawn
+with arrows bending counterclockwise, then $f$ is left adjoint to $g$ iff the
+arrows do not cross. With a little bit of thought, this can be formalised. We
+think this is a pretty neat way of visualizing Galois connections between total
+orders!
+\end{remark}
+
+%
+%\begin{example}
+%Here is an attempt to create a biological example; it is meant to be correct when taken as a vague idea, not to stand up to serious scrutiny.
+%
+%Let $(P,\ss)$ denote the preorder of possible animal populations: an element $p$ is a set of possible animals, and we write $p\ss q$ if every animal in $p$ is also in $q$. Let $(G,\leq)$ denote the set of gene pools: an element $g$ is again a set of animals, but we write $g\leq h$ if the gene pool $h$ can generate the gene pool $g$, i.e.\ if every animal in $g$ could be generated by mating animals in $h$ (genes recombine, no mutations).
+%
+%There is a monotone map $i\colon P\to G$ sending each population to itself as a gene pool, $i(p)=p$, because if $p\ss q$ then clearly $q$ can generate $p$. There is also a monotone map $\mathrm{cl}\colon G\to P$ sending each gene pool to its closure: the set of all possible animals that could be generated from $g$ under recombination of genes.
+%
+%These are adjoint: given $p\in P$ and $g\in G$, then $p\ss\mathrm{cl}(g)$ means that every animal in $p$ can be obtained by recombination of genetic material in $g$, which is exactly what $p\leq g$ means. Since $p=i(p)$, we have the desired \cref{eqn.galois_connection}: $i(p)\leq g$ iff $p\leq\mathrm{cl}(g)$.
+%\end{example}
+%
+
+\begin{exercise}%
+\label{exc.extra_right_adj_ceil}
+\begin{enumerate}
+	\item Does $\ceil{-/3}$ have a left adjoint $L\colon \zz\to\rr$?
+	\item If not, why? If so, does its left adjoint have a left adjoint?
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+\subsection{Back to partitions}%
+\label{subsec.back_to_parts}%
+\index{partition|(}
+Recall from \cref{ex.partitions} that we can understand the set $\prt{S}$ of partitions on a set $S$
+in terms of surjective functions out of $S$.
+
+Suppose we are given any function $g\colon S\to T$. We will show that this
+function $g$ induces a Galois connection 
+%$\begin{tikzcd} \prt{S} \ar[r, "g_!",shift left] & \prt{T} \ar[l, "g^*", shift left] \end{tikzcd}$
+$g_!\colon\prt{S}\leftrightarrows\prt{T}\cocolon g^*$,
+between preorder of $S$-partitions and the preorder of $T$-partitions. The way
+you might explain it to a seasoned category theorist is:
+\begin{quote}%
+\index{adjunction!examples of}
+The left adjoint is given by taking any surjection out of $S$ and pushing out along $g$ to get a surjection out of $T$. The right adjoint is given by taking any surjection out of $T$, composing with $g$ to get a function out of $S$, and then taking the epi-mono factorization to get a surjection out of $S$.
+\[
+\begin{tikzcd}[row sep=large]
+	S\ar[r, "g"]\ar[d, two heads, "c"']\ar[dr, phantom, very near end, gray,  "\ulcorner"]&T\ar[d, two heads, gray]\\
+	P\ar[r, gray]&{\color{gray}P\sqcup_ST}
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}[row sep=large]
+	S\ar[r, "g"]\ar[d, gray, two heads]\ar[dr, gray, "g\cp c"]&T\ar[d, two heads, "c"]\\
+	{\color{gray}\mathrm{im}(g\cp c)}\ar[r, gray]&P
+\end{tikzcd}
+\]
+\end{quote}
+By the end of this book, the reader will understand pushouts and epi-mono factorizations, so he or she will be able to make sense of the above statement. But for now we will explain the process in more down-to-earth terms.%
+\index{pushout}%
+\index{epi-mono factorization}
+
+Start with $g\colon S\to T$; we first want to understand $g_!\colon\prt S\to \prt T$. So start with a partition $\sim_S$ of $S$. To begin the process of obtaining a partition $\sim_T$ on $T$, say that two elements $t_1,t_2\in T$ are in the same part, $t_1\sim_T t_2$, if there exist $s_1,s_2\in S$ with such that $s_1\sim_Ss_2$ and $g(s_1)=t_1$ and $g(s_2)=t_2$. However, the result of doing so will not necessarily be transitive---you may get $t_1\sim_T t_2$ and $t_2\sim_T t_3$ without $t_1\sim_T^? t_3$---and partitions must be transitive. So complete the process by just adding in the missing pieces (take the transitive closure).%
+\index{transitive closure} The result is $g_!(\sim_S)\coloneqq\sim_T$.
+
+Again starting with $g$, we want to get the right adjoint $g^*\colon\prt T\to\prt S$. So start with a partition $\sim_T$ of $T$. Get a partition $\sim_S$ on $S$ by saying that $s_1\sim_Ss_2$ iff $g(s_1)\sim_T g(s_2)$. The result is $g^*(\sim_T)\coloneqq \sim_S$.%
+\index{partition!pullback of}
+
+\begin{example}%
+\label{ex.pushforward_part}%
+\index{partition!pushforward of}
+Let $S=\{1,2,3,4\}$, $T=\{12,3,4\}$, and $g\colon S\to T$ by $g(1)\coloneqq g(2)\coloneqq 12$, $g(3)\coloneqq 3$, and $g(4)\coloneqq4$. The partition shown left below is translated by $g_!$ to the partition shown on the right.
+\[
+\begin{tikzpicture}[x=1cm]
+	\node (a1) {$\LMO{1}$};
+	\node[right=.5 of a1] (a2) {$\LMO{2}$};
+	\node[below=.5 of a1] (a3) {$\LMO{3}$};
+	\node[below=.5 of a2] (a4) {$\LMO{4}$};
+	\draw [rounded corners=9pt] 
+     ($(a1)+(135:.45)$) --
+     ($(a3)+(-135:.45)$) --
+     ($(a3)+(-45:.45)$) --
+     ($(a1)+(45:.45)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(a2)+(135:.45)$) --
+     ($(a4)+(-135:.45)$) --
+     ($(a4)+(-45:.45)$) --
+     ($(a2)+(45:.45)$) --     
+     cycle;
+	\node[draw, inner sep=10pt, fit=(a1) (a2) (a3) (a4)] (a) {};
+	\node[above=0 of a] (laba) {partitioned $S$};
+%
+	\node[right=3 of a3] (b3) {$\LMO{3}$};
+	\node[right=.5 of b3] (b4) {$\LMO{4}$};
+	\node at ($(b3)!.5!(b4)$) (b helper) {};
+	\node at (a2-|b helper) (b12) {$\LMO{12}$};
+	\node[draw, inner sep=10pt, fit=(b12) (b3) (b4)] (b) {};
+	\node at (b.center|-laba) {$T$};
+%
+	\draw[mapsto, bend right] (a1) to (b12);
+	\draw[mapsto, bend right] (a2) to (b12);
+	\draw[mapsto, bend right] (a3) to (b3);
+	\draw[mapsto, bend right] (a4) to (b4);	
+%
+	\node[right=3 of b3] (c3) {$\LMO{3}$};
+	\node[right=.5 of c3] (c4) {$\LMO{4}$};
+	\node at ($(c3)!.5!(c4)$) (c helper) {};
+	\node at (a2-|c helper) (c12) {$\LMO{12}$};
+	\node[draw, inner sep=10pt, fit=(c12) (c3) (c4)] (c) {};
+	\node[above=0 of c] {partitioned $T$};
+
+	\draw [rounded corners=11pt] 
+   ($(c12)+(90:.6)$) --
+   ($(c3)+(-150:.6)$) --
+   ($(c4)+(-30:.6)$) --
+   cycle;
+%
+	\node at ($(b.east)!.5!(c.west)$) {$\leadsto$};
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.g_left_part}
+There are 15 different partitions of a set with four elements. Choose 6 different ones and for each one, call it $c\colon S\surj P$, find $g_!(c)$, where $S$, $T$, and $g\colon S\to T$ are the same as they were in \cref{ex.pushforward_part}.
+\end{exercise}
+
+\begin{example}
+Let $S$, $T$ be as below, and let $g\colon S\to T$ be the function shown in blue. Here is a picture of how $g^*$ takes a partition on $T$ and ``pulls it back'' to a partition on $S$:
+\[
+\begin{tikzpicture}
+	\foreach \i in {1,2,3,4} {
+  	\node at (\i,0) (Q1\i) {$\bullet$};
+  	\node at (\i,-1) (Q2\i) {$\bullet$};
+		\node[font=\scriptsize] at (Q1\i.north) (Qlab1\i) {$1\i$};
+		\node[font=\scriptsize] at (Q2\i.south) (Qlab2\i) {$2\i$};
+  	\node at (\i+10,0) (P1\i) {$\bullet$};
+  	\node at (\i+10,-1) (P2\i) {$\bullet$};
+		\node[font=\scriptsize] at (P1\i.north) (Plab1\i) {$1\i$};
+		\node[font=\scriptsize] at (P2\i.south) (Plab2\i) {$2\i$};
+		\ifnum \i=4 {} \else {
+  		\node at (\i+5,0) (C1\i) {$\bullet$};
+  		\node at (\i+5,-1) (C2\i) {$\bullet$};
+  		\node[font=\scriptsize] at (C1\i.north) (Clab1\i) {$1\i$};
+  		\node[font=\scriptsize] at (C2\i.south) (Clab2\i) {$2\i$};
+		}\fi
+	}
+%
+	\node[inner sep=10pt, draw, fit=(Qlab11) (Qlab24)] (Q) {};
+	\node[inner sep=10pt, draw, fit=(Plab11) (Plab24)] (P) {};
+	\node[inner sep=10pt, draw, fit=(Clab11) (Clab23)] (C) {};
+%
+	\node[above=0 of Q] (labQ) {$S$};
+	\node at (labQ-|C.center) {Partitioned $T$};
+	\node at ($(C.east)!.5!(P.west)$) {$\leadsto$};
+	\node at (labQ-|P.center) {Partitioned $S$};
+%
+	\begin{scope}[mapsto, shorten >=-2pt, shorten <=-2pt]
+  	\draw[bend right=20pt] (Q11) to (C11);
+  	\draw[bend right=20pt] (Q12) to (C11);
+  	\draw[bend left=35pt] (Q13) to (C12);
+  	\draw[bend left=35pt] (Q14) to (C13);
+  	\draw[bend right] (Q21) to (C21);
+  	\draw[bend right] (Q22) to (C21);
+  	\draw (Q23) to (C12);
+  	\draw[bend right] (Q24) to (C23);
+	\end{scope}
+%
+		\draw [rounded corners=9pt] 
+     ($(C11)+(135:.6)$) --
+     ($(C21)+(-135:.6)$) --
+     ($(C21)+(-45:.6)$) --
+     ($(C11)+(45:.6)$) --     
+     cycle;
+		\draw [rounded corners=9pt] 
+     ($(C12)+(135:.6)$) --
+     ($(C12)+(-135:.6)$) --
+     ($(C12)+(-45:.6)$) --
+     ($(C12)+(45:.6)$) --     
+     cycle;
+		\draw [rounded corners=9pt] 
+     ($(C13)+(135:.6)$) --
+     ($(C13)+(-135:.6)$) --
+     ($(C13)+(-45:.6)$) --
+     ($(C13)+(45:.6)$) --     
+     cycle;
+		\draw [rounded corners=9pt] 
+     ($(C22)+(135:.6)$) --
+     ($(C22)+(-135:.6)$) --
+     ($(C23)+(-45:.6)$) --
+     ($(C23)+(45:.6)$) --     
+     cycle;
+%
+		\draw [rounded corners=9pt] 
+     ($(P11)+(135:.6)$) --
+     ($(P21)+(-135:.6)$) --
+     ($(P22)+(-45:.6)$) --
+     ($(P12)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(P13)+(135:.6)$) --
+     ($(P23)+(-135:.6)$) --
+     ($(P23)+(-45:.6)$) --
+     ($(P13)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(P14)+(135:.6)$) --
+     ($(P14)+(-135:.6)$) --
+     ($(P14)+(-45:.6)$) --
+     ($(P14)+(45:.6)$) --     
+     cycle;
+	\draw [rounded corners=9pt] 
+     ($(P24)+(135:.6)$) --
+     ($(P24)+(-135:.6)$) --
+     ($(P24)+(-45:.6)$) --
+     ($(P24)+(45:.6)$) --     
+     cycle;
+
+\end{tikzpicture}
+\]
+\end{example}
+
+\begin{exercise}%
+\label{exc.pullback_parts}
+There are five partitions possible on a set with three elements, say $T=\{12,3,4\}$. Using the same $S$ and $g\colon S\to T$ as in \cref{ex.pushforward_part}, determine the partition $g^*(c)$ on $S$ for each of the five partitions $c\colon T\surj P$.
+\end{exercise}
+
+To check that for any function $g\colon S\to T$, the monotone map
+$g_!\colon\prt S\to \prt T$ really is left adjoint to $g^*\colon\prt T\to \prt S$ would take too much time for this sketch. But the following exercise gives some evidence.
+
+\begin{exercise}%
+\label{exc.parts_adjunction}
+Let $S$, $T$, and $g\colon S\to T$ be as in \cref{ex.pushforward_part}.
+\begin{enumerate}
+	\item Choose a nontrivial partition $c\colon S\surj P$ and let $g_!(c)$ be its push forward partition on $T$.
+	\item Choose any coarser partition $d\colon T\surj P'$, i.e.\ where $g_!(c)\leq d$.
+	\item Choose any non-coarser partition $e\colon T\surj Q$, i.e.\ where $g_!(c)\not\leq e$. (If you can't do this, revise your answer for \#1.)
+	\item Find $g^*(d)$ and $g^*(e)$.
+	\item The adjunction formula \cref{eqn.galois_connection} in this case says that since $g_!(c)\leq d$ and $g_!(c)\not\leq e$, we should have $c\leq g^*(d)$ and $c\not\leq g^*(e)$. Show that this is true.
+\qedhere
+\end{enumerate}
+\end{exercise}
+%
+\index{partition|)}
+
+%---- Subsection ----%
+\subsection{Basic theory of Galois connections}
+
+\begin{proposition}%
+\label{prop.galois_monad_comonad}%
+\index{Galois connection}
+Suppose that $f\colon P\to Q$ and $g\colon Q\to P$ are monotone maps. The following are equivalent
+\begin{enumerate}[label=(\alph*)]
+	\item $f$ and $g$ form a Galois connection where $f$ is left adjoint to $g$,
+	\item for every $p\in P$ and $q\in Q$ we have
+  \begin{equation}%
+\label{eqn.preorder_monad_comonad}
+  	p\leq g(f(p))
+  	\qquad\text{and}\qquad
+  	f(g(q))\leq q.
+  \end{equation}
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Suppose $f$ is left adjoint to $g$. Take any $p\in P$, and let $q\coloneqq
+f(p)$. By reflexivity, we have $f(p)\leq q$, so by the \cref{def.galois} of
+Galois connection we have $p\leq g(q)$, but this means $p\leq g(f(p))$. The
+proof that $f(g(q))\leq q$ is similar.
+
+Now suppose that \cref{eqn.preorder_monad_comonad} holds for all $p\in P$ and $q\in Q$. We want show that $f(p)\leq q$ iff $p\leq g(q)$. Suppose $f(p)\leq q$; then since $g$ is monotonic, $g(f(p))\leq g(q)$, but $p\leq g(f(p))$ so $p\leq g(q)$. The proof that $p\leq g(q)$ implies $f(p)\leq q$ is similar.
+\end{proof}
+
+\begin{exercise}%
+\label{exc.proof_galois_monad}
+Complete the proof of \cref{prop.galois_monad_comonad} by showing that
+\begin{enumerate}
+	\item if $f$ is left adjoint to $g$ then for any $q\in Q$, we have $f(g(q))\leq q$, and 
+	\item if \cref{eqn.preorder_monad_comonad} holds, then holds $p\leq g(q)$ iff $f(p)\leq q$ holds, for all $p\in P$ and $q\in Q$.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+If we replace $\leq$ with $=$ in \cref{eqn.preorder_monad_comonad}, we get back the definition of isomorphism (\cref{def.preorder_isomorphism}); this is why we said at the beginning of \cref{subsec.def_ex_Galois} that Galois connections are a kind of relaxed version of isomorphisms.
+
+\begin{exercise}%
+\label{exc.uniqueness_of_adjoints}
+ 	\begin{enumerate}
+		\item Show that if $f\colon P\to Q$ has a right adjoint $g$, then it is unique up to isomorphism. That means, for any other right adjoint $g'$, we have $g(q)\cong g'(q)$ for all $q\in Q$.
+  	\item Is the same true for left adjoints? That is, if $h\colon P\to Q$ has a left adjoint, is it necessarily unique up to isomorphism?
+	\qedhere
+	\end{enumerate}
+\end{exercise}
+
+\begin{proposition}[Right adjoints preserve meets]%
+\label{prop.right_adj_meets}%
+\index{meets!preservation of}%
+\index{joins!preservation of}%
+\index{adjunction!preservation of meets and joins}
+  Let $f\colon P\to Q$ be left adjoint to $g\colon Q\to P$. Suppose $A\ss Q$ any subset, and let $g(A)\coloneqq\{g(a)\mid a\in A\}$ be its image. Then if $A$ has a meet $\bigwedge A\in Q$ then $g(A)$ has a meet $\bigwedge g(A)$ in $P$, and we have
+  \[g\left(\bigwedge A\right)\cong\bigwedge g(A).\]
+That is, right adjoints preserve meets. Similarly, left adjoints preserve joins: if $A\ss P$ is any subset that has a join $\bigvee A\in P$, then $f(A)$ has a join $\bigvee f(A)$ in $Q$, and we have
+  \[f\left(\bigvee A\right)\cong\bigvee f(A).\]  
+\end{proposition}
+\begin{proof}
+  Let $f\colon P \to Q$ and $g\colon Q \to P$ be adjoint monotone maps, with $g$
+  right adjoint to $f$. Let $A\ss Q$ be any subset and let $m\coloneqq\bigwedge A$ be
+  its meet. Then since $g$ is monotone $g(m) \le g(a)$ for all $a \in A$, so $g(m)$ is a
+  lower bound for the set $g(A)$. We will be done if we can show $g(m)$ is a greatest 
+  lower bound. 
+
+  So take any other lower bound $b$ for $g(A)$; that is suppose that for all $a\in A$, we have $b\leq g(a)$ and we want to show $b\leq g(m)$. Then by definition of $g$ being a right adjoint (\cref{def.galois}), we also have $f(b)\leq a$. This means that $f(b)$ is a
+  lower bound for $A$ in $Q$. Since the meet $m$ is the greatest lower bound, we
+  have $f(b)\leq m$. Once again using the Galois connection, $b\leq g(m)$, proving that $g(m)$ is indeed the greatest lower bound for $g(A)$, as desired. 
+  
+  The second claim is proved similarly; see \cref{exc.mimic_proof_joins}.
+\end{proof}
+
+\begin{exercise}%
+\label{exc.mimic_proof_joins}
+  Complete the proof of \cref{prop.right_adj_meets} by showing that left adjoints preserve joins.
+\end{exercise}
+
+Since left adjoints preserve joins, we know that they cannot have generative
+effects. In fact, we will see in \cref{prop.adjoint_functor_thm} that a monotone map does not have generative effects---i.e.\ it preserves joins---if and only if it is a left adjoint to some other monotone.
+
+\begin{example}%
+\label{ex.right_adj_not_joins}
+Right adjoints need not preserve joins. Here is an example:
+\[
+\begin{tikzpicture}[y=1.2cm]
+%
+	\node (b1) {$\LMO{1}$};
+	\node[right= of b1] (b2) {$\LMO{2}$};
+	\node at ($(b1)!.5!(b2)+(0,1)$) (b3) {$\LMO{3.9}$};
+	\node at ($(b3)+(0,1)$) (b4) {$\LMO{4}$};
+	\draw[->] (b1) -- (b3);
+	\draw[->] (b2) -- (b3);
+	\draw[->] (b3) -- (b4);
+	\node[fit=(b1) (b2) (b4), draw] (b) {};
+	\node[left=1pt of b] {$P\coloneqq$};
+%
+	\node[right=3 of b2] (a1) {$\LMO{1}$};
+	\node[right= of a1] (a2) {$\LMO{2}$};
+	\node at ($(a1)!.5!(a2)+(0,2)$) (a4) {$\LMO{4}$};
+	\draw[->] (a1) -- (a4);
+	\draw[->] (a2) -- (a4);
+	\node[fit=(a1) (a2) (a4), draw] (a) {};
+	\node[right=1pt of a] {$=:Q$};
+	\draw[functor] ($(a.west)+(0,5pt)$) to node[above, font=\footnotesize] {$g$} ($(b.east)+(0,5pt)$);
+	\draw[functor] ($(b.east)+(0,-5pt)$) to node[below, font=\footnotesize] {$f$} ($(a.west)+(0,-5pt)$);
+\end{tikzpicture}
+\]
+Let $g$ be the map that preserves labels, and let $f$ be the map that preserves labels as far as possible but with $f(3.9)\coloneqq4$. Both are $f$ and $g$ monotonic, and one can check that $g$ is right adjoint to $f$ (see \cref{exc.g_really_is_right_adj}). But $g$ does not preserve joins because $1\vee 2=4$ holds in $Q$, whereas $g(1)\vee g(2)=1\vee 2=3.9\neq 4=g(4)$ in $P$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.g_really_is_right_adj}
+To be sure that $g$ really is right adjoint to $f$ in \cref{ex.right_adj_not_joins}, there are twelve tiny things to check; do so. That is, for every $p\in P$ and $q\in Q$, check that $f(p)\leq q$ iff $p\leq g(q)$.
+\end{exercise}
+
+%Thus Galois connections provide a way of constructing maps that sustain
+%generative effects: maps that preserve meets but do not necessarily preserve
+%joins. In fact, all maps that preserve meets come from Galois connections as we now show.
+
+\begin{theorem}[Adjoint functor theorem for
+  preorders]%
+\label{prop.adjoint_functor_thm}%
+\index{adjoint functor theorem}
+Suppose $Q$ is a preorder that has all meets and let $P$ be any preorder. A monotone map $g\colon Q \to P$
+preserves meets if and only if it is a right adjoint. 
+
+Similarly, if $P$ has all joins and $Q$ is any preorder, a monotone map $f\colon P \to Q$ preserves joins if
+and only if it is a left adjoint.
+\end{theorem}
+\begin{proof}
+We will only prove the claim about meets; the claim about joins follows similarly.
+
+We proved one direction in \cref{prop.right_adj_meets}, namely that right adjoints preserve meets. For the other, suppose that $g$ is a
+monotone map that preserves meets; we shall construct a left adjoint $f$. We define our candidate $f\colon P \to Q$ on any $p\in P$ by
+\begin{equation}%
+\label{eqn.def_f_random596}
+  f(p)\coloneqq\bigwedge \{q \in Q \mid p\leq g(q)\};
+\end{equation}
+this meet is well defined because $Q$ has all meets, but for $f$ to really be a candidate, we need to show it is monotone. So suppose that $p\leq p'$. Then $\{q' \in Q \mid p'\leq g(q')\}\ss\{q \in Q \mid p\leq g(q)\}$. By \cref{prop.containment_meet_join}, this implies $f(p)\leq f(p')$. Thus $f$ is monotone.
+
+By \cref{prop.right_adj_meets}, it suffices to show that $p_0\leq g(f(p_0))$ and that $f(g(q_0))\leq q_0$ for all $p_0\in P$ and $q_0\in Q$. For the first, we have
+\[
+  p_0\leq
+  \bigwedge\{g(q)\in P\mid p_0\leq g(q)\}\cong
+  g\left(\bigwedge\{q\in Q\mid p_0\leq g(q)\}\right)=
+  g(f(p_0)),
+\]
+where the first inequality follows from the fact that if $p_0$ is below every element of a set, then it is below their meet, and the isomorphism is by definition of $g$ preserving meets. For the second, we have
+\[
+	f(g(q_0))=\bigwedge\{q\in Q\mid g(q_0)\leq g(q)\}\leq\bigwedge\{q_0\}=q_0,
+\]
+where the first inequality follows from \cref{prop.containment_meet_join} since $\{q_0\}\ss\{q\in Q\mid g(q_0)\leq g(q)\}$, and the fact that $\bigwedge\{q_0\}=q_0$.
+\end{proof}
+
+\begin{example}%
+\index{pullback!along a map}
+  Let $f\colon A \to B$ be a function between sets. We can imagine $A$ as a set
+  of apples, $B$ as a set of buckets, and $f$ as putting each apple in a bucket.
+  
+  Then we have the monotone map $f^\ast\colon \powset(Y) \to \powset(X)$ that category theorists call
+  ``pullback along $f$.'' This map takes a subset $B' \subseteq B$ to its preimage
+  $f\inv (B') \subseteq A$: that is, it takes a collection $B'$ of buckets, and tells
+  you all the apples that they contain in total. This operation is monotonic (more buckets means more apples) and it has both a left and a right adjoint. %
+\index{preimage}
+  
+  The left adjoint $f_!(A)$ is given by the direct image: it maps a subset $A' \subseteq A$ to
+  \[
+  f_!(A') \coloneqq \{b \in B\mid \mbox{there exists }a \in A' \mbox{ such that }
+  f(a) = b\}
+  \]
+  This map takes a set $A'$ of apples, and tells you all the buckets that
+  contain at least one of those apples.
+
+  The right adjoint $f_*$ maps a subset $A' \subseteq A$ to 
+  \[
+  f_*(A')\coloneqq\{b \in B\mid \mbox{for all }a \mbox{ such that } f(a)=b,\mbox{ we have } a \in A'\}
+  \]
+  This map takes a set $A'$ of apples, and tells you all the buckets $b$ that are all-$A'$: all the apples in $b$ are from the chosen subset $A'$. Note that if a bucket doesn't contain any apples at
+  all, then vacuously all its apples are from $A'$, so empty buckets count as far as $f_*$ is concerned.
+ 
+  Notice that all three of these operations turn out to be interesting: start with a set $B'$ of buckets and return all the apples in them, or start with a set $A'$ of apples and either find the buckets that contain at least one apple from $A'$, or the buckets whose only apples are from $A'$. But we did not invent these mappings $f^*$, $f_!$, and $f_*$: they were \emph{induced} by the function $f$. They were automatic. It is one of the pleasures of category theory that adjoints so often turn out to have interesting semantic interpretations.
+\end{example}
+
+\begin{exercise}%
+\label{exc.subsets_!*}
+Choose sets $X$ and $Y$ with between two and four elements each, and choose a function $f\colon X\to Y$.
+\begin{enumerate}
+	\item Choose two different subsets $B_1,B_2\ss Y$ and find $f^*(B_1)$ and $f^*(B_2)$.
+	\item Choose two different subsets $A_1,A_2\ss X$ and find $f_!(A_1)$ and $f_!(A_2)$.
+	\item With the same $A_1,A_2\ss X$, find $f_*(A_1)$ and $f_*(A_2)$.\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+%---- Subsection ----%
+\subsection{Closure operators}%
+\label{subsec.closure_operator}%
+\index{closure operator|(}
+
+Given a Galois connection with $f\colon P\to Q$ left adjoint to $g\colon Q\to P$, we may compose $f$ and
+$g$ to arrive at a monotone map $f\cp g\colon P \to P$ from preorder $P$ to itself.
+This monotone map has the property that $p \le (f\cp g)(p)$, and that $(f\cp g\cp f \cp g)(p) \cong (f\cp g)(p)$ for any $p\in P$.
+This is an example of a \emph{closure operator}.%
+\footnote{The other composite $g\cp f$ satisfies the dual properties: $(g\cp f)(q)\leq q$ and $(g\cp f\cp g\cp f)(q)\cong(g \cp f)(q)$ for all $q\in Q$. This is called an \emph{interior operator}, though we will not discuss this concept further.%
+\index{dual|seealso {properties, dual}}%
+\index{properties!dual}}
+
+\begin{exercise}%
+\label{exc.closure}
+Suppose that $f$ is left adjoint to $g$. Use \cref{prop.galois_monad_comonad} to show the following.
+\begin{enumerate}
+	\item $p \le (f\cp g)(p)$.
+	\item $(f\cp g\cp f \cp g)(p) \cong (f\cp g)(p)$. To prove this, show inequalities in both directions, $\leq$ and $\geq$.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{definition}%
+\index{closure operator}
+A \emph{closure operator} $j\colon P \to P$ on a preorder $P$ is a monotone map such that for all $p \in
+P$ we have
+\begin{enumerate}[label=(\alph*)]
+\item $p \le j(p)$;
+\item $j(j(p)) \cong j(p)$.
+\end{enumerate}
+\end{definition}
+
+\begin{example}%
+\label{ex.rewrite_systems}%
+\index{program semantics}
+Here is an example of closure operators from computation, very roughly presented. Imagine computation as a
+process of rewriting input expressions to output expressions. For example, a computer
+can rewrite the expression \texttt{7+2+3} as the expression \texttt{12}. The set of arithmetic expressions
+has a partial order according to whether one expression can be rewritten as another.
+
+We might think of a computer program, then, as a method of taking an expression and reducing it to
+another expression. So it is a map $j\colon \texttt{exp} \to \texttt{exp}$.
+It furthermore is desirable to require that this computer program is a closure
+operator. Monotonicity means that if an expression $x$ can be rewritten into expression
+$y$, then the reduction $j(x)$ can be rewritten into $j(y)$. Moreover, the requirement $x \le j(x)$ implies that $j$
+can only turn one expression into another if doing so is a permissible rewrite. The requirement
+$j(j(x))=j(x)$ implies if you try to reduce an expression that has already been reduced,
+the computer program leaves it as is. These properties provide useful structure
+in the analysis of program semantics.
+\end{example}
+
+\begin{example}[Adjunctions from closure operators]%
+\index{adjunction!from
+  closure operator}
+Just as every adjunction gives rise to a closure operator, from every closure
+operator we may construct an adjunction.
+
+Let $P$ be a preorder and let
+$j\colon P\to P$ be a closure operator. We can define a preorder $\Set{fix}_j$ to have
+elements the fixed points of $j$; that is,
+\[
+\Set{fix}_j\coloneqq\{p \in P\mid j(p)\cong p\}.
+\]
+This is a subset of $P$, and inherits an order as a result; hence $\Set{fix}_j$ is a sub-preorder of $P$. Note that $j(p)$ is a fixed point for all $p\in P$, since $j(j(p))\cong j(p)$.
+
+We define an adjunction with left adjoint $j\colon P \to
+\Set{fix}_j$ sending $p$ to $j(p)$, and right adjoint $g\colon \Set{fix}_j
+\to P$ simply the inclusion of the sub-preorder. To see it's really an adjunction, we need to see that for any $p \in P$ and $q \in \Set{fix}_j$, we have $j(p) \le q$ if and only if $p \le q$. Let's check it. Since $p \le j(p)$, we have that $j(p) \le q$ implies $p \le q$ by transitivity.
+Conversely, since $q$ is a fixed point, $p \le q$ implies $j(p) \le j(q)\cong q$.
+\end{example}
+
+\begin{example}%
+\label{ex.modal_operator}%
+\index{logic}
+Another example of closure operators comes from logic. This will be discussed in the final chapter of the book, in particular \cref{subsec.modalities}, but we will give a quick overview here. In essence, logic is the study of when one formal statement---or proposition---implies another. For example, if $n$ is prime then $n$ is not a multiple of $6$, or if it is raining then the ground is getting wetter. Here ``$n$ is prime'', ``$n$ is not a multiple of $6$'', ``it is raining'', and ``the ground is getting wetter'' are propositions, and we gave two implications.
+
+Take the set of all propositions, and order them by $p\leq q$ iff $p$ implies $q$, denoted $p\imp q$. Since $p\imp p$ and since whenever $p\imp q$ and $q\imp r$, we also have $p\imp r$, this is indeed a preorder.
+
+A closure operator on it is often called a \emph{modal operator}. It is a function $j$
+from propositions to propositions, for which $p\imp j(p)$ and $j(j(p))= j(p)$. An
+example of a $j$ is ``assuming Bob is in San Diego....'' Think of this as a proposition $B$; so ``assuming Bob is in San Diego, $p$'' means $B\imp p$. Let's see why $B\imp -$ is a closure operator.
+
+If `$p$' is true then
+``assuming Bob is in San Diego, $p$'' is still true. Suppose that ``assuming Bob
+is in San Diego it is the case that, assuming Bob is in San Diego, $p$' is true.''
+It follows that ``assuming Bob is in San Diego, $p$'' is true. So we have seen, at least informally, that ``assuming Bob is in San Diego...'' is a closure operator.
+\end{example}
+%
+\index{closure operator|)}
+
+%---- Subsection ----%
+\subsection{Level shifting} %
+\label{ssec.level_shift}%
+\index{level shift}\index{level shift|seealso {primordial ooze}}
+
+The last thing we want to discuss in this chapter is a phenomenon that happens often in category theory, something we might informally call ``level-shifting.'' It is easier to give an example of this than to explain it directly.
+
+Given any set $S$, there is a set $\Cat{Rel}(S)$ of binary relations on $S$. An element $R\in\Cat{Rel}(S)$ is formally a subset $R\ss S\times S$. The set $\Cat{Rel}(S)$ can be given an order via the subset relation, $R\ss R'$, i.e.\ if whenever $R(s_1,s_2)$ holds then so does $R'(s_1,s_2)$.%
+\index{relation!binary}
+
+For example, the Hasse diagram for $\Cat{Rel}(\{1\})$ is:
+\[
+\begin{tikzcd}
+	\LMO{\varnothing}\ar[r]& 	\LMO{\{(1,1)\}}
+\end{tikzcd}
+\]
+%
+\index{Hasse diagram}
+
+\begin{exercise}%
+\label{exc.Hasse_binary12}
+Draw the Hasse diagram for the preorder $\Cat{Rel}(\{1,2\})$ of all binary relations on the set $\{1,2\}$.
+\end{exercise}
+
+For any set $S$, there is also a set $\Cat{Pos}(S)$,
+consisting of all the preorder relations on $S$. In fact there is a preorder
+structure $\sqsubseteq$%
+\label{page.order_preorder} on $\Cat{Pos}(S)$, again given by inclusion: $\leq$
+is below $\leq'$ (we'll write $\leq\sqsubseteq\leq')$ if $a\leq b$ implies $a\leq' b$ for every $a,b\in S$. A preorder of preorder structures? That's what we mean by a level shift.
+
+Every preorder relation is---in particular---a relation, so we have an inclusion
+$\Cat{Pos}(S)\to\Cat{Rel}(S)$. This is the right adjoint of a Galois connection.%
+\index{adjunction!examples of}
+Its left adjoint is a monotone map
+$\mathrm{Cl}\colon\Cat{Rel}(S)\to\Cat{Pos}(S)$ given by taking any relation $R$, writing it in infix notation using $\leq$, and
+taking the reflexive and transitive closure, i.e.\ adding $s\leq s$ for every
+$s$ and adding $s\leq u$ whenever $s\leq t$ and $t\leq u$.%
+\index{relation!free preorder on}
+
+\begin{exercise}%
+\label{exc.understand_adj}%
+\index{adjunction}
+	Let $S=\{1,2,3\}$. Let's try to understand the adjunction discussed above.
+	\begin{enumerate}
+		\item Come up with any preorder relation $\leq$ on $S$, and define $U(\leq)$ to be the subset $U(\leq)\coloneqq\{(s_1,s_2)\mid s_1\leq s_2\}\ss S\times S$, i.e.\ $U(\leq)$ is the image of $\leq$ under the inclusion $\Cat{Pos}(S)\to\Cat{Rel}(S)$, the relation `underlying' the preorder.
+		\item Come up with any two binary relations $Q\ss S\times S$ and $Q'\ss S\times S$ such that $Q\ss U(\leq)$ but $Q'\not\ss U(\leq)$. Note that your choice of $Q,Q'$ do not have to come from preorders.
+	\end{enumerate}
+	We now want to check that in this case, the closure operation $\Fun{Cl}$ is really left adjoint to the `underlying relation' map $U$.
+	\begin{enumerate}[resume]
+		\item Concretely (without using the assertion that there is some sort of adjunction), show that $\Fun{Cl}(Q)\sqsubseteq\;\leq$, where $\sqsubseteq$ is the order on $\Cat{Pos}(S)$, defined immediately above this exercise.
+		\item Concretely show that $\Fun{Cl}(Q')\not\sqsubseteq\;\leq$.
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+%
+\index{Galois connection|)}%
+\index{adjunction!of preorders|)}
+%-------- Section --------%
+\section{Summary and further reading}%
+\label{ch1.further_reading}
+
+In this first chapter, we set the stage for category theory by introducing
+one of the simplest interesting sorts of example: preorders. From this seemingly
+simple structure, a bunch of further structure emerges:
+monotone maps, meets, joins, and more. In terms of modeling real world phenomena, we
+thought of preorders as the states of a system, and monotone maps as describing a
+way to use one system to observe another. From this point of view, generative
+effects occur when observations of the whole cannot be deduced by combining observations of the parts.
+
+In the final section we introduced Galois connections. A Galois connection, or adjunction, is a pair of maps that are like inverses, but allowed to be more ``relaxed'' by getting the orders involved. Perhaps
+surprisingly, it turns out adjunctions are closely related to joins and meets:
+if a preorder $P$ has all joins, then a monotone map out of $P$ is a left adjoint if and only if it preserves joins; similarly for meets and right adjoints.
+
+The next two chapters build significantly on this material, but in two different
+directions. \cref{chap.resource_theory} adds a new operation on the underlying
+set: it introduces the idea of a monoidal structure on preorders. This allows us to
+construct an element $a \otimes b$ of a preorder $P$ from any elements $a, b \in
+P$, in a way that respects the order. On the other hand,
+\cref{chap.databases} adds new structure on the order itself: it introduces the
+idea of a morphism, which describes not only whether $a \le b$, but gives a name
+$f$ for how $a$ relates to $b$. This structure is known as a category.
+These generalizations are both fundamental to the story of compositionality, and
+in \cref{chap.codesign} we'll see them meet in the concept of a monoidal
+category.  The lessons we have learned in this chapter will illuminate the
+more highly-structured generalizations in the chapters to come.  Indeed, it is a
+useful principle in studying category theory to try to understand concepts first
+in the setting of preorders---where often much of the complexity is stripped away
+and one can develop some intuition---before considering the general case.
+
+But perhaps you might be interested in exploring some ideas in this chapter in
+other directions. While we won't return to them in this book, we learned about
+generative effects from Elie Adam's thesis \cite{Adam:2017a}, and a much richer
+treatment of generative effect can be found there. In particular, he discusses abelian categories and cohomology, providing a way to
+detect generative effects in quite a general setting.%
+\index{generative effect}
+
+Another important application of preorders, monotone maps, and Galois connections
+is to the analysis of programming languages. In this setting, preorders describe
+the possible states of a computer, and monotone maps describe the action of
+programs, or relationships between different ways of modeling computation
+states. Galois connections are useful for showing how different models may be closely
+related, and for transporting program analysis from one framework to another.
+For more detail on this, see Chapter 4 of the textbook
+\cite{Nielson:1999:PPA:555142}.%
+\index{program semantics}
+
+
+\end{document}

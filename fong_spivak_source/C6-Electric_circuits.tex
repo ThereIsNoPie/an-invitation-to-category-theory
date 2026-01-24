@@ -1,0 +1,3881 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+
+\setcounter{chapter}{5}%Just finished 5.
+%------------ Chapter ------------%
+\chapter[Circuits: hypergraph categories and operads]{Electric circuits:\\Hypergraph categories and operads}%
+\label{chap.hypergraph_cats}
+
+%\settocdepth{subsubsection}
+%\tableofcontents*
+
+%-------- Section --------%
+\section{The ubiquity of network languages}%
+\index{network!diagram}
+
+Electric circuits, chemical reaction networks, finite state automata, Markov
+processes: these are all models of physical or computational systems that are
+commonly described using network diagrams. Here, for example, we draw a diagram
+that models a flip-flop, an electric circuit---important in computer
+memory---that can store a bit of information:%
+\index{flip-flop}
+\index{electric circuit}
+\[
+\tikzset{int/.style={draw, fill, circle, inner sep=1pt}}
+\begin{circuitikz}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic,xscale=2,yscale=1,thick]
+\coordinate (1) at (.8,0) {};
+\coordinate (2) at (2,0) {};
+\coordinate (3) at (3,0) {};
+\coordinate (4) at (4,0) {};
+\coordinate (5) at (5,0) {};
+\coordinate (z) at (0,2.5) {};
+\coordinate (a) at (0,2) {};
+\coordinate (b) at (0,.7) {};
+\coordinate (c) at (0,0) {};
+\coordinate (d) at (0,-.7) {};
+\coordinate (e) at (0,-2) {};
+\coordinate (f) at (0,-2.5) {};
+%transistors
+\node[npn,rotate=90] at (a-|3) (t1){};
+\node[npn,xscale=-1,rotate=-90] at (e-|3) (t2){};
+\node[npn,xscale=-1,rotate=-90] at (b-|4) (t3){};
+\node[npn,rotate=90] at (d-|4) (t4){};
+%connections
+\node[draw, circle, inner sep=1pt] (source) at (.6,0) {};
+\node at (.4,0) {\small $V_S$};
+\node[draw, circle, inner sep=1pt, "\tiny \textrm{OUTPUT}"] (out) at (z-|2) {};
+\node[draw, circle, inner sep=1pt, label={[label distance=-1.5pt, below]\tiny
+$\overline{\mathrm{OUTPUT}}$}] (out2) at (f-|2) {};
+\node[draw, circle, inner sep=1pt, "\tiny \textrm{SET}"] (set) at (z-|4) {};
+\node[draw, circle, inner sep=1pt, "\tiny \textrm{RESET}" below] (reset) at (f-|4) {};
+\node[ground, scale=.6] (ground) at ($(5)+(.25,0)$) {};
+%intersections
+\node[int] at (a-|2) {};
+\node[int] at (e-|2) {};
+\node[int] at (b-|3) {};
+\node[int] at (d-|3) {};
+\node[int] at (b-|5) {};
+\node[int] at (d-|5) {};
+\draw
+(source) to (c-|1)
+(a-|1) to (e-|1)
+(a-|1) to[resistor] node[label={[label distance=0pt]90:{\tiny$1K\Omega$}}] {} (a-|2)
+(e-|1) to[resistor] node[label={[label distance=0pt]90:{\tiny$1K\Omega$}}] {} (e-|2)
+(a-|2) to[resistor] node[label={[label distance=-1pt]180:{\tiny$10K\Omega$}}]{}(b-|2)
+(e-|2) to[resistor] node[label={[label distance=-1pt]180:{\tiny$10K\Omega$}}]{}(d-|2)
+(b-|2) to (d-|3)
+(d-|2) to (b-|3)
+(b-|3) to (t1.B)
+(d-|3) to (t2.B)
+(a-|2) to (t1.C)
+(e-|2) to (t2.C)
+(t1.E) to (a-|5) to (c-|5)
+(t2.E) to (e-|5) to (c-|5)
+(b-|3) to (t3.C)
+(t3.E) to (b-|5)
+(t3.B) to (set)
+(d-|3) to (t4.C)
+(t4.E) to (d-|5)
+(t4.B) to (reset)
+(a-|2) to (out)
+(e-|2) to (out2)
+(c-|5) to (ground)
+	;
+\end{circuitikz}
+\]
+
+Network diagrams have time-tested utility. In this chapter, we are interested in
+understanding the common mathematical structure that they share, for the
+purposes of translating between and unifying them; for example certain types of
+Markov processes can be simulated and hence solved using circuits of resisters.
+When we understand the underlying structures that are shared by network diagram languages, we can make comparisons between the corresponding mathematical models easily.
+
+At first glance network diagrams appear quite different from the wiring diagrams
+we have seen so far.  For example, the wires are undirected in the case above,
+whereas in a category---including monoidal categories seen in resource theories or co-design---every
+morphism has a domain and codomain, giving it a sense of direction. Nonetheless, we shall see how to use
+categorical constructions such as universal properties to create categorical
+models that precisely capture the above type of ``network'' compositionality, i.e.\ allowing us to effectively drop directedness when convenient.
+
+In particular we'll return to the idea of a colimit, which we sketched for you
+at the end of \cref{chap.databases}, and show how to use colimits in the
+category of sets to formalize ideas of connection. Here's the key idea.
+
+\paragraph{Connections via colimits.}%
+\index{colimit|(}%
+\index{electrical circuit}
+Let's say we want to install some lights: we want to create a circuit so that
+when we flick a switch, a light turns on or off. To start, we have a bunch of
+circuit components: a power source, a switch, and a lamp connected to a resistor:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+\node (1) at (1,0) {};
+\coordinate (2) at (4,0) {};
+\node (3) at (7,0) {};
+\node (5) at (0,1) {};
+\node (6) at (3,1) {};
+\node (7) at (5,1) {};
+\node (8) at (8,1) {};
+\draw (1) to [bulb] (2);
+\draw (2) to [resistor] (3);
+\draw (5) to [battery] (6);
+\draw (7) to [make contact] (8);
+\end{tikzpicture}
+\]
+We want to connect them together, but there are many ways to do so. How should we describe the particular way that will form a light
+switch?%
+\index{interconnection}
+
+First, we claim that circuits should really be thought of as open circuits: each
+carries the additional structure of an `interface' exposing it to the rest of the electrical world.%
+\index{interface}%
+\index{open system} Here by \emph{interface} we mean a certain set of locations, or \emph{ports}, at which we are able to connect them with other components.%
+\footnote{If your circuit has no such ports, it still falls within our purview, by taking its interface to be the empty set.}
+As is so common in category
+theory, we begin by making this more-or-less obvious fact explicit.  Let's
+depict the available ports using a bold $\bullet$. If we say that in the each of the three drawings above, the 
+ports are simply the dangling end points of the wires, they would be redrawn as follows:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+  \node [contact] (1) at (1,0) {};
+  \coordinate (2) at (4,0) {};
+  \node [contact] (3) at (7,0) {};
+  \node [contact] (5) at (0,1) {};
+  \node [contact] (6) at (3,1) {};
+  \node [contact] (7) at (5,1) {};
+  \node [contact] (8) at (8,1) {};
+  \draw (1) to [bulb] (2);
+  \draw (2) to [resistor] (3);
+  \draw (5) to [battery] (6);
+  \draw (7) to [make contact] (8);
+\end{tikzpicture}
+\]
+Next, we have to describe which ports should be connected. We'll do this by
+drawing empty circles $\circ$ connected by arrows to two ports $\bullet$. Each will be a witness-to-connection, saying
+`connect these two!' 
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+  \node [contact] (1) at (1,0) {};
+  \coordinate (2) at (4,0) {};
+  \node [contact] (3) at (7,0) {};
+  \node [contact] (5) at (0,1) {};
+  \node [contact] (6) at (3,1) {};
+  \node [contact] (7) at (5,1) {};
+  \node [contact] (8) at (8,1) {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,1) {};
+  \node [draw, inner sep=1.5pt,circle] (c) at (8,0) {};
+  \draw (1) to [bulb] (2);
+  \draw (2) to [resistor] (3);
+  \draw (5) to [battery] (6);
+  \draw (7) to [make contact] (8);
+  \begin{scope}[function, blue]
+    \draw (a) to (5);
+    \draw (b) to (7);
+    \draw (c) to (3);
+    \draw (a) to (1);
+    \draw (b) to (6);
+    \draw (c) to (8);
+  \end{scope}
+\end{tikzpicture}
+\]
+Looking at this picture, it is clear what we need to do: just identify---i.e.\ \emph{merge} or \emph{make equal}---the ports as indicated, to get the following circuit:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+  \coordinate (1) at (1,0) {};
+  \coordinate (2) at (4,0) {};
+  \coordinate (3) at (7,0) {};
+  \coordinate (4) at (1,1) {};
+  \coordinate (5) at (4,1) {};
+  \coordinate (6) at (7,1) {};
+  \draw (1) to [bulb] (2);
+  \draw (2) to [resistor] (3);
+  \draw (4) to [battery] (5);
+  \draw (5) to [make contact] (6);
+  \draw (1) -- (4);
+  \draw (3) -- (6);
+\end{tikzpicture}
+\]
+
+But mathematics doesn't have a visual cortex with which to generate the intuitions we can count on with a human reader such as yourself.%
+\footnote{Unless the future has arrived since the writing of this book.}
+Thus we need to specify formally what `identifying ports as indicated' means mathematically. As it turns out, we can do this using finite colimits in a given category $\cat{C}$.%
+\index{future!as not yet arrived}
+
+Colimits are diagrams with certain universal properties, which is kind of an
+epiphenomenon of the category $\cat{C}$. Our goal is to obtain $\cat{C}$'s
+colimits more directly, as a kind of operation in some context, so that we can think of them as
+telling us how to connect circuit parts together. To that end, we produce a
+certain monoidal category---namely that of \emph{cospans in $\cat{C}$}, denoted
+$\cospan{\cat{C}}$---that can conveniently package $\cat{C}$'s colimits in terms
+of its own basic operations: composition and monoidal product.
+
+In summary, the first part of this chapter is devoted to the slogan `colimits
+model interconnection'. In addition to universal constructions such as colimits,
+however, another way to describe interconnection is to use wiring diagrams. We go full circle when we find that these wiring diagrams are strongly connected to cospans, and hence colimits.%
+\index{connection!as colimit}
+
+\paragraph{Composition operations and wiring diagrams.}%
+\index{wiring diagram!styles of}
+In this book we have seen the utility of defining syntactic or algebraic
+structures that describe the sort of composition operations that make sense and
+can be performed in a given application area. Examples include monoidal preorders with
+discarding, props, and compact closed categories. Each of these has an
+associated sort of wiring diagram style, so that any wiring diagram of that
+style represents a composition operation that makes sense in the given area: the
+first makes sense in manufacturing, the second in signal flow, and the third in
+collaborative design. So our second goal is to answer the question, ``how do we
+describe the compositional structure of network-style wiring diagrams?''
+%
+\index{interconnection!network-type}
+
+Network-type interconnection can be described using something called a hypergraph category. Roughly speaking, these are categories whose
+wiring diagrams are those of symmetric monoidal categories together with, for
+each pair of natural numbers $(m,n)$, an icon $s_{m,n}\colon m \to n$. These
+icons, known as \emph{spiders},%
+\footnote{Our spiders have any number of legs.}
+are drawn as follows:%
+\index{spider}%
+\index{icon}
+\[
+\begin{tikzpicture}[spider diagram]
+	\node[spider={4}{5}, fill=black] (a) {};
+\end{tikzpicture}
+\]
+Two spiders can share a leg, and when they do, we can fuse them into one spider.
+The intuition is that spiders are connection points for a number of wires, and
+when two connection points are connected, they fuse to form an even more
+`connect-y' connection point. Here is an example:%
+\index{icon!spider}
+\[
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={3}{4}, fill=black] (a) {};
+	\node[spider={3}{2}, fill=black, below right=.3 and 1.5 of a] (b) {};
+	\draw (a_out1) to (b_out1|-a_out1);
+	\draw (a_out2) to (b_out1|-a_out2);
+	\draw (a_out3) to (b_in1);
+	\draw (a_out4) to (b_in2);
+	\draw (a_in1|-b_in3) to (b_in3);
+\end{tikzpicture}
+\end{aligned}
+\;
+=
+\;
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={4}{4}, fill=black] (a) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+A hypergraph category may have many species of spiders with the rule that spiders of different species cannot share a leg---and hence not fuse---but two spiders of the same species can share legs and fuse. We add spider diagrams to the iconography of hypergraph categories.%
+\index{spider!as iconography}%
+\index{icon!spider}
+
+As we shall see, the ideas of describing network interconnection using colimits
+and hypergraph categories come together in the notion of a theory. We
+first introduced the idea of a theory in \cref{ssec.alg_theories}, but here we
+explore it more thoroughly, starting with the idea that, approximately speaking,
+cospans in the category $\finset$ form the theory of hypergraph categories.
+
+We can assemble all cospans in $\finset$ into something called an `operad'.%
+\index{operad} Throughout this book we have talked about using free structures
+and presentations to create instances of algebraic structures such as preorders,
+categories, and props, tailored to the needs of a particular situation. Operads
+can be used to tailor the algebraic structures \emph{themselves} to the needs of
+a particular situation. We will discuss how this works, in particular how
+operads encode various sorts of wiring diagram languages and corresponding
+algebraic structures, at the end of the chapter.%
+\index{operad!as custom compositionality}
+
+%In \cref{chap.SFGs} we talked about using free structures and presentations to
+%construct categories tailored to the needs of a particular situation. In this
+%chapter we introduce another idea: first as decorated cospans, secondly as
+%algebras for a theory of composition.
+
+%An open electric circuit, as far as the electrical behavior is concerned, is
+%a box with a bunch of ports to which other circuits can be connected:
+%\[
+%\begin{tikzpicture}[oriented WD, bb port length =3ex]
+%  \node[bb={4}{5},minimum width=.2\textwidth] (bb) {};
+%  \foreach \i in {1,...,4}{
+%  \node[contact] at (bb_in\i) (bbin\i) {};}
+%  \foreach \i in {1,...,5}{
+%  \node[contact] at (bb_out\i) (bbout\i) {};}
+%	\node[above = 0.6 of bbin1] (A) {$A$};
+%	\node at (A-|bbout1) {$B$};
+%\end{tikzpicture}
+%\]
+
+%-------- Section --------%
+\section{Colimits and connection}%
+\label{sec.colims_connection}
+
+Universal constructions are central to category theory. They allow us to define
+objects, at least up to isomorphism, by describing their relationship with other
+objects. So far we have seen this theme in a number of different forms: meets and joins (\cref{sec.meets_joins}), Galois
+connections and adjunctions (\cref{sec.galois_connections,sec.adjunctions_mig}),
+limits (\cref{sec.bonus_lims_colims}), and free and presented structures
+(Section~\ref{sec.free_constructions}-\ref{sec.prop_presentations}).  Here we turn our attention to colimits.
+%
+\index{universal property}
+
+In this section, our main task is to have a concrete understanding of colimits
+in the category $\finset$ of finite sets and functions. The idea will be to take
+a bunch of sets---say two or fifteen or zero---use functions between them to
+designate that elements in one set `should be considered the same' as elements
+in another set, and then merge the sets together accordingly.
+
+%---- Subsection ----%
+\subsection{Initial objects} %
+\index{initial object|(}%
+\index{colimit!initial object as}
+
+Just as the simplest limit is a terminal object (see
+\cref{subsec.terminals_products}), the simplest colimit is an initial object.
+This is the case where you start with no objects and you merge them together.
+
+\begin{definition}%
+\label{def.initial_obj}%
+\index{initial object}
+  Let $\cat C$ be a category. An \emph{initial object} in $\cat C$ is an object
+  $\varnothing\in\cat{C}$ such that for each object $T$ in $\cat C$ there exists a unique
+  morphism $!_T\colon \varnothing \to T$.
+\end{definition}
+
+The symbol $\varnothing$ is just a default name, a notation, intended to evoke
+the right idea; see \cref{ex.empty_set} for the reason why we use the notation
+$\varnothing$, and \cref{exc.rig_initial_obj} for a case when the default name
+$\varnothing$ would probably not be used.
+
+Again, the hallmark of universality is the existence of a unique map to any
+other comparable object. 
+
+
+\begin{example}
+  An initial object of a preorder is a bottom element---that is, an element that is
+  less than every other element. For example $0$ is the initial object in $(\nn,\leq)$, whereas $(\rr,\leq)$ has no initial object.
+\end{example}
+
+\begin{exercise}%
+\label{exc.initial_ob_practice}
+Consider the set $A=\{a,b\}$. Find a preorder relation $\leq$ on $A$ such that
+\begin{enumerate}
+	\item $(A,\leq)$ has no initial object.
+	\item $(A,\leq)$ has exactly one initial object.
+	\item $(A,\leq)$ has two initial objects.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{example} %
+\label{ex.empty_set}
+  The initial object in $\finset$ is the empty set. Given any finite set $T$,
+  there is a unique function $\varnothing \to T$, since $\varnothing$ has no
+  elements.%
+\index{initial object!empty set as}
+\end{example}
+
+\begin{example}
+As seen in \cref{exc.initial_ob_practice}, a category $\cat{C}$ need not have an initial object. As a different sort of example, consider the category
+shown here:
+\[
+\cat{C}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, shift left, "f"]\ar[r, shift right, "g"']\&\LMO{B}
+\end{tikzcd}
+}
+\]
+If there were to be an initial object $\varnothing$, it would either be $A$ or $B$. Either way, we need to show that for each object $T\in\Ob(\cat{C})$ (i.e.\ for both $T=A$ and $T=B$) there is a unique morphism $\varnothing\to T$. Trying the case $\varnothing=^?A$ this condition fails when $T=B$: there are two morphisms $A\to B$, not one. And trying the case $\varnothing=^?B$ this condition fails when $T=A$: there are zero morphisms $B\to A$, not one.
+\end{example}
+
+\begin{exercise} %
+\label{exc.initial_object}
+For each of the graphs below, consider the free category on that graph, and say whether it has an initial object.\\
+\begin{enumerate*}[itemjoin=\hspace{.8in}]
+	\item \fbox{$\LMO{a}$}
+	\item \fbox{$\LMO{a}\to\LMO{b}\to\LMO{c}$}
+	\item \fbox{$\LMO{a}\qquad\LMO{b}$}
+	\item \fbox{$\begin{tikzcd}\LMO{a}\ar[loop right]\end{tikzcd}$}
+	\qedhere
+\end{enumerate*}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.rig_initial_obj}
+Recall the notion of rig from \cref{chap.SFGs}. A \emph{rig homomorphism} from $(R,0_R,+_R,1_R,*_R)$ to $(S,0_S,+_S,1_S, *_S)$ is a function $f\colon R\to S$ such that $f(0_R)=0_S$, $f(r_1+_Rr_2)=f(r_1)+_Sf(r_2)$, etc.
+\begin{enumerate}
+	\item We said ``etc.'' Guess the remaining conditions for $f$ to be a rig homomorphism.
+	\item Let $\Cat{Rig}$ denote the category whose objects are rigs and whose morphisms are rig homomorphisms. We claim $\Cat{Rig}$ has an initial object. What is it?
+	\qedhere
+\end{enumerate}	
+\end{exercise}
+
+
+\begin{exercise} %
+\label{exc.universality}
+Explain the statement ``the hallmark of universality is the existence of a
+unique map to any other comparable object,'' in the context of
+\cref{def.initial_obj}. In particular, what is being universal in \cref{def.initial_obj}, and which is the ``comparable object''?
+\end{exercise}
+
+\begin{remark}
+As mentioned in \cref{rem.the_vs_a}, we often speak of `the' object that
+satisfies a universal property, such as `the initial object', even though many
+different objects could satisfy the initial object condition. Again, the reason
+is that initial objects are unique up to unique isomorphism: any two initial
+objects will have a canonical isomorphism between them, which one finds using various applications of the universal
+property.
+
+%This sort of thing will work for any sort of universal object---in particular
+%any sort of  colimit---that exists in a category. To be more precise, we will soon construct colimits for more general diagrams (above the diagram was empty). In each case, there may be many objects $A,B,C$, etc.\ that satisfy the universal property of the colimit, but we can always point to an isomorphism comparing any two of them. 
+%
+%Having these ready-made isomorphisms in hand lets us informally consider two
+%universal objects `the same', and just talk of `the' universal object.
+\end{remark}
+
+\begin{exercise}%
+\label{exc.initials_are_isomorphic}
+Let $\cat{C}$ be a category, and suppose that $c_1$ and $c_2$ are initial objects. Find an isomorphism between them, using the universal property from \cref{def.initial_obj}.
+\end{exercise}
+
+%
+\index{initial object|)}
+
+%---- Subsection ----%
+\subsection{Coproducts} %
+\index{coproduct|(}%
+\index{colimit!coproduct as}
+
+Coproducts generalize both joins in a preorder and disjoint unions of sets.%
+\index{union!disjoint}%
+\index{disjoint union|see {union, disjoint}}
+
+\begin{definition}%
+\label{def.coproduct}%
+\index{coproduct}
+  Let $A$ and $B$ be objects in a category $\cat C$. A \emph{coproduct} of $A$
+  and $B$ is an object, which we denote $A+B$, together with a pair of morphisms $(\iota_A \colon A \to A+B,
+  \iota_B \colon B \to A+B)$ such that for all objects $T$ and pairs of morphisms $(f\colon A \to T,
+  g \colon B \to T)$, there exists a unique morphism $\copair{f,g}\colon A+B \to T$ such that the following diagram commutes:
+  \begin{equation}%
+\label{eqn.universal_prop_coprod}
+    \begin{tikzcd}
+      A \ar[r,"\iota_A"] \ar[dr,"f"'] & A+B \ar[d, pos=.4, dashed,"\copair{f,g}"] & B
+      \ar[l,"\iota_B"'] \ar[dl, "g"] \\[10pt]
+      & T
+    \end{tikzcd}
+  \end{equation}
+  We call $\copair{f,g}$ the \emph{copairing} of $f$ and $g$.
+\end{definition}
+
+\begin{exercise}%
+\label{exc.join_as_coproduct}%
+\index{join!as coproduct}
+  Explain why, in a preorder, coproducts are the same as joins.
+\end{exercise}
+
+\begin{example} %
+\label{ex.setcoproduct}
+  Coproducts in the categories $\finset$ and $\smset$ are disjoint unions. More
+  precisely, suppose $A$ and $B$ are sets. Then the coproduct of $A$ and $B$ is
+  given by the disjoint union $A\dju B$ together with the inclusion functions
+  $\iota_A\colon A \too A \dju B$ and $\iota_B \colon B \to A\dju B$.
+\begin{equation}%
+\label{eqn.apples_oranges_again}
+\begin{tikzpicture}[y=.8ex, rounded corners, baseline=(sq)]
+	\node (a1) {$\LTO{apple}$};
+	\node [below=1 of a1] (a2) {$\LTO{banana}$};
+	\node [below=1 of a2] (a3) {$\LTO{pear}$};
+	\node [below=1 of a3] (a4) {$\LTO{cherry}$};
+	\node [below=1 of a4] (a5) {$\LTO{orange}$};
+	\node [draw, inner ysep=0pt, fit=(a1) (a5)] (a) {};
+	\node [above=0 of a] (alab) {$A$};
+%
+	\node [right=2 of a2] (b1) {$\LTO{apple}$};
+	\node [below=1 of b1] (b2) {$\LTO{tomato}$};
+	\node [below=1 of b2] (b3) {$\LTO{mango}$};
+	\node [draw, inner ysep=0pt, fit=(b1) (b3)] (b) {};	
+	\node [above=0 of b] {$B$};
+%
+	\node at ($(a)!.5!(b)$) (sq) {$\sqcup$};
+%
+	\node [right=5 of a1] (x11) {$\LTO{apple1}$};
+	\node [below=1 of x11] (x12) {$\LTO{banana1}$};
+	\node [below=1 of x12] (x13) {$\LTO{pear1}$};
+	\node [below=1 of x13] (x14) {$\LTO{cherry1}$};
+	\node [below=1 of x14] (x15) {$\LTO{orange1}$};
+	\node [right=1 of x12] (x21) {$\LTO{apple2}$};
+	\node [below=1 of x21] (x22) {$\LTO{tomato2}$};
+	\node [below=1 of x22] (x23) {$\LTO{mango2}$};
+	\node [draw, inner ysep=0pt, fit=(x11) (x21) (x15) (x23)] (x) {};	
+	\node [above=0 of x] {$A\sqcup B$};
+%
+	\node at ($(b.east)!.5!(x.west)$) {$=$};
+%
+	\begin{scope}[mapsto, bend left=10pt]
+  	\draw (a1) to (x11);
+  	\draw (a2) to (x12);
+  	\draw (a3) to (x13);
+  	\draw (a4) to (x14);
+  	\draw (a5) to (x15);
+	\end{scope}
+	\begin{scope}[mapsto, red, bend right=15pt]
+  	\draw (b1) to (x21);
+  	\draw (b2) to (x22);
+  	\draw (b3) to (x23);
+	\end{scope}
+	
+\end{tikzpicture}
+\end{equation}
+  
+  Suppose we have functions $f\colon A \to T$ and $g\colon B \to T$ for some other set
+  $T$, unpictured. The universal property of coproducts says there is a unique function $\copair{f,g}\colon A\dju B
+  \to T$ such that $\iota_A\cp \copair{f,g} =f$ and $\iota_B \cp \copair{f,g} =g$. What is
+  it? Any element $x\in A\dju B$ is either `from $A$' or `from $B$', i.e.\ either there is some $a\in A$ with $x=\iota_A(a)$ or there is some $b\in B$ with $x=\iota_B(b)$. By \cref{eqn.universal_prop_coprod}, we must have:
+  \[
+    \copair{f,g}(x) = 
+    \begin{cases}
+      f(x) & \mbox{if } x=\iota_A(a) \mbox{ for some }a \in A; \\
+      g(x) & \mbox{if } x=\iota_B(b) \mbox{ for some }b \in B.
+    \end{cases}
+    \qedhere
+  \]
+\end{example}
+
+\begin{exercise} %
+\label{exc.copairing}
+	Suppose $T=\{a,b,c,\ldots,z\}$ is the set of letters in the alphabet,
+	and let $A$ and $B$ be the sets from \cref{eqn.apples_oranges_again}.
+	Consider the function $f\colon A\to T$ sending each element of $A$ to
+	the first letter of its label, e.g.\ $f(\mathrm{apple})=a$. Let $g\colon
+	B\to T$ be the function sending each element of $B$ to the last letter
+	of its label, e.g.\ $g(\mathrm{apple})=e$. Write down the function
+	$\copair{f,g}(x)$ for all eight elements of $A\sqcup B$.
+\end{exercise}
+  
+\begin{exercise} %
+\label{exc.coprod_properties}
+  Let $f \colon A \to C$, $g \colon B \to C$, and $h\colon C \to D$ be morphisms
+  in a category $\cat{C}$ with coproducts. Show that
+  \begin{enumerate}
+  \item $\iota_A \cp \copair{f,g} = f$.
+  \item $\iota_B \cp \copair{f,g} = g$.
+  \item $\copair{f,g}\cp h = \copair{f \cp h,g\cp h}$.
+  \item $\copair{\iota_A,\iota_B} = \id_{A+B}$.
+  \qedhere
+  \end{enumerate}
+\end{exercise}
+
+\begin{exercise} %
+\label{exc.coproducts_give_monoidal_structure}
+Suppose a category $\cat C$ has coproducts, denoted $+$, and an initial object,
+denoted $\varnothing$. Then $(\cat C,+,\varnothing)$ is a symmetric
+monoidal category (recall \cref{rdef.sym_mon_cat}). In this exercise we develop
+the data relevant to this fact: 
+\begin{enumerate}
+\item Show that $+$ extends to a functor $\cat C \times \cat C \to \cat C$. In particular, how does it act on morphisms in $\cat{C}\times\cat{C}$?
+\item Using the universal properties of the initial object and coproduct, show
+that there are isomorphisms $A+\varnothing \to A$ and $\varnothing +A \to A$.
+\item Using the universal property of the coproduct, write down morphisms
+\begin{enumerate}
+\item $(A+B)+C \to A+(B+C)$.
+\item $A+B \to B+A$.
+\end{enumerate}
+If you like, check that these are isomorphisms.
+\end{enumerate}
+It can then be checked that this data obeys the axioms of a symmetric monoidal
+category, but we'll end the exercise here.
+\end{exercise}
+
+%
+\index{coproduct|)}
+
+%---- Subsection ----%
+\subsection{Pushouts} %
+\index{pushout|(}
+
+Pushouts are a way of combining sets. Like a union of
+subsets, a pushout can combine two sets in a non-disjoint way: elements of one
+set may be identified with elements of the other. The pushout construction,
+however, is much more general: it allows (and requires) the user to specify
+exactly which elements will be identified. We'll see a demonstration of this
+additional generality in \cref{ex.pushouts_quotient}.
+
+\begin{definition}%
+\label{def.pushout}
+\index{pushout}%
+\index{colimit!pushout as}%
+\index{pushout!as colimit}
+  Let $\cat{C}$ be a category and let $f\colon A \to X$ and $g \colon A \to Y$ be morphisms in $\cat{C}$ that have a common domain. The \emph{pushout}
+  $X+_AY$ is the colimit of the diagram 
+  \[
+    \begin{tikzcd}[column sep=20pt]
+      A \ar[r,"f"] \ar[d,"g"'] & X \\
+      Y
+    \end{tikzcd}
+  \]
+\end{definition}
+  In more detail, a pushout consists of (i) an object $X+_AY$ and (ii) morphisms
+  $\iota_X\colon X \to X+_AY$ and $\iota_Y\colon Y \to X+_AY$ satisfying (a) and
+  (b) below.%(
+  \begin{enumerate}[label=(\alph*)]
+    \item The diagram
+  \begin{equation}%
+\label{eq.pushout_diagram}
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"g"'] & X \ar[d,"\iota_X"] \\
+      Y \ar[r,"\iota_Y"'] & X+_AY\ar[ul, phantom, very near start, "\ulcorner"]
+    \end{tikzcd}
+  \end{equation}
+  commutes. (We will explain the `$\ulcorner$' symbol below.)
+  \item For all objects $T$ and morphisms $x\colon X \to T$, $y\colon Y \to T$, if the diagram
+  \[
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"g"'] & X \ar[d,"x"] \\
+      Y \ar[r,"y"'] & T
+    \end{tikzcd}
+  \]
+  commutes, then there exists a unique morphism $t\colon X+_AY \to T$ such that
+  \begin{equation}%
+\label{eqn.univ_prop_pushout}
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"g"'] & X \ar[d,"\iota_X"] \ar[ddr,"x", bend left] \\
+      Y \ar[r,"\iota_Y"] \ar[drr,"y", bend right=20pt] & X+_AY \ar[dr,dashed, "t"] \\[-7pt]
+      &&[-15pt]T
+    \end{tikzcd}
+  \end{equation}
+  commutes.
+  \end{enumerate}
+  
+  If $X+_AY$ is a pushout, we denote that fact by drawing the commutative square \cref{eq.pushout_diagram}, together with the $\ulcorner$ symbol as shown; we call it a \emph{pushout square}.
+  
+  We further call $\iota_X$ the \emph{pushout of $g$ along $f$}, and similarly
+  $\iota_Y$ the \emph{pushout of $f$ along $g$}.
+
+  \begin{example}
+    In a preorder, pushouts and coproducts have a lot in common. The pushout of a diagram $B\from A\to C$ is equal to the coproduct $B\sqcup C$: namely, both are equal to the join $B\vee C$.
+  \end{example}
+
+\begin{example} %
+\label{ex.pushout_along_identity}%
+\index{pushout!along isomorphism}%
+\index{isomorphism!as stable under pushout}
+  Let $f \colon A \to X$ be a morphism in a category $\cat{C}$. For any isomorphisms $i\colon A\to A'$ and $j\colon X\to X'$, we can take $X'$ to be the pushout
+  $X+_AA'$, i.e.\ the following is a pushout square:
+  \[
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"i"'] & X \ar[d,"j"] \\
+      A' \ar[r,"f'"'] & X'\ar[ul, phantom, very near start, "\ulcorner"]
+    \end{tikzcd}
+  \]
+  where $f'\coloneqq i\inv\cp f\cp j$.   To see this, observe that if there is any object $T$ such that the following square commutes:
+  \[
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"i"'] & X \ar[d,"x"] \\
+      A' \ar[r,"a"'] & T
+    \end{tikzcd}
+  \]
+then $f\cp x = i\cp a$, and so we are forced to take $x'\colon X\to T$ to be $x'\coloneqq j\inv\cp x$. This makes the following diagram commute:
+  \[
+    \begin{tikzcd}
+      A \ar[r,"f"] \ar[d,"i"'] & X \ar[d,"j"] \ar[ddr,"x", bend left] \\
+      A' \ar[r,"f'"'] \ar[drr, bend right=20pt, "a"'] & X' \ar[dr,dashed, "x'"] \\[-7pt]
+      &&[-15pt]T
+    \end{tikzcd}
+  \]
+ because $f'\cp x'=i\inv\cp f\cp j\cp j\inv\cp x=i\inv\cp i\cp a=a$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.disc_cats_have_pushouts}
+For any set $S$, we have the discrete category $\Cat{Disc}_S$, with $S$ as objects and only identity morphisms.
+\begin{enumerate}
+	\item Show that all pushouts exist in $\Cat{Disc}_S$, for any set $S$.
+	\item For what sets $S$ does $\Cat{Disc}_S$ have an initial object?
+\qedhere
+\end{enumerate}
+\end{exercise}
+  
+\begin{example} %
+\label{ex.pushouts}
+  In the category $\finset$, pushouts always exist. The pushout of functions
+  $f\colon A \to X$ and $g \colon A \to Y$ is the set of equivalence classes of
+  $X \dju Y$ under the equivalence relation generated by---that is, the
+  reflexive, transitive, symmetric closure of---the relation $\{f(a)\sim g(a)\mid a\in A\}$.
+
+  We can think of this in terms of interconnection too. Each element $a\in A$ provides
+  a connection between $f(a)$ in $X$ and $g(a)$ in $Y$. The pushout is the set
+  of connected components of $X \dju Y$. 
+\end{example}
+
+\begin{exercise} %
+\label{exc.pushout}
+  What is the pushout of the functions $f\colon \ord{4} \to \ord{5}$ and $g\colon \ord{4} \to
+  \ord{3}$ pictured below?
+  \[ 
+    \begin{tikzpicture}[x=.6cm,y=.4cm, baseline=(3a), short=2pt]
+      \node at (2,-1.5) {$f\colon \ord{4} \to \ord{5}$};
+      \node[contact] at (0,3) (1) {};
+      \node[contact] at (0,2) (2) {};
+      \node[contact] at (0,1) (3) {};
+      \node[contact] at (0,0) (4) {};
+      \node[contact] at (4,3.5) (1a) {};
+      \node[contact] at (4,2.5) (2a) {};
+      \node[contact] at (4,1.5) (3a) {};
+      \node[contact] at (4,0.5) (4a) {};
+      \node[contact] at (4,-0.5) (5a) {};
+      \node[draw, rounded corners, inner xsep=7pt, inner ysep=4pt, fit=(1) (4)] (B) {};
+      \node[draw, rounded corners, inner xsep=7pt, inner ysep=4pt, fit=(1a) (5a)] (B) {};
+      \begin{scope}[mapsto]
+      	\draw (1) to (1a);
+      	\draw (2) to (1a);
+      	\draw (3) to (3a);
+      	\draw (4) to (5a);
+      \end{scope}
+    \end{tikzpicture}
+    \hspace{.25\textwidth}
+    \begin{tikzpicture}[x=.6cm,y=.4cm, baseline=(2a),short=2pt]
+      \node at (2,-1.35) {$g\colon \ord{4} \to \ord{3}$};
+      \node[contact] at (0,3) (1) {};
+      \node[contact] at (0,2) (2) {};
+      \node[contact] at (0,1) (3) {};
+      \node[contact] at (0,0) (4) {};
+      \node[contact] at (4,2.5) (1a) {};
+      \node[contact] at (4,1.5) (2a) {};
+      \node[contact] at (4,0.5) (3a) {};
+      \node[draw, rounded corners, inner xsep=7pt, inner ysep=4pt, fit=(1) (4)] (B) {};
+      \node[draw, rounded corners, inner xsep=7pt, inner ysep=4pt, fit=(1a) (3a)] (B) {};
+  %    
+      \begin{scope}[mapsto]
+      	\draw (1) to (1a);
+      	\draw (2) to (2a);
+      	\draw (3) to (3a);
+      	\draw (4) to (3a);
+      \end{scope}
+    \end{tikzpicture}
+    \qedhere
+  \]
+  Check your answer using the abstract description from \cref{ex.pushouts}.
+\end{exercise}
+
+\begin{example}%
+\label{ex.pushout_initial}
+Suppose a category $\cat{C}$ has an initial object $\varnothing$. For any two objects $X,Y\in\Ob\cat{C}$, there is a unique morphism $f\colon\varnothing\to X$ and a unique morphism $g\colon\varnothing\to Y$; this is what it means for $\varnothing$ to be initial.
+
+The diagram $X\From{f}\varnothing\To{g}Y$ has a pushout in $\cat{C}$ iff $X$ and $Y$ have a coproduct in $\cat{C}$, and the pushout and the coproduct will be the same. Indeed, suppose $X$ and $Y$ have a coproduct $X+ Y$; then the diagram to the left
+\[
+\begin{tikzcd}
+	\varnothing\ar[r,"f"]\ar[d,"g"']&X\ar[d,"\iota_X"]\\
+	Y\ar[r,"\iota_Y"']&X+ Y
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}
+	\varnothing\ar[r,"f"]\ar[d,"g"']&X\ar[d,"x"]\\
+	Y\ar[r,"y"']&T
+\end{tikzcd}
+\]
+commutes (why?$^1$), and for any object $T$ and commutative diagram as to the
+right, there is a unique map $X+ Y\to T$ making the diagram as in
+\cref{eqn.univ_prop_pushout} commute (why?$^2$). This shows that $X+ Y$ is
+a pushout, $X+_\varnothing Y\cong X+ Y$.
+
+Similarly, if a pushout $X+_\varnothing Y$ exists, then it satisfies the universal property of the coproduct (why?$^3$).
+\end{example}
+
+\begin{exercise} %
+\label{exc.pushout_initial}
+In \cref{ex.pushout_initial} we asked ``why?'' three times.
+\begin{enumerate}
+	\item Give a justification for ``why?$^1$''.
+	\item Give a justification for ``why?$^2$''.
+	\item Give a justification for ``why?$^3$''.	
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+
+\begin{example}%
+\label{ex.pushouts_quotient}
+Let $A=X=Y=\NN$. Consider the functions $f\colon A\to X$ and $g\colon A\to Y$ given by the `floor' functions, 
+$f(a)\coloneqq\floor{a/2}$ and $g(a)\coloneqq\floor{(a+1)/2}$.
+\[
+\begin{tikzpicture}[xscale=1.5,yscale=1.2]
+ \node at (-1.2,1) (x) {$X$};
+ \node at (-1.2,0) (a) {$A$};
+ \node at (-1.2,-1) (y) {$Y$};
+  \foreach \i in {0,...,5}{
+  \node at (\i,1) (x\i) {$\i$};
+  \node at (\i,0) (a\i) {$\i$};
+  \node at (\i,-1) (y\i) {$\i$};}
+  \node at (6,1) {$\cdots$};
+  \node at (6,0) {$\cdots$};
+  \node at (6,-1) {$\cdots$};
+  \draw[->] (a) to node[left] {\small $f$} (x);
+  \draw[->] (a) to node[left] {\small $g$} (y);
+  \begin{scope}[mapsto]
+  \draw (a0) to (x0);
+  \draw (a0) to (y0);
+  \draw (a1) to (x0);
+  \draw (a1) to (y1);
+  \draw (a2) to (x1);
+  \draw (a2) to (y1);
+  \draw (a3) to (x1);
+  \draw (a3) to (y2);
+  \draw (a4) to (x2);
+  \draw (a4) to (y2);
+  \draw (a5) to (x2);
+  \draw (a5) to (y3);
+  \end{scope}
+\end{tikzpicture}
+\]
+What is their pushout? Let's figure it out using the definition.
+
+If $T$ is any other set and we have maps $x\colon X\to T$ and $y\colon Y\to T$ that commute with $f$ and $g$, i.e.\ $f\cong x=g\cong y$, then this commutativity implies that
+\[y(0)=y(g(0))=x(f(0))=x(0).\]
+In other words, $Y$'s 0 and $X$'s 0 go to the same place in $T$, say $t$. But since $f(1)=0$ and $g(1)=1$, we also have that $t=x(0)=x(f(1))=y(g(1))=y(1)$. This means $Y$'s 1 goes to $t$ also. But since $g(2)=1$ and $f(2)=1$, we also have that $t=g(1)=y(g(2))=x(f(2))=x(1)$, which means that $X$'s 1 also goes to $t$. One can keep repeating this and find that every element of $Y$ and every element of $X$ go to $t$! Using mathematical induction, one can prove that the pushout is in fact a 1-element set, $X\sqcup_AY\cong\{1\}$.
+\index{induction}
+%\tablefootnote{We do not discuss mathematical induction in this book, but it is a very important proof technique based on a sort of infinite-domino effect: knock down the first, each knocks down the next, and they all fall. This can be formulated in terms of a universal property held by the set $\NN$ of natural numbers, its ``first'' element $0$ and its ``next'' function $\NN\to\NN$.}
+\end{example}
+
+%
+\index{pushout|)}
+
+%---- Subsection ----%
+\subsection{Finite colimits}%
+\index{colimit!finite|(}
+
+Initial objects, coproducts, and pushouts are all types of colimits. We gave the
+general definition of colimit in \cref{subsec.brief_colimits}. Just as a limit
+in $\cat{C}$ is a terminal object in a category of cones over a diagram $D\colon\cat{J}\to\cat{C}$, a colimit is an initial
+object in a category of cocones over some diagram $D\colon\cat{J}\to\cat{C}$. For our purposes it is enough to discuss finite colimits---i.e.\ when $\cat{J}$ is a finite category---which subsume initial objects, coproducts, and pushouts.%
+\footnote{If a category $\cat{J}$ has finitely many morphisms, we say that $\cat{J}$ is a \emph{finite category}. Note that in this case it must have finitely many objects too, because each object $j\in\Ob\cat{J}$ has its own identity morphism $\id_j$.}%
+\index{category!of cocones}
+
+In \cref{def.colimit}, cocones in $\cat{C}$ are defined to be cones in $\cat{C}\op$. For visualization purposes, if $D\colon\cat{J}\to\cat{C}$ looks like the diagram to the left, then a cocone on it shown in the diagram to the right:
+\[
+\boxCD{
+  \begin{tikzcd}[sep=small, ampersand replacement=\&]
+    D_1\ar[dr]\&\&D_3\ar[ld]\ar[dr, bend left]\ar[dr, bend right]\\
+    \&D_2\&\&D_4\ar[r]\&D_5\\[10pt]
+    {\color{white}C}
+  \end{tikzcd}
+}
+\hspace{.8in}
+\boxCD{
+  \begin{tikzcd}[sep=small, ampersand replacement=\&]
+    D_1\ar[dr]\ar[ddrr, bend right]\&\&D_3\ar[ld]\ar[dd]\ar[dr, bend left]\ar[dr, bend right]\\
+    \&D_2\ar[dr, bend right]\&\&D_4\ar[dl, bend left]\ar[r]\&D_5\ar[dll, bend left]\\[10pt]
+    \&\&T
+  \end{tikzcd}
+}
+\]
+Here, any two parallel paths that end at $T$ are equal in $\cat{C}$.
+
+\begin{definition}%
+\index{category!having finite colimits}
+We say that a category $\cat{C}$ \emph{has finite colimits} if a colimit, $\colim_\cat{J} D$, exists whenever $\cat{J}$ is a finite category and $D\colon\cat{J}\to\cat{C}$ is a diagram.
+\end{definition}
+
+\begin{example}%
+\index{initial object!as colimit}
+The initial object in a category $\cat{C}$, if it exists, is the colimit of the
+functor $!\colon \Cat{0} \to \cat{C}$, where $\Cat{0}$ is the category with no
+objects and no morphisms, and $!$ is the unique such functor. Indeed, a cocone
+over $!$ is just an object of $\cat{C}$, and so the initial cocone over $!$ is
+just the initial object of $\cat{C}$.
+
+Note that $\Cat{0}$ has finitely many objects (none); thus initial objects are finite
+colimits.
+\end{example}
+
+We often want to know that a category $\cat{C}$ has \emph{all} finite colimits (in which case, we often drop the `all' and just say `$\cat{C}$ has finite colimits'). To check that $\cat{C}$ has (all) finite colimits, it's enough to check it has a few simpler forms of colimit, which generate all the rest. 
+\begin{proposition}%
+\label{prop.finite_colimits}
+Let $\cat{C}$ be a category. The following are equivalent:
+\begin{enumerate}
+	\item $\cat{C}$ has all finite colimits.
+	\item $\cat{C}$ has an initial object and all pushouts.
+	\item $\cat{C}$ has all coequalizers and all finite coproducts.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+We will not give precise details here, but the key idea is an inductive one: one can build arbitrary finite diagrams using some basic building blocks. Full details can be found in \cite[Prop 2.8.2]{Borceux:1994a}.
+\end{proof}
+
+\begin{example}%
+\label{ex.W_colim}
+Let $\cat{C}$ be a category with all pushouts, and suppose we want to take the colimit of the following diagram in $\cat{C}$:
+\begin{equation}%
+\label{eqn.W_colim}
+\begin{tikzcd}
+	&
+	B\ar[r]\ar[d]&
+	Z\\
+	A\ar[r]\ar[d]&
+	C\\
+	D
+\end{tikzcd}
+\end{equation}
+In it we see two diagrams ready to be pushed out, and we know how to take pushouts. So suppose we do that; then we see another pushout diagram so we take the pushout again:
+\[
+\begin{tikzcd}
+	&
+	B\ar[r]\ar[d]&
+	Z\ar[d]\\
+	A\ar[r]\ar[d]&
+	Y\ar[r]\ar[d]&
+	R\ar[ul, phantom, very near start, "\ulcorner"]\\
+	X\ar[r]&
+	Q\ar[ul, phantom, very near start, "\ulcorner"]
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}
+	&
+	B\ar[r]\ar[d]&
+	Z\ar[d]\\
+	A\ar[r]\ar[d]&
+	Y\ar[r]\ar[d]&
+	R\ar[ul, phantom, very near start, "\ulcorner"]\ar[d]\\
+	X\ar[r]&
+	Q\ar[ul, phantom, very near start, "\ulcorner"]\ar[r]&
+	S\ar[ul, phantom, very near start, "\ulcorner"]
+\end{tikzcd}
+\]
+is the result---consisting of the object $S$, together with all the morphisms from the original diagram to $S$---the colimit of the original diagram? One can check that it indeed has the correct universal property and thus is a colimit.
+\end{example}
+
+\begin{exercise}%
+\label{exc.W_colim}
+Check that the pushout of pushouts from \cref{ex.W_colim} satisfies the universal property of the colimit for the original diagram, \cref{eqn.W_colim}.
+\end{exercise}
+
+We have already seen that the categories $\finset$ and $\smset$ both have an
+initial object and pushouts. We thus have the following corollary.
+\begin{corollary} %
+\label{cor.set_cocomplete}
+The categories $\finset$ and $\smset$ have (all) finite colimits.
+\end{corollary}
+
+In \cref{thm.set_limits} we gave a general formula for computing finite limits
+in $\smset$. It is also possible to give a formula for computing finite colimits. There is a duality between products and coproducts and between subobjects and quotient objects, so whereas a finite limit is given by a subset of a product, a finite colimit is given by a quotient of a coproduct.%
+\index{dual notions!subobjects and quotients}%
+\index{quotient}
+
+\begin{theorem}%
+\label{thm.colims_in_set}%
+\index{colimit!formula for finite colimits in $\smset$}
+Let $\cat{J}$ be presented by the finite graph $(V,A,s,t)$ and some equations, and let $D\colon \cat{J} \to \smset$ be a diagram. Consider the set
+\[\colim_{\cat{J}} D \coloneqq \big\{(v,d)\mid v\in V \text{ and }d\in D(v)\big\}/\sim\]
+where this denotes the set of equivalence classes under the equivalence relation
+$\sim$ generated by putting $(v,d)\sim (w,e)$ if there is an arrow $a\colon v\to w$ in $J$ such that $D(a)(d)=e$. Then this set, together with the functions $\iota_v\colon D(v)\to\colim_{\cat{J}} D$ given by sending $d\in D(v)$ to its equivalence class, constitutes a colimit of $D$.%
+\index{equivalence relation}
+\index{quotient}
+\end{theorem}
+
+\begin{example} %
+\label{ex.initial_obj}
+   Recall that an initial object is the colimit on the empty graph. The formula thus says
+   the initial object in $\smset$ is the empty set $\varnothing$: there are no $v
+   \in V$.
+\end{example}
+
+\begin{example} %
+\label{ex.coproduct}
+A coproduct is a colimit on the graph $\cat{J}=\fbox{$\LMO{v_1}\quad\LMO{v_2}$}$. A functor $D\colon\cat{J}\to\smset$ can be identified with a choice of two sets, $X\coloneqq D(v_1)$ and $Y\coloneqq D(v_2)$. Since there are no arrows in $\cat{J}$, the equivalence relation $\sim$ is vacuous, so the
+formula in \cref{{thm.colims_in_set}} says that a coproduct is given by
+\[\{(v,d) \mid d \in D(v), \text{ where } v=v_1 \text{ or }v=v_2\}.\]
+In other words, the coproduct of sets $X$ and $Y$ is their disjoint
+union $X \sqcup Y$, as expected.
+\end{example}
+
+\begin{example}
+If $\cat{J}$ is the category $\Cat{1} = \fbox{$\LMO{v}$}\,$, the formula in \cref{thm.colims_in_set}
+yields the set
+  \[\{(v,d) \mid d \in D(v)\}\]
+This is isomorphic to the set $D(v)$. In other words, if $X$ is a set considered
+as a diagram $X \colon \Cat{1} \to \smset$, then its colimit (like its limit)
+is just $X$ again.
+\end{example}
+
+\begin{exercise} %
+\label{exc.pushout_formula}
+Use the formula in \cref{thm.colims_in_set} to show that pushouts---colimits on
+a diagram $X \xleftarrow{f} N \xrightarrow{g} Y$---agree with the description we
+gave in \cref{ex.pushouts}.
+\end{exercise}
+
+\begin{example}%
+\index{coequalizer} %
+\label{ex.coequalizer}%
+\index{colimit!coequalizer as}
+Another important type of finite colimit is the \emph{coequalizer}. These are
+colimits over the graph \fbox{$\LMO{}\tto \LMO{}$} consisting of two
+parallel arrows.
+
+Consider some diagram $\begin{tikzcd} X \ar[r, "f", shift left=3pt]\ar[r, "g"',
+shift right=3pt] & Y\end{tikzcd}$ on this graph in $\smset$. The coequalizer of
+this diagram is the set of equivalence classes of $Y$ under equivalence relation
+generated by declaring $y \sim y'$ whenever there exists $x$ in $X$ such that $f(x)=y$ and $g(x)=y'$.%
+\index{equivalence relation}
+
+Let's return to the example circuit in the introduction to hint at why colimits
+are useful for interconnection.%
+\index{colimit!and interconnection} Consider the following picture:%
+\index{electrical circuit}
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+\node [contact] (1) at (1,0) {};
+\coordinate (2) at (4,0) {};
+\node [contact] (3) at (7,0) {};
+\node [contact] (5) at (0,1) {};
+\node [contact] (6) at (3,1) {};
+\node [contact] (7) at (5,1) {};
+\node [contact] (8) at (8,1) {};
+\node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+\node [draw, inner sep=1.5pt,circle] (b) at (4,1) {};
+\node [draw, inner sep=1.5pt,circle] (c) at (8,0) {};
+\draw (1) to [bulb] (2);
+\draw (2) to [resistor] (3);
+\draw (5) to [battery] (6);
+\draw (7) to [make contact] (8);
+\begin{scope}[shorten <=5pt, shorten >=5pt, ->,red]
+\draw (a) to (5);
+\draw (b) to (7);
+\draw (c) to (3);
+\end{scope}
+\begin{scope}[shorten <=5pt, shorten >=5pt, ->,blue]
+\draw (a) to (1);
+\draw (b) to (6);
+\draw (c) to (8);
+\end{scope}
+\end{tikzpicture}
+\]
+We've redrawn this picture with one change: some of the arrows are now red, and
+others are now blue. If we let $X$ be the set of white circles $\circ$, and $Y$
+be the set of black circles $\bullet$, the blue and red arrows respectively
+define functions $f,g\colon X \to Y$. Let's leave the actual circuit components out of the picture for now; we're just interested in the dots. What is the coequalizer?
+
+It is a three element set, consisting of one element for each newly-connected
+pair of $\bullet$'s . Thus the colimit describes the set of terminals after
+performing the interconnection operation. In \cref{sec.decorated_cospans} we'll
+see how to keep track of the circuit components too.%
+\index{electrical circuit}
+\end{example}
+
+%
+\index{colimit|)}%
+\index{colimit!finite|)}
+
+%---- Subsection ----%
+\subsection{Cospans}%
+\label{subsec.cospans}
+When a category $\cat{C}$ has finite colimits, an extremely useful way to package them is by considering the category of cospans in $\cat{C}$.%
+\index{cospan|(}
+
+\begin{definition}%
+\index{cospan}
+Let $\cat{C}$ be a category. A \emph{cospan} in $\cat{C}$ is just a pair of morphisms to a common object $A\to N\from B$. The common object $N$ is called the \emph{apex} of the cospan and the other two objects $A$ and $B$ are called its \emph{feet}.%
+\index{cospan!foot of}%
+\index{cospan!apex of}
+\end{definition}
+
+%
+\index{cospans!composition of}
+If we want to say that cospans form a category, we should begin by saying how composition would work. So suppose we have two cospans in $\cat{C}$%
+\index{category!of cospans}
+\[
+\begin{tikzcd}[row sep=small]
+& N \\
+A \ar[ur,"f"] && B \ar[ul,"g"'] 
+\end{tikzcd}
+\qquad\mbox{and}\qquad
+\begin{tikzcd}[row sep=small]
+& P \\
+B \ar[ur,"h"] && C \ar[ul,"k"'] 
+\end{tikzcd}
+\]
+Since the right foot of the first is equal to the left foot of the second, we
+might stick them together into a diagram like this:
+  \[
+  \begin{tikzcd}[row sep=small]
+      & N && P  \\
+      \quad A \ar[ur,"f"] && B \ar[ul, "g"'] \ar[ur, "h"] && C
+      \quad \ar[ul, "k"']
+  \end{tikzcd}
+  \]
+%\[
+%\begin{tikzcd}[sep=20pt]
+%&&C\ar[d,"k"]\\
+%&B\ar[d,"g"']\ar[r,"h"]&Q\\
+%A\ar[r,"f"']&P
+%\end{tikzcd}
+%\]
+Then, if a pushout of $N \xleftarrow{g} B \xrightarrow{h} P$ exists in $\cat{C}$, as shown on the left, we can extract a new cospan in $\cat{C}$, as shown on the right:
+  \begin{equation}%
+\label{eqn.composecospan}
+  \begin{tikzcd}[row sep=small, column sep=20pt]
+     && N+_BP \ar[dd, phantom, very near start, "\rotatebox{-45}{$\lrcorner$}"]\\
+      & N \ar[ur,"\iota_N"] && P \ar[ul, "\iota_P"'] \\
+       \quad A  \ar[ur,"f"] && B \ar[ul, "g"'] \ar[ur, "h"] &&  C \quad
+       \ar[ul, "k"']
+  \end{tikzcd}
+  \:
+  \rightsquigarrow
+  \quad
+\begin{tikzcd}
+& N+_BP \\
+A \ar[ur,"f\cp \iota_N"] && C \ar[ul,"k\cp\iota_P"'] 
+\end{tikzcd}  
+  \end{equation}%
+\index{pushout!in cospan composition}
+
+%\[
+%\begin{tikzcd}[sep=20pt]
+%&&C\ar[d,"k"]\\
+%&B\ar[d,"g"']\ar[r,"h"]&Q\ar[d,"\iota_Q"]\\
+%A\ar[r,"f"']&P\ar[r,"\iota_P"']&P+_BQ\ar[ul, phantom, very near start, "\ulcorner"]
+%\end{tikzcd}
+%\hspace{1in}
+%\begin{tikzcd}[sep=20pt]
+%&& C \ar[dd,"k\cp\iota_Q"]\\~\\
+%A \ar[rr,"f\cp\iota_P"'] &~& P+_BQ 
+%\end{tikzcd}
+%\]
+It might look like we have achieved our goal, but we're missing some things. First, we need an identity on every object $C\in\Ob\cat{C}$; but that's not hard: use $C\to C\from C$ where both maps are identities in $\cat{C}$. More importantly, we don't know that $\cat{C}$ has all pushouts, so we don't know that every two sequential morphisms $A\to B\to C$ can be composed. And beyond that, there is a technical condition that when we form pushouts, we only get an answer `up to isomorphism': anything isomorphic to a pushout counts as a pushout (check the definition to see why). We want all these different choices to count as the same thing, so we define two cospans to be equivalent iff there is an isomorphism between their respective apexes. That is, the cospan $A\to P\from B$ and $A\to P'\from B$ in the diagram shown left below are equivalent iff there is an isomorphism $P\cong P'$ making the diagram to the right commute:
+\[
+\begin{tikzcd}[sep=small, row sep=0]
+	&P\\A\ar[ru]\ar[rd]&&B\ar[lu]\ar[ld]\\
+	&P'
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}[sep=small, row sep=0]
+	&P\ar[dd, "\cong"]\\A\ar[ru]\ar[rd]&&B\ar[lu]\ar[ld]\\
+	&P'
+\end{tikzcd}
+\]
+
+Now we are getting somewhere. As long as our category $\cat{C}$ has pushouts, we are in business: $\cospan{\cat{C}}$ will form a category. But in fact, we are very close to getting more. If we also demand that $\cat{C}$ has an initial object $\varnothing$ as well, then we can upgrade $\cospan{\cat{C}}$ to a symmetric monoidal category. 
+
+Recall from \cref{prop.finite_colimits} that a category $\cat{C}$ has all finite colimits iff it has an initial object and all pushouts.
+
+\begin{definition}%
+\label{def.cospan_sym_mon_cat}
+  Let $\cat{C}$ be a category with finite colimits. Then there exists a
+  category $\cospan{\cat{C}}$ with the same objects as $\cat{C}$, i.e.\ $\Ob(\cospan{\cat{C}})=\Ob(\cat{C})$, where the morphisms $A \to B$ are the (equivalence classes of)
+  cospans from $A$ to $B$, and composition is given by the above pushout construction.
+  
+  There is a symmetric monoidal structure on this category, denoted
+  $(\cospan{\cat{C}},\varnothing,+)$. The monoidal unit is the initial object
+  $\varnothing\in\cat{C}$ and the monoidal product is given by coproduct. The coherence
+  isomorphisms, e.g.\ $A+\varnothing\cong A$, can be defined in a similar way to
+  those in \cref{exc.coproducts_give_monoidal_structure}. 
+\end{definition}
+
+It is a straightforward but time-consuming exercise to verify that $(\cospan{\cat{C}},\varnothing,+)$ from \cref{def.cospan_sym_mon_cat} really does satisfy all the axioms of a symmetric
+monoidal category, but it does.
+
+\begin{example} %
+\label{ex.cospan_finset}%
+\index{cospans!category of}
+  The category $\finset$ has finite colimits (see \ref{cor.set_cocomplete}). So,
+  we can define a symmetric monoidal category $\cospan{\finset}$. What does it
+  look like? It looks a lot like wires connecting ports. 
+
+  The objects of $\cospan\finset$ are finite sets; here let's draw them as
+  collections of $\bullet$'s. The morphisms are cospans of functions.  Let $A$ and
+  $N$ be five element sets, and $B$ be a six element set.  Below are two
+  depictions of a cospan $A \To{f} N \From{g} B$. 
+  \[
+    \begin{aligned}
+      \begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+	  \node [contact, outer sep=5pt] (6) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (8) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (9) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (7) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (10) at (-2, -1) {};
+	  \node [contact, outer sep=5pt] (15) at (-0.5, 0.875) {};
+	  \node [contact, outer sep=5pt] (28) at (-0.5, 0.25) {};
+	  \node [contact, outer sep=5pt] (16) at (-0.5, -0.125) {};
+	  \node [contact, outer sep=5pt] (29) at (-0.5, -0.5) {};
+	  \node [contact, outer sep=5pt] (17) at (-0.5, -1) {};
+	  \node [contact, outer sep=5pt] (-2) at (1, 1.25) {};
+	  \node [contact, outer sep=5pt] (-1) at (1, 0.75) {};
+	  \node [contact, outer sep=5pt] (0) at (1, 0.25) {};
+	  \node [contact, outer sep=5pt] (1) at (1, -0.25) {};
+	  \node [contact, outer sep=5pt] (2) at (1, -0.75) {};
+	  \node [contact, outer sep=5pt] (3) at (1, -1.25) {};
+	  \node [style=none] (4) at (-2, -1.75) {$A$};
+	  \node [style=none] (20) at (1, -1.75) {$B$};
+	  \node [style=none] (30) at (-0.5, -1.75) {$N$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[mapsto, shorten <=10pt,shorten >=10pt]
+	    \draw (6.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (-2.center) to (15.center);
+	    \draw (-1.center) to (15.center);
+	    \draw (9.center) to (16.center);
+	    \draw (7.center) to (16.center);
+	    \draw (10.center) to (17.center);
+	    \draw (2.center) to (17.center);
+	    \draw (3.center) to (17.center);
+	    \draw (0.center) to (28.center);
+	    \draw (1.center) to (29.center);
+	  \end{scope}
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+    \hspace{.2\textwidth}
+    \begin{aligned}
+      \begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+	  \node [contact, outer sep=5pt] (6) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (8) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (9) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (7) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (10) at (-2, -1) {};
+	  \node [outer sep=5pt] (15) at (-0.5, 1) {};
+	  \node [outer sep=5pt] (28) at (-0.5, 0.25) {};
+	  \node [outer sep=5pt] (16) at (-0.5, -0.125) {};
+	  \node [outer sep=5pt] (29) at (-0.5, -0.5) {};
+	  \node [outer sep=5pt] (17) at (-0.5, -1) {};
+	  \node [contact, outer sep=5pt] (-2) at (1, 1.25) {};
+	  \node [contact, outer sep=5pt] (-1) at (1, 0.75) {};
+	  \node [contact, outer sep=5pt] (0) at (1, 0.25) {};
+	  \node [contact, outer sep=5pt] (1) at (1, -0.25) {};
+	  \node [contact, outer sep=5pt] (2) at (1, -0.75) {};
+	  \node [contact, outer sep=5pt] (3) at (1, -1.25) {};
+	  \node [style=none] (4) at (-2.75, -0) {$A$};
+	  \node [style=none] (20) at (1.75, 0) {$B$};
+		%\node [style=none] (30) at (-0.5, -1.75) {\phantom{$N$}};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[very thick]
+	    \draw (6.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (-2.center) to (15.center);
+	    \draw (-1.center) to (15.center);
+	    \draw (9.center) to (16.center);
+	    \draw (7.center) to (16.center);
+	    \draw (10.center) to (17.center);
+	    \draw (2.center) to (17.center);
+	    \draw (3.center) to (17.center);
+	    \draw (0.center) to (28.center);
+	    \draw (1.center) to (29.center);
+	  \end{scope}
+	  \draw [rounded corners=5pt, dashed, color=gray] 
+	  (node cs:name=6, anchor=north west) --
+	  (node cs:name=8, anchor=south west) --
+	  (node cs:name=-1, anchor=south east) --
+	  (node cs:name=-2, anchor=north east) --
+	  cycle;
+	  \draw [rounded corners=5pt, dashed, color=gray] 
+	  (node cs:name=9, anchor=north west) --
+	  (node cs:name=7, anchor=south west) --
+	  (node cs:name=7, anchor=south east) --
+	  (node cs:name=9, anchor=north east) --
+	  cycle;
+	  \draw [rounded corners=5pt, dashed, color=gray] 
+	  (node cs:name=10, anchor=north west) --
+	  (node cs:name=10, anchor=south west) --
+	  (node cs:name=3, anchor=south east) --
+	  (node cs:name=2, anchor=north east) --
+	  cycle;
+	  \draw [rounded corners=5pt, dashed, color=gray] 
+	  (node cs:name=0, anchor=north west) --
+	  (node cs:name=0, anchor=south west) --
+	  (node cs:name=0, anchor=south east) --
+	  (node cs:name=0, anchor=north east) --
+	  cycle;
+	  \draw [rounded corners=5pt, dashed, color=gray] 
+	  (node cs:name=1, anchor=north west) --
+	  (node cs:name=1, anchor=south west) --
+	  (node cs:name=1, anchor=south east) --
+	  (node cs:name=1, anchor=north east) --
+	  cycle;
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+  \]
+  In the depiction on the left, we simply represent the functions $f$ and $g$
+  by drawing arrows from each $a\in A$ to $f(a)$ and each $b\in B$ to $g(b)$. In the depiction on the
+  right, we make this picture resemble wires a bit more, simply drawing a wire
+  where before we had an arrow, and removing the unnecessary center dots. We also draw a dotted line around points that are
+  connected, to emphasize an important perspective, that cospans establish that
+  certain ports are connected, i.e.\ part of the same
+  equivalence class.
+
+  The monoidal category $\cospan\finset$ then provides two operations for
+  combining cospans: composition and monoidal product. Composition is given by
+  taking the pushout of the maps coming from the common foot, as described in
+  \cref{def.cospan_sym_mon_cat}.  Here is an example of cospan composition,
+  where all the functions are depicted with arrow notation:
+  \begin{equation} %
+\label{eq.cospan_comp}
+    \begin{aligned}
+      \begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+	  \node [contact, outer sep=5pt] (6) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (7) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (8) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (9) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (10) at (-2, -1) {};
+	  \node [contact, outer sep=5pt] (15) at (-0.5, 0.875) {};
+	  \node [contact, outer sep=5pt] (28) at (-0.5, 0.25) {};
+	  \node [contact, outer sep=5pt] (16) at (-0.5, -0.125) {};
+	  \node [contact, outer sep=5pt] (29) at (-0.5, -0.5) {};
+	  \node [contact, outer sep=5pt] (17) at (-0.5, -1) {};
+	  \node [contact, outer sep=5pt] (-2) at (1, 1.25) {};
+	  \node [contact, outer sep=5pt] (-1) at (1, 0.75) {};
+	  \node [contact, outer sep=5pt] (0) at (1, 0.25) {};
+	  \node [contact, outer sep=5pt] (1) at (1, -0.25) {};
+	  \node [contact, outer sep=5pt] (2) at (1, -0.75) {};
+	  \node [contact, outer sep=5pt] (3) at (1, -1.25) {};
+	  \node [contact, outer sep=5pt] (18) at (2.5, -1.125) {};
+	  \node [contact, outer sep=5pt] (21) at (2.5, 1) {};
+	  \node [contact, outer sep=5pt] (22) at (2.5, -0.375) {};
+	  \node [contact, outer sep=5pt] (23) at (2.5, 0.475) {};
+	  \node [contact, outer sep=5pt] (24) at (2.5, 0.25) {};
+	  \node [contact, outer sep=5pt] (19) at (4, 1) {};
+	  \node [contact, outer sep=5pt] (14) at (4, 0.5) {};
+	  \node [contact, outer sep=5pt] (11) at (4, -0) {};
+	  \node [contact, outer sep=5pt] (13) at (4, -0.5) {};
+	  \node [contact, outer sep=5pt] (12) at (4, -1) {};
+	  \node [style=none] (a) at (-2, -1.75) {$A$};
+	  \node [style=none] (n) at (-.5, -1.75) {$N$};
+	  \node [style=none] (b) at (1, -1.75) {$B$};
+	  \node [style=none] (p) at (2.5, -1.75) {$P$};
+	  \node [style=none] (c) at (4, -1.75) {$C$};
+	  \node [style=none] (30) at (1, 1.75) {\phantom{$B$}};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[mapsto,shorten <=10pt,shorten >=10pt]
+	    \draw (6.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (-2.center) to (15.center);
+	    \draw (-1.center) to (15.center);
+	    \draw (9.center) to (16.center);
+	    \draw (7.center) to (16.center);
+	    \draw (10.center) to (17.center);
+	    \draw (2.center) to (17.center);
+	    \draw (3.center) to (17.center);
+	    \draw (0.center) to (28.center);
+	    \draw (1.center) to (29.center);
+	    \draw (3.center) to (18.center);
+	    \draw (-2.center) to (21.center);
+	    \draw (-1.center) to (21.center);
+	    \draw (1.center) to (22.center);
+	    \draw (2.center) to (22.center);
+	    \draw (0.center) to (24.center);
+	    \draw (11.center) to (22.center);
+	    \draw (12.center) to (18.center);
+	    \draw (13.center) to (22.center);
+	    \draw (14.center) to (23.center);
+	    \draw (19.center) to (21.center);
+	  \end{scope}
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+    \quad\leadsto\quad
+    \begin{aligned}
+      \begin{tikzpicture}	
+	\begin{pgfonlayer}{nodelayer}
+	  \node [style=none] (a) at (-2, -1.7) {$A$};
+	  \node [style=none] (p) at (-.5, -1.75) {$N+_BP$};
+	  \node [style=none] (c) at (1, -1.7) {$C$};
+	  \node [style=none] (30) at (-.5, 1.75) {\phantom{$B$}};
+	  \node [contact, outer sep=5pt] (2) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (3) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (4) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (5) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (6) at (-2, -1) {};
+	  \node [contact, outer sep=5pt] (11) at (-0.5, 0.875) {};
+	  \node [contact, outer sep=5pt] (12) at (-0.5, 0.35) {};
+	  \node [contact, outer sep=5pt] (extra) at (-0.5, 0.05) {};
+	  \node [contact, outer sep=5pt] (14) at (-0.5, -0.2) {};
+	  \node [contact, outer sep=5pt] (15) at (-0.5, -0.7) {};
+	  \node [contact, outer sep=5pt] (7) at (1, -0) {};
+	  \node [contact, outer sep=5pt] (8) at (1, -1) {};
+	  \node [contact, outer sep=5pt] (9) at (1, -0.5) {};
+	  \node [contact, outer sep=5pt] (10) at (1, 0.5) {};
+	  \node [contact, outer sep=5pt] (13) at (1, 1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[mapsto,shorten <=10pt,shorten >=10pt]
+	    \draw (2.center) to (11.center);
+	    \draw (4.center) to (11.center);
+	    \draw (5.center) to (14.center);
+	    \draw (3.center) to (14.center);
+	    \draw (6.center) to (15.center);
+	    \draw (7.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (9.center) to (15.center);
+	    \draw (10.center) to (12.center);
+	    \draw (13.center) to (11.center);
+	  \end{scope}
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+  \end{equation}
+  The monoidal product is given simply by the disjoint union of two cospans; in
+  pictures it is simply combining two cospans by stacking one above another.
+\end{example}%
+\index{monoidal product!as stacking}
+
+\begin{exercise} %
+\label{exc.cospan_tensor}
+In \cref{eq.cospan_comp} we showed morphisms $A\to B$ and $B\to C$ in
+$\cospan{\finset}$. Draw their monoidal product as a morphism $A+B\to
+B+C$ in $\cospan{\finset}$.
+\end{exercise}
+
+\begin{exercise} %
+\label{exc.cospan_comp}
+  Depicting the composite of cospans in \cref{eq.cospan_comp} with the wire
+  notation gives
+  \begin{equation} %
+\label{eq.cospan_comp_wires}
+    \begin{aligned}
+      \begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+	  \node [contact, outer sep=5pt] (6) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (7) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (8) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (9) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (10) at (-2, -1) {};
+	  \node [outer sep=5pt] (15) at (-0.5, 0.875) {};
+	  \node [outer sep=5pt] (28) at (-0.5, 0.25) {};
+	  \node [outer sep=5pt] (16) at (-0.5, -0.125) {};
+	  \node [outer sep=5pt] (29) at (-0.5, -0.5) {};
+	  \node [outer sep=5pt] (17) at (-0.5, -1) {};
+	  \node [contact, outer sep=5pt] (-2) at (1, 1.25) {};
+	  \node [contact, outer sep=5pt] (-1) at (1, 0.75) {};
+	  \node [contact, outer sep=5pt] (0) at (1, 0.25) {};
+	  \node [contact, outer sep=5pt] (1) at (1, -0.25) {};
+	  \node [contact, outer sep=5pt] (2) at (1, -0.75) {};
+	  \node [contact, outer sep=5pt] (3) at (1, -1.25) {};
+	  \node [outer sep=5pt] (18) at (2.5, -1.125) {};
+	  \node [outer sep=5pt] (21) at (2.5, 1) {};
+	  \node [outer sep=5pt] (22) at (2.5, -0.375) {};
+	  \node [outer sep=5pt] (23) at (2.5, 0.475) {};
+	  \node [outer sep=5pt] (24) at (2.5, 0.25) {};
+	  \node [contact, outer sep=5pt] (19) at (4, 1) {};
+	  \node [contact, outer sep=5pt] (14) at (4, 0.5) {};
+	  \node [contact, outer sep=5pt] (11) at (4, -0) {};
+	  \node [contact, outer sep=5pt] (13) at (4, -0.5) {};
+	  \node [contact, outer sep=5pt] (12) at (4, -1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[very thick]
+	    \draw (6.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (-2.center) to (15.center);
+	    \draw (-1.center) to (15.center);
+	    \draw (9.center) to (16.center);
+	    \draw (7.center) to (16.center);
+	    \draw (10.center) to (17.center);
+	    \draw (2.center) to (17.center);
+	    \draw (3.center) to (17.center);
+	    \draw (0.center) to (28.center);
+	    \draw (1.center) to (29.center);
+	    \draw (3.center) to (18.center);
+	    \draw (-2.center) to (21.center);
+	    \draw (-1.center) to (21.center);
+	    \draw (1.center) to (22.center);
+	    \draw (2.center) to (22.center);
+	    \draw (0.center) to (24.center);
+	    \draw (11.center) to (22.center);
+	    \draw (12.center) to (18.center);
+	    \draw (13.center) to (22.center);
+	    \draw (14.center) to (23.center);
+	    \draw (19.center) to (21.center);
+	  \end{scope}
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+    \quad=\quad
+    \begin{aligned}
+      \begin{tikzpicture}	
+	\begin{pgfonlayer}{nodelayer}
+	  \node [contact, outer sep=5pt] (2) at (-2, 1) {};
+	  \node [contact, outer sep=5pt] (3) at (-2, -0.5) {};
+	  \node [contact, outer sep=5pt] (4) at (-2, 0.5) {};
+	  \node [contact, outer sep=5pt] (5) at (-2, -0) {};
+	  \node [contact, outer sep=5pt] (6) at (-2, -1) {};
+	  \node [outer sep=5pt] (11) at (-0.5, 0.875) {};
+	  \node [outer sep=5pt] (12) at (-0.5, 0.35) {};
+	  \node [draw, fill=black, circle, inner sep=1.2pt] (extra) at (-0.5, 0.05) {};
+	  \node [outer sep=5pt] (14) at (-0.5, -0.2) {};
+	  \node [outer sep=5pt] (15) at (-0.5, -0.7) {};
+	  \node [contact, outer sep=5pt] (7) at (1, -0) {};
+	  \node [contact, outer sep=5pt] (8) at (1, -1) {};
+	  \node [contact, outer sep=5pt] (9) at (1, -0.5) {};
+	  \node [contact, outer sep=5pt] (10) at (1, 0.5) {};
+	  \node [contact, outer sep=5pt] (13) at (1, 1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	  \begin{scope}[very thick]
+	    \draw (2.center) to (11.center);
+	    \draw (4.center) to (11.center);
+	    \draw (5.center) to (14.center);
+	    \draw (3.center) to (14.center);
+	    \draw (6.center) to (15.center);
+	    \draw (7.center) to (15.center);
+	    \draw (8.center) to (15.center);
+	    \draw (9.center) to (15.center);
+	    \draw (10.center) to (12.center);
+	    \draw (13.center) to (11.center);
+	  \end{scope}
+	\end{pgfonlayer}
+      \end{tikzpicture}
+    \end{aligned}
+  \end{equation}
+  Comparing \cref{eq.cospan_comp} and \cref{eq.cospan_comp_wires}, describe the
+  composition rule in $\cospan\finset$ in terms of wires and connected
+  components.
+\end{exercise}
+
+%
+\index{cospan|)}
+
+%-------- Section --------%
+\section{Hypergraph categories}%
+\index{hypergraph category|(}
+A hypergraph category is a type of symmetric monoidal category whose wiring
+diagrams are networks. We will soon see that electric circuits can be organized into a hypergraph category; this is what we've been building up to. But to define hypergraph categories, it is useful to first introduce Frobenius monoids.
+
+%---- Subsection ----%
+\subsection{Frobenius monoids} %
+\label{sec.escfm}%
+\index{Frobenius!structure|(}
+The pictures of cospans we saw above, e.g.\ in \cref{eq.cospan_comp_wires} look
+something like icons in signal flow graphs (see \cref{subsec.icons_sfgs}):
+various wires merge and split, initialize and terminate. And these follow the
+same rules they did for linear relations, which we briefly discussed in
+\cref{exc.linear_relations}. There's a lot of potential for confusion, so let's start
+from scratch and build back up.%
+\index{interconnection!via Frobenius structures}%
+\index{icon}
+
+In any symmetric monoidal category $(\mathcal C,I,\otimes)$, recall from \cref{subsec.reflection_wds} that objects can be drawn as wires and morphisms can be drawn as boxes. Particularly noteworthy morphisms might be iconified as dots rather than boxes, to indicate that the morphisms there are not arbitrary but notation-worthy. One case of this is when there is an object $X$ with special ``abilities'', e.g. the ability to duplicate into two, or disappear into nothing. 
+
+To make this precise, recall from \cref{def.monoid_object} that a commutative monoid
+$(X,\mu,\eta)$ in symmetric monoidal category $(\cat{C},I,\otimes)$ is an
+object $X$ of $\mathcal C$ together with (noteworthy) morphisms
+\[
+  \xymatrixrowsep{1pt}
+  \xymatrix{
+    \mult{.075\textwidth} & & \unit{.075\textwidth} \\
+    \mu\colon X\otimes X \to X & & \eta\colon I \to X
+  }
+\]
+%\[
+%\begin{tikzpicture}[spider diagram]
+%	\node[spider={2}{1}, fill=black] (a) {};
+%	\node[spider={0}{1}, fill=black, right=3 of a] (b) {};
+%	\node[below=.5 of a] (a lab) {$\mu\colon X\otimes X\to X$};
+%	\node at (a lab-|b) {$\eta\colon I\to X$};
+%\end{tikzpicture}
+%\]
+obeying
+%\[
+%\begin{tikzpicture}[spider diagram, young]
+%	\node[spider={2}{1}, fill=black] (ar) {};
+%	\node[spider={2}{1}, fill=black, left=\legxlen of ar_in1] (al) {};
+%	\node[spider={2}{1}, fill=black, right=4 of al] (br) {};
+%	\node[spider={2}{1}, fill=black, left=\legxlen of br_in2] (bl) {};
+%	\node at ($(ar)!.5!(bl)$) {=};
+%	\draw (al_out1) -- (ar_in1);
+%	\draw (bl_out1) -- (br_in2);
+%\end{tikzpicture}
+%\]
+\begin{equation}%
+\label{eqn.ass_un_comm}
+  \xymatrixrowsep{1pt}
+  \xymatrixcolsep{25pt}
+  \xymatrix{
+    \assocl{.1\textwidth} = \assocr{.1\textwidth} & \unitl{.1\textwidth} =
+    \idone{.1\textwidth} & \commute{.1\textwidth} = \mult{.07\textwidth} \\
+    \textrm{(associativity)} & \textrm{(unitality)} & \textrm{(commutativity)}
+  }
+\end{equation}
+where $\swap{1em}$ is the symmetry on $X \otimes X$. A cocommutative cocomonoid
+$(X,\delta,\epsilon)$ is an object $X$ with maps $\delta\colon X \to X \otimes
+X$, $\epsilon\colon X \to I$, obeying the mirror images of the laws in \cref{eqn.ass_un_comm}.%
+\index{associativity!of monoid operation, wiring diagram for}%
+\index{unitality!of monoid operation, wiring diagram for}%
+\index{symmetry!of monoid operation, wiring diagram for}
+
+Suppose $X$ has both the structure of a commutative monoid and cocommutative
+comonoid, and consider a wiring diagram built only from the icons $\mu,\eta,\delta,$ and $\epsilon$, where every wire is labeled $X$. These diagrams have a left and right, and are pictures of how ports on the left are connected to ports on the right. The commutative monoid and cocommutative comonoid axioms thus both
+express when to consider two such connection pictures should be considered the
+same. For example, associativity says the order of connecting ports on the left
+doesn't matter; coassociativity (not drawn) says the same for the right.%
+\index{comonoid}
+
+If you want to go all the way and say ``all I care about is which port is connected to which; I don't even care about left and right'', then you need a few more axioms to say how the morphisms $\mu$ and $\delta$, the merger and the splitter, interact.
+
+\begin{definition}%
+\label{def.spec_comm_frob_mon}%
+\index{Frobenius!structure}
+  Let $X$ be an object in a symmetric monoidal category $(\cat{C},\otimes,I)$. A \emph{Frobenius structure} on $X$ consists of a 4-tuple $(\mu,\eta,\delta,\epsilon)$ such that $(X,\mu,\eta)$ is a commutative monoid and 
+  $(X,\delta,\epsilon)$ is a cocommutative comonoid, which satisfies the six equations above ((co-)associativity, (co-)unitality, (co-)commutativity), as well as the following three equations:
+  \begin{equation}%
+\label{eqn.frob_laws}
+  \xymatrixrowsep{1pt}
+  \xymatrixcolsep{25pt}
+  \xymatrix{
+    \frobs{.1\textwidth} = \frobx{.1\textwidth} = \frobz{.1\textwidth} & \spec{.1\textwidth} =
+    \idone{.1\textwidth}  \\
+    \textrm{(the Frobenius law)} & \textrm{(the special law)}%
+\index{Frobenius!law}
+    }
+  \end{equation}
+  We refer to an object $X$ equipped with a Frobenius structure as a \emph{special commutative Frobenius monoid}, or just \emph{Frobenius monoid} for short.%
+\index{Frobenius!monoid}
+\end{definition}
+
+With these two equations, it turns out that two morphisms $X^{\otimes m}\to
+X^{\otimes n}$---defined by composing and tensoring identities on $X$ and the
+noteworthy morphisms $\mu,\delta$, etc.---are equal if and only if their string
+diagrams connect the same ports. This link between connectivity, and Frobenius
+monoids can be made precise as follows. 
+
+\begin{definition}%
+\index{spider}
+  Let $(X,\mu,\eta,\delta,\epsilon)$ be a Frobenius monoid
+  in a monoidal category $(\cat{C},I,\otimes)$. Let $m,n \in\NN$. Define 
+  $s_{m,n}\colon X^{\otimes m} \to X^{\otimes n}$ to be the following morphism
+ \[
+  \begin{tikzpicture}[spider diagram, decoration={brace, amplitude=7pt}]
+  	\node[special spider={2}{1}{1.8*\leglen}{\leglen}, fill=black] (a1) {};
+  	\node[special spider={2}{1}{\leglen}{0pt}, fill=black, left=0 of a1_in1] (a2) {};
+		\node[special spider={2}{1}{\leglen}{0pt}, fill=black, left=0 of a2_in1] (a3) {};
+		\node[special spider={1}{2}{\leglen}{1.8*\leglen}, fill=black, right=.5 of a1_out1] (c1) {};
+		\node[special spider={1}{2}{0pt}{\leglen}, fill=black, right=0 of c1_out1] (c2) {};
+		\node[special spider={1}{2}{0pt}{\leglen}, fill=black, right=0 of c2_out1] (c3) {};
+		\draw (a1_out1) -- (c1_in1);
+		\draw (a1_in2) -- (a1_in2-|a3_in1) node[coordinate] (b1) {};
+		\draw (a2_in2) -- (a2_in2-|a3_in1) node[coordinate] (b2) {};
+		\draw (c1_out2) -- (c1_out2-|c3_out1) node[coordinate] (d1) {};
+		\draw (c2_out2) -- (c2_out2-|c3_out1) node[coordinate] (d2) {};
+		\node at ($(b1)!.5!(b2)+(3pt,3pt)$) {$\vdots$};
+		\node at ($(d1)!.5!(d2)+(-3pt,3pt)$) {$\vdots$};
+		\draw[decorate, very thick] ($(b1)+(-10pt,-2pt)$) -- ($(a3_in1)+(-10pt,2pt)$);
+		\draw[decorate, very thick] ($(c3_out1)+(10pt,2pt)$) -- ($(d1)+(10pt,-2pt)$);
+		\node[anchor=east] at ($(b2)+(-20pt,2pt)$) {$m$ wires};
+		\node[anchor=west] at ($(d2)+(20pt,2pt)$) {$n$ wires};
+  \end{tikzpicture}
+  \]
+	It can be written formally as $(m-1)$ $\mu$'s followed by $(n-1)$ $\delta$'s, with special cases when $m=0$ or $n=0$.
+
+  We call $s_{m,n}$ the \emph{spider of type $(m,n)$}, and can draw it more simply as the icon
+\[
+\begin{tikzpicture}[spider diagram, decoration={brace, amplitude=5pt}]
+	\node[spider={5}{6}, fill=black] (a) {};
+	\draw[decorate, thick] ($(a_in5)+(-10pt,-2pt)$) -- ($(a_in1)+(-10pt,2pt)$);	
+	\draw[decorate, thick] ($(a_out1)+(10pt,2pt)$) -- ($(a_out6)+(10pt,-2pt)$);	
+	\node[anchor=east] at ($(a.center)+(-30pt,0pt)$) {$m$ legs};
+	\node[anchor=west] at ($(a.center)+(30pt,0pt)$) {$n$ legs};
+\end{tikzpicture}
+\]
+\end{definition}%
+\index{icon!spider}
+
+So a special commutative Frobenius monoid, aside from being a mouthful, is a `spiderable' wire. You agree that in any monoidal category wiring diagram language, wires represent objects and boxes represent morphisms? Well in our weird way of talking, if a wire is spiderable, it means that we have a bunch of morphisms $\mu,\eta,\delta,\epsilon,\sigma$ that we can combine without worrying about the order of doing so: the result is just ``how many in's, and how many out's'': a spider. Here's a formal statement.%
+\index{spiderable wire!Frobenius structure as}
+
+\begin{theorem} %
+\label{thm.spider}
+  Let $(X,\mu,\eta,\delta,\epsilon)$ be a Frobenius monoid
+  in a monoidal category $(\cat{C},I,\otimes)$.  Suppose that we have a map
+  $f\colon X^{\otimes m} \to X^{\otimes n}$ each constructed from spiders and
+  the symmetry map $\sigma\colon X^{\otimes 2} \to X^{\otimes 2}$ using
+  composition and the monoidal product, and such that the string diagram of $f$
+  has only one connected component. Then it is a spider: $f=s_{m,n}$.
+\end{theorem}
+
+\begin{example}
+  As the following two morphisms both (i) have the same number of inputs and
+  outputs, (ii) are constructed only from spiders, and (iii) are connected,
+  \cref{thm.spider} immediately implies they are equal:
+\[
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={3}{4}, fill=black] (a) {};
+	\node[spider={3}{2}, fill=black, below right=.3 and 1.5 of a] (b) {};
+	\begin{scope}
+	\draw (a_out1) to (b_out1|-a_out1);
+	\draw (a_out2) to (b_out1|-a_out2);
+	\draw (a_out3) to (b_in1);
+	\draw (a_out4) to (b_in2);
+	\draw (a_in1|-b_in3) to (b_in3);
+      \end{scope}
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={4}{4}, fill=black] (a) {};
+\end{tikzpicture}
+\end{aligned}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise} %
+\label{exc.spider}
+  Let $X$ be an object equipped with a Frobenius structure. Which of the morphisms $X\otimes X\to X\otimes X\otimes X$ in the following list are necessarily equal?
+  \begin{enumerate}
+    \item 
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={2}{3}, fill=black] (a) {};
+\end{tikzpicture}
+\]
+    \item 
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={2}{0}, fill=black] (a) {};
+  \node[spider={0}{3}, fill=black, right=.5 of a] (b) {};
+\end{tikzpicture}
+\]
+    \item
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={1}{2}, fill=black] (a) {};
+  \node[spider={2}{2}, fill=black, right=1 of a] (b) {};
+  \node[spider={1}{1}, fill=black, below=.5 of a] (c) {};
+  \node[spider={1}{1}, fill=black, right=1 of c] (d) {};
+  \begin{scope}
+    \draw (a_out1) to (b_in1);
+    \draw (a_out2) to (b_in2);
+    \draw (c_out1) to (d_in1);
+  \end{scope}
+\end{tikzpicture}
+\]
+    \item
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={2}{2}, fill=black] (a) {};
+  \node[spider={2}{3}, fill=black, right=1 of a] (b) {};
+  \begin{scope}
+    \draw (a_out1) to (b_in1);
+    \draw (a_out2) to (b_in2);
+  \end{scope}
+\end{tikzpicture}
+\]
+    \item
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={1}{2}, fill=black] (a) {};
+  \node[spider={2}{2}, fill=black, right=1 of a] (b) {};
+  \node[spider={1}{2}, fill=black, below=.5 of a] (c) {};
+  \node[spider={2}{1}, fill=black, right=1 of c] (d) {};
+  \begin{scope}
+    \draw (a_out1) to (b_in1);
+    \draw (a_out2) to (b_in2);
+    \draw (c_out1) to (d_in1);
+    \draw (c_out2) to (d_in2);
+  \end{scope}
+\end{tikzpicture}
+\]
+    \item
+      \[
+\begin{tikzpicture}[spider diagram]
+  \node[spider={1}{2}, fill=black] (a) {};
+  \node[spider={1}{2}, fill=black, below=.8 of a] (b) {};
+  \node[spider={2}{2}, fill=black, below right=.36 and .9 of a] (c) {};
+  \node[spider={2}{1}, fill=black, right=1.9 of a] (d) {};
+  \begin{scope}
+    \draw (a_out1) to (d_in1);
+    \draw (a_out2) to (c_in1);
+    \draw (b_out1) to (c_in2);
+  \draw (b_out2) to (d_out1|-b_out2);
+    \draw (c_out1) to (d_in2);
+    \draw (c_out2) to (d_out1|-c_out2);
+  \end{scope}
+\end{tikzpicture}
+\qedhere
+\]
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\paragraph{Back to cospans.}
+Another way of understanding Frobenius monoids is to relate them to cospans.
+Recall the notion of prop presentation from \cref{rdef.presentation_prop}.
+
+\begin{theorem}%
+\index{cospans!as theory of Frobenius monoids}
+Consider the four-element set $G\coloneqq\{\mu,\eta,\delta,\epsilon\}$ and define $\pgin,\pgout \colon G \to
+\nn$ as follows:
+\begin{align*}
+  \pgin(\mu)&\coloneqq 2,&
+  \pgin(\eta)&\coloneqq 0,&
+  \pgin(\delta)&\coloneqq 1,&
+  \pgin(\epsilon)&\coloneqq 1,
+  \\
+  \pgout(\mu)&\coloneqq 1,&
+  \pgout(\eta)&\coloneqq 1,&
+  \pgout(\delta)&\coloneqq 2,&
+  \pgout(\epsilon)&\coloneqq 0.
+\end{align*}
+Let $E$ be the set of Frobenius axioms, i.e.\ the nine equations from \cref{def.spec_comm_frob_mon}. Then the
+free prop on $(G,E)$ is equivalent, as a symmetric monoidal category,%
+\footnote{
+We will not explain precisely what it means to be equivalent as a symmetric
+monoidal category, but you probably have some idea: ``they are the same for all category-theoretic intents and purposes.'' The idea is similar to that of
+equivalence of categories, as explained in \cref{rem.preorder_boolcats2}.
+}
+to
+$\cospan\finset$.
+\end{theorem}
+
+
+
+Thus we see that ideal wires, connectivity, cospans, and objects with Frobenius structures are
+all intimately related. We use Frobenius structures (all that splitting, merging, initializing, and terminating stuff) as a way to capture the grammar of circuit diagrams.
+
+%---- Subsection ----%
+\subsection{Wiring diagrams for hypergraph categories}%
+\index{wiring diagram!for
+hypergraph categories}
+
+We introduce hypergraph categories through their wiring diagrams. Just like for
+monoidal categories, the formal definition is just the structure required to
+unambiguously interpret these diagrams.
+
+Indeed, our interest in hypergraph categories is best seen in their wiring
+diagrams. The key idea is that wiring diagrams for hypergraph categories are
+network diagrams. This means, in addition to drawing labeled boxes with inputs
+and outputs, as we can for monoidal categories, and in addition to bending these
+wires around as we can for compact closed categories, we are allowed to split,
+join, terminate, and initialize wires.%: ``do the Frobenius''!%
+%\footnote{
+%`The Frobenius' is a futuristic dance move, wherein informatic entities split, merge, initialize, and terminate themselves on the dance floor. It's sweeping the hyperverse!
+%}
+
+Here is an example of a wiring diagram that represents a composite of morphisms
+in a hypergraph category
+\[
+  \begin{tikzpicture}[oriented WD, bby=.25cm, font=\small, bb port length=0pt]
+    %boxes
+	\node[bb={2}{1}] (f) {$f$};
+	\node[bb={1}{2}] at ($(f)+(5,0)$) (h) {$h$};
+	\node[bb={1}{2}] at ($(f)+(3,-5)$) (h2) {$h$};
+	\node[bb={1}{1}] at ($(f)+(2,-9)$) (g) {$g$};
+	%waypoints
+	\node at ($(f_out1)+(2,0)$) (1u) {};
+	\node at ($(h_in1)-(.5,0)$) (2u) {};
+	\node at ($(1u)-(0,3)$) (1d) {};
+	\node at ($(2u)-(0,3)$) (2d) {};
+	\node at ($(1d)-(1,0)$) (3u) {};
+	\node at ($(3u)-(0,3)$) (3d) {};
+	\node at ($(h2_out2)+(.1,0)$) (5u) {};
+	\node at ($(5u)-(0,3)$) (5d) {};
+	\node at ($(f)-(0,12)$) (lower) {};
+	%black dots
+	\node[bdot] at ($(1u)+(.5,-1.5)$) (1) {};
+	\node[bdot] at ($(2u)+(-.5,-1.5)$) (2) {};
+	\node[bdot] at ($(3u)+(-.5,-1.5)$) (3) {};
+	\node[bdot] at ($(3)+(-.3,0)$) (4) {};
+	\node[bdot] at ($(5u)+(.5,-1.5)$) (5) {};
+	\node[bdot] at ($(5)+(.3,0)$) (6) {};
+	%outer
+	\node[bb={5}{5}, fit=(f) (lower) (h), minimum height=25ex, minimum
+	width=.7\textwidth] (outer) {};
+	\node[bdot] at ($(outer_out5)-(5,0)$) (Z) {};
+	% lines
+	\draw ($(outer.west|-f_in1)-(.2,0)$) node[left] {$A$} to (f_in1);
+	\draw ($(outer.west|-f_in2)-(.2,0)$) node[left] {$B$} to (f_in2);
+	\draw ($(outer.west|-g_in1)-(.2,0)$) node[left] {$C$} to (g_in1);
+	\draw (f_out1) to (1u.center);
+	\draw (2u.center) to (h_in1);
+	\draw (1u.center) to (1);
+	\draw (1d.center) to (1);
+	\draw (2) to (2u.center);
+	\draw (2) to (2d.center);
+	\draw (3) to (3u.center);
+	\draw (3) to (3d.center);
+	\draw (1) to (2);
+	\draw (3u.center) to (1d.center);
+	\draw (4) to (3);
+	\draw (3d.center) to (h2_in1);
+	\draw (g_out1) to (5d.center);
+	\draw (h2_out2) to (5u.center);
+	\draw (5u.center) to (5);
+	\draw (5d.center) to (5);
+	\draw (5) to (6);
+	\draw (h_out1) to ($(outer.east|-h_out2)+(.2,0)$) node[right] {$D$};
+	\draw (h_out2) to ($(outer.east|-h_out1)+(.2,0)$) node[right] {$D$};
+	\draw (h2_out1) to ($(outer.east|-h2_out1)+(.2,0)$);
+	\draw (2d.center) to ($(outer.east|-2d)+(.2,0)$) node[right] {$B$};
+	\draw (Z) to ($(outer_out5)+(.2,0)$)node[right] {$A$};
+\end{tikzpicture}
+\]
+We have suppressed some of the object/wire labels for readability, since all
+types can be inferred from the labeled ones.
+
+\begin{exercise}%
+\label{exc.suppressed_labels}~ 
+\begin{enumerate}
+	\item What label should be on the input to $h$?
+	\item What label should be on the output of $g$?
+	\item What label should be on the fourth output wire of the composite?
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Thus hypergraph categories are general enough to talk about all network-style
+diagrammatic languages, like circuit diagrams. %
+\index{network!language}
+
+%
+\index{Frobenius!structure|)}
+%---- Subsection ----%
+\subsection{Definition of hypergraph category}
+We are now ready to define hypergraph categories formally. Since the wiring diagrams for hypergraph categories are just those for symmetric
+monoidal categories with a few additional icons, the definition is relatively
+straightforward: we just want a Frobenius structure on every object. The only
+coherence condition is that these interact nicely with the monoidal product.
+
+\begin{definition}%
+\index{category!hypergraph structure on}%
+\index{hypergraph category}
+  A \emph{hypergraph category} is a symmetric monoidal category $(\cat{C},I,\otimes)$ in which each
+  object $X$ is equipped with a Frobenius structure
+  $(X,\mu_X,\delta_X,\eta_X,\epsilon_X)$ such that 
+  \[
+    \tikzset{every path/.style={line width=1.1pt}}
+%    \xymatrixcolsep{1.8ex}
+    \xymatrixrowsep{1ex}
+    \xymatrix{
+    \begin{aligned}
+      \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-0.25, 0.5) {};
+		\node [style=bdot] (1) at (0.5, -0) {};
+		\node [style=none] (2) at (-0.25, -0.5) {};
+		\node [style=none] (3) at (1.25, -0) {};
+		\node [style=none] (4) at (-1.5, 0.5) {$X \otimes Y$};
+		\node [style=none] (5) at (-1.5, -0.5) {$X \otimes Y$};
+		\node [style=none] (6) at (2, -0) {$X \otimes Y$};
+		\node [style=none] (7) at (-0.75, 0.5) {};
+		\node [style=none] (8) at (-0.75, -0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [in=90, out=0, looseness=0.90] (0.center) to (1.center);
+		\draw [in=-90, out=0, looseness=0.90] (2.center) to (1.center);
+		\draw (1.center) to (3.center);
+		\draw (7.center) to (0.center);
+		\draw (8.center) to (2.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+  \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-0.25, 0.5) {};
+		\node [style=bdot] (1) at (0.5, -0) {};
+		\node [style=none] (2) at (-0.25, -0.5) {};
+		\node [style=none] (3) at (1.25, -0) {};
+		\node [style=none] (4) at (-1.75, 0.5) {$X$};
+		\node [style=none] (5) at (-1.75, -1.25) {$X$};
+		\node [style=none] (6) at (1.5, -0) {$X$};
+		\node [style=none] (7) at (-1.5, 0.5) {};
+		\node [style=none] (8) at (-1.5, -1.25) {};
+		\node [style=none] (9) at (1.25, -1.75) {};
+		\node [style=none] (10) at (-1.5, -2.25) {};
+		\node [style=none] (11) at (1.5, -1.75) {$Y$};
+		\node [style=none] (12) at (-1.5, -0.5) {};
+		\node [style=none] (13) at (-0.25, -2.25) {};
+		\node [style=bdot] (14) at (0.5, -1.75) {};
+		\node [style=none] (15) at (-0.25, -1.25) {};
+		\node [style=none] (16) at (-1.75, -0.5) {$Y$};
+		\node [style=none] (17) at (-1.75, -2.25) {$Y$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [in=90, out=0, looseness=0.90] (0.center) to (1.center);
+		\draw [in=-90, out=0, looseness=0.90] (2.center) to (1.center);
+		\draw (1.center) to (3.center);
+		\draw (7.center) to (0.center);
+		\draw [in=180, out=0, looseness=1.00] (8.center) to (2.center);
+		\draw [in=90, out=0, looseness=0.90] (15.center) to (14);
+		\draw [in=-90, out=0, looseness=0.90] (13.center) to (14);
+		\draw (14) to (9.center);
+		\draw [in=180, out=0, looseness=1.00] (12.center) to (15.center);
+		\draw (10.center) to (13.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+& &   
+\qquad
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (-0.5, 0.5) {};
+		\node [style=none] (1) at (1.5, 0.5) {$X\otimes Y$};
+		\node [style=none] (2) at (0.75, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (0.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  = \qquad
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (0, 0.5) {};
+		\node [style=none] (1) at (1.5, 0.5) {$X$};
+		\node [style=none] (2) at (1.25, 0.5) {};
+		\node [style=none] (3) at (1.25, -0.25) {};
+		\node [style=bdot] (4) at (0, -0.25) {};
+		\node [style=none] (5) at (1.5, -0.25) {$Y$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (0.center);
+		\draw (3.center) to (4.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+\\
+    \begin{aligned}
+\begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0.75, 0.5) {};
+		\node [style=bdot] (1) at (0, -0) {};
+		\node [style=none] (2) at (0.75, -0.5) {};
+		\node [style=none] (3) at (-0.75, -0) {};
+		\node [style=none] (4) at (2, 0.5) {$X \otimes Y$};
+		\node [style=none] (5) at (2, -0.5) {$X \otimes Y$};
+		\node [style=none] (6) at (-1.5, -0) {$X \otimes Y$};
+		\node [style=none] (7) at (1.25, 0.5) {};
+		\node [style=none] (8) at (1.25, -0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [in=90, out=180, looseness=0.90] (0.center) to (1.center);
+		\draw [in=-90, out=180, looseness=0.90] (2.center) to (1.center);
+		\draw (1.center) to (3.center);
+		\draw (7.center) to (0.center);
+		\draw (8.center) to (2.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, 0.5) {};
+		\node [style=bdot] (1) at (-0.75, -0) {};
+		\node [style=none] (2) at (0, -0.5) {};
+		\node [style=none] (3) at (-1.5, -0) {};
+		\node [style=none] (4) at (1.5, 0.5) {$X$};
+		\node [style=none] (5) at (1.5, -1.25) {$X$};
+		\node [style=none] (6) at (-1.75, -0) {$X$};
+		\node [style=none] (7) at (1.25, 0.5) {};
+		\node [style=none] (8) at (1.25, -1.25) {};
+		\node [style=none] (9) at (-1.5, -1.75) {};
+		\node [style=none] (10) at (1.25, -2.25) {};
+		\node [style=none] (11) at (-1.75, -1.75) {$Y$};
+		\node [style=none] (12) at (1.25, -0.5) {};
+		\node [style=none] (13) at (0, -2.25) {};
+		\node [style=bdot] (14) at (-0.75, -1.75) {};
+		\node [style=none] (15) at (0, -1.25) {};
+		\node [style=none] (16) at (1.5, -0.5) {$Y$};
+		\node [style=none] (17) at (1.5, -2.25) {$Y$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [in=90, out=180, looseness=0.90] (0.center) to (1.center);
+		\draw [in=-90, out=180, looseness=0.90] (2.center) to (1.center);
+		\draw (1.center) to (3.center);
+		\draw (7.center) to (0.center);
+		\draw [in=0, out=180, looseness=1.00] (8.center) to (2.center);
+		\draw [in=90, out=180, looseness=0.90] (15.center) to (14);
+		\draw [in=-90, out=180, looseness=0.90] (13.center) to (14);
+		\draw (14) to (9.center);
+		\draw [in=0, out=180, looseness=1.00] (12.center) to (15.center);
+		\draw (10.center) to (13.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+& &
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (1.5, 0.5) {};
+		\node [style=none] (1) at (-0.5, 0.5) {$X\otimes Y$};
+		\node [style=none] (2) at (0.25, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (0.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  \qquad \quad =
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.65]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (1.5, 0.5) {};
+		\node [style=none] (1) at (0, 0.5) {$X$};
+		\node [style=none] (2) at (0.25, 0.5) {};
+		\node [style=none] (3) at (0.25, -0.25) {};
+		\node [style=bdot] (4) at (1.5, -0.25) {};
+		\node [style=none] (5) at (0, -0.25) {$Y$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (0.center);
+		\draw (3.center) to (4.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\qquad \quad
+  \end{aligned}
+}
+\]
+for all objects $X$, $Y$, and such that $\eta_I=\id_I=\epsilon_I$.
+
+A \emph{hypergraph prop} is a hypergraph category that is also a prop, e.g.\ $\Ob(\cat{C})=\NN$, etc.%
+\index{prop!hypergraph}
+\end{definition}
+%\begin{definition}
+%A  \emph{hypergraph functor} is a strong symmetric monoidal functor
+%$(F,\varphi)$ that preserves the hypergraph structure. More precisely, the
+%latter condition means that given an object $X$, the special commutative
+%Frobenius structure on $FX$ must be 
+%\[
+%  (FX,\enspace F\mu_X \circ \varphi_{X,X},\enspace  \varphi^{-1} \circ F\delta_X,\enspace  F\eta_X \circ
+%\varphi_1,\enspace  \varphi_1 \circ \epsilon_X).
+%\]
+%\end{definition}
+
+\begin{example} %
+\label{ex.cospan_hypergraph}%
+\index{cospans!hypergraph
+  category of|see {hypergraph category, of cospans}}%
+\index{hypergraph category!of cospans}
+For any $\cat C$ with finite colimits, $\cospan{\cat C}$ is a hypergraph category.
+The Frobenius morphisms $\mu_X,\delta_X,\eta_X,\epsilon_X$ for each object $X$ are
+constructed using the universal properties of colimits:
+\begin{align*}
+  \mu_X \coloneq&\quad\big(
+  X+X 
+  \xrightarrow{\copair{\id_X,\id_X}} X 
+  \xleftarrow{\makebox[4.5em]{$\id_X$}} X \big)\\
+  \eta_X \coloneq& \quad\big(
+  \varnothing 
+  \xrightarrow{\makebox[4.5em]{$!_X$}} X
+  \xleftarrow{\makebox[4.5em]{$\id_X$}} X \big)\\
+  \delta_X \coloneq&\quad\big(
+  X 
+  \xrightarrow{\makebox[4.5em]{$\id_X$}} X 
+  \xleftarrow{\copair{\id_X,\id_X}} X+X \big)\\
+  \epsilon_X \coloneq &\quad\big(
+  X 
+  \xrightarrow{\makebox[4.5em]{$\id_X$}} X 
+  \xleftarrow{\makebox[4.5em]{$!_X$}} \varnothing\big)
+  \qedhere
+\end{align*}
+\end{example}
+
+\begin{exercise} %
+\label{exc.frob_cospan}
+  By \cref{ex.cospan_hypergraph}, the category $\cospan\finset$ is a hypergraph
+  category. (In fact, it is equivalent to a hypergraph prop.) Draw the Frobenius
+  morphisms for the object $\ul{1}$ in $\cospan\finset$ using both the function
+  and wiring depictions as in \cref{ex.cospan_finset}.
+\end{exercise}
+
+\begin{exercise} %
+\label{exc.frob_cospan2}
+  Using your knowledge of colimits, show that the maps defined in
+  \cref{ex.cospan_hypergraph} do indeed obey the special law (see
+  \cref{def.spec_comm_frob_mon}).
+%
+%  Using your knowledge of colimits, show that the maps defined in
+%  \cref{ex.cospan_hypergraph} do indeed obey 
+%  \begin{enumerate}
+%  \item the unitality law, 
+%  \item the special law, and  
+%  \item the Frobenius law.
+%  \end{enumerate}
+%  (See \cref{eqn.ass_un_comm,def.spec_comm_frob_mon} for the statements of these
+%  laws.)
+\end{exercise}
+
+
+%\begin{example}
+%Any category of corelations $\corel{}(\cat C,\cat E,\cat M)$ is a hypergraph
+%category. The Frobenius maps on each object are given by the $\cat E$-part of
+%the cospans defining the Frobenius maps on that object in $\cospan{\cat C}$.
+%\end{example}
+
+\begin{example} %
+\label{ex.frob_corel}%
+\index{corelations!hypergraph category of|see {hypergraph category, of corelations}}%
+\index{hypergraph category!of corelations}
+  Recall the monoidal category $(\Cat{Corel},\varnothing, \sqcup)$ from \cref{ex.corel}; its objects are finite sets and its morphisms are
+  corelations. Given a finite set $X$, define the corelation $\mu_X\colon
+  X\sqcup X \to X$ such that two elements of $X \sqcup X \sqcup X$ are
+  equivalent if and only if they come from the same underlying element of $X$.
+  Define $\delta_X\colon X \to X\sqcup X$ in the same way, and define
+  $\eta_X\colon \varnothing \to X$ and $\epsilon_X\colon X \to \varnothing$ such
+  that no two elements of $X = \varnothing \sqcup X = X \sqcup \varnothing$ are
+  equivalent.
+
+  These maps define a special commutative Frobenius monoid
+  $(X,\mu_X,\eta_X,\delta_X,\epsilon_X)$, and in fact give $\Cat{Corel}$
+  the structure of a hypergraph category.
+\end{example}
+
+\begin{example} %
+\index{linear relations!hypergraph category of|see {hypergraph category, of
+linear relations}}\index{hypergraph category!of linear relations}
+The prop of linear relations, which we briefly mentioned in
+\cref{exc.linear_relations}, is a hypergraph category. In fact, it is a hypergraph
+category in two ways, by choosing either the black `copy' and `discard'
+generators or the white `add' and `zero' generators as the Frobenius maps.
+\end{example}
+
+We can generalize the construction we gave in \cref{thm.rel_is_ccc}.
+\begin{proposition} %
+\label{prop.hyp_cat_comp_closed}%
+\index{compact closed category!hypergraph
+  category as}
+  Hypergraph categories are self-dual compact closed categories, if we define the cup and cap
+  to be%
+\index{dual!self}
+  \[
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (-0.25, -0) {};
+		\node [style=none] (1) at (0.75, -0.5) {};
+		\node [style=none] (2) at (0.75, 0.5) {};
+		\node [style=bdot] (3) at (-0.75, -0) {};
+		\node [style=none] (4) at (-2, 0.5) {};
+		\node [style=none] (5) at (-2, -0.5) {};
+		\node [style=none] (6) at (-1.5, -0) {$\coloneq$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend right, looseness=1.00] (2.center) to (0);
+		\draw [bend right, looseness=1.00] (0) to (1.center);
+		\draw (0) to (3);
+		\draw [bend right=90, looseness=3.50] (4.center) to (5.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  \hspace{.1\textwidth}
+  \mbox{ and }
+  \hspace{.1\textwidth}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (-1, -0) {};
+		\node [style=none] (1) at (-2, -0.5) {};
+		\node [style=none] (2) at (-2, 0.5) {};
+		\node [style=bdot] (3) at (-0.5, -0) {};
+		\node [style=none] (4) at (0.75, 0.5) {};
+		\node [style=none] (5) at (0.75, -0.5) {};
+		\node [style=none] (6) at (0.25, -0) {$\coloneq$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (2.center) to (0);
+		\draw [bend left, looseness=1.00] (0) to (1.center);
+		\draw (0) to (3);
+		\draw [bend left=90, looseness=3.50] (4.center) to (5.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+\]
+\end{proposition}
+\begin{proof}
+The proof is a straightforward application of the Frobenius and unitality
+axioms:
+\begin{align*}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=none] (2) at (1.25, 1) {};
+	\node [style=none] (4) at (1.25, -0) {};
+	\node [style=none] (5) at (3.5, -0) {};
+	\node [style=none] (6) at (-1, 2) {};
+	\node [style=none] (7) at (1.25, 2) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (6.center) to (7.center);
+	\draw [bend left=90, looseness=4.00] (7.center) to (2.center);
+	\draw [bend right=90, looseness=4.00] (2.center) to (4.center);
+	\draw (4.center) to (5.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+  \qquad
+  &=\qquad
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=bdot] (0) at (-0.5, 0.5) {};
+	\node [style=bdot] (1) at (2.25, 1.5) {};
+	\node [style=none] (2) at (1.25, 1) {};
+	\node [style=bdot] (3) at (0.25, 0.5) {};
+	\node [style=none] (4) at (1.25, -0) {};
+	\node [style=none] (5) at (3.5, -0) {};
+	\node [style=none] (6) at (-1, 2) {};
+	\node [style=none] (7) at (1.25, 2) {};
+	\node [style=bdot] (8) at (3, 1.5) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (6.center) to (7.center);
+	\draw [bend left, looseness=1.00] (7.center) to (1);
+	\draw [bend left, looseness=1.00] (1) to (2.center);
+	\draw (1) to (8);
+	\draw [bend right, looseness=1.00] (2.center) to (3);
+	\draw (0) to (3);
+	\draw [bend right, looseness=1.00] (3) to (4.center);
+	\draw (4.center) to (5.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned} \tag{definition}\\
+  &=\qquad
+  \begin{aligned}
+  \begin{tikzpicture}
+  \node[draw,minimum height=15ex, minimum
+  width=.3\textwidth,label={[yshift=-14ex]\cref{exc.fill_in_diagram}!}] (box) {};
+  \end{tikzpicture}
+  \end{aligned} \tag{Frobenius}\\
+  &=\qquad
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=none] (0) at (1.75, -0) {};
+	\node [style=none] (1) at (-1.75, -0) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (0.center) to (1.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}\tag{unitality}
+\end{align*}
+\end{proof}
+
+\begin{exercise} %
+\label{exc.fill_in_diagram}
+Fill in the missing diagram in the proof of \cref{prop.hyp_cat_comp_closed} using the equations from \cref{eqn.ass_un_comm}, their opposites, and \cref{eqn.frob_laws}.
+\end{exercise}
+
+%
+\index{hypergraph category|)}
+
+%-------- Section --------%
+\section{Decorated cospans}%
+\label{sec.decorated_cospans}%
+\index{cospans!decorated}
+The goal of this section is to show how we can construct a hypergraph category whose morphisms are electric circuits. To do this, we first must
+introduce the notion of structure-preserving map for symmetric monoidal
+categories, a generalization of monoidal monotones known as symmetric
+monoidal functors. Then we introduce a general method---that of decorated cospans---for producing hypergraph categories. Doing all this will tie up lots of loose ends: colimits, cospans, circuits, and hypergraph categories. 
+
+%---- Subsection ----%
+\subsection{Symmetric monoidal functors}%
+\label{sec.monoidal_cats_full}
+
+\begin{roughDef}%
+\index{monoidal functor}%
+\label{roughdef.monoidal_functor}
+Let $(\cat{C},I_{\cat{C}},\otimes_\cat{C})$ and
+$(\cat{D},I_{\cat{D}},\otimes_\cat{D})$ be symmetric monoidal categories. To
+specify a \emph{symmetric monoidal functor} $(F,\varphi)$ between them,
+\begin{enumerate}[label=(\roman*)]
+	\item one specifies a functor $F\colon\cat{C}\to\cat{D}$;
+	\item one specifies a morphism $\varphi_I\colon I_\cat{D}\to F(I_\cat{C})$.
+	\item for each $c_1,c_2\in\Ob(\cat{C})$, one specifies a morphism 
+	\[
+	    \varphi_{c_1,c_2}\colon F(c_1)\otimes_\cat{D} F(c_2)\to F(c_1\otimes_\cat{C} c_2),
+	  \]
+	  natural in $c_1$ and $c_2$.
+\end{enumerate}
+We call the various maps $\varphi$ \emph{coherence maps}. We require the
+coherence maps to obey bookkeeping axioms that ensure they are well behaved with
+respect to the symmetric monoidal structures on $\cat{C}$ and
+$\cat{D}$.%
+\index{coherence} If $\varphi_I$ and $\varphi_{c_1,c_2}$ are isomorphisms for all $c_1,c_2$, we say that $(F,\varphi)$ is \emph{strong}.
+
+%A monoidal functor is called \emph{strong} if all coherence maps are
+%isomorphisms, and it is called \emph{strict} if they are equalities. If we want
+%to emphasize that neither of these need be true, we call a monoidal functor
+%\emph{lax}.
+\end{roughDef}
+
+\begin{example} %
+\label{ex.powset}%
+\index{power set}
+Consider the power set functor $\powset\colon\smset\to\smset$. It acts on objects by sending a set
+$S\in\smset$ to its set of subsets $\powset(S)\coloneqq\{R\ss S\}$. It acts on morphisms by sending a function $f\colon
+S\to T$ to the image map $\im_f\colon\powset(S)\to\powset(T)$, which maps $R\ss
+S$ to $\{f(r)\mid r\in R\}\ss T$.
+
+Now consider the symmetric monoidal structure $(\{1\},\times)$ on $\smset$ from
+\cref{ex.set_as_mon_cat}. To make $\powset$ a symmetric monoidal functor, we
+need to specify a function $\varphi_I\colon\{1\}\to\powset(\{1\})$ and for all
+sets $S$ and $T$, a functor $\varphi_{S,T}\colon \powset(S)\times\powset(T) \to
+\powset(S \times T)$. One possibility is to define $\varphi_I(1)$ to be the maximal subset $\{1\}\ss\{1\}$, and
+given subsets $A \ss S$ and $B \ss T$, to define $\varphi_{S,T}(A,B)$ to be the product subset $A
+\times B \ss S \times T$. With these definitions, $(\powset,\varphi)$ is a symmetric monoidal functor.
+\end{example}
+
+\begin{exercise} %
+\label{exc.powset_mon_coherence}
+  Check that the maps $\varphi_{S,T}$ defined in \cref{ex.powset} are natural in
+  $S$ and $T$. In other words, given $f\colon S\to S'$ and $g\colon T\to T'$, show that the diagram below commutes:
+  \[
+  \begin{tikzcd}[column sep=large]
+  	\powset(S)\times\powset(T)\ar[r,
+	"\varphi_{S,T}"]\ar[d,"\im_f\times \im_g"']&
+		\powset(S\times T)\ar[d, "\im_{f\times g}"]\\
+		\powset(S')\times\powset(T')\ar[r, "\varphi_{S',T'}"']&
+		\powset(S'\times T')
+  \end{tikzcd}
+  \qedhere
+  \]
+\end{exercise}
+
+%---- Subsection ----%
+\subsection{Decorated cospans} %
+\label{sec.deccospans}
+
+Now that we have briefly introduced symmetric monoidal functors, we return to the task at hand: constructing a hypergraph category of circuits. To do so, we introduce the method of decorated cospans.%
+\index{electrical circuit|(}
+
+Circuits have lots of internal structure, but they also have some external ports---also called `terminals'---by which to interconnect them with others. Decorated cospans are ways of discussing exactly that: things with external ports and internal structure. 
+
+To see how this works, let us start with the following example circuit:
+\begin{equation} %
+\label{eq.circuit}
+\begin{aligned}
+    \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC graphic]
+      \node[contact]         (A) at (0,0) {};
+      \node[contact]         (B) at (3,0) {};
+      \node[contact]         (C) at (0,-2.5) {};
+      \node[contact]         (D) at (3,-2.5) {};
+      \coordinate         (ua) at (.5,.25) {};
+      \coordinate         (ub) at (2.5,.25) {};
+      \coordinate         (la) at (.5,-.25) {};
+      \coordinate         (lb) at (2.5,-.25) {};
+      \path (A) edge (ua);
+      \path (A) edge (la);
+      \path (B) edge (ub);
+      \path (B) edge (lb);
+      \path (ua) edge  [resistor] node[label={[label distance=1pt]90:{$2\Omega$}}] {} (ub);
+      \path (la) edge  [capacitor] node[label={[label distance=1pt]270:{$3F$}}] {} (lb);
+      \path (A) edge  [resistor] node[label={[label distance=2pt]180:{$1\Omega$}}] {} (C);
+      \path (D) edge  [resistor] node[label={[label distance=2pt]0:{$1\Omega$}}] {} (B);
+      \path (C) edge  [inductor] node[label={[label
+      distance=1pt]90:{$1H$}}] {} (D);
+    \end{tikzpicture}
+    \end{aligned}
+\end{equation}
+We might formally consider this as a graph on the set of four ports, where each edge
+is labeled by a type of circuit component (for example, the top edge would be
+labeled as a resistor of resistance $2\Omega$). For this circuit to be a
+morphism in some category, i.e.\ in order to allow for interconnection, we must equip the circuit with
+some notion of interface. We do this by marking the ports in the interface using
+functions from finite sets:
+\begin{equation} %
+\label{eq.circuitcospan}
+    \begin{aligned}
+    \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC graphic]
+      \node[circle,draw,inner sep=1.5pt]         (x) at
+	(-3,-1.3) {};
+	\node at (-3,-3.2) {$A$};
+      \node[contact]         (A) at (0,0) {};
+      \node[contact]         (B) at (3,0) {};
+      \node[contact]         (C) at (0,-2.5) {};
+      \node[contact]         (D) at (3,-2.5) {};
+      \node[circle,draw,inner sep=1.5pt]         (y1) at
+	(6,-.6) {};
+	  \node[circle,draw,inner sep=1.5pt]         (y2) at
+	  (6,-2) {};
+	  \node at (6,-3.2) {$B$};
+	  \node at (1.5,-3.2) {$N$};
+      \coordinate         (ua) at (.5,.25) {};
+      \coordinate         (ub) at (2.5,.25) {};
+      \coordinate         (la) at (.5,-.25) {};
+      \coordinate         (lb) at (2.5,-.25) {};
+      \path (A) edge (ua);
+      \path (A) edge (la);
+      \path (B) edge (ub);
+      \path (B) edge (lb);
+      \path (ua) edge  [resistor] node[label={[label distance=1pt]90:{$2\Omega$}}] {} (ub);
+      \path (la) edge  [capacitor] node[label={[label distance=1pt]270:{$3F$}}] {} (lb);
+      \path (A) edge  [resistor] node[label={[label distance=2pt]180:{$1\Omega$}}] {} (C);
+      \path (D) edge  [resistor] node[label={[label distance=2pt]0:{$1\Omega$}}] {} (B);
+      \path (C) edge  [inductor] node[label={[label
+      distance=1pt]90:{$1H$}}] {} (D);
+	\path[mapsto, shorten >=10pt, shorten <=5pt] (x) edge (A);
+	\path[mapsto, shorten >=10pt, shorten <=5pt] (y1) edge (B);
+	\path[mapsto, shorten >=10pt, shorten <=5pt] (y2) edge (B);
+    \end{tikzpicture}
+    \end{aligned}
+\end{equation}
+Let $N$ be the set of nodes of the circuit. Here the finite sets $A$, $B$, and
+$N$ are sets consisting of one, two, and four elements respectively, drawn as points, and the
+values of the functions $A \to N$ and $B \to N$ are indicated by the grey
+arrows. This forms a
+cospan in the category of finite sets, for which the apex set $N$
+has been \emph{decorated} by our given circuit.%
+\index{category!of finite sets}
+
+Suppose given another such decorated cospan with input $B$
+\begin{center}
+    \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+      graphic,scale=2]
+    \node[circle,draw,inner sep=1.5pt]       (y1) at (-1.4,-.25) {};
+    \node[circle,draw,inner sep=1.5pt]       (y2) at (-1.4,-.61) {};
+    \node at (-1.4,-.9) {$B$};
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (1,0) {};
+    \node[contact]         (C) at (0.5,-.86) {};
+    \node[circle,draw,inner sep=1.5pt]       (z1) at (2.4,-.25) {};
+    \node[circle,draw,inner sep=1.5pt]       (z2) at (2.4,-.61) {};
+    \node at (2.4,-.9) {$C$};
+      \path (A) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[above] {\footnotesize $5\Omega$} (B);
+      \path (C) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[right] {\footnotesize $8\Omega$} (B);
+    \path[mapsto, shorten >=10pt, shorten <=5pt] (y1) edge (A);
+    \path[mapsto, shorten >=10pt, shorten <=5pt] (y2)
+    edge (C);
+    \path[mapsto, shorten >=10pt, shorten <=5pt] (z1) edge (B);
+    \path[mapsto, shorten >=10pt, shorten <=5pt] (z2) edge (C);
+  \end{tikzpicture}
+\end{center}
+Since the output of the first equals the input of the second (both are $B$), we can stick them together into a single diagram:
+\begin{equation} %
+\label{eq.circuitcomposition}
+  \begin{aligned}
+    \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+      graphic,scale=.6]
+      \node[circle,draw,inner sep=1.5pt]        (x) at
+      (-3,-1.3) {};
+      \node at (-3,-3.2) {\footnotesize $A$};
+      \node[circle,draw,inner sep=1pt,fill]         (A) at (0,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (B) at (3,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (C) at (0,-2.5) {};
+      \node[circle,draw,inner sep=1pt,fill]         (D) at (3,-2.5) {};
+      \node at (1.5,-3.2) {\footnotesize $N$};
+      \node[circle,draw,inner sep=1.5pt]        (y1) at
+      (6,-.6) {};
+      \node[circle,draw,inner sep=1.5pt]        (y2) at
+      (6,-2) {};
+      \node at (6,-3.2) {\footnotesize $B$};
+      \coordinate         (ua) at (.5,.25) {};
+      \coordinate         (ub) at (2.5,.25) {};
+      \coordinate         (la) at (.5,-.25) {};
+      \coordinate         (lb) at (2.5,-.25) {};
+      \path (A) edge (ua);
+      \path (A) edge (la);
+      \path (B) edge (ub);
+      \path (B) edge (lb);
+      \path (ua) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[label={[label distance=1pt]90:{\footnotesize $2\Omega$}}] {} (ub);
+      \path (la) edge  [capacitor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[label={[label distance=1pt]270:{\footnotesize$3F$}}] {} (lb);
+      \path (A) edge  [resistor, circuit symbol unit=5pt, circuit symbol
+      size=width {5} height 1.5] node[left] {\footnotesize $1\Omega$} (C);
+      \path (D) edge  [resistor, circuit symbol unit=5pt, circuit symbol
+      size=width {5} height 1.5] node[right] {\footnotesize$1\Omega$} (B);
+      \path (C) edge  [inductor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[label={[label
+      distance=0pt]90:{\footnotesize$1H$}}] {} (D);
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (x) edge (A);
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (y1) edge (B);
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (y2)
+      edge (B);
+      \node[circle,draw,inner sep=1pt,fill]         (A') at (9,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (B') at (12,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (C') at (10.5,-2.6) {};
+      \node at (10.5,-3.2) {\footnotesize $M$};
+      \node[circle,draw,inner sep=1.5pt]        (z1) at
+      (15,-.6) {};
+      \node[circle,draw,inner sep=1.5pt]        (z2) at (15,-2) {};
+      \node at (15,-3.2) {\footnotesize $C$};
+      \path (A') edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[above] {\footnotesize $5\Omega$} (B');
+      \path (C') edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[right] {\footnotesize $8\Omega$} (B');
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (y1) edge (A');
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (y2)
+      edge (C');
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (z1) edge (B');
+      \path[mapsto, shorten >=10pt, shorten <=5pt]
+      (z2) edge (C');
+    \end{tikzpicture}  
+  \end{aligned}
+\end{equation}
+The composition is given by gluing the circuits along the identifications specified by $B$, resulting in the decorated
+cospan
+\begin{equation}%
+\label{eqn.circuitcomposed}
+\begin{aligned}
+    \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+      graphic,scale=.8]
+      \node[circle,draw,inner sep=1.5pt]        (x) at (-4,-1.3) {};
+      \node at (-4,-3.2) {\footnotesize $A$};
+      \node[circle,draw,inner sep=1pt,fill]         (A) at (0,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (B) at (3,0) {};
+      \node[circle,draw,inner sep=1pt,fill]         (C1) at (0,-2.5) {};
+      \node[circle,draw,inner sep=1pt,fill]         (D1) at (3,-2.5) {};
+      \node at (3,-3.2) {\footnotesize $N+_BM$};
+      \node[circle,draw,inner sep=1pt,fill]         (D) at (6,0) {};
+      \coordinate         (ua) at (.5,.25) {};
+      \coordinate         (ub) at (2.5,.25) {};
+      \coordinate         (la) at (.5,-.25) {};
+      \coordinate         (lb) at (2.5,-.25) {};
+      \coordinate         (ub2) at (3.5,.25) {};
+      \coordinate         (ud) at (5.5,.25) {};
+      \coordinate         (lb2) at (3.5,-.25) {};
+      \coordinate         (ld) at (5.5,-.25) {};
+      \path (A) edge (ua);
+      \path (A) edge (la);
+      \path (B) edge (ub);
+      \path (B) edge (lb);
+      \path (B) edge (ub2);
+      \path (B) edge (lb2);
+      \path (D) edge (ud);
+      \path (D) edge (ld);
+      \node[circle,draw,inner sep=1.5pt]         (z1) at
+      (10,-.6) {};
+      \node[circle,draw,inner sep=1.5pt]         (z2) at (10,-2) {};
+      \node at (10,-3.2) {\footnotesize $C$};
+      \path (ua) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[above] {\footnotesize $2\Omega$} (ub);
+      \path (la) edge  [capacitor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[label={[label distance=1pt]270:{\footnotesize$3F$}}] {} (lb);
+      \path (A) edge  [resistor, circuit symbol unit=5pt, circuit symbol
+      size=width {5} height 1.5] node[left] {\footnotesize $1\Omega$} (C1);
+      \path (D1) edge  [resistor, circuit symbol unit=5pt, circuit symbol
+      size=width {5} height 1.5] node[right] {\footnotesize$1\Omega$} (B);
+      \path (C1) edge  [inductor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[label={[label
+      distance=0pt]90:{\footnotesize$1H$}}] {} (D1);
+      \path (ub2) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[above] {\footnotesize $5\Omega$} (ud);
+      \path (lb2) edge  [resistor, circuit symbol unit=5pt, circuit symbol size=width {5} height 1.5] node[below] {\footnotesize $8\Omega$} (ld);
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (x) edge (A);
+      \path[mapsto, shorten >=10pt, shorten <=5pt] (z1)
+      edge (D);
+      \path[mapsto, shorten >=10pt, shorten <=5pt, bend left] (z2)
+      edge (B);
+    \end{tikzpicture}
+  \end{aligned}
+\end{equation}
+We've seen this sort of gluing before when we defined composition of cospans in \cref{def.cospan_sym_mon_cat}. But now there's this whole `decoration' thing; our goal is to formalize it.
+
+\begin{definition}%
+\label{def.decorated_cospan}%
+\index{cospan!decorated}%
+\index{category!having finite colimits}%
+\index{monoidal functor}
+  Let $\mathcal C$ be a category with finite colimits, and $(F,\varphi) \colon  (\mathcal
+  C,+) \longrightarrow (\smset, \times)$
+  be a symmetric monoidal functor. An \emph{$F$-decorated cospan} is a pair 
+  consisting of a cospan $A \stackrel{i}\rightarrow N \stackrel{o}\leftarrow B$ in
+  $\mathcal C$ together with an element $s \in F(N)$.%
+  \tablefootnote{Just like in \cref{def.cospan_sym_mon_cat}, we should technically use equivalence classes of cospans. We will elide this point to get the bigger idea across. The interested reader should consult \cref{sec.c6_further_reading}.}
+  We call $(F,\varphi)$ the \emph{decoration functor} and $s$ the
+  \emph{decoration}.
+\end{definition}
+
+The intuition here is to use $\cat{C}=\finset$, and, for each object $N\in\finset$, the functor $F$ assigns the set of all legal decorations on a set $N$ of nodes. When you choose an $F$-decorated cospan, you choose a set $A$ of left-hand external ports, a set $B$ of right-hand external ports, each of which maps to a set $N$ of nodes, and you choose one of the available decorations on $N$ nodes, taken from the set $F(N)$.
+
+So, in our electrical circuit case, the decoration functor $F$ sends a finite set
+$N$ to the set of circuit diagrams---graphs whose edges are labeled by resistors, capacitors, etc.---that have $N$ vertices.
+
+Our goal is still to be able to compose such diagrams; so how does that work exactly? Basically one combines the way cospans are composed with the structures defining our decoration functor: namely $F$ and $\varphi$.
+
+% First, note that
+%just as we consider two cospans equivalent if they are appropriately isomorphic,
+%we consider two decorated cospans $(A \xrightarrow{f} N \xleftarrow{g} B,s)$ and
+%$(A'\xrightarrow{f'} N' \xleftarrow{g'} B',s')$ equivalent if there exists an
+%isomorphism $n\colon N \to N'$ such that $f\cp n=f'$ and $g\cp n=g'$,
+%and $Fn(s)=s'$. Just like for cospans, we in fact compose equivalence classes of
+%decorated cospans.
+Let $(A \xrightarrow{f} N \xleftarrow{g} B,s)$ and $(B \xrightarrow{h} P
+\xleftarrow{k} C,t)$ represent decorated cospans. Their
+composite is represented by the composite of the cospans $A \xrightarrow{f} N
+\xleftarrow{g} B$ and $B \xrightarrow{h} P \xleftarrow{k} C$, paired with the
+following element of $F(N+_BP)$:
+\begin{equation} %
+\label{eqn.compositedecoration}
+F([\iota_N,\iota_P])(\varphi_{N,P}(s,t))%
+\end{equation}%
+\label{page.horrendous}
+
+
+That's rather compact! We'll unpack it, in a concrete case, in just a second.
+But let's record a theorem first.
+
+\begin{theorem}%
+\label{thm.hypergraph_from_deccospan}
+  Given a category $\mathcal C$ with finite colimits and a symmetric
+  monoidal functor $(F,\varphi)\colon  (\mathcal C,+) \longrightarrow (\smset, \times)$,
+  there is a hypergraph category $\cospan{F}$ whose objects are the objects of
+  $\mathcal C$, and whose morphisms are equivalence classes of $F$-decorated cospans. 
+  
+%  \[
+%    1 \stackrel{(s,t)}\longrightarrow FN \times FM \stackrel{\varphi_{N,M}}\longrightarrow
+%    F(N+M) \stackrel{F[\iota_N,\iota_M]}\longrightarrow F(N+_BM)
+%  \]
+
+  The symmetric monoidal and hypergraph structures are derived from those on
+  $\cospan{\cat C}$.
+\end{theorem}
+
+\begin{exercise} %
+\label{exc.cospan_as_fcospan}
+	Suppose you're worried that the notation $\cospan{\cat{C}}$ looks like the notation $\cospan{F}$, even though they're very different. An expert tells you ``they're not so different; one is a special case of the other. Just use the constant functor $F(c)\coloneqq\{*\}$.'' What does the expert mean? 
+\end{exercise}
+
+%---- Subsection ----%
+\subsection{Electric circuits} %
+\label{subsec.circuits}
+
+In order to work with the above abstractions, we will get a bit more precise
+about the circuits example and then have a detailed look at how composition
+works in decorated cospan categories.
+
+\paragraph{Let's build some circuits.}
+
+To begin, we'll need to choose which components we want in our circuit. This is
+simply a matter of what's in our electrical toolbox. Let's say we're carrying some
+lightbulbs, switches, batteries, and resistors of every possible resistance. That is, define a set
+\[
+  C \coloneq \{\light,\switch,\battery\} \sqcup \{x\Omega \,|\, x \in \rr^+\}.
+\]
+To be clear, the $\Omega$ are just labels; the above set is isomorphic to
+$\{\light,\switch,\battery\}\sqcup \rr^+$. But we write $C$ this way to remind
+us that it consists of circuit components. If we wanted, we could also add
+inductors, capacitors, and even elements connecting more than two ports, like
+transistors, but let's keep things simple for now.
+
+Given our set $C$, a $C$-circuit is just a graph $(V,A,s,t)$, where $s,t \colon
+A \to V$ are the source and target functions, together with a function
+$\ell\colon A \to C$ labeling each edge with a certain circuit component from
+$C$.
+
+For example, we might have the simple case of $V=\{1,2\}$, $A=\{e\}$, $s(e)=1$,
+$t(e)=2$---so $e$ is an edge from $1$ to $2$---and $\ell(e)=3\Omega$. This represents
+a resistor with resistance $3\Omega$:
+\[
+  \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC graphic]
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (2,0) {};
+    \path (A) edge  [resistor] node[label={[label distance=1pt]90:{$3\Omega$}}]
+    {} (B);
+    \node[below=0 of A, font=\scriptsize] {$1$};
+    \node[below=0 of B, font=\scriptsize] {$2$};
+  \end{tikzpicture}
+\]
+Note that in the formalism we have chosen, we have multiple ways to represent any
+circuit, as our representations explicitly choose directions for the edges. The
+above resistor could also be represented by the `reversed graph', with data $V=\{1,2\}$, $A=\{e\}$,
+$s(e)=2$, $t(e)=1$, and $\ell(e)=3F$.
+
+\begin{exercise} %
+\label{exc.circuit_tuple}
+  Write a tuple $(V,A,s,t,\ell)$ that represents the circuit in
+  \cref{eq.circuit}.
+\end{exercise}
+
+\paragraph{A decoration functor for circuits.}
+
+We want $C$-circuits to be our decorations, so let's use them to define a
+decoration functor as in \cref{def.decorated_cospan}. We'll call the functor
+$(\elec,\psi)$. We start by defining the functor part
+\[
+  \elec \colon (\finset,+) \longrightarrow (\smset, \times)
+\]
+as follows. On objects, simply send a finite set $V$ to the set of $C$-circuits:
+\[
+  \elec(V)\coloneqq\{(V,A,s,t,\ell)\,|\,\mbox{ where }s,t \colon A \to V, \ell\colon E \to
+C\}.
+\]
+On morphisms, $\elec$ sends a function $f\colon V \to V'$ to the function
+\begin{align*}
+  \elec(f)\colon \elec(V) & \longrightarrow \elec(V');\\
+  (V,A,s,t,\ell)&\longmapsto \big(V',A, (s\cp f), (t\cp f),\ell\big).
+\end{align*}
+This defines a functor; let's explore it a bit in an exercise.
+
+\begin{exercise} %
+\label{exc.pushforwardcircuit}
+  To understand this functor better, let $c\in \elec(\ord{4})$ be the circuit
+\[
+  \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC graphic]
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (2,0) {};
+    \node[contact]         (C) at (3,0) {};
+    \node[contact]         (D) at (5,0) {};
+    \path (A) edge  [bulb] (B);
+    \path (C) edge  [resistor] node[label={[label distance=1pt]90:{$3\Omega$}}]
+    {} (D);
+    \node[below=0 of A, font=\scriptsize] {$1$};
+    \node[below=0 of B, font=\scriptsize] {$2$};
+    \node[below=0 of C, font=\scriptsize] {$3$};
+    \node[below=0 of D, font=\scriptsize] {$4$};
+  \end{tikzpicture}
+\]
+and let $f\colon \ord{4} \to \ord{3}$ be the function
+\[
+  \begin{tikzpicture}[y=.5cm,short=5pt]
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (2,0) {};
+    \node[contact]         (C) at (3,0) {};
+    \node[contact]         (D) at (5,0) {};
+    \node[contact]         (1) at (1,-2) {};
+    \node[contact]         (2) at (2.5,-2) {};
+    \node[contact]         (3) at (4,-2) {};
+    \begin{scope}[font=\scriptsize]
+      \node[above=0 of A] {$1$};
+      \node[above=0 of B] {$2$};
+      \node[above=0 of C] {$3$};
+      \node[above=0 of D] {$4$};
+      \node[below=0 of 1] {$1$};
+      \node[below=0 of 2] {$2$};
+      \node[below=0 of 3] {$3$};
+		\end{scope}
+    \begin{scope}[mapsto]
+      \draw (A) to (1);
+      \draw (B) to (2);
+      \draw (C) to (2);
+      \draw (D) to (3);
+    \end{scope}
+  \end{tikzpicture}
+\]
+Draw a picture of the circuit $\elec(f)(c)$.
+\end{exercise}
+
+We're trying to get a decoration functor $(\elec,\psi)$ and so far we have $\elec$. For the coherence maps $\psi_{V,V'}$ for finite sets $V,V'$, we define
+\begin{align}
+  \psi_{V,V'}\colon \elec(V) \times \elec(V') & \longrightarrow \elec(V+V'); \nonumber \\
+  \big((V,A,s,t,\ell),(V',A',s',t',\ell')\big)&\longmapsto(V+V',A+A',s+s',t+t',\copair{\ell,\ell'}).
+  %
+\label{eqn.Flaxator}
+\end{align}
+This is simpler than it may look: it takes a circuit on $V$ and a circuit on $V'$, and just
+considers them together as a circuit on the disjoint union of vertices $V+V'$.
+
+\begin{exercise} %
+\label{exc.parallelcirc}
+  Suppose we have circuits  
+\[
+\begin{aligned}
+  \begin{tikzpicture}[circuit ee IEC, set make contact graphic=var make contact IEC graphic]
+    \node at (-.5,0) {$b\coloneq$};
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (2,0) {};
+    \path (A) edge  [battery] (B);
+  \end{tikzpicture}
+\end{aligned}
+  \qquad
+  \mbox{and}
+  \qquad
+\begin{aligned}
+  \begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC graphic]
+    \node at (-.5,0) {$s\coloneq$};
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (2,0) {};
+    \path (A) edge  [make contact] (B);
+  \end{tikzpicture}
+\end{aligned}
+\]
+in $\elec(\ord{2})$. Use the definition of $\psi_{V,V'}$ from
+\eqref{eqn.Flaxator} to figure out what $4$-vertex circuit $\psi_{\ord{2},\ord{2}}(b,s) \in
+\elec(\ord{2} + \ord{2}) = \elec(\ord{4})$ should be, and draw a picture.
+\end{exercise}
+
+\paragraph{Open circuits using decorated cospans.}%
+\index{electrical circuit!via cospans}
+
+From the above data, just a monoidal functor $(\elec,\psi)\colon(\finset,+) \to
+(\smset, \times)$, we can construct our promised hypergraph category of
+circuits!%
+\index{monoidal functor}
+
+Our notation for this category is $\cospan\elec$. Following
+\cref{thm.hypergraph_from_deccospan}, the objects of this category are the same
+as the objects of $\finset$, just finite sets. We'll reprise our notation from
+the introduction and \cref{ex.coequalizer}, and draw these finite sets as
+collections of white circles $\circ$. For example, we'll represent the object
+$\ord{2}$ of $\cospan\elec$ as two white circles:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+\node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+\node [draw, inner sep=1.5pt,circle] (b) at (.6, 0) {};
+\end{tikzpicture}
+\]
+These white circles mark interface points of an open circuit.
+
+More interesting than the objects, however, are the morphisms in $\cospan\elec$. These are open
+circuits. By \cref{thm.hypergraph_from_deccospan}, a morphism $\ord{m} \to
+\ord{n}$ is a $\elec$-decorated cospan: that is, cospan $\ord{m} \to \ord{p}
+\from \ord{n}$ together with an element $c$ of $\elec(\ord{p})$. As an example,
+consider the cospan $\ord{1} \xrightarrow{i_1} \ord{2} \xleftarrow{i_2} \ord{1}$ where
+$i_1(1) =1$ and $i_2(1) =2$, equipped with the battery element of $\elec(\ord{2})$ connecting node 1 and node 2. We'll depict this as follows:
+\begin{equation} %
+\label{eqn.decorated_cospan}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (r) at (3,0) {};
+	\node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,0) {};
+  \draw (l) to [battery] (r);
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\end{equation}
+\begin{exercise} %
+\label{exc.namethedecoration}
+Morphisms of $\cospan\elec$ are $\elec$-decorated cospans, as defined in
+\cref{def.decorated_cospan}. This means \eqref{eqn.decorated_cospan} depicts a
+cospan together with a \emph{decoration}, which is some $C$-circuit
+$(V,A,s,t,\ell) \in \elec(\ord{2})$. What is it?
+\end{exercise}
+
+Let's now see how the hypergraph operations in $\cospan\elec$ can be used to
+construct electric circuits. 
+
+\paragraph{Composition in $\cospan\elec$.}
+First we'll consider composition. Consider the following decorated cospan from
+$\ord{1}$ to $\ord{1}$:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (r) at (3,0) {};
+	\node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,0) {};
+  \draw (l) to [make contact] (r);
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\]
+Since this and the circuit in \eqref{eqn.decorated_cospan} are both morphisms
+$\ord{1} \to \ord{1}$, we may compose them to get another morphism $\ord{1} \to
+\ord{1}$. How do we do this? There are two parts: to get the new cospan, we
+simply compose the cospans of our two circuits, and to get the new decoration,
+we use the formula $\elec([\iota_N,\iota_P])(\psi_{N,P}(s,t))$ from
+\eqref{eqn.compositedecoration}.  Again, this is rather compact! Let's unpack it
+together. 
+
+We'll start with the cospans. The cospans we wish to compose are
+\[
+\begin{aligned}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (r) at (3,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\end{aligned}
+\hspace{2cm}
+\mbox{and} 
+\hspace{2cm}
+\begin{aligned}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (r) at (3,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\end{aligned}
+\]
+(We simply ignore the decorations for now.) If we pushout over the common set
+$\ord{1} = \{\circ\}$, we obtain the pushout square
+\begin{equation} %
+\label{eqn.pushoutexample}
+  \begin{tikzpicture}[y=.5cm, short=4pt]
+    \node[contact]         (1) at (1.5,2) {};
+    \node[contact]         (2) at (2.5,2) {};
+    \node[contact]         (3) at (3.5,2) {};
+  	\node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(1) (3)] {};
+    \node[contact]         (A) at (0,0) {};
+    \node[contact]         (B) at (1,0) {};
+	  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(A) (B)] {};
+    \node[contact]         (C) at (4,0) {};
+    \node[contact]         (D) at (5,0) {};
+	  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(C) (D)] {};
+\node [draw, inner sep=1.5pt,circle] (a) at (-1.5,-2) {};
+\node [draw, inner sep=1.5pt,circle] (b) at (2.5,-2) {};
+\node [draw, inner sep=1.5pt,circle] (c) at (6.5,-2) {};
+    \begin{scope}[mapsto]
+      \draw (a) to (A);
+      \draw (b) to (B);
+      \draw (b) to (C);
+      \draw (c) to (D);
+      \draw (A) to (1);
+      \draw (B) to (2);
+      \draw (C) to (2);
+      \draw (D) to (3);
+    \end{scope}
+  \end{tikzpicture}
+\end{equation}
+This means the composite cospan is 
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (m) at (2,0) {};
+  \node [contact] (r) at (3,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (4,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\]
+
+In the meantime, we already had you start us off unpacking the formula for the
+new decoration. You told us what the map
+$\psi_{\ord{2},\ord{2}}$ does in \cref{exc.parallelcirc}. It takes the
+two decorations, both circuits in $\elec(\ord{2})$, and turns them into the single, disjoint
+circuit
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+\node [contact] (l) at (1,0) {};
+\node [contact] (r) at (3,0) {};
+\node [contact] (l2) at (5,0) {};
+\node [contact] (r2) at (7,0) {};
+\draw (l) to [battery] (r);
+\draw (l2) to [make contact] (r2);
+\end{tikzpicture}
+\]
+in $\elec(\ord{4})$. So this is what the $\psi_{N,P}(s,t)$ part means. What does
+the $[\iota_N,\iota_P]$ mean? Recall this is the copairing of the pushout maps,
+as described in \cref{ex.setcoproduct,ex.pushouts}. In our case, the relevant
+pushout square is given by \eqref{eqn.pushoutexample}, and $[\iota_N,\iota_P]$
+is in fact the function $f$ from \cref{exc.pushforwardcircuit}! This means the
+decoration on the composite cospan is
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+\node [contact] (l) at (1,0) {};
+\node [contact] (m) at (3,0) {};
+\node [contact] (r) at (5,0) {};
+\draw (l) to [battery] (m);
+\draw (m) to [make contact] (r);
+\end{tikzpicture}
+\]
+Putting this all together, the composite circuit is
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (m) at (3,0) {};
+  \node [contact] (r) at (5,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \draw (l) to [battery] (m);
+  \draw (m) to [make contact] (r);
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (6,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\]
+
+\begin{exercise} %
+\label{exc.composefcospans}
+Refer back to the example at the beginning of \cref{sec.deccospans}. In
+particular, consider the composition of circuits in
+\cref{eq.circuitcomposition}. Express the two circuits in this diagram as
+morphisms in $\cospan\elec$, and compute their composite. Does it match the
+picture in \cref{eqn.circuitcomposed}?
+\end{exercise}
+
+%To understand concretely what this implies for composition of decorated cospans,
+%we refer to \cref{eq.circuitcomposition} once more. First, the underlying cospan
+%of the composite decorated cospan is just the composite of their underlying
+%cospans. So, in \cref{eq.circuitcomposition}, the composite decorated cospan
+%decorates the cospan with apex $N+_BM$, a five element set. If we call the
+%circuit in \cref{eq.circuit} $c$, and call the other circuit $c'$, then the
+%composite decoration is $\elec[\iota_M,\iota_N](\psi_{M,N}(c,c'))$.
+%
+%Oh no, there's that horrendous formula again!%
+%\footnote{We saw this formula on page~\pageref{page.horrendous}.}
+%But all $\psi_{M,N}(c,c')$ says is to the disjoint union of circuit diagrams $c$ and
+%$c'$; the result is a circuit on the seven element set $M+N$; let's call it $c''$. Then
+%$\elec([\iota_M,\iota_N])(c'')$ just transfers $c''$ along the
+%canonical function $M+N \to M+_BN$. This might sound hard, but it's just like what you did in \cref{exc.pushforwardcircuit} when you computed $\elec(f)(c)$. Go look at it; you'll feel better.
+
+
+\paragraph{Monoidal products in $\cospan\elec$.}
+Monoidal products in $\cospan\elec$ are much simpler than composition. On objects, we again just
+work as in $\finset$: we take the disjoint union of finite sets. Morphisms again
+have a cospan, and a decoration. For cospans, we again just work in
+$\cospan{\finset}$: given two cospans $A \to M \from B$ and $C \to N \from D$,
+we take their coproduct cospan $A+C \to M+N \from B+D$. And for decorations,
+we use the map $\psi_{M,N}: \elec(M) \times \elec(N) \to \elec(M+N)$. So, for
+example, suppose we want to take the monoidal product of the open circuits
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (m) at (3,0) {};
+  \node [contact] (r) at (5,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \draw (l) to [battery] (m);
+  \draw (m) to [make contact] (r);
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (6,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\]
+and
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (m) at (3,0) {};
+  \node [contact] (r) at (5,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l) (r)] {};
+  \draw (l) to [bulb] (m);
+  \draw (m) to [resistor] (r);
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (6,0) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\]
+The result is given by stacking them. In other words, their monoidal product is:
+\begin{equation} %
+\label{eqn.circuit}
+\begin{aligned}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node [contact] (l2) at (1,1) {};
+  \node [contact] (m2) at (3,1) {};
+  \node [contact] (r2) at (5,1) {};
+  \node [draw, inner sep=1.5pt,circle] (a2) at (0,1) {};
+  \node [draw, inner sep=1.5pt,circle] (b2) at (6,1) {};
+  \node [contact] (l) at (1,0) {};
+  \node [contact] (m) at (3,0) {};
+  \node [contact] (r) at (5,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(l2) (r)] {};
+  \draw (l2) to [battery] (m2);
+  \draw (m2) to [make contact] (r2);
+  \draw (l) to [bulb] (m);
+  \draw (m) to [resistor] (r);
+  \node [draw, inner sep=1.5pt,circle] (a) at (0,0) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (6,0) {};
+  \begin{scope}[mapsto]
+    \draw (a2) to (l2);
+    \draw (b2) to (r2);
+    \draw (a) to (l);
+    \draw (b) to (r);
+  \end{scope}
+\end{tikzpicture}
+\end{aligned}
+\end{equation}
+Easy, right?%
+\index{monoidal product!as stacking}
+
+We leave you to do two compositions of your own.
+
+\begin{exercise} %
+\label{exc.buildcircuit}
+Write $x$ for the open circuit in \eqref{eqn.circuit}. Also define cospans $\eta\colon 0\to 2$ and $\eta\colon 2\to 0$ as follows: 
+\[
+\eta \coloneqq
+\quad
+\begin{aligned}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node (i) at (-1,0) {$\varnothing$};
+  \node [contact] (m) at (0,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(m)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (1,.5) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (1,-.5) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (m);
+    \draw (b) to (m);
+  \end{scope}
+\end{tikzpicture}
+\end{aligned}
+\hspace{1in}
+\begin{aligned}
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic, short=4pt]
+  \node (i) at (1,0) {$\varnothing$};
+  \node [contact] (m) at (0,0) {};
+  \node [draw, rounded corners, gray, inner ysep=10pt, inner xsep=10pt, fit=(m)] {};
+  \node [draw, inner sep=1.5pt,circle] (a) at (-1,.5) {};
+  \node [draw, inner sep=1.5pt,circle] (b) at (-1,-.5) {};
+  \begin{scope}[mapsto]
+    \draw (a) to (m);
+    \draw (b) to (m);
+  \end{scope}
+\end{tikzpicture}
+\end{aligned}
+\quad
+=\colon\epsilon
+\]
+where each of these are decorated by the empty circuit
+$(\ord{1},\varnothing,!,!,!) \in \elec(\ord{1})$.%
+\tablefootnote{As usual $!$ denotes the unique function, in this case from the empty set to the relevant codomain.}
+
+Compute the composite $\eta \cp x \cp \epsilon$ in $\cospan\elec$. This is a
+morphism $\ord{0} \to \ord{0}$; we call such things \emph{closed circuits}.%
+\index{electrical circuit!closed}
+\end{exercise}
+
+%%---- Subsection ----%
+%\subsection{Decorated corelations}
+%
+%Although we shall not give the details here, decorated cospans can be
+%generalized to talk about decorated \emph{corelations}. While there are a number
+%of ways of presenting this idea, at a rough approximation it is enough to think
+%of these as constructed using functors out of $\cospan\finset$, as opposed to
+%the functor out of $\finset$ we use above to define a decorated cospan category
+%of circuits. This more general construction suffices to construct any hypergraph
+%category. We thus see that our careful examination of the compositional
+%structure of ideal wires pays off, giving an understanding of how to generalize
+%to the compositional structure any network language. 
+%
+
+%
+\index{electrical circuit|)}
+%-------- Section --------%
+\section{Operads and their algebras}%
+\index{operad|(}
+In \cref{thm.hypergraph_from_deccospan} we described how decorating cospans
+builds a hypergraph category from a symmetric monoidal functor. We then explored
+how that works in the case that the decoration functor is somehow ``all circuit
+graphs on a set of nodes''.
+
+In this book, we have devoted a great deal of attention to different sorts of
+compositional theories, from monoidal preorders to compact closed categories to
+hypergraph categories. Yet for an application you someday have in mind, it may
+be the case that none of these theories suffice. You need a different structure,
+customized to a particular situation. For example in \cite{Vagner.Spivak.Lerman:2015a} the
+authors wanted to compose continuous dynamical systems with control-theoretic properties
+and realized that in order for feedback to make sense, the wiring diagrams could
+not involve what they called `passing wires'.%
+\index{dynamical system!continuous}
+
+So to close our discussion of compositional structures, we want to quickly
+sketch something we can use as a sort of meta-compositional structure, known as
+an operad. We saw in \cref{subsec.circuits} that we can build electric circuits
+from a symmetric monoidal functor $\finset\to\smset$. Similarly we'll see that
+we can build examples of new algebraic structures from operad functors
+$\cat{O}\to\smset$.
+
+%---- Subsection ----%
+\subsection{Operads design wiring diagrams}%
+\index{operad!of wiring diagrams}
+Understanding that circuits are morphisms in a hypergraph category is useful: it
+means we can bring the machinery of category theory to bear on understanding
+electrical circuits. For example, we can build functors that express the compositionality
+of circuit semantics, i.e.\ how to derive the functionality of the whole from
+the functionality and interaction pattern of the parts. Or we can use the
+category-theoretic foundation to relate circuits to other sorts of network
+systems, such as signal flow graphs.  Finally, the basic coherence theorems for
+monoidal categories and compact closed categories tell us that wiring diagrams
+give sound and complete reasoning in these settings.
+
+However, one perhaps unsatisfying result is that the hypergraph category
+introduces artifacts like the domain and codomain of a circuit, which are not
+inherent to the structure of circuits or their composition. Circuits just have a
+single boundary interface, not `domains' and `codomains'. This is not to say the above
+model is not useful: in many applications, a vector space does not have a
+preferred basis, but it is often useful to pick one so that we may use matrices
+(or signal flow graphs!). But it would be worthwhile to have a
+category-theoretic model that more directly represents the compositional structure
+of circuits. In general, we want the category-theoretic model to fit our desired
+application like a glove. Let us quickly sketch how this can be done.%
+\index{vector space}
+
+Let's return to wiring diagrams for a second. We saw that wiring diagrams for
+hypergraph categories basically look like this:
+\begin{equation}%
+\label{eqn.SMC_WD_rand147}
+  \begin{tikzpicture}[oriented WD, font=\small, bb port length=0pt,xscale=.7]
+    %boxes
+	\node[bb={1}{2}] (f) {$f$};
+	\node[bb={2}{1}] at ($(f)+(5,3.5)$) (g) {$g$};
+	\node[bb={1}{3}] at ($(f_out2)+(2.5,0)$) (h) {$h$};
+	\node[bb={1}{1}] at ($(g_out1)+(2,-1.5)$) (k) {$k$};
+	%waypoints
+	\node at ($(f.east)+(0,6.7)$) (1u) {};
+	\node at ($(1u)-(0,3)$) (1d) {};
+	\node at ($(1d)+(.5,0)$) (2u) {};
+	\node at ($(2u)-(0,3)$) (2d) {};
+	\node at ($(g_out1)+(.5,0)$) (5u) {};
+	\node at ($(5u)-(0,3)$) (5d) {};
+	%black dots
+	\node[bdot] at ($(1u)+(-.5,-1.5)$) (1) {};
+	\node[bdot] at ($(2u)+(.5,-1.5)$) (2) {};
+	\node[bdot] at ($(2)+(.3,0)$) (3) {};
+	\node[bdot] at ($(h_out3)+(.5,0)$) (4) {};
+	\node[bdot] at ($(5u)+(.5,-1.5)$) (5) {};
+	%outer
+	\node[bb={5}{5}, fit=(f) (g) (h) (k), minimum height=25ex, minimum
+	width=.7\textwidth] (outer) {};
+	% lines
+	\draw ($(outer.west|-1)-(.2,0)$) node[left] {$A$} to (1);
+	\draw ($(outer.west|-f_in1)-(.2,0)$) node[left] {$B$} to (f_in1);
+	\draw (f_out1) to (2d.center);
+	\draw (1) to (1u.center);
+	\draw (1) to (1d.center);
+	\draw (1d.center) to (2u.center);
+	\draw (2u.center) to (2);
+	\draw (2d.center) to (2);
+	\draw (2) to (3);
+	\draw (1u.center) to (g_in1);
+	\draw (g_out1) to (5u.center);
+	\draw (f_out2) to node[below] {\scriptsize C} (h_in1);
+	\draw (h_out1) to node[above] {\scriptsize D} (g_in2);
+	\draw (h_out2) to (5d.center);
+	\draw (h_out3) node[below right] {\scriptsize F} to (4);
+	\draw (5u.center) to (5);
+	\draw (5d.center) to (5);
+	\draw (5) to node[above] {\scriptsize E} (k_in1);
+	\draw (k_out1) to ($(outer.east|-k_out1)+(.2,0)$) node[right] {$D$};
+\end{tikzpicture}
+\end{equation}
+Note that if you had a box with $A$ and $B$ on the left and $D$ on the right,
+you could plug the above diagram right inside it, and get a new open circuit.
+This is the basic move of operads. 
+
+But before we explain this, let's get where we said we wanted to go: to a model where there aren't ports on the left and ports on the right, there are just ports. We want a more succinct model of composition for
+circuit diagrams; something that looks more like this:
+\begin{equation}%
+\label{eqn.operad_WD_rand248}
+\begin{tikzpicture}[unoriented WD, spacing=16pt, every label/.style={font=\small}]
+	\node[pack] (f1) {$f$};
+	\node[pack, below right=1.7 and 1 of f1] (f3) {$h$};
+	\node[pack, above right=1.7 and 1 of f3] (f2) {$g$};
+	\node[pack, below right=1.7 and 1 of f2] (f4) {$k$};
+	\node[outer pack, fit=(f1) (f4)] (outer) {};
+	%
+	\node[link, label=below:$B$] at ($(f1)!-.4!(outer)$) (t) {};
+	\node[link, label=left:$C$] at ($(f1)!.5!(f3)$) (u) {};
+	\node[link, label=below:$A$] at (f3 |-f1) (v){};
+	\node[link, label=left:$D$] at ($(f3)!.5!(f2)$) (w) {};
+	\node[link, label=below:$E$] at ($(w)!.3!(f4)$) (x) {};
+	\node[link, below=.5 of f3, label=below:$F$] (y) {};
+	\node[link, label=above:$D$] at ($(f4)!-.4!(outer)$) (z) {};
+	%
+	\draw[shorten >=-2pt, shorten >=-2pt] (f1) -- (outer);
+	\draw (v) -- (outer.north-|v);
+	\draw[shorten >=-2pt, shorten >=-2pt] (f4) -- (outer);
+	\draw (f1) -- (v) -- (f2) -- (f3) -- (y);
+	\draw (f1) -- (f3) to[bend right=10] (x);
+	\draw (x) to [bend right=10] (f2);
+	\draw (x) -- (f4);
+\end{tikzpicture}
+\end{equation}
+Do you see how diagrams \cref{eqn.SMC_WD_rand147} and \cref{eqn.operad_WD_rand248} are actually exactly the same in terms of interconnection pattern? The only difference is that the latter does not have left/right distinction: we have lost exactly what we wanted to lose.
+
+The cost is that the `boxes' $f,g,h,k$ in \cref{eqn.operad_WD_rand248} no longer have a left/right distinction; they're just circles now. That wouldn't be bad except that it means they can no longer represent morphisms in a category---like they used to above, in \cref{eqn.SMC_WD_rand147}---because morphisms in a category by definition have a domain and codomain. Our new circles have no such distinction. So now we need a whole new way to think about `boxes' categorically: if they're no longer morphisms in a category, what are they? The answer is found in the theory of operads.
+
+In understanding operads, we will find we need to navigate one of the level
+shifts that we first discussed in \cref{ssec.level_shift}. Notice that for
+decorated cospans, we define a hypergraph \emph{category} using a symmetric
+monoidal \emph{functor}.%
+\index{monoidal functor} This is reminiscent of our brief discussion of
+algebraic theories in \cref{ssec.alg_theories}, where we defined something called the theory of monoids as a prop $\cat{M}$, and define monoids using functors $\cat{M}\to\smset$; see \cref{rem.theory_of_monoids}. In the same way, we can view the category $\cospan\finset$ as some
+sort of `theory of hypergraph categories', and so define hypergraph categories
+as functors $\cospan\finset\to\smset$.
+
+So that's the idea. An operad $\cat{O}$ will define a theory or grammar of
+composition, and operad functors $\cat{O}\to\smset$, known as
+\emph{$\cat{O}$-algebras}, will describe particular applications that obey that
+grammar.
+
+\begin{roughDef}%
+\index{operad}
+To specify an \emph{operad} $\cat O$,
+\begin{enumerate}[label=(\roman*)]
+\item one specifies a collection $T$, whose elements are called \emph{types};
+\item for each tuple $(t_1,\dots,t_n,t)$ of types, one specifies a set $\cat
+O(t_1,\dots,t_n;t)$, whose elements are called \emph{operations of arity
+$(t_1,\dots,t_n;t)$};%
+\index{operation|see {operad}}%
+\index{operad!operation in}
+\item for each pair of tuples $(s_1,\dots,s_m,t_i)$ and $(t_1,\dots,t_n,t)$, one specifies a
+function 
+\[
+\circ_i\colon \cat O(s_1,\dots,s_m;t_i) \times \cat O(t_1,\dots,t_n;t)
+\to \cat O(t_1,\dots,t_{i-1},s_1,\dots,s_m,t_{i+1},\dots, t_n;t);
+\]
+called \emph{substitution}; and
+\item for each type $t$, one specifies an operation $\id_t \in O(t;t)$ called the
+\emph{identity operation}.
+\end{enumerate}
+These must obey generalized identity and associativity laws.%
+\tablefootnote{Often what we call types are called objects or colors, what we call operations are called morphisms, what we call substitution is called composition, and what we call operads are called multicategories. A formal definition can be found in \cite{Leinster:2004a}.}
+\end{roughDef}%
+\index{associativity!of composition in an operad}
+
+Let's ignore types for a moment and think about what this structure models. The intuition is that an operad consists of, for each $n$, a set of operations
+of arity $n$---that is, all the operations that accept $n$ arguments. If we take an
+operation $f$ of arity $m$, and plug the output into the $i$th argument of an
+operation $g$ of arity $n$, we should get an operation of arity $m+n-1$: we have
+$m$ arguments to fill in $m$, and the remaining $n-1$ arguments to fill in $g$.
+Which operation of arity $m+n-1$ do we get? This is described by the substitution function
+$\circ_i$, which says we obtain the operation $f\circ_i g \in \cat O(m+n-1)$.
+The coherence conditions say that these functions $\circ_i$ capture the following
+intuitive picture:
+\[
+\begin{tikzpicture}[unoriented WD, pack inside color=white]
+	\node[pack] (A) {};
+	\node[draw, red, below left=of A] (B) {};
+	\node[trapezium, green!.9!black, minimum width=.5cm, draw, below right=1 and 1.5 of A] (C) {};
+	\node[outer pack, fit=(A) (B) (C)] (outer) {};
+%
+	\node[pack, above right=1.5 and 9 of C] (C1) {};
+	\node[pack, above right= of C1] (C2) {};
+	\node[trapezium, green!.9!black, draw, below right=1 and 1 of C2] (C3) {};
+	\node[red, draw, right=1 and 1 of C2] (C4) {};
+	\node[trapezium, green!.9!black, draw, fit=(C1) (C2) (C3) (C4)] (outerC) {};
+%
+	\draw[dashed] (C.top left corner) -- (outerC.top left corner);
+	\draw[dashed] (C.bottom right corner) -- (outerC.bottom right corner);
+%
+	\node[right=2 of outerC.bottom right corner] {$\leadsto$};
+%
+	\node[pack, right=29 of A] (XA) {};
+	\node[draw, red, below left=of XA] (XB) {};
+	\node[trapezium, minimum width=.5cm, below right=1 and 1.5 of XA] (XC) {};
+%%
+	\node[pack, pack size=2pt] at (XC.north) (XD) {};
+	\node[pack, pack size=2pt, below left=2pt and 2pt of XD] (XE) {};
+	\node[red, draw, minimum width=0, inner sep=1pt, right=2pt of XD] (XF) {};
+	\node[trapezium, green!.9!black, draw, inner sep=1pt, below=2pt of XF] (XG) {};
+	\node[outer pack, fit=(XA) (XB) (XC)] (Xouter) {};
+\end{tikzpicture}
+\]
+
+
+The types then allow us to specify the, well, types of the
+arguments---inputs---that each function takes. So making tea is a 2-ary
+operation, an operation with arity 2, because it takes in two things. To make tea
+you need some warm water, and you need some tea leaves.
+
+%In defining an operad above we have used what is often called `circle $i$'
+%notation. This is because we have asked for a composition rule that specifies
+%the operation that results if you plug in an operation into the $i$th argument
+%of a given operation. Another way of defining an operad is to specify functions that
+%describe plugging in an operation into every argument in a given operation.
+%There are a variety of different flavors of operad; we've given a flavor of the
+%non-symmetric typed flavor.
+
+\begin{example}%
+\index{context free grammar}
+  Context-free grammars are to operads as graphs are to categories.  Let's
+  sketch what this means. First, a context-free grammar is a way of describing a
+  particular set of `syntactic categories' that can be formed from a set of
+  symbols. For example, in English we have syntactic categories like nouns,
+  determiners, adjectives, verbs, noun phrases, prepositional phrases,
+  sentences, etc. The symbols are words, e.g.\ cat, dog, the, chases.
+  
+  To define a context-free grammar on some alphabet, one specifies some
+  \emph{production rules}, which say how to form an entity in some syntactic
+  category from a bunch of entities in other syntactic categories. For example,
+  we can form a noun phrase from a determiner (the), an adjective (happy), and a
+  noun (boy). Context free grammars are important in both linguistics and
+  computer science. In the former, they're a basic way to talk about the
+  structure of sentences in natural languages. In the latter, they're crucial
+  when designing parsers for programming languages.
+
+  So just like graphs present free categories, context-free grammars present free operads. This idea was first noticed in \cite{Hermida.Makkai.Power:1998a}.
+\end{example}
+
+%---- Subsection ----%
+\subsection{Operads from symmetric monoidal categories}
+%
+\index{operad!from monoidal category}
+%
+\label{subsec.mon_cat_operads}
+We will see in \cref{def.underlying_operad} that a large class of operads come from symmetric monoidal categories. Before we explain this, we give a couple of examples. Perhaps the most important operad is that of $\smset$. 
+
+\begin{example}%
+\index{operad!of sets}
+The operad $\oprdset$ of sets has 
+\begin{enumerate}[label=(\roman*)]
+\item Sets $X$ as types.
+\item Functions $X_1\times \dots \times X_n \to Y$ as operations of arity
+$(X_1,\dots, X_n;Y)$.
+\item Substitution defined by 
+\begin{multline*}
+(g\circ_if)(x_1,\dots,x_{i-1},w_1,\dots,w_m,x_{i+1},\dots,x_n)\\
+ =
+g\big(x_1,\dots,x_{i-1},f(w_1,\dots,w_m),x_{i+1},\dots,x_n\big)
+\end{multline*}
+where $f\in \oprdset(W_1,\dots,W_m;X_i)$, $g \in \oprdset(X_1,\dots,X_n;Y)$, and
+hence $g\circ_if$ is a function 
+\[
+(g\circ_if)\colon
+X_1 \times \dots \times X_{i-1}\times W_1\times \dots \times
+W_m\times X_{i+1}\times \dots \times X_n \longrightarrow Y 
+\]
+\item Identities $\id_X\in \oprdset(X;X)$ are given by the identity function
+$\id_X\colon X \to X$.
+\qedhere
+\end{enumerate}
+\end{example}
+
+Next we give an example that reminds us what all this operad stuff was for: wiring diagrams.
+
+\begin{example}%
+\index{operad!of cospans}
+The operad $\oprdcospan$ of finite-set cospans has
+\begin{enumerate}[label=(\roman*)]
+\item Natural numbers $a \in \nn$ as types.
+\item Cospans $\ord{a_1} + \dots + \ord{a_n} \to \ord{p} \leftarrow
+\ord{b}$ of finite sets as operations of arity $(a_1,\dots, a_n;b)$.
+\item Substitution defined by pushout.
+\item Identities $\id_a\in \oprdset(a;a)$ just given by the identity cospan
+$\ord{a} \xrightarrow{\id_{\ord{a}}}\ord{a} \xleftarrow{\id_{\ord{a}}} \ord{a}$.
+\end{enumerate}
+This is the operadic analogue of the monoidal category $(\cospan\finset, 0, +)$.
+
+We can depict operations in this operad using diagrams like we drew above. For example, here's a picture of an operation:
+\begin{equation}%
+\label{eqn.unoriented_WD_rand327}
+\begin{tikzpicture}[unoriented WD, spacing=16pt, every label/.style={font=\small}]
+	\node[pack] (f1) {$f$};
+	\node[pack, below right=1.7 and 1 of f1] (f3) {$h$};
+	\node[pack, above right=1.7 and 1 of f3] (f2) {$g$};
+	\node[pack, below right=1.7 and 1 of f2] (f4) {$k$};
+	\node[outer pack, fit=(f1) (f4)] (outer) {};
+	%
+	\node[link] at ($(f1)!-.4!(outer)$) (t) {};
+	\node[link] at ($(f1)!.5!(f3)$) (u) {};
+	\node[link] at (f3 |-f1) (v){};
+	\node[link] at ($(f3)!.5!(f2)$) (w) {};
+	\node[link] at ($(w)!.3!(f4)$) (x) {};
+	\node[link, below=.5 of f3] (y) {};
+	\node[link] at ($(f4)!-.4!(outer)$) (z) {};
+	%
+	\draw[shorten >=-2pt, shorten >=-2pt] (f1) -- (outer);
+	\draw (v) -- (outer.north-|v);
+	\draw[shorten >=-2pt, shorten >=-2pt] (f4) -- (outer);
+	\draw (f1) -- (v) -- (f2) -- (f3) -- (y);
+	\draw (f1) -- (f3) to[bend right=10] (x);
+	\draw (x) to [bend right=10] (f2);
+	\draw (x) -- (f4);
+\end{tikzpicture}
+\end{equation}
+This is an operation of arity $(\ord{3},\ord{3},\ord{4},\ord{2};\;\ord{3})$. Why? The circles
+marked $f$ and $g$ have 3 ports, $h$ has 4 ports, $k$ has 2 ports, and the
+outer circle has 3 ports: 3, 3, 4, 2; 3. 
+
+So how exactly is \cref{eqn.unoriented_WD_rand327} a morphism in this operad? Well a morphism of this arity is, by (ii), a cospan $\ord{3}+\ord{3}+\ord{4}+\ord{2}\To{a}\ord{p}\From{b}\ord{3}$. In the diagram above, the apex $\ord{p}$ is the set $\ord{7}$, because there are 7
+nodes $\bullet$ in the diagram. The function $a$ sends each port on one of the small circles
+to the node it connects to, and the function $b$ sends each port of the outer circle to
+the node it connects to.
+
+We are able to depict each operation in the operad $\oprdcospan$ as a wiring
+diagram. It is often helpful to think of operads as describing a wiring diagram grammar. The substitution operation of the operad signifies inserting one wiring diagram
+into a circle or box in another wiring diagram.
+\end{example}
+
+\begin{exercise}%
+\label{exc.wd_drawing_practice}
+\begin{enumerate}
+	\item Consider the following cospan $f\in\oprdcospan(2,2; 2)$:
+	\[
+	\begin{tikzpicture}[x=.25cm, y=.75cm, short=2pt]
+		\begin{scope}[every node/.style={draw, inner sep=1.5pt, fill, circle}]
+  		\node (a1) {};
+  		\node[right=1 of a1] (a2) {};
+  		\node[right=2 of a2] (a3) {};
+  		\node[right=1 of a3] (a4) {};
+		%
+  		\node at ($(a2)!.5!(a3)+(0,-1)$) (b2) {};
+  		\node[left=1 of b2] (b1) {};
+  		\node[right=1 of b2] (b3) {};
+		%
+			\node at ($(b1)!.5!(b2)+(0,-1)$) (c1) {};
+			\node[right=1 of c1] (c2) {};
+		\end{scope}
+		\begin{scope}[every node/.style={draw, rounded corners, gray, inner ysep=5pt, inner xsep=5pt}]
+  	  \node [fit=(a1) (a2)] {};
+  	  \node [fit=(a3) (a4)] {};
+  	  \node [fit=(b1) (b3)] {};
+  	  \node [fit=(b1) (b3)] {};
+  	  \node [fit=(c1) (c2)] {};
+		\end{scope}
+		\begin{scope}[mapsto]
+			\draw (a1) -- (b1);
+			\draw (a2) -- (b2);
+			\draw (a3) -- (b2);
+			\draw (a4) -- (b3);
+			\draw (c1) -- (b1);
+			\draw (c2) -- (b3);
+		\end{scope}
+	\end{tikzpicture}
+	\]
+	Draw it as a wiring diagram with two inner circles, each with two ports, and one outer circle with two ports.
+	\item Draw the wiring diagram corresponding to the following cospan $g\in\oprdcospan(2,2,2;0)$:
+	\[
+	\begin{tikzpicture}[x=.25cm, y=.75cm,short=2pt]
+		\begin{scope}[every node/.style={draw, inner sep=1.5pt, fill, circle}]
+			\node (a11) {};
+			\node[right=1 of a11] (a12) {};
+			\node[right=2 of a12] (a21) {};
+			\node[right=1 of a21] (a22) {};
+			\node[right=2 of a22] (a31) {};
+			\node[right=1 of a31] (a32) {};
+		%
+			\node at ($(a21)!.5!(a22)+(0,-1.5)$) (b2) {};
+			\node[left=1 of b2] (b1) {};
+			\node[right=1 of b2] (b3) {};
+		%
+		\end{scope}
+		\node at ($(b2)+(0,-1.25)$) {$\varnothing$};
+		\begin{scope}[every node/.style={draw, rounded corners, gray, inner ysep=7pt, inner xsep=5pt}]
+  	  \node [fit=(a11) (a12)] {};
+  	  \node [fit=(a21) (a22)] {};
+  	  \node [fit=(a31) (a32)] {};
+			\node [fit=(b1) (b3)] {};
+		\end{scope}
+		\begin{scope}[mapsto]
+			\draw (a11) -- (b2);
+			\draw (a12) -- (b1);
+			\draw (a21) -- (b1);
+			\draw (a22) -- (b3);
+			\draw (a31) -- (b3);
+			\draw (a32) -- (b2);
+		\end{scope}
+	\end{tikzpicture}
+	\]	
+	\item Compute the cospan $g\circ_1 f$. What is its arity?
+	\item Draw the cospan $g\circ_1 f$. Do you see it as substitution?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+We can turn any symmetric monoidal category into an operad in a way that
+generalizes the above two examples.
+
+\begin{definition}%
+\label{def.underlying_operad}
+For any symmetric monoidal category $(\cat{C},I,\otimes)$, there is an operad $\cat{O}_\cat{C}$, called the \emph{operad underlying $\cat{C}$}, defined as having:
+\begin{enumerate}[label=(\roman*)]
+	\item $\Ob(\cat{C})$ as types.
+	\item morphisms $C_1\otimes\cdots\otimes C_n\to D$ in $\cat{C}$ as the operations of arity $(C_1,\ldots,C_n;D)$.
+	\item substitution is defined by
+	\[(f\circ_ig)\coloneqq f\circ(\id,\ldots,\id,g,\id,\ldots,\id)\]
+	\item identities $\id_a\in\cat{O}_\cat{C}(a;a)$ defined by $\id_a$.
+\end{enumerate}
+\end{definition}
+We can also turn any monoidal functor into what's called an operad functor.
+
+%---- Subsection ----%
+\subsection{The operad for hypergraph props}%
+\index{hypergraph prop!operad for}
+
+An operad functor takes the types of one operad to the types of another, and
+then the operations of the first to the operations of the second in a way that
+respects this. 
+\begin{roughDef}%
+\index{functor!operad}
+Suppose given two operads $\cat O$ and $\cat P$ with type collections $T$ and $U$ respectively. To specify an
+operad functor $F\colon \cat O \to \cat P$,
+\begin{enumerate}[label=(\roman*)]
+\item one specifies a function $f\colon T \to U$.
+\item For all arities $(t_1,\dots,t_n;t)$ in $\cat O$, one specifies a function 
+\[
+F\colon \cat O(t_1,\dots,t_n;t) \to \cat P(f(t_1),\dots,f(t_n);f(t))
+\]
+\end{enumerate}
+such that composition and identities are preserved.
+\end{roughDef}
+
+Just as set-valued functors $\cat{C}\to\smset$ from any category $\cat{C}$ are of particular
+interest---we saw them as database instances in \cref{chap.databases}---so to are $\smset$-valued functors $\cat{O}\to\smset$ from any operad $\cat{O}$.%
+\index{functor!set@$\smset$-valued}
+
+\begin{definition}%
+\index{operad!algebra of }
+An \emph{algebra} for an operad $\cat O$ is an operad functor
+$F\colon \cat O \to \oprdset$.
+\end{definition}
+
+We can think of functors $\cat{O}\to\oprdset$ as defining a set of possible ways to fill the
+boxes in a wiring diagram. Indeed, each box in a wiring diagram represents a
+type $t$ of the given operad $\cat O$ and an algebra $F\colon \cat O \to
+\oprdset$ will take a type $t$ and return a set $F(t)$ of fillers for box $t$.  Moreover, given an
+operation (i.e., a wiring diagram) $f\in \cat O(t_1,\dots,t_n;t)$, we get a
+function $F(f)$ that takes an element of each set $F(t_i)$, and returns an element
+of $F(t)$. For example, it takes $n$ circuits with interface
+$t_1,\dots,t_n$ respectively, and returns a circuit with boundary $t$.
+
+\begin{example}
+For electric circuits, the types are again finite sets, $T=\Ob(\finset)$, where each finite set $t\in T$ corresponds to a cell with $t$ ports. Just as before, we have a set $\elec(t)$ of fillers, namely the set of electric circuits with that $t$-marked terminals. As an operad algebra, $\elec\colon\oprdcospan\to\smset$ transforms wiring diagrams like this one
+\[
+\begin{tikzpicture}[unoriented WD, pack size=15pt, pack inside color=white, pack
+outside color=black, link size=2pt, font=\footnotesize, spacing=20pt]
+ 	\node[pack] (f) {};
+ 	\node[pack, right=1 of f] (g) {};
+	\node[pack] at ($(f)!.5!(g)+(0,-1.5)$) (h) {};
+	\node[outer pack, inner xsep=3pt, inner ysep=0pt, fit=(f) (g) (h)] (fgh) {};
+  \node[link] at ($(f)!.5!(g)$) (linkfg) {};
+ 	\node[link] at ($(f)!.5!(h)$) (linkfh) {};
+ 	\node[link] at ($(g)!.5!(h)$) (linkgh) {};
+  \draw (f) -- (linkfg);
+ 	\draw (g) -- (linkfg);
+ 	\draw (f) -- (linkfh);
+  \draw (h) -- (linkfh);
+ 	\draw (g) -- (linkgh);
+  \draw (h) -- (linkgh);
+  \node[left=1 of fgh, font=\normalsize] {$\varphi\coloneqq$};
+\end{tikzpicture}
+\]	
+into formulas that build a new circuit from a bunch of existing ones. In the above-drawn case, we would get a morphism $\elec(\varphi)\in\smset(\elec(2),\elec(2),\elec(2);\elec(0))$, i.e.\ a function
+\[\elec(\varphi)\colon\elec(2)\times\elec(2)\times\elec(2)\to\elec(0).\]
+We could apply this function to the three elements of $\elec(2)$ shown here
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+  \node [contact] (1) at (1,0) {};
+  \coordinate (2) at (4,0) {};
+  \node [contact] (3) at (7,0) {};
+  \node [contact] (5) at (0,1) {};
+  \node [contact] (6) at (3,1) {};
+  \node [contact] (7) at (5,1) {};
+  \node [contact] (8) at (8,1) {};
+  \draw (1) to [bulb] (2);
+  \draw (2) to [resistor] (3);
+  \draw (5) to [battery] (6);
+  \draw (7) to [make contact] (8);
+\end{tikzpicture}
+\]
+and the result would be the closed circuit from the beginning of the chapter:
+\[
+\begin{tikzpicture}[circuit ee IEC, set resistor graphic=var resistor IEC
+graphic, set make contact graphic=var make contact IEC graphic]
+  \coordinate (1) at (1,0) {};
+  \coordinate (2) at (4,0) {};
+  \coordinate (3) at (7,0) {};
+  \coordinate (4) at (1,1) {};
+  \coordinate (5) at (4,1) {};
+  \coordinate (6) at (7,1) {};
+  \draw (1) to [bulb] (2);
+  \draw (2) to [resistor] (3);
+  \draw (4) to [battery] (5);
+  \draw (5) to [make contact] (6);
+  \draw (1) -- (4);
+  \draw (3) -- (6);
+\end{tikzpicture}
+\]
+\end{example}
+
+This is reminiscent of the story for decorated cospans: gluing fillers together to form hypergraph categories. An advantage of the decorated cospan construction is that one obtains an explicit category (where morphisms have domains and codomains and can hence be composed associatively), equipped with Frobenius structures that allow us to get around the strictures of domains and codomains. The operad perspective has other advantages. First, whereas decorated cospans can produce only some hypergraph categories, $\oprdcospan$-algebras can produce any hypergraph category.
+
+\begin{proposition}%
+\index{theory!of hypergraph props}%
+\index{hypergraph prop!theory of}
+There is an equivalence between $\oprdcospan$-algebras and hypergraph props.
+\end{proposition}
+
+%In particular, the functor $(F,\varphi)\colon  (\finset,+) \to (\smset,\times)$
+%of \cref{subsec.circuits} can be extended to a monoidal functor
+%$(\cospan\finset,+) \to (\smset,\times)$ by a universal construction known as a
+%Kan extension. The monoidal categories $\cospan{}$ and $\finset$ may be converted to operads in the
+%manner described in \cref{subsec.mon_cat_operads}, and the functor becomes an operad algebra for $\cospan{}$. The resulting hypergraph prop agrees with
+%the hypergraph prop constructed explicitly using decorated cospans.
+
+Another advantage of using operads is that one can vary the operad itself, from $\oprdcospan$ to something similar (like the operad of `cobordisms'), and get slightly different compositionality rules. 
+
+In fact, operads---with the additional complexity in their definition---can be customized
+even more than all compositional structures defined so far. For example, we can
+define operads of wiring diagrams where the wiring diagrams must obey precise
+conditions far more specific than the constraints of a category, such as
+requiring that the diagram itself has no wires that pass straight through it.
+In fact, operads are strong enough to define themselves: roughly speaking, there is an operad for operads: the category of operads is equivalent to the category of algebras for a certain operad \cite[Example 2.2.23]{Leinster:2004a}.
+While operads can, of course, be generalized again, they conclude our
+march through an informal hierarchy of compositional structures, from preorders to
+categories to monoidal categories to operads.%
+\index{category!of operads}%
+\index{category!of algebras for an operad}
+
+%
+\index{operad|)}
+
+%-------- Section --------%
+\section{Summary and further reading}%
+\label{sec.c6_further_reading}
+
+This chapter began with a detailed exposition of colimits in the category of
+sets; as we saw, these colimits describe ways of joining or interconnecting sets. Our
+second way of talking about interconnection was the use of Frobenius monoids and
+hypergraph categories; we saw these two themes come together in the idea of a
+decorated cospans. The decorated cospan construction uses a certain type of
+structured functor to construct a certain type of structured category. More
+generally, we might be interested in other types of structured category, or
+other compositional structure. To address this, we briefly saw how these ideas
+fit into the theory of operads.
+
+Colimits are a fundamental concept in category theory. For more on colimits,
+one might refer to any of the introductory category theory
+textbooks we mentioned in \cref{sec.ch2_further_reading}.
+
+Special commutative Frobenius monoids and hypergraph categories were first
+defined, under the names `separable commutative Frobenius algebra' and `well-supported compact closed category', by Carboni and Walters
+\cite{Carboni:1987a,Carboni:1991a}. The use of
+decorated cospans to construct them is detailed in
+\cite{fong2015decorated,fong2017decorated,Fong:2016a}. The application to
+networks of passive linear systems, such as certain electrical circuits, is
+discussed in \cite{baez2015compositional}, while further applications, such as to Markov
+processes and chemistry can be found in
+\cite{baez2016compositional,baez2017compositional}. For another interesting application of hypergraph
+categories, we recommend the pixel array method for approximating solutions to
+nonlinear equations \cite{Spivak.Dobson.Kumari.Wu:2016a}.%
+\index{chemistry} The story of this chapter is fleshed out in a couple of
+recent, more technical papers \cite{fong2018hypergraph,Fong.Sarazola:2018}.
+
+Operads were introduced by May to describe compositional structures arising in
+algebraic topology \cite{May:1972a}; Leinster has written a great book on the subject
+\cite{Leinster:2004a}. More recently, with collaborators author-David has discussed
+using operads in applied mathematics, to model composition of structures in
+logic, databases, and dynamical systems
+\cite{Rupel.Spivak:2013a,Spivak:2013b,Vagner.Spivak.Lerman:2015a}. 
+
+\end{document}

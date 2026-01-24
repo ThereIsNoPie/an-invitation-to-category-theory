@@ -1,0 +1,3838 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+
+\setcounter{chapter}{4}%Just finished 4.
+
+%------------ Chapter ------------%
+\chapter[Signal flow graphs: Props, presentations, \& proofs]{Signal flow graphs:\\Props, presentations, and proofs}%
+\label{chap.SFGs}
+
+%-------- Section --------%
+\section{Comparing systems as interacting signal processors}
+%
+\index{cyber-physical system}
+Cyber-physical systems are systems that involve tightly interacting physical and
+computational parts. An example is an autonomous car: sensors inform a decision
+system that controls a steering unit that drives a car, whose movement changes the sensory input. While such systems
+involve complex interactions of many different subsystems---both physical ones, such
+as the driving of a wheel by a motor, or a voltage placed across a wire, and
+computational ones, such as a program that takes a measured velocity and returns
+a desired acceleration---it is often useful to model the system behavior as
+simply the passing around and processing of signals. For this illustrative sketch, we
+will just think of signals as things which we can add and multiply, such as real
+numbers. 
+
+Interaction in cyber-physical systems can often be understood as variable
+sharing; i.e.\ when two systems are linked, certain variables become shared. For
+example, when we connect two train carriages by a physical coupling, the train
+carriages must have the same velocity, and their positions differ by a constant.
+Similarly, when we connect two electrical ports, the electric potentials at
+these two ports now must be the same, and the current flowing into one must
+equal the current flowing out of the other. %
+\index{interconnection!as variable
+sharing} Of course, the way the shared variable is actually used may be very different for the different subsystems using it, but sharing the variable serves to couple those systems nonetheless.
+
+Note that both the above examples involve the physical joining of two systems; more
+figuratively, we might express the interconnection by drawing a line connecting the
+boxes that represent the systems. In its simplest form, this is captured by the
+formalism of signal flow graphs, due to Claude Shannon in the 1940s. Here is an example
+of a signal flow graph:%
+\index{signal flow graph|(}
+\begin{equation}%
+\label{eq.examplesfg}
+  \begin{aligned}
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=none] (5) at (-6, 1.5) {};
+		\node [style=wamp] (2) at (-4, 0) {$\scriptstyle 7$};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wamp] (10) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=bdot] (13) at (1.25, 0.5) {};
+		\node [style=wamp] (16) at (1.25, 2) {$\scriptstyle 3$};
+		\node [style=none] (12) at (2.25, 1) {};
+		\node [style=wamp] (14) at (2.25, -0) {$\scriptstyle 2$};
+		\node [style=wdot] (21) at (3.25, 0.5) {};
+		\node [style=none] (17) at (5, 2) {};
+		\node [style=none] (20) at (5, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	\begin{scope}[font=\footnotesize]
+		\draw (0.center) to (2);
+		\draw (2) to (18.center);
+		\draw [bend right, looseness=1] (18.center) to (8);
+		\draw [bend right, looseness=1] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to (5);
+		\draw [bend left, looseness=1.00] (6) to (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to (17.center);
+		\draw [bend right, looseness=1.00] (12.center) to  (13);
+		\draw (8) to (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw [bend right, looseness=1.00] (14.center) to (21);
+		\draw [bend left, looseness=1.00] (12.center) to (21);
+		\draw (21) to (20.center);
+	\end{scope}
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\end{equation}
+We consider the dangling wires on the left as inputs, and those on the right as
+outputs. In \cref{eq.examplesfg} we see three types of signal processing units, which we interpret as follows:
+\begin{itemize}
+	\item Each unit labelled by a number $a$ takes an input and multiplies it by $a$.
+  \item Each black dot takes an input and produces two copies of it.
+  \item Each white dot takes two inputs and produces their sum.
+\end{itemize}
+Thus the above signal flow graph takes in two input signals, say $x$ (on the upper left wire) and $y$ (on the
+lower left wire), and---going from left to right as described above---produces two output signals: $u=15x$ (upper right) and $v=3x+21y$ (lower
+right). Let's show some steps from this computation (leaving others off to avoid clutter):
+\[
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=none] (5) at (-6, 1.5) {};
+		\node [style=wamp] (2) at (-4, 0) {$\scriptstyle 7$};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wamp] (10) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=bdot] (13) at (1.25, 0.5) {};
+		\node [style=wamp] (16) at (1.25, 2) {$\scriptstyle 3$};
+		\node [style=none] (12) at (2.25, 1) {};
+		\node [style=wamp] (14) at (2.25, -0) {$\scriptstyle 2$};
+		\node [style=wdot] (21) at (3.25, 0.5) {};
+		\node [style=none] (17) at (5, 2) {};
+		\node [style=none] (20) at (5, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	\begin{scope}[font=\footnotesize]
+		\draw (0.center) to node[above] {$y$} (2);
+		\draw (2) to node[above] {$7y$} (18.center);
+		\draw [bend right, looseness=1] (18.center) to (8);
+		\draw [bend right, looseness=1] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to node[above, near end] {$x$} (5);
+		\draw [bend left, looseness=1.00] (6) to node[above] {$x$} (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to node[above] {$15x$} (17.center);
+		\draw [bend right, looseness=1.00] (12.center) to (13);
+		\draw (8) to node[above] {$x+7y$} (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw [bend right, looseness=1.00] (14.center) to node[below right=0
+		and -.1] {$2x+14y$}(21);
+		\draw [bend left, looseness=1.00] (12.center) to (21);
+		\draw (21) to node[above] {$3x+21y$}(20.center);
+	\end{scope}
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+In words, the signal flow graph first multiplies $y$ by $7$, then splits $x$
+into two copies, adds the second copy of $x$ to the lower signal to get $x+7y$, and so
+on.
+
+A signal flow graph might describe an existing system, or it might specify a
+system to be built. In either case, it is important to be able to analyze these
+diagrams to understand how the composite system converts inputs to outputs.
+This is reminiscent of a co-design problem from \cref{chap.codesign}, which asks
+how to evaluate the composite feasibility relation from a diagram of simpler feasibility
+relations. We can use this process of evaluation to determine whether two
+different signal flow graphs in fact specify the same composite system, and
+hence to validate that a system meets a given specification. 
+
+In this chapter, however, we introduce categorical tools---props and
+their presentations---for reasoning more directly with the diagrams. Recall from
+\cref{chap.resource_theory} that symmetric monoidal preorders are a type of
+symmetric monoidal category where the \emph{morphisms} are constrained to be
+very simple: there can be at most one morphism between any two objects. Here
+shall see that signal flow graphs represent morphisms in a different,
+complementary simplification of the symmetric monoidal category concept, known as a \emph{prop}.%
+\footnote{
+Historically, the word `prop' was written in all caps, `PROP,' standing for `products and permutations category.' However, we find `PROP' a bit loud, so like many modern authors we opt for writing it as `prop.'
+}
+A prop is a symmetric monoidal category where the \emph{objects} are constrained
+to be very simple: they are generated, using the monoidal product, by just a
+single object. Just as the wiring diagrams for symmetric monoidal preorders did
+not require labels on the boxes, this means that wiring diagrams for props do
+not require labels on the wires. This makes props particularly suited for
+describing diagrammatic formalisms such as signal flow graphs, which only have
+wires of a single type.
+
+Finally, many systems behave in what is called a \emph{linear} way, and linear systems form a foundational part of control theory, a branch of engineering that works on cyber-physical systems. Similarly, linear
+algebra is a foundational part of modern mathematics, both pure and applied,
+which includes not only control theory, but also the practice of computing,
+physics, statistics, and many others. As we analyze signal flow graphs, we shall see that they are in fact a
+way of recasting linear algebra---more specifically, matrix operations---in graphical terms. More formally, we shall say
+that signal flow graphs have \emph{functorial semantics} as matrices. %
+\index{control theory}
+
+% presentations of categories give decision rules for deciding equality of
+%terms
+
+% representation is important: a new viewpoint can make the subtle obvious
+
+%Matrices play a central role in linear algebra. Indeed, while matrices of a
+%given dimension form a monoid, and the invertible matrices form a group, what
+%sort of algebraic structure does the set of all matrices form? The answer is a
+%category. In fact, it is useful to view matrices as a special, simple type of
+%monoidal category, known as a prop.
+
+%What sort of algebraic structure does the set of all matrices form? If we just
+%pick the invertible matrices of a given dimension, say all invertible $2 \times
+%2$ matrices, they form a group: we can multiply any two invertible $2 \times 2$
+%matrices, and by definition every invertible $2 \times 2$ matrix has a $2 \times
+%2$ matrix as its inverse. If we take all $2 \times 2$ matrices, we no longer
+%have a group, but we do have a monoid. If we take all matrices, however, we can
+%no longer multiply any pair of matrices, we need to make sure the dimensions
+%match up. This matching of dimensions is the captured by category theory.
+%Indeed, we can consider the dimensions as objects in a category. If we do this,
+%we can define a category where the morphisms are exactly all the matrices! In
+%particular, we can define the morphisms $n \to m$ to be the $n \times m$
+%matrices. It is easy to check that this defines a category.
+
+%Interconnection and the behavioral approach
+%
+%\begin{quotation}
+%  The behavioral approach stems from the observation that classical
+%  system-theoretic thinking is unsuitable for dealing\ldots with the basic
+%  tenets at which system theory aims, namely, open and interconnected systems.
+%\end{quotation}
+%
+%relational philosophy.
+
+
+%-------- Section --------%
+\section{Props and presentations}%
+\label{sec.props_and_presentations}
+\index{prop|(}
+
+Signal flow graphs as in \cref{eq.examplesfg} are easily seen to be wiring
+diagrams of some sort. However they have the property that, unlike for monoidal
+preorders and monoidal categories, there is no need to label the wires. This
+corresponds to a form of symmetric monoidal category, known as a prop, which has
+a very particular set of objects.
+
+%---- Subsection ----%
+\subsection{Props: definition and first examples}
+
+Recall the definition of symmetric strict monoidal category from
+\cref{rdef.sym_mon_cat,rem.strict_mon_cat}.
+
+\begin{definition}%
+\label{def.prop}%
+\index{prop}
+A \emph{prop} is a symmetric strict monoidal category $(\cat{C},0,+)$ for which $\Ob(\cat{C})=\NN$, the monoidal unit is $0\in\NN$, and the monoidal product on objects is given by addition.
+\end{definition}
+
+Note that each object $n$ is the $n$-fold monoidal product of the object $1$; we
+call $1$ the \emph{generating object}. Since the objects of a prop are always
+the natural numbers, to specify a prop $P$ it is enough to specify five things:
+\begin{enumerate}[label=(\roman*)]
+	\item a set $\cat{C}(m,n)$ of morphisms $m\to n$, for $m,n\in\NN$.
+	\item for all $n \in \NN$, an identity map $\id_n\colon n \to n$.
+	\item for all $m, n \in \NN$, a symmetry map $\sigma_{m,n}\colon m+n \to
+	n+m$.%
+\index{symmetry}
+	\item a composition rule: given $f\colon m \to n$ and $g\colon n \to p$,
+	a map $(f\cp g)\colon m \to p$.
+	\item a monoidal product on morphisms: given $f\colon m\to m'$ and $g\colon n\to n'$, a map $(f+g)\colon m+n\to m'+n'$.
+\end{enumerate}
+Once one specifies the above data, he should check that his specifications
+satisfy the rules of symmetric monoidal categories (see
+\cref{rdef.sym_mon_cat}).%
+\footnote{We use `his' terminology because this definition is for boys only. The rest of the book is for girls only.}
+
+\begin{example}%
+\label{ex.FinSet_Prop}%
+\index{prop!$\finset$}
+  There is a prop $\Cat{FinSet}$ where the morphisms $f\colon m \to n$ are
+  functions from $\ord{m}=\{1,\dots m\}$ to $\ord{n}=\{1,\dots,n \}$. (The
+  identities, symmetries, and composition rule are obvious.) The monoidal
+  product on functions is given by the disjoint union of functions: that is,
+  given $f\colon m \to m'$ and $g\colon n \to n'$, we
+  define $f+ g\colon m+n \longrightarrow m'+n'$ by
+  \begin{equation}%
+\label{eqn.mon_prod_finset}
+    i \longmapsto 
+    \begin{cases}
+      f(i) &\mbox{ if }1\leq i\leq m ;\\
+      m'+g(i) &\mbox{ if }m+1\leq i \leq m+n.
+    \end{cases}
+    \qedhere
+  \end{equation}
+\end{example}
+
+\begin{exercise}%
+\label{exc.finset_as_prop}%
+\index{obvious!conventional mathematical meaning of}
+In \cref{ex.FinSet_Prop} we said that the identities, symmetries, and
+composition rule in $\Cat{FinSet}$ ``are obvious.'' In math lingo, this just
+means ``we trust that the reader can figure them out, if she spends the time tracking
+down the definitions and fitting them together.''
+\begin{enumerate}
+	\item Draw a morphism $f\colon 3\to 2$ and a morphism $g\colon 2\to 4$ in $\finset$.
+	\item Draw $f+g$.
+	\item What is the composition rule for morphisms $f\colon m\to n$ and $g\colon n\to p$ in $\Cat{FinSet}$?
+	\item What are the identities in $\Cat{FinSet}$? Draw some.
+	\item Choose $m,n \in \NN$, and draw the symmetry map $\sigma_{m,n}$
+	in $\Cat{FinSet}$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.function_bijection}%
+\index{function!bijective}
+  Recall from \cref{def.function} that a bijection is a function that is both
+  surjective and injective.  There is a prop $\Cat{Bij}$ where the morphisms
+  $f\colon m \to n$ are bijections $\ord{m} \to \ord{n}$. Note that in this case
+  morphisms $m \to n$ only exist when $m = n$; when $m\neq n$ the homset
+  $\Cat{Bij}(m,n)$ is empty. Since $\Cat{Bij}$ is a subcategory of
+  $\Cat{FinSet}$, we can define the monoidal product to be as in
+  \cref{eqn.mon_prod_finset}.
+\end{example}%
+\index{category!of finite sets}%
+\index{category!of bijections}
+
+\begin{example}%
+\label{ex.corelation}%
+\index{corelation}%
+\index{compact closed category}
+  The compact closed category $\Cat{Corel}$, in which the morphisms $f\colon
+  m \to n$ are partitions on $\ord{m}\sqcup \ord{n}$ (see \cref{ex.corel}), is a prop.
+\end{example}
+
+\begin{example}%
+\label{ex.relation}%
+\index{binary relation}
+There is a prop $\Cat{Rel}$ for which morphisms $m\to n$ are relations, $R\ss\ord{m}\times\ord{n}$. The composition of $R$ with $S\ss\ord{n}\times\ord{p}$ is
+\[R\cp S\coloneqq\{(i,k)\in\ord{m}\times\ord{p}\mid\exists(j\in\ord{n})\ldotp (i,j)\in R\text{ and }(j,k)\in S\}.\]
+The monoidal product is relatively easy to formalize using universal properties,%
+\tablefootnote{The monoidal product $R_1+R_2$ of relations $R_1\ss \ord{m_1}\times \ord{n_1}$ and $R_2\ss \ord{m_2}\times \ord{n_2}$ is given by $R_1\sqcup R_2\ss(\ord{m_1}\times \ord{n_1})\sqcup(\ord{m_2}\times \ord{n_2})\ss(\ord{m_1}\sqcup \ord{m_2})\times(\ord{n_1}\sqcup \ord{n_2})$.}
+but one might get better intuition from pictures:
+\[
+\begin{tikzpicture}[x=1ex, inner sep=2pt]
+	\node (a1) {$\bullet$};
+	\node[right=1 of a1] (a2) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(a1) (a2)] (a) {};
+%
+	\node[below=1 of a1] (b1) {$\bullet$};
+	\node[below=1 of a2] (b2) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(b1) (b2)] (b) {};
+%
+	\draw (a1) -- (b1);
+	\draw (a1) -- (b2);
+%%
+	\node [right=5 of a2] (c1) {$\bullet$};
+	\node [right=1 of c1] (c2) {$\bullet$};
+	\node [right=1 of c2] (c3) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(c1) (c3)] (c) {};
+%
+	\node[below=1 of c2] (d1) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(d1)] (d) {};
+%
+	\draw (c1) -- (d1);
+	\draw (c3) -- (d1);
+%%%
+	\node[right=10 of c3] (x1) {$\bullet$};
+	\node[right=1 of x1] (x2) {$\bullet$};
+	\node[right=1 of x2] (x3) {$\bullet$};
+	\node[right=1 of x3] (x4) {$\bullet$};
+	\node[right=1 of x4] (x5) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(x1) (x5)] (x) {};
+%
+	\node[below=1 of x2] (y1) {$\bullet$};
+	\node[right=1 of y1] (y2) {$\bullet$};
+	\node[right=1 of y2] (y3) {$\bullet$};
+	\node[draw, ellipse, inner sep=0, fit=(y1) (y3)] (y) {};
+%
+	\draw (x1) -- (y1);
+	\draw (x1) -- (y2);
+	\draw (x3) -- (y3);
+	\draw (x5) -- (y3);
+%%
+	\node at ($(a2)!.5!(c1)$)  (midx) {};
+	\node at ($(a2)!.5!(b2)$) (midy) {};
+	\node at (midx |- midy) (plus) {+};
+	\node at ($(c3)!.5!(x1)$) (midxx) {};
+	\node at (plus-|midxx) {=};	
+
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\begin{exercise}%
+\index{prop!posetal}%
+\label{exc.posetal_prop}
+  A posetal prop is a prop that is also a poset. That is, a posetal prop is a
+  symmetric monoidal preorder of the form $(\NN,\preceq)$, for some poset relation
+  $\preceq$ on $\NN$, where the monoidal product on objects is addition. We've
+  spent a lot of time discussing order structures on the natural numbers. Give
+  three examples of a posetal prop.
+\end{exercise}
+
+%Since the natural numbers can be generated by starting with 0 and adding 1 as
+%many times as you need, the objects of a prop can be obtained as monoidal
+%products of the object 1. In wiring diagrams for props, each wire represents the
+%object 1.
+%
+%Since $2=1+1$, we may draw a map $\mult{1em}\colon 2 \to 1$ using the wiring diagram.
+%
+
+\begin{exercise}%
+\label{exc.prop_practice}
+Choose one of \cref{ex.function_bijection,ex.corelation,ex.relation} and explicitly provide the five aspects of props discussed below \cref{def.prop}.
+\end{exercise}
+
+\begin{definition}%
+\label{def.prop_functor}%
+\index{functor!prop}
+  Let $\cat{C}$ and $\cat{D}$ be props. A \emph{functor} $F\colon\cat{C}\to\cat{D}$ is called a \emph{prop functor} if
+  \begin{enumerate}[label=(\alph*)]
+  	\item $F$ is identity-on-objects, i.e.\ $F(n)=n$ for all $n\in\Ob(\cat{C}) = \Ob(\cat{D}) = \nn$, and
+		\item for all $f\colon m_1\to m_2$ and $g\colon n_1\to n_2$ in $\cat{C}$, we have $F(f)+F(g)=F(f+g)$ in $\cat{D}$.
+	\end{enumerate}
+\end{definition}
+
+\begin{example}
+The inclusion $i\colon\Cat{Bij}\to\Cat{FinSet}$ is a prop functor. Perhaps more interestingly, there is a prop functor $F\colon\Cat{FinSet}\to\Cat{Rel}_\Cat{Fin}$. It sends a function $f\colon \ord{m}\to\ord{n}$ to the relation $F(f)\coloneqq\{(i,j)\mid f(i)=j\}\ss\ord{m}\times\ord{n}$.%
+\index{relation}
+\end{example}
+
+
+%---- Subsection ----%
+\subsection{The prop of port graphs}%
+\label{subsec.prop_PGs}%
+\index{port graph|(}
+An important example of a prop is the one in which morphisms are open, directed, acyclic port graphs, as we next define. We will just call them port graphs.
+
+\begin{definition}%
+\label{def.port_graph}%
+\index{port graph}
+For $m,n\in\nn$, an \emph{$(m,n)$-port graph} $(V,\pgin,\pgout, \iota)$ is
+specified by
+\begin{enumerate}[label=(\roman*)]
+\item a set $V$, elements of which are called \emph{vertices},
+\item functions $\pgin,\pgout \colon V \to \nn$, where $\pgin(v)$ and
+$\pgout(v)$ are called the \emph{in degree} and \emph{out degree} of each $v \in V$, and
+\item a bijection $\iota\colon \ord{m} \sqcup O \stackrel{\cong}{\to} I \sqcup
+\ord{n}$, where $I=\{(v,i)\mid v \in V, \, 1 \le i \le \pgin(v)\}$ is the set of
+\emph{vertex inputs}, and $O=\{(v,i)\mid v \in V,\, 1 \le i \le \pgout(v)\}$ is
+the set of \emph{vertex outputs}.
+\end{enumerate}
+This data must obey the following acyclicity condition. First, use the bijection
+$\iota$ to construct the graph with vertices $V$ and with
+an arrow $e^{u,i}_{v,j}\colon u \to v$ for every $i,j \in \nn$ such that
+$\iota(u,i)=(v,j)$; call it the \emph{internal flow graph}. If the internal flow graph is acyclic---that is, if the only
+path from any vertex $v$ to itself is the trivial path---then we say that
+$(V,\pgin,\pgout, \iota)$ is a port graph.%
+\index{port graph!acyclicity condition}%
+\index{trivial path}
+\end{definition}
+
+This seems quite a technical construction, but it's quite intuitive once you
+unpack it a bit. Let's do this.
+
+\begin{example}%
+\label{ex.a_port_graph}
+Here is an example of a $(2,3)$-port graph, i.e.\ with $m=2$ and $n=3$:
+\begin{equation}%
+\label{eqn.port_graph}
+\begin{tikzpicture}[oriented WD, bb port length=6pt, bb port sep=1.5, baseline=(X2.north)]
+	\node[bb={1}{3}] (X1) {$a$};
+	\node[bb={3}{3}, below right=of X1] (X2) {$b$};
+	\node[bb port sep=2.25, bb={2}{1}, above right=of X2] (X3) {$c$};
+	\node[bb={0}{0}, fit={($(X1.north west)+(.3,1.5)$) (X2)  ($(X3.east)+(-.3,0)$)}] (Y) {};
+	\node[coordinate] at (Y.west|-X1_in1) (Y_in1) {};
+	\node[coordinate] at (Y.west|-X2_in3) (Y_in2) {};
+	\node[coordinate] at (X3_out1-|Y.east) (Y_out1) {};
+	\node[coordinate] at (X2_out2-|Y.east) (Y_out2) {};
+	\node[coordinate] at (X2_out3-|Y.east) (Y_out3) {};
+	\draw (Y_in1) to (X1_in1);	
+	\draw (Y_in2) to (X2_in3);
+	\draw (X1_out1) to (X3_in1);
+	\draw (X1_out2) to (X2_in2);
+	\draw (X1_out3) to (X2_in1);
+	\draw (X2_out1) to (X3_in2);
+	\draw (X3_out1) to (Y_out1);
+	\draw (X2_out2) to (Y_out2);
+	\draw (X2_out3) to (Y_out3);
+	\draw[label]
+		node[left=3pt of Y_in1] {$1$}
+		node[left=3pt of Y_in2] {$2$}
+		node[above= of X1_in1] {$1$}
+		node[above= of X2_in1] {$1$}
+		node[below= of X2_in2] {$2$}
+		node[below= of X2_in3] {$3$}
+		node[above= of X3_in1] {$1$}
+		node[below= of X3_in2] {$2$}
+		node[above= of X1_out1] {$1$}
+		node[above= of X1_out2] {$2$}
+		node[below= of X1_out3] {$3$}
+		node[above= of X2_out1] {$1$}
+		node[above= of X2_out2] {$2$}
+		node[below= of X2_out3] {$3$}
+		node[above= of X3_out1] {$1$}
+		node[right=3pt of Y_out1] {$1$}
+		node[right=3pt of Y_out2] {$2$}
+		node[right=3pt of Y_out3] {$3$}
+	;
+\end{tikzpicture}
+\end{equation}
+Since the port graph has type $(2,3)$, we draw two ports on the
+left hand side of the outer box, and three on the right. 
+The vertex set is $V=\{a,b,c\}$ and, for example $\pgin(a)=1$ and
+$\pgout(a)=3$, so we draw
+one port on the left-hand side and three ports on the right-hand side
+of the box labelled $a$. The bijection $\iota$ is what tells us how the ports are connected by wires:
+\[
+\begin{tikzpicture}[y=2.3ex, font=\scriptsize, decoration={brace, amplitude=5pt}]
+	\node[                label={[above=-5pt]:$1$}    ] (L1)  {$\bullet$};
+	\node[right=1 of L1,  label={[above=-5pt]:$2$}    ] (L2)  {$\bullet$};
+	\node[right=1 of L2,  label={[above=-5pt]:$(a,1)$}] (La1) {$\bullet$};
+	\node[right=1 of La1, label={[above=-5pt]:$(a,2)$}] (La2) {$\bullet$};
+	\node[right=1 of La2, label={[above=-5pt]:$(a,3)$}] (La3) {$\bullet$};
+	\node[right=1 of La3, label={[above=-5pt]:$(b,1)$}] (Lb1) {$\bullet$};
+	\node[right=1 of Lb1, label={[above=-5pt]:$(b,2)$}] (Lb2) {$\bullet$};
+	\node[right=1 of Lb2, label={[above=-5pt]:$(b,3)$}] (Lb3) {$\bullet$};
+	\node[right=1 of Lb3, label={[above=-5pt]:$(c,1)$}] (Lc1) {$\bullet$};
+%
+	\node[below=3 of L1,  label={[below=7pt]:$(a,1)$}] (Ra1) {$\bullet$};
+	\node[below=3 of L2,  label={[below=7pt]:$(b,1)$}] (Rb1) {$\bullet$};
+	\node[below=3 of La1, label={[below=7pt]:$(b,2)$}] (Rb2) {$\bullet$};
+	\node[below=3 of La2, label={[below=7pt]:$(b,3)$}] (Rb3) {$\bullet$};
+	\node[below=3 of La3, label={[below=7pt]:$(c,1)$}] (Rc1) {$\bullet$};
+	\node[below=3 of Lb1, label={[below=7pt]:$(c,2)$}] (Rc2) {$\bullet$};
+	\node[below=3 of Lb2, label={[below=7pt]:$1$}    ] (R1)  {$\bullet$};
+	\node[below=3 of Lb3, label={[below=7pt]:$2$}    ] (R2)  {$\bullet$};
+	\node[below=3 of Lc1, label={[below=7pt]:$3$}    ] (R3)  {$\bullet$};
+%
+	\draw[decorate, thick] ($(L1.west)+(0,1.5)$) to node[above=4pt] {$m$} ($(L2.east)+(0,1.5)$);
+	\draw[decorate, thick] ($(La1.west)+(0,1.5)$) to node[above=4pt] {$O$} ($(Lc1.east)+(0,1.5)$);
+	\draw[decorate, thick] ($(Rc2.east)+(0,-1.5)$) to node[below=4pt] {$I$} ($(Ra1.west)+(0,-1.5)$);
+	\draw[decorate, thick] ($(R3.east)+(0,-1.5)$) to node[below=4pt] {$n$} ($(R1.west)+(0,-1.5)$);
+%
+\begin{scope}[mapsto]
+	\draw (L1)  -- (Ra1);
+	\draw (L2)  -- (Rb3);
+	\draw (La1) -- (Rc1);
+	\draw (La2) -- (Rb2);
+	\draw (La3) -- (Rb1);
+	\draw (Lb1) -- (Rc2);
+	\draw (Lb2) -- (R2);
+	\draw (Lb3) -- (R3);
+	\draw (Lc1) -- (R1);
+\end{scope}
+\end{tikzpicture}
+\]
+The internal flow graph---which one can see is acyclic---is shown below:
+\[
+\begin{tikzcd}[column sep = 50pt, row sep=35pt]
+	\LMO{a}\ar[rr, "\displaystyle e^{a,1}_{c,1}"]\ar[rd, bend left=10,
+	"\displaystyle e^{a,2}_{b,2}"]\ar[rd, bend right=10, "\displaystyle e^{a,3}_{b,1}"']&&\LMO{c}\\
+	&\LMO{b}\ar[ur,"\displaystyle e^{b,1}_{c,2}"']
+\end{tikzcd}
+\]
+\end{example}
+
+As you might guess from \eqref{eqn.port_graph}, port graphs are closely related to
+wiring diagrams for monoidal categories, and even more closely related to wiring
+diagrams for props.
+
+\paragraph{A category $\Cat{PG}$ whose morphisms are port graphs.}
+%
+\label{page.port_graphs_prop}%
+\index{port graph!as morphism}
+
+Given an $(m,n)$-port graph $(V,\pgin,\pgout,\iota)$ and an $(n,p)$-port graph
+$(V',\pgin',\pgout',\iota')$, we may compose them to produce an $(m,p)$-port
+graph $(V\sqcup V',\copair{\pgin,\pgin'},\copair{\pgout,\pgout'},\iota'')$. Here
+$\copair{\pgin,\pgin'}$ denotes the function $V\sqcup V' \to \nn$ which maps elements
+of $V$ according to $\pgin$, and elements of $V'$ according to $\pgin'$, and
+similarly for $\copair{\pgout,\pgout'}$. The
+bijection $\iota''\colon\ord{m}\sqcup O\sqcup O'\to I\sqcup I'\sqcup\ord{p}$ is defined as follows:
+\[
+\iota''(x) = \begin{cases}
+\iota(x) & \mbox{ if }\iota(x) \in I \\
+\iota'(\iota(x)) & \mbox{ if }\iota(x) \in \ord{n} \\
+\iota'(x) & \mbox{ if }x \in O.'
+\end{cases}
+\]
+
+\begin{exercise}%
+\label{exc.port_graph_comp}
+Describe how port graph composition looks, with respect to the visual
+representation of \cref{ex.a_port_graph}, and give a nontrivial example.
+\end{exercise}
+
+We thus have a category $\Cat{PG}$, whose objects are natural numbers $\Ob(\Cat{PG})=\NN$, whose morphisms are port graphs $\Cat{PG}(m,n)=\{(V,\pgin,\pgout,\iota)\mid\text{as in \cref{def.port_graph}}\}$.
+Composition of port graphs is as above, and the identity port graph on $n$ is the $(n,n)$-port graph
+$(\varnothing, !,!,\id_{\ord{n}})$, where
+$!\colon \varnothing \to \nn$ is the unique function. The identity on an object,
+say $3$, is depicted as follows:%
+\index{identity!port graph}
+\[
+\begin{tikzpicture}[oriented WD, bb port length=0]
+	\node[bb={3}{3}, minimum width = 1.5cm] (Y) {};
+	\draw (Y.west|-Y_in1) to (Y.east|-Y_out1);
+	\draw (Y.west|-Y_in2) to  (Y.east|-Y_out2);
+	\draw (Y.west|-Y_in3) to  (Y.east|-Y_out3);
+	\draw[label]
+		node[left=3pt of Y_in1] {$1$}
+		node[left=3pt of Y_in2] {$2$}
+		node[left=3pt of Y_in3] {$3$}
+		node[right=3pt of Y_out1] {$1$}
+		node[right=3pt of Y_out2] {$2$}
+		node[right=3pt of Y_out3] {$3$}
+	;	
+\end{tikzpicture}
+\]
+
+\paragraph{The monoidal structure structure on $\Cat{PG}$.}
+
+This category $\Cat{PG}$ is in fact a prop. The monoidal
+product of two port graphs $G\coloneqq (V,\pgin,\pgout,\iota)$ and
+$G'\coloneqq (V',\pgin',\pgout',\iota')$ is given by taking the disjoint union
+of $\iota$ and $\iota'$:
+\begin{equation}%
+\label{eqn.PG_prop}
+G+G'\coloneqq\big((V\sqcup V'),[\pgin,\pgin'],[\pgout,\pgout'],(\iota\sqcup\iota')\big).
+\end{equation}
+The monoidal unit is $(\varnothing,!,!,!)$.
+
+%%---- Subsection ----%
+%\subsection{The prop of odags}
+%
+%  We define the prop of $\Cat{Odag}$ of open directed cyclic graphs. 
+%
+%A \emph{directed acyclic graph}, or \emph{dag}, $(V,E,s,t)$ comprises
+%\begin{itemize}
+%\item a set $V$ of \emph{vertices}, 
+%\item a set $E$ of \emph{edges},
+%\item a function $s\colon E \to V$ called the \emph{source function},
+%\item a function $t\colon E \to V$ called the \emph{target function}.
+%\end{itemize}
+%such that the edges do not form any cycles. By this we mean that there is no
+%sequence $e_1,\dots,e_n$ of edges such that $t(e_i)=s(e_{i+1})$ for all
+%$i=1,\dots,n-1$, and $s(e_1) = t(e_n)$.
+%
+%For example, the following is a picture of a dag with five vertices and four
+%edges. Note that it is not possible to return to a vertex by following edges.
+%\[
+%\begin{tikzpicture}
+%\node[draw,circle] (a) {};
+%\node[draw,circle,right=1 of a] (b) {};
+%\node[draw,circle,below=1.5 of a] (a') {};
+%\node[draw,circle,below right=1 of a] (c) {};
+%\node[draw,circle,right=1 of c] (d) {};
+%\node[draw,circle,above right=.8 of d] (e) {};
+%\node[draw,circle] at ($(d)+(2,.5)$) (f) {};
+%\node[draw,circle,below=.5 of f] (g) {};
+%\draw[->] (a) to (b);
+%\draw[->] (b) to (d);
+%\draw[->] (a) to (c);
+%\draw[->] (a') to (c);
+%\draw[->] (c) to (d);
+%\draw[->] (a') to (g);
+%\draw[->] (d) to (f);
+%\draw[->] (d) to (g);
+%\end{tikzpicture}
+%\]
+%
+%Given $n,m \in \nn$, an (n,m)-\emph{open directed acyclic graph}, or
+%(n,m)-\emph{odag} is a directed acyclic graph $(V\sqcup \ord{n} \sqcup \ord{m},E,s,t)$
+%such that 
+%\begin{itemize}
+%\item every element of $\ord{n}$ is the source of exactly one edge and not the
+%target of any edge
+%\item every element of $\ord{m}$ is the target of exactly one edge and not the
+%source of any edge 
+%\item no two edges with source in $\ord{n}$ have the same target
+%\item no two edges with target in $\ord{m}$ have the same source.
+%\end{itemize}
+%We call the vertices in the image of $i$ \emph{inputs} and the
+%vertices in the image of $o$ \emph{outputs}. Here is an example of a
+%$(3,2)$-odag:
+%\[
+%\begin{tikzpicture}
+%\node[draw,circle] (a) {};
+%\node[draw,circle,right=1 of a] (b) {};
+%\node[draw,circle,below=1.5 of a] (a') {};
+%\node[draw,circle,below right=1 of a] (c) {};
+%\node[draw,circle,right=1 of c] (d) {};
+%\node[draw,circle,above right=.8 of d] (e) {};
+%\node[draw,circle] at ($(d)+(2,.5)$) (f) {};
+%\node[draw,circle,below=.5 of f] (g) {};
+%\node[draw,fill,left =1 of a] (ia) {};
+%\node[draw,fill,left =2 of c] (ic) {};
+%\node[draw,fill,left =1 of a'] (ia') {};
+%\node[draw,fill,right =1 of f] (of) {};
+%\node[draw,fill] at (of|-a') (oa') {};
+%\draw[->] (a) to (b);
+%\draw[->] (b) to (d);
+%\draw[->] (a) to (c);
+%\draw[->] (a') to (c);
+%\draw[->] (c) to (d);
+%\draw[->] (a') to (g);
+%\draw[->] (d) to (f);
+%\draw[->] (d) to (g);
+%\draw[->] (ia) to (a);
+%\draw[->] (ia') to (a');
+%\draw[->] (ic) to (c);
+%\draw[->] (a') to (oa');
+%\draw[->] (f) to (of);
+%\end{tikzpicture}
+%\]
+%Here an arrow from a black dot on the left to a vertex denotes that the vertex
+%is in $I$, while an arrow from a black dot on the right denotes that vertex is
+%in $O$.
+%
+%Given an $(n,m)$-odag $(V,E,s,t,i,o)$ and an $(m,p)$-odag $(V',E',s',t',i',o')$,
+%we can form an $(n,p)$-odag $(V\sqcup V',E\sqcup E'\sqcup \ord{m},\tilde s,\tilde
+%t,i,o')$, where 
+%
+%We call two $(n,m)$-odags $(V,E,s,t,i,o)$ and $(V',E',s',t',i',o')$ equivalent
+%if there exist bijections $\nu\colon V \to V'$, $\epsilon\colon E \cong E'$ such
+%that
+%
+%The identity $(n,n)$-odag is just given by
+%
+%This composition rule defines a prop, where morphisms $n\to m$ are
+%equivalence classes of $(n,m)$-odags.
+
+\begin{exercise}%
+\label{exc.mon_prod_of_morphisms}
+Draw the monoidal product of the morphism shown in \cref{eqn.port_graph} with itself. It will be a $(4,6)$-port graph, i.e.\ a morphism $4\to 6$ in $\Cat{PG}$.
+\end{exercise}
+
+%
+\index{port graph|)}
+
+%---- Subsection ----%
+\subsection{Free constructions and universal properties}%
+\label{sec.free_constructions}
+\index{universal property|(}
+
+Given some sort of categorical structure, such as a preorder, a category, or a prop,
+it is useful to be able to construct one according to your own specification.
+(This should not be surprising.) The minimally-constrained structure that
+contains all the data you specify is called the \emph{free structure} on your
+specification: it's free from unneccessary constraints! We have already seen
+some examples of free structures; let's recall and explore them.
+
+\begin{example}[The free preorder on a relation]%
+\index{preorder!free on a relation}%
+\index{free!preorder}%
+\index{relation!free preorder on}
+For preorders, we saw the construction of taking the reflexive, transitive closure
+of a relation. That is, given a relation $R\ss P\times P$, the reflexive,
+transitive closure of $R$ is the called the free preorder on $R$. Rather than
+specify all the inequalities in the preorder $(P,\leq)$, we can specify just a few
+inequalities $p \le q$, and let our ``closure machine'' add in the minimum
+number of other inequalities necessary to make $P$ a preorder. To obtain a preorder
+out of a graph, or Hasse diagram, we consider a
+graph $(V,A,s,t)$ as defining a relation $\{(s(a),t(a)) \mid a \in A\} \ss V
+\times V$, and apply this closure machine.
+
+But in what sense is the reflexive, transitive closure of a relation $R\ss P\times P$ really the \emph{minimally-constrained} preorder containing $R$? One way of understanding this is that the extra equalities impose
+no further constraints when defining a monotone map \emph{out} of $P$. We are
+claiming that freeness has something to do with maps \emph{out}! As strange as
+an asymmetry might seem here (one might ask, ``why not maps in?''), the reader
+will have an opportunity to explore it for herself in Exercises~\ref{exc.free_preorder_check_1}~and~\ref{exc.free_preorder_check_2}.%
+
+A higher-level justification understands freeness as a left adjoint (see
+\cref{ex.adjunctions}), but we will not discuss that here.
+\end{example}
+
+\begin{exercise}%
+\label{exc.free_preorder_check_1}
+Let $P$ be a set, let $R\ss P \times P$ a relation, let $(P,\leq_P)$ be the preorder
+obtained by taking the reflexive, transitive closure of $R$, and let $(Q,\leq_Q)$ be an arbitrary preorder. Finally, let $f\colon P\to Q$ be a function, not assumed monotone.
+\begin{enumerate}
+	\item Suppose that for every $x,y\in P$, if $R(x,y)$ then $f(x)\leq f(y)$. Show that $f$ defines a monotone map $f\colon (P,\leq_P)\to (Q,\leq_Q)$.
+	\item Suppose that $f$ defines a monotone map $f\colon (P,\leq_P)\to (Q,\leq_Q)$. Show that for every $x,y\in P$, if $R(x,y)$ then $f(x)\leq_Q f(y)$.
+\end{enumerate}
+We call this the \emph{universal property} of the free preorder $(P,\leq_P)$.%
+\index{universal
+property}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.free_preorder_check_2}
+Let $P$, $Q$, $R$, etc.\ be as in \cref{exc.free_preorder_check_1}. We want to see that the universal property is really about maps out of---and not maps in to---the reflexive, transitive closure $(P,\leq)$. So let $g\colon Q\to P$ be a function.
+\begin{enumerate}
+	\item Suppose that for every $a,b\in Q$, if $a\leq b$ then $(g(a),g(b))\in R$. Is it automatically true that $g$ defines a monotone map $g\colon(Q,\leq_Q)\to(P,\leq_P)$?
+	\item Suppose that $g$ defines a monotone map $g\colon(Q,\leq_Q)\to(P,\leq_P)$. Is it automatically true that for every $a,b\in Q$, if $a\leq b$ then $(g(a),g(b))\in R$?
+\end{enumerate}
+The lesson is that maps between structured objects are defined to preserve
+constraints. This means the domain of a map must be somehow more constrained than the
+codomain. Thus having the fewest additional constraints coincides with having
+the most maps out---every function that respects our generating constraints
+should define a map.%
+\end{exercise}
+
+\begin{example}[The free category on a graph]%
+\index{category!free}%
+\index{free!category}
+There is a similar story for categories. Indeed, we saw in
+\cref{def.free_category} the construction of the free category $\free(G)$ on a
+graph $G$. The objects of $\free(G)$ and the vertices of $G$ are the
+same---nothing new here---but the morphisms of $\free(G)$ are not just the
+arrows of $G$ because morphisms in a category have stricter requirements: they
+must compose and there must be an identity. Thus morphisms in $\free(G)$ are the
+\emph{closure} of the set of arrows in $G$ under these operations. Luckily
+(although this happens often in category theory), the result turns out to
+already be a relevant graph concept: the morphisms in $\free(G)$ are exactly the
+paths in $G$. So $\free(G)$ is a category that in a sense contains $G$ and obeys
+no equations other than those that categories are forced to obey.
+\end{example}
+
+\begin{exercise}%
+\label{exc.free_cat_is_free}
+Let $G=(V,A,s,t)$ be a graph, and let $\cat{G}$ be the free category on $G$. Let $\cat{C}$ be another category whose set of morphisms is denoted $\Mor(\cat{C})$. 
+\begin{enumerate}
+	\item Someone tells you that there are ``domain and codomain'' functions $\dom,\cod\colon\Mor(\cat{C})\to\Ob(\cat{C})$; interpret this statement.
+	\item Show that the set of functors $\cat{G} \to
+\cat{C}$ are in one-to-one correspondence with the set of pairs of functions
+$(f,g)$, where $f\colon V \to \Ob(\cat{C})$ and $g\colon A\to\Mor(\cat{C})$ for which $\dom(g(a))=f(s(a))$ and $\cod(g(a))=f(t(a))$ for all $a$.
+	\item Is $(\Mor(\cat{C}),\Ob(\cat{C}),\dom,\cod)$ a graph? If so, see if you can use the word ``adjunction'' in a sentence that describes the statement in part 2. If not, explain why not.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}[The free monoid on a set]%
+\index{monoid!free}%
+\index{free!monoid}%
+\label{exc.free_monoid}
+Recall from \cref{ex.monoid_nats} that monoids are one-object categories. For any set $A$, there is a graph $\Cat{Loop}(A)$ with one vertex and with one arrow from the vertex to itself for each $a\in A$. So if $A=\{a,b\}$ then $\Cat{Loop}(A)$ looks like this:
+\[
+\fbox{
+\begin{tikzcd}[ampersand replacement=\&]
+	\bullet\ar[loop left, "a"]\ar[loop right, "b"]
+\end{tikzcd}
+}
+\]
+The free category on this graph is a one-object category, and hence a monoid; it's called the free monoid on $A$.
+\begin{enumerate}
+	\item What are the elements of the free monoid on the set $A=\{a\}$?
+	\item Can you find a well-known monoid that is isomorphic to the free monoid on $\{a\}$?%
+\index{natural numbers!as free monoid}
+	\item What are the elements of the free monoid on the set $A=\{a,b\}$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+
+%---- Subsection ----%
+\subsection{The free prop on a signature}
+
+We have been discussing free constructions, in particular for preorders and
+categories. A similar construction exists for props. Since we already know what
+the objects of the prop will be---the natural numbers---all we need to specify
+is a set $G$ of \emph{generating morphisms}, together with the arities,%
+\footnote{The arity of a prop morphism is a pair $(m,n)\in\NN\times\NN$, where
+$m$ is the number of inputs and $n$ is the number of outputs.} that we want to
+be in our prop. This information will be called a \emph{signature}. Just as we
+can generate the free category from a graph, so too can we generate the free
+prop from a signature. 
+
+We now give an explicit construction of the free prop in terms of port graphs (see
+\cref{def.port_graph}). 
+
+\begin{definition}%
+\label{def.free_prop}%
+\index{free!prop}%
+\index{prop!free}%
+\index{port graph}
+  A \emph{prop signature} is a tuple $(G,s,t)$, where $G$ is a set and $s,t\colon G \to \nn$ are functions; each element $g\in G$ is called a \emph{generator} and $s(g),t(g)\in\nn$ are called its \emph{in-arity and out-arity}. We often denote $(G,s,t)$ simply by $G$, taking $s,t$ to be implicit.%
+\index{prop!signature of}
+  
+  A \emph{$G$-labeling} of a port graph $\Gamma=(V,\pgin,\pgout,\iota)$ is a
+  function $\ell\colon V\to G$ such that the arities agree:
+  $s(\ell(v))=\pgin(v)$ and $t(\ell(v))=\pgout(v)$ for each $v\in V$.
+  
+  Define the \emph{free prop on $G$}, denoted $\free(G)$, to have as morphisms
+  $m\to n$ all $G$-labeled $(m,n)$-port graphs. The composition and monoidal
+  structure are just those for port graphs $\Cat{PG}$ (see \cref{eqn.PG_prop});
+  the labelings (the $\ell$'s) are just carried along. 
+\end{definition}
+
+The morphisms in $\free(G)$ are port graphs $(V,\fun{in},\fun{out},\iota)$ as in
+\cref{def.port_graph}, that are equipped with a $G$-labeling. To draw a port
+graph, just as in \cref{ex.a_port_graph}, we draw each vertex $v\in V$ as a box
+with $\fun{in}(v)$-many ports on the left and $\fun{out}(v)$-many ports on the
+right. In wiring diagrams, we depict the labeling function $\ell\colon V\to G$
+by using $\ell$ to add labels (in the usual sense) to our boxes. Note that
+multiple boxes can be labelled with the same generator. For example, if
+$G=\{f\colon 1 \to 1, g\colon 2 \to 2, h\colon 2 \to 1\}$, then the following is
+a morphism $3\to 2$ in $\free(G)$:
+\begin{equation}%
+\label{eqn.labeled_pg}
+\begin{aligned}
+\begin{tikzpicture}[oriented WD]
+	\node[bb={2}{2}] (X11) {$g$};
+	\node[bb={2}{2}, below right=-.5 and 1 of X11] (X12) {$g$};
+	\node[bb={2}{1}, above right=-.5 and 1 of X12] (X13) {$h$};
+	\node[bb={0}{0}, fit={($(X11.north west)+(.3,1.5)$) (X12)  ($(X13.east)+(-.3,0)$)}] (Y1) {};
+	\draw (Y1.west|-X11_in1) to (X11_in1);	
+	\draw (Y1.west|-X11_in2) to (X11_in2);	
+	\draw (Y1.west|-X12_in1) to (X12_in1);
+	\draw (X11_out1) to (X13_in1);
+	\draw (X11_out2) to (X12_in2);
+	\draw (X12_out1) to (X13_in2);
+	\draw (X12_out2) to (X12_out2-|Y1.east);
+	\draw (X13_out1) to (X13_out1-|Y1.east);
+\end{tikzpicture}
+\end{aligned}
+\end{equation}
+Note that the generator $g$ is used twice, while the generator
+$f$ is not used at all in \cref{eqn.labeled_pg}. This is perfectly fine.
+
+\begin{example}%
+\index{function!bijective}
+The free prop on the empty set $\varnothing$ is $\Cat{Bij}$. This is because
+each morphism must have a labelling function of the form $V \to \varnothing$,
+and hence we must have $V=\varnothing$; see \cref{exc.map_to_empty}. Thus the only morphisms $(n,m)$ are
+those given by port graphs $(\varnothing, !,!,\sigma)$, where $\sigma\colon n
+\to m$ is a bijection.
+\end{example}
+
+\begin{exercise}%
+\index{port graph!as morphism}%
+\label{exc.free_prop_port_graph}
+Consider the following prop signature:
+\[
+  G\coloneqq\{\rho_{m,n} \mid m, n \in \nn\},\qquad s(\rho_{m,n})\coloneqq m,\quad t(\rho_{m,n})\coloneqq n,
+\]
+i.e.\ having one generating morphism for each $(m,n)\in\nn^2$. Show that
+$\free(G)$ is the prop $\Cat{PG}$ of port graphs from \cref{subsec.prop_PGs}.
+\end{exercise}
+
+Just like free preorders and free categories, the free prop is characterized by
+a universal property in terms of maps out. The following can be proved in a
+manner similar to \cref{exc.free_cat_is_free}.
+
+\begin{proposition}
+The free prop $\free(G)$ on a signature $(G,s,t)$ has the property that, for any
+prop $\cat{C}$, the prop functors $\free(G) \to \cat{C}$ are in one-to-one
+correspondence with functions $G \to \cat{C}$ that send each $g \in G$ to a
+morphism $s(g) \to t(g)$ in $\cat{C}$. 
+\end{proposition}
+
+
+\paragraph{An alternate way to describe morphisms in $\free(G)$.}
+
+Port graphs provide a convenient formalism of thinking about morphisms in the free prop on a signature $G$, but there is another approach which is also useful. It is syntactic, in the sense that we start with a small stock of basic morphisms, including elements of $G$, and then we inductively build new morphisms from them using the basic operations of props: namely composition and monoidal product. Sometimes the conditions of monoidal categories---e.g.\ associativity, unitality, functoriality, see \cref{rdef.sym_mon_cat}---force two such morphisms to be equal, and so we dutifully equate them. When we are done, the result is again the free prop $\free(G)$. Let's make this more formal.
+
+First, we need the notion of a prop expression. Just as prop signatures are the
+analogue of the graphs used to present categories, prop expressions are the
+analogue of paths in these graphs.
+
+\begin{definition}%
+\label{def.prop_expressions}%
+\index{prop!expression in}
+  Suppose we have a set $G$ and functions $s,t\colon G \to \nn$. We define a
+  \emph{$G$-generated prop expression}, or simply \emph{expression} $e\colon m\to n$, where $m,n\in\nn$, 
+  inductively as follows:
+\begin{itemize}
+\item The empty morphism $\id_0 \colon 0 \to 0$, the identity morphism $\id_1\colon 1 \to
+1$, and the symmetry $\sigma\colon 2 \to 2$ are expressions.%
+\tablefootnote{One can think of $\sigma$ as the ``swap'' icon $\swap{1em}\colon 2 \to
+  2$}
+\item the generators $g \in G$ are expressions $g\colon s(g) \to t(g)$.
+\item if $\alpha\colon m \to n$ and $\beta\colon p \to q$ are expressions, then
+$\alpha+\beta\colon m+p \to n+q$ is an expression.
+\item if $\alpha\colon m \to n$ and $\beta\colon n \to p$ are expressions, then
+$\alpha\cp\beta\colon m \to p$ is an expression.
+\end{itemize}
+We write $\expr(G)$ for the set of expressions in $G$. If $e\colon m\to n$ is an expression, we refer to $(m,n)$ as its \emph{arity}.
+\end{definition}%
+\index{icon}
+
+\begin{example}
+Let $G=\{f\colon 1 \to 1, g\colon 2 \to 2, h\colon 2 \to 1\}$. Then 
+\begin{itemize}
+\item $\id_1\colon 1 \to 1$, 
+\item $f\colon 1 \to 1$,
+\item $f\cp\id_1\colon 1\to 1$,
+\item $h+\id_1\colon 3 \to 2$, and 
+\item $(h+\id_1) \cp \sigma \cp g\cp \sigma \colon 3 \to 2$
+\end{itemize}
+are all $G$-generated prop expressions.
+\end{example}
+
+Both $G$-labeled port graphs and $G$-generated prop expressions are ways to
+describe morphisms in the free prop $\free(G)$. Note, however, that unlike for
+$G$-labeled port graphs, there may be two $G$-generated prop expressions that
+represent the same morphism. For example, we want to consider $f\cp \id_1$ and
+$f$ to be the same morphism, since the unitality axiom for categories says $f\cp
+\id_1 =f$. Nonetheless, we only consider two $G$-generated prop expressions
+equal when some axiom from the definition of prop requires that they be so;
+again, the free prop is the \emph{minimally-constrained} way to take $G$ and
+obtain a prop.
+\index{quotient}
+
+Since both port graphs and prop expressions describe morphisms in $\free(G)$,
+you might be wondering how to translate between them. Here's how to turn a port
+graph into a prop expression: imagine a vertical line moving through the port
+graph from left to right. Whenever you see ``action''---either a box or wires
+crossing---write down the sum (using $+$) of all the boxes $g$, all the
+symmetries $\sigma$, and all the wires $\id_1$ in that column. Finally, compose
+all of those action columns. For example, in the picture below we see four
+action columns:
+\[
+\begin{tikzpicture}[oriented WD]
+	\node[bb={2}{2}] (X11) {$g$};
+	\node[bb={2}{2}, below right=-.5 and 1 of X11] (X12) {$g$};
+	\node[bb={2}{1}, above right=-.5 and 1 of X12] (X13) {$h$};
+	\node[bb={0}{0}, fit={($(X11.north west)+(.3,1.5)$) (X12)  ($(X13.east)+(-.3,0)$)}] (Y1) {};
+	\draw (Y1.west|-X11_in1) to (X11_in1);	
+	\draw (Y1.west|-X11_in2) to (X11_in2);	
+	\path[name path=Q, draw] (Y1.west|-X12_in1) to (X12_in1);
+	\draw (X11_out1) to (X13_in1);
+	\path[name path=R, draw] (X11_out2) to (X12_in2);
+	\draw (X12_out1) to (X13_in2);
+	\draw (X12_out2) to (X12_out2-|Y1.east);
+	\draw (X13_out1) to (X13_out1-|Y1.east);
+	\coordinate (col1) at ($(Y1.west)!.29!(Y1.east)$);
+	\coordinate (col2) at ($(Y1.west)!.41!(Y1.east)$);
+	\coordinate (col3) at ($(Y1.west)!.65!(Y1.east)$);
+	\begin{scope}[blue, dashed, very thick]
+	\draw (col1|-Y1.north) -- (col1|-Y1.south);
+	\draw (col2|-Y1.north) -- (col2|-Y1.south);
+	\draw (col3|-Y1.north) -- (col3|-Y1.south);
+	\end{scope}
+\end{tikzpicture}
+\]
+Here the result is $(g+\id_1)\cp(\id_1+\sigma)\cp(\id_1+g)\cp(h+\id_1)$.%
+
+\begin{exercise}%
+\label{exc.free_prop_pic}
+Consider again the free prop on generators $G=\{f\colon 1 \to 1, g\colon 2 \to
+2, h\colon 2 \to 1\}$. Draw a picture of
+$(f+\id_1+\id_1)\cp(\sigma+\id_1)\cp(\id_1+h)\cp \sigma\cp g$, where
+$\sigma\colon 2\to 2$ is the symmetry map.
+\end{exercise}
+
+Another way of describing when we should consider two prop expressions equal is
+to say that they are equal if and only if they represent the same port graph. In
+either case, these notions induce an equivalence relation on the set of prop
+expressions. To say that we consider these certain prop expressions equal is to
+say that the morphisms of the free prop on $G$ are the $G$-generated prop
+expressions \emph{quotiented} by this equivalence relation (see
+\cref{def.quotient}).
+
+%---- Subsection ----%
+\subsection{Props via presentations}
+\label{sec.prop_presentations}
+
+In \cref{subsec.presenting_cats} we saw that a presentation for a category, or
+database schema, consists of a graph together with imposed equations between
+paths. Similarly here, sometimes we want to construct a prop whose morphisms
+obey specific equations. But rather than mere paths, the things we want to
+equate are prop expressions as in \cref{def.prop_expressions}.%
+\index{database!schema}
+\index{category!presentation of}
+
+\begin{roughDef}%
+\label{rdef.presentation_prop}%
+\index{prop!presentation of}%
+\index{presentation!of prop}
+A \emph{presentation} $(G,s,t,E)$ for a prop is a set $G$, functions $s,t\colon G\to\nn$, and a set $E\subseteq \expr(G) \times \expr(G)$ of pairs of $G$-generated prop expressions, such that $e_1$ and $e_2$ have the same arity for each $(e_1,e_2)\in E$. We refer to $G$ as the set of generators and to $E$ as the set of \emph{equations} in the presentation.%
+\tablefootnote{Elements of $E$, which we call equations, are traditionally called ``relations.'' We think of $(e_1,e_2)\in E$ as standing for the equation $e_1=e_2$, as this will be forced soon.}%
+\index{generators and relations|see {presentation}}
+
+The prop $\cat{G}$ \emph{presented} by the presentation $(G,s,t,E)$ is the prop whose
+morphisms are elements in $\expr(G)$, quotiented by both the equations
+$e_1=e_2$ where $(e_1,e_2) \in E$, and by the axioms of symmetric strict monoidal categories.
+\end{roughDef}
+
+\begin{remark}%
+\label{rem.free_prop_universal_property}%
+\index{universal property}
+Given a presentation $(G,s,t,E)$, it can be shown that the prop $\cat{G}$ has a
+universal property in terms of ``maps out.'' Namely prop functors from $\cat{G}$
+to any other prop $\cat{C}$ are in one-to-one correspondence with functions $f$
+from $G$ to the set of morphisms in $\cat{C}$ such that 
+\begin{itemize}
+\item for all $g \in G$, $f(g)$ is a morphism $s(g) \to t(g)$, and 
+\item for all $(e_1,e_2) \in E$, we have that $f(e_1)=f(e_2)$ in
+$\cat{C}$, where $f(e)$ denotes the morphism in $\cat{C}$ obtained by
+applying $f$ to each generators in the expression $e$, and then composing
+the result in $\cat{C}$. 
+\end{itemize}
+\end{remark}
+
+\begin{exercise}%
+\label{exc.same_free_prop}
+Is it the case that the free prop on generators $(G,s,t)$, defined in \cref{def.free_prop}, is the same thing as the prop presented by $(G,s,t,\varnothing)$, having no relations, as defined in \cref{rdef.presentation_prop}? Or is there a subtle difference somehow?
+\end{exercise}
+
+%
+\index{universal property|)}
+
+
+%-------- Section --------%
+\section{Simplified signal flow graphs}
+
+We now return to signal flow graphs, expressing them in terms of props. We will
+discuss a simplified form without feedback (the only sort we have discussed so
+far), and then extend to the usual form of signal flow graphs in
+\cref{subsec.full_SFGs}. But before we can do that, we must say what we mean by
+signals; this gets us into the algebraic structure of ``rigs.'' We will get to
+signal flow graphs in \cref{subsec.icons_sfgs}.
+
+%---- Subsection ----%
+\subsection{Rigs}%
+\index{rig|(}
+Signals can be amplified, and they can be added. Adding and amplification
+interact via a distributive law, as follows: if we add two signals, and then amplify them by some amount $a$, it should be the same as amplifying the two signals
+separately by $a$, then adding the results. 
+
+We can think of all the possible amplifications as forming a structure called a rig,%
+\footnote{Rigs are also known as \emph{semi-rings}.}
+defined as follows.
+
+\begin{definition}%
+\label{def.rig}%
+\index{rig}
+A \emph{rig} is a tuple $(R,0,+,1,*)$, where $R$ is a set, $0,1\in R$ are elements, and $+,*\colon R
+\times R \to R$ are functions, such that 
+\begin{enumerate}[label=(\alph*)]
+	\item $(R,+,0)$ is a commutative monoid,
+	\item $(R,*,1)$ is a monoid,%
+	\tablefootnote{
+	Note that we did not demand that $(R,*,1)$ be commutative; we will see a naturally-arising example where it is not commutative in \cref{ex.mat_rig}.
+	}
+	and	
+	\item $a*(b+c)=a* b +a* c$ and $(a+b)*c=a*c+b*c$ for all $a,b,c \in R$.
+	\item $a*0=0=0*a$ for all $a\in R$.
+\end{enumerate}
+\end{definition}
+
+We have already encountered many examples of rigs.
+\begin{example}%
+\label{ex.rig_nat}%
+\index{natural numbers!as rig}
+The natural numbers form a rig $(\nn,0,+,1,*)$.
+\end{example}
+
+\begin{example}%
+\index{booleans!as rig}
+The Booleans form a rig $(\bb,\false,\vee,\true,\wedge)$.
+\end{example}
+
+\begin{example}%
+\label{ex.quantale_as_rig}%
+\index{quantale}
+Any quantale $\cat{V}=(V,\leq,I,\otimes)$ determines a rig $(V,0,\vee,I,\otimes)$, where $0=\bigvee\varnothing$ is the empty join. See \cref{def.monoidal_closed}.
+\end{example}
+
+\begin{example}%
+\label{ex.mat_rig}%
+\index{matrices!rig of}%
+\index{rig!matrices as}
+If $R$ is a rig and $n\in\nn$ is any natural number, then the set
+$\Set{Mat}_n(R)$ of $(n\times n)$-matrices in $R$ forms a rig. A matrix
+$M\in\Set{Mat}_n(R)$ is a function $M\colon \ord{n}\times\ord{n} \to R$.
+Addition $M+N$ of matrices is given by $(M+N)(i,j)\coloneqq M(i,j)+N(i,j)$ and multiplication $M*N$ is given by $(M*N)(i,j)\coloneqq\sum_{k\in\ord{n}}M(i,k)*N(k,j)$. The $0$-matrix is $0(i,j)\coloneqq 0$ for all $i,j\in\ord{n}$. Note that $\Set{Mat}_n(R)$ is generally not commutative.
+\end{example}
+
+\begin{exercise}%
+\label{exc.rigs_mats}
+\begin{enumerate}
+	\item We said in \cref{ex.mat_rig} that for any rig $R$, the set $\Set{Mat}_n(R)$ forms a rig. What is its multiplicative identity $1\in\Set{Mat}_n(R)$?
+	\item We also said that $\Set{Mat}_n(R)$ is generally not commutative. Pick an $n$ and show that that $\Set{Mat}_n(\NN)$ is not commutative, where $\NN$ is as in \cref{ex.rig_nat}.
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+The following is an example for readers who are familiar with the algebraic structure known as ``rings.''
+
+\begin{example}%
+\index{rig!vs.\ ring}
+Any ring forms a rig. In particular, the real numbers $(\rr,0,+,1,*)$ are a
+rig. The difference between a ring and rig is that a ring, in addition to
+all the properties of a rig, must also have additive inverses, or
+\emph{negatives}. A common mnemonic is that a rig is a ri\textbf{n}g without
+\textbf{n}egatives.
+\end{example}
+
+%
+\index{rig|)}
+
+%---- Subsection ----%
+\subsection{The iconography of signal flow graphs}%
+\label{subsec.icons_sfgs}
+%
+\index{signal flow graph!simplified}%
+\index{icon|(}
+
+A signal flow graph is supposed to keep track of the amplification, by elements
+of a rig $R$, to which signals are subjected. While not strictly necessary,%
+\footnote{The necessary requirement for the material below to make sense is that
+  the signals take values in an \emph{$R$-module} $M$. We will not discuss this
+here, keeping to the simpler requirement that $M=R$.} we will assume the signals
+themselves are elements of the same rig $R$. We refer to elements of $R$ as
+\emph{signals} for the time being.
+
+Amplification of a signal by some value $a \in R$ is simply depicted like
+so:
+\[\tag{scalar mult.}
+\begin{aligned}
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0,0) {};
+		\node [style=wamp] (1) at (1,0) {$\scriptstyle \textsf{a}$};
+		\node [style=none] (2) at (2,0) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (0.center) to (1);
+		\draw (1) to (2.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+\]
+We interpret the above icon as a depicting a system where a signal enters on the left-hand wire, is multiplied by $a$, and is output on the right-hand wire.
+
+
+What is more interesting than just a single signal amplification, however, is
+the interaction of signals. There are four other important icons in signal flow
+graphs.
+\[
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[spider={1}{0}, fill=black, right=2 of a] (b) {};
+	\node[spider={2}{1}, fill=white, right=2 of b] (c) {};
+	\node[spider={0}{1}, fill=white, right=2 of c] (d) {};
+\end{tikzpicture}
+\]
+Let's go through them one by one. The first two are old friends from
+\cref{chap.resource_theory}: copy and discard.
+\[\tag{copy}
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+We interpret this diagram as taking in an input signal on the left, and
+outputting that same value to both wires on the right. It is basically the
+``copy'' operation from \cref{subsubsec.informatics}.
+
+Next, we have the ability to discard signals.
+\[\tag{discard}
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{0}, fill=black] (b) {};
+	\node at (\leglen,0) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+This takes in any signal, and outputs nothing. It is basically the ``waste'' operation from \cref{subsubsec.manufacturing}.
+
+Next, we have the ability to add signals.
+\[\tag{add, +}
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (c) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+This takes the two input signals and adds them, to produce a single output
+signal.  
+
+Finally, we have the zero signal.
+\[\tag{zero, 0}
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={0}{1}, fill=white] (d) {};
+	\node at (-\leglen,0) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+This has no inputs, but always outputs the $0$ element of the rig.
+
+Using these icons, we can build more complex signal flow graphs.  To compute the
+operation performed by a signal flow graph we simply trace the paths with the
+above interpretations, plugging outputs of one icon into the inputs of the next
+icon.
+
+For example, consider the rig $R =\nn$ from \cref{ex.rig_nat}, where the scalars
+are the natural numbers. Recall the signal flow graph from \cref{eq.examplesfg}
+in the introduction:
+\[
+  \begin{aligned}
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=none] (5) at (-6, 1.5) {};
+		\node [style=wamp] (2) at (-4, 0) {$\scriptstyle 7$};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wamp] (10) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=bdot] (13) at (1.25, 0.5) {};
+		\node [style=wamp] (16) at (1.25, 2) {$\scriptstyle 3$};
+		\node [style=none] (12) at (2.25, 1) {};
+		\node [style=wamp] (14) at (2.25, -0) {$\scriptstyle 2$};
+		\node [style=wdot] (21) at (3.25, 0.5) {};
+		\node [style=none] (17) at (5, 2) {};
+		\node [style=none] (20) at (5, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	\begin{scope}[font=\footnotesize]
+		\draw (0.center) to (2);
+		\draw (2) to (18.center);
+		\draw [bend right, looseness=1] (18.center) to (8);
+		\draw [bend right, looseness=1] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to (5);
+		\draw [bend left, looseness=1.00] (6) to (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to (17.center);
+		\draw [bend right, looseness=1.00] (12.center) to  (13);
+		\draw (8) to (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw [bend right, looseness=1.00] (14.center) to (21);
+		\draw [bend left, looseness=1.00] (12.center) to (21);
+		\draw (21) to (20.center);
+	\end{scope}
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\]
+As we explained, this takes in two input signals $x$ and $y$, and returns two
+output signals $a=15x$ and $b=3x+21y$.
+
+In addition to tracing the processing of the values as they move forward through
+the graph, we can also calculate these values by summing over paths. More
+explicitly, to get the contribution of a given input wire to a given output
+wire, we take the sum, over all paths $p$ joining the wires, of the total amplification along that
+path.
+
+So, for example, there is one path from the top input to the top output.
+On this path, the signal is first copied, which does not affect its value, then
+amplified by 5, and finally amplified by 3. Thus, if $x$ is the first input
+signal, then this contributes $15x$ to the first output. Since there is no path
+from the bottom input to the top output (one is not allowed to traverse paths
+backwards), the signal at the first output is exactly $15x$. Both inputs contribute to the bottom output. In fact, each input contributes in
+two ways, as there are two paths to it from each input. The top input thus
+contributes $3x=x+2x$, whereas the bottom input, passing through an additional
+$\ast 7$ amplification, contributes $21y$.
+
+\begin{exercise}%
+\label{exc.a_signal_flow_graph}
+  The following flow graph   takes in two natural numbers $x$ and $y$
+\[
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=bdot] (1) at (-5, -0) {};
+		\node [style=wamp] (2) at (-4, 0.5) {$\scriptstyle 3$};
+		\node [style=none] (3) at (-4, -0.5) {};
+		\node [style=wdot] (4) at (-3, -0) {};
+		\node [style=none] (5) at (-6, 1.5) {};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wamp] (10) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (11) at (2.25, 1.5) {};
+		\node [style=none] (12) at (1.25, 1) {};
+		\node [style=bdot] (13) at (0.25, 0.5) {};
+		\node [style=none] (14) at (1.25, -0) {};
+		\node [style=none] (15) at (3, -0) {};
+		\node [style=wamp] (16) at (0.5, 2) {$\scriptstyle {3}$};
+		\node [style=none] (17) at (1.25, 2) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=none] (19) at (3, 1.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (0.center) to (1);
+		\draw [bend left, looseness=1.00] (1) to (2.center);
+		\draw [bend right, looseness=1.00] (1) to (3.center);
+		\draw [bend left, looseness=1.00] (2.center) to (4);
+		\draw [bend right, looseness=1.00] (3.center) to (4);
+		\draw (4) to (18.center);
+		\draw [bend right, looseness=1.00] (18.center) to (8);
+		\draw [bend right, looseness=1.00] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to (5);
+		\draw [bend left, looseness=1.00] (6) to (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to (17.center);
+		\draw [bend left, looseness=1.00] (17.center) to (11);
+		\draw [bend left, looseness=1.00] (11) to (12.center);
+		\draw (11) to (19);
+		\draw [bend right, looseness=1.00] (12.center) to (13);
+		\draw (8) to (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw (14.center) to (15.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+  and produces two output signals. What are they?
+\end{exercise}
+
+\begin{example}%
+\index{differential equation}
+This example is for those who have some familiarity with differential equations. A linear system of differential equations provides a simple way to specify the movement of a particle. For example, consider a particle whose position $(x,y,z)$ in $3$-dimensional space is determined by the following equations:
+\begin{align*}
+	\dot{x}+3\ddot{y}-2z=0\\
+	\ddot{y}+5\dot{z}=0
+\end{align*}
+Using what is known as the Laplace transform, one can convert this into a linear system involving a formal variable $D$, which stands for ``differentiate.'' Then the system becomes
+\begin{align*}
+	Dx+3D^2y-2z=0\\
+	D^2y+5Dz=0
+\end{align*}
+which can be represented by the signal flow graph
+\[
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, 0.25) {};
+		\node [style=bdot] (1) at (-5.25, 0.25) {};
+		\node [style=none] (2) at (-4.25, -0.25) {};
+		\node [style=none] (3) at (-4.25, 0.75) {};
+		\node [style=wdot] (4) at (-1.25, 1.25) {};
+		\node [style=none] (5) at (-2.25, 0.75) {};
+		\node [style=none] (6) at (-2.25, 1.75) {};
+		\node [style=none] (7) at (-4.25, -1.75) {};
+		\node [style=none] (8) at (-6, -1.25) {};
+		\node [style=none] (9) at (-4.25, -0.75) {};
+		\node [style=bdot] (10) at (-5.25, -1.25) {};
+		\node [style=wamp] (11) at (-3, 1.75) {$\scriptstyle {D}$};
+		\node [style=none] (12) at (-1, -1.75) {};
+		\node [style=wdot] (13) at (0, -1.25) {};
+		\node [style=none] (14) at (-1, -0.75) {};
+		\node [style=none] (15) at (0.75, -1.25) {};
+		\node [style=none] (16) at (-1, -0) {};
+		\node [style=wdot] (17) at (0, 0.75) {};
+		\node [style=none] (18) at (-1, 1.25) {};
+		\node [style=none] (19) at (0.75, 0.75) {};
+		\node [style=none] (20) at (-6, 1.75) {};
+		\node [style=wamp] (21) at (-3, -0) {$\scriptstyle {-2}$};
+		\node [style=wamp] (22) at (-3, -0.75) {$\scriptstyle {D^2}$};
+		\node [style=wamp] (23) at (-3, -1.75) {$\scriptstyle {5D}$};
+		\node [style=wamp] (24) at (-3, 0.75) {$\scriptstyle {3D^2}$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (1) to (0.center);
+		\draw [bend left, looseness=1.00] (1) to (3.center);
+		\draw [bend left, looseness=1.00] (6.center) to (4);
+		\draw [bend left, looseness=1.00] (4) to (5.center);
+		\draw [bend left, looseness=1.00] (2.center) to (1);
+		\draw (10) to (8.center);
+		\draw [bend left, looseness=1.00] (10) to (9.center);
+		\draw [bend left, looseness=1.00] (7.center) to (10);
+		\draw [bend left, looseness=1.00] (14.center) to (13);
+		\draw [bend left, looseness=1.00] (13) to (12.center);
+		\draw (13) to (15.center);
+		\draw [bend left, looseness=1.00] (18.center) to (17);
+		\draw [bend left, looseness=1.00] (17) to (16.center);
+		\draw (17) to (19.center);
+		\draw (4) to (18.center);
+		\draw (20.center) to (11);
+		\draw (11) to (6.center);
+		\draw (3.center) to (24);
+		\draw (24) to (5.center);
+		\draw [in=180, out=0, looseness=1.25] (2.center) to (22);
+		\draw [in=180, out=15, looseness=1.25] (9.center) to (21);
+		\draw (21) to (16.center);
+		\draw (22) to (14.center);
+		\draw (7.center) to (23);
+		\draw (23) to (12.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\qedhere
+\]
+\end{example}
+
+\paragraph{Signal flow graphs as morphisms in a free prop.}%
+\index{signal flow graph!as morphism}
+
+We can formally define simplified signal flow graphs using props.
+
+\begin{definition}%
+\label{def.sig_flow_graph_gens}
+Let $R$ be a rig (see \cref{def.rig}). Consider the set 
+\[
+G_R := \left\{\add{.05\textwidth}, \zero{.05\textwidth},\comult{.05\textwidth},
+\counit{.05\textwidth}\right\} \cup \left\{\scalar{.07\textwidth} \mid a \in R\right\},
+\]
+and let $s,t\colon G_R \to \nn$ be given by the number of dangling wires on the
+left and right of the generator icon respectively.  A \emph{simplified signal flow graph}
+is a morphism in the free prop $\free(G_R)$ on this set $G_R$ of generators. We
+define $\sfg_R\coloneq \free(G_R)$.
+\end{definition}
+
+For now we'll drop the term `simplified', since these are the only sort of
+signal flow graph we know. We'll return to signal flow graphs in their full
+glory---i.e.\ including feedback---in \cref{subsec.full_SFGs}.
+
+\begin{example}
+To be more in line with our representations of both wiring diagrams and port
+graphs, morphisms in $\free(G_R)$ should be drawn slightly differently. For example, technically the signal flow graph from
+\cref{exc.a_signal_flow_graph} should be drawn as follows:
+\[
+\begin{tikzpicture}[oriented WD, spider diagram, bbx=3ex, bby=2ex]
+	\node[spider={1}{2}, fill=black] (black1) {};
+	\node[bb={0}{0}, fit=(black1)] (black1outer) {};
+	\node[spider={2}{1}, fill=white, right=6 of black1] (white1) {};
+	\node[bb={0}{0}, fit=(white1)] (white1outer) {};
+	\node at ($(black1_out1)!.5!(white1_in1)$) (helper1) {};
+	\node[spider={1}{1}, wamp] at (helper1) (scalar1) {$3$};
+	\node[bby=.75ex, bbx=2ex, bb={0}{0}, fit=(scalar1)] (scalar1outer) {};
+	\node[spider={1}{2}, fill=black, above=4.5 of white1] (black2) {}; 
+	\node[bb={0}{0}, fit=(black2)] (black2outer) {};
+	\node[spider={2}{1}, fill=white, right=6 of scalar1] (white2) {};
+	\node[bb={0}{0}, fit=(white2)] (white2outer) {};
+	\node at (black2_out1-|white2) (helper2) {};
+	\node[spider={1}{1}, wamp] at (helper2) (scalar2) {$5$};
+	\node[bby=.75ex, bbx=2ex, bb={0}{0}, fit=(scalar2)] (scalar2outer) {};
+	\node[spider={1}{1}, wamp, right=2 of scalar2] (scalar3) {$3$};
+	\node[bby=.75ex, bbx=2ex, bb={0}{0}, fit=(scalar3)] (scalar3outer) {};
+	\node[spider={1}{2}, fill=black, right=2.5 of white2] (black3) {};
+	\node[bb={0}{0}, fit=(black3)] (black3outer) {};
+	\node[spider={2}{1}, fill=white, below right=.3 and 3 of scalar3] (white3) {};
+	\node[bb={0}{0}, fit=(white3)] (white3outer) {};
+	\node[bb={0}{0}, fit=(black1outer) (scalar3outer) (white3outer)] (outer) {};
+%
+	\draw (outer.west|-black1_in1) to (black1_in1);
+	\draw (outer.west|-black2_in1) to (black2_in1);
+	\draw (black1_out1) to (scalar1_in1);
+	\draw (black1_out2) to (white1_in2);
+	\draw (scalar1_out1) to (white1_in1);
+	\draw (black2_out1) to (scalar2_in1);
+	\draw (black2_out2) to (white2_in1);
+	\draw (white1_out1) to (white2_in2);
+	\draw (scalar2_out1) to (scalar3_in1);
+	\draw (scalar3_out1) to (white3_in1);
+	\draw (white2_out1) to (black3_in1);
+	\draw (black3_out1) to (white3_in2);
+	\draw (black3_out2) to (black3_out2-|outer.east);
+	\draw (white3_out1) to (white3_out1-|outer.east);
+\end{tikzpicture}
+\]
+because we said we would label boxes with the elements of $G$. But it is easier on the eye to draw remove the boxes and just look at the icons inside as in \cref{exc.a_signal_flow_graph},
+and so we'll draw our diagrams in that fashion.
+\end{example}
+%
+\index{icon|)}
+
+More importantly, props provide language to understand the semantics of
+signal flow graphs. Although the signal flow graphs themselves are free props,
+their semantics---their meaning in our model of signals flowing---will arise
+when we add equations to our props, as in \cref{rdef.presentation_prop}. These
+equations will tell us when two signal flow graphs act the same way on signals.%
+\index{signal flow graph!semantics of}
+For example,
+  \begin{equation}%
+\label{eqn.equivalence.rand89}
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out1] (b) {};
+	\draw (a_out1) to (b_in1);
+	\draw (a_out2) to (b_out1|-a_out2);
+\end{tikzpicture}
+\end{aligned}
+    \qquad
+    \mbox{and}\qquad
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out2] (b) {};
+	\draw (a_out2) to (b_in1);
+	\draw (a_out1) to (b_out1|-a_out1);
+\end{tikzpicture}
+\end{aligned}
+  \end{equation}
+both express the same behavior: a single input signal is copied twice so that
+three identical copies of the input signal are output.
+
+If two signal flow graphs $S,T$ are almost the same, with the one exception
+being that somewhere we replace the left-hand side of
+\cref{eqn.equivalence.rand89} with the right-hand side, then $S$ and $T$ have
+the same behavior. But there are other replacements we could make to a signal
+flow graph that do not change its behavior. Our next goal is to find a complete
+description of these replacements.
+
+%---- Subsection ----%
+\subsection{The prop of matrices over a rig}%
+\index{rig!matrices over}
+Signal flow graphs are closely related to matrices. In previous chapters we showed how a
+matrix with values in a quantale $\cat{V}$---a closed monoidal preorder with all
+joins---represents a system of interrelated points and connections between
+them, such as a profunctor.  The quantale gave us the structure and axioms we
+needed in order for matrix multiplication to work properly. But we know from
+\cref{ex.quantale_as_rig} that quantales are examples of rigs, and in fact
+matrix multiplication makes sense in any rig $R$. In \cref{ex.mat_rig}, we
+explained that the set $\Set{Mat}_n(R)$ of $(n\times n)$-matrices in $R$ can
+naturally be assembled into a rig, for any fixed choice of $n\in\nn$. But what
+if we want to do better, and assemble \emph{all} matrices into a single
+algebraic structure? The result is a prop!
+
+An \emph{$(m\times n)$-matrix $M$ with values in $R$} is a function
+$M\colon(\ord{m}\times\ord{n}) \to R$.  Given an $(m\times n)$-matrix $M$ and an $(n
+\times p)$-matrix $N$, their \emph{composite} is the $(m\times p)$-matrix $M\cp N$
+defined as follows for any $a \in \ord{m}$ and $c \in \ord{p}$:
+\begin{equation}%
+\label{eqn.matrix_mult_again}
+  M\cp N(a,c) \coloneqq \sum_{b \in \ord{n}} M(a,b)\times N(b,c),
+\end{equation}
+Here the $\sum_{b\in \ord{n}}$ just
+means repeated addition (using the rig $R$'s $+$ operation), as usual.
+
+\begin{remark}
+Conventionally, one generally considers a matrix $A$ acting on a vector $v$ by multiplication in the order $Av$, where $v$ is a column vector. In keeping with our composition convention, we use the opposite order, $v\cp A$, where $v$ is a row vector. See for example \cref{eqn.gens_as_matrices} for when this is implicitly used.
+\end{remark}%
+\index{vector}
+
+\begin{definition}%
+\label{def.prop_matrices}%
+\index{prop!of matrices}
+  Let $R$ be a rig. We define the \emph{prop of $R$-matrices}, denoted $\mat(R)$,
+  to be the prop whose morphisms $m\to n$ are the $(m\times n)$-matrices
+  with values in $R$. Composition of morphisms is given
+  by matrix multiplication as in \cref{eqn.matrix_mult_again}. The monoidal product is given by the direct sum of
+  matrices: given matrices $A\colon m \to n$ and $b\colon p \to q$, we define
+  $A+B\colon m+p \to n+q$ to be the block matrix
+  \[
+  \begin{pmatrix}
+  A & 0 \\
+  0 & B
+  \end{pmatrix}
+  \]
+  where each $0$ represents a matrix of zeros of the appropriate dimension ($m\times q$ and $n\times p$). We refer to any combination of multiplication and direct sum as a \emph{interconnection} of matrices.
+\end{definition}
+
+\begin{exercise}%
+\label{exc.monoidal_mat_prod}
+Let $A$ and $B$ be the following matrices with values in $\NN$:
+\[
+A=\left(
+\begin{array}{ccc}
+	3&3&1\\
+	2&0&4
+\end{array}
+\right)
+\hspace{1in}
+B=\left(
+\begin{array}{cccc}
+	2&5&6&1\\
+\end{array}
+\right).
+\]
+What is the direct sum matrix $A+B$?
+\end{exercise}
+
+
+%---- Subsection ----%
+\subsection{Turning signal flow graphs into matrices}%
+\index{matrix!associated to a signal flow graph|(}
+Let's now consider more carefully what we mean when we talk about the meaning, or \emph{semantics},
+of each signal flow graph. We'll use matrices.
+\[
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=none] (5) at (-6, 1.5) {};
+		\node [style=wamp] (2) at (-4, 0) {$\scriptstyle 7$};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wamp] (10) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=bdot] (13) at (1.25, 0.5) {};
+		\node [style=wamp] (16) at (1.25, 2) {$\scriptstyle 3$};
+		\node [style=none] (12) at (2.25, 1) {};
+		\node [style=wamp] (14) at (2.25, -0) {$\scriptstyle 2$};
+		\node [style=wdot] (21) at (3.25, 0.5) {};
+		\node [style=none] (17) at (5, 2) {};
+		\node [style=none] (20) at (5, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+	\begin{scope}[font=\footnotesize]
+		\draw (0.center) to (2);
+		\draw (2) to (18.center);
+		\draw [bend right, looseness=1] (18.center) to (8);
+		\draw [bend right, looseness=1] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to (5);
+		\draw [bend left, looseness=1.00] (6) to (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to (17.center);
+		\draw [bend right, looseness=1.00] (12.center) to  (13);
+		\draw (8) to (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw [bend right, looseness=1.00] (14.center) to (21);
+		\draw [bend left, looseness=1.00] (12.center) to (21);
+		\draw (21) to (20.center);
+	\end{scope}
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+In the examples like the above (copied from \cref{eq.examplesfg}), the signals emanating from output wires, say $a$ and $b$, are given by certain sums of
+amplified input values, say $x$ and $y$. If we can only measure the input and output signals, and
+care nothing for what happens in between, then each signal flow graph may as
+well be reduced to a matrix of amplifications. We can represent the signal flow graph of \cref{eq.examplesfg} by either the matrix on the left (for more detail) or the matrix on the right if the labels are clear from context:
+\[
+  \begin{array}{c|cc}
+    &a&b\\\hline
+    x & 15 & 3\\
+    y & 0 & 21\\
+  \end{array}
+\hspace{1in}
+  \begin{pmatrix}
+    15 & 3 \\ 
+    0 & 21
+  \end{pmatrix}
+\]
+
+\paragraph{Every signal flow graph can be interpreted as a matrix.}
+
+The generators $G_R$ from \cref{def.sig_flow_graph_gens} are shown again in the table below, where each is interpreted as a matrix. For example, we interpret amplification by $a \in R$ as the
+$1\times 1$ matrix $(a)\colon 1 \to 1$: it is an operation that takes an input
+$x\in R$ and returns $a*x$.  Similarly, we can interpret $\add{1.2em}$ as the $2\times 1$ matrix $\left(\begin{smallmatrix} 1\\1\end{smallmatrix}\right)$: it is an operation that takes a row vector consisting of two
+inputs, $x$ and $y$, and returns $x+y$.  Here is a table showing the
+interpretation of each generator.%
+\index{vector}
+
+\begin{equation}%
+\label{eqn.gens_as_matrices}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{c|c|c|c}
+  generator & 
+  icon & 
+  matrix & 
+  arity 
+\\\hline
+  amplify by $a \in R$ & 
+  $\scalar{.07\textwidth}$  & \renewcommand{\arraystretch}{.9}
+  $\begin{pmatrix} a\end{pmatrix}$ &
+  $1 \to 1$
+\\
+  add & 
+  $\add{2em}$ & 
+  \renewcommand{\arraystretch}{.9} 
+  $\begin{pmatrix} 1 \\ 1 \end{pmatrix}$ & 
+  $2 \to 1$
+\\
+  zero & 
+  $\zero{2em}$ & 
+  $()$ &
+  $0 \to 1$
+\\
+  copy & 
+  $\comult{2em}$ &
+  \renewcommand{\arraystretch}{.9} 
+  $\begin{pmatrix} 1 & 1 \end{pmatrix}$ &
+  $1 \to 2$
+\\
+  discard &  
+  $\counit{2em}$ &
+  $()$ &
+  $1 \to 0$
+\end{tabular}
+\end{equation}
+Note that both zero and discard are represented by empty matrices, but of
+differing dimensions. In linear algebra it is unusual to consider matrices of
+the form $0\times n$ or $n\times 0$ for various $n$ to be different, but they can be kept distinct for bookkeeping purposes: you can multiply a $0\times 3$ matrix by a $3\times n$ matrix for any
+$n$, but you can not multiply it by a $2\times n$ matrix.
+
+
+Since signal flow graphs are morphisms in a free prop, the table in
+\eqref{eqn.gens_as_matrices} is enough to show that we can
+interpret any signal flow diagram as a matrix.
+
+\begin{theorem}%
+\label{thm.sfg_to_mat}
+There is a prop functor $S\colon \sfg_R \to \mat(R)$ that sends the generators $g\in G$
+icons to the matrices as described in Table \ref{eqn.gens_as_matrices}.
+\end{theorem}
+\begin{proof}
+This follows immediately from the universal property of free props, \cref{rem.free_prop_universal_property}.
+\end{proof}
+
+We have now constructed a matrix $S(g)$ from any signal flow graph $g$. But how can we produce this matrix explicitly? Both for the example signal flow graph in \cref{eq.examplesfg}
+and for the generators in \cref{def.sig_flow_graph_gens}, the associated matrix
+has dimension $m\times n$, where $m$ is the number of inputs and $n$ the number of outputs,
+with $(i,j)$th entry describing the amplification of the $i$th input that
+contributes to the $j$th output. This is how one would hope or expect the
+functor $S$ to work in general; but does it? We have used a big hammer---the
+universal property of free constructions---to obtain our functor $S$. Our next
+goal is to check that it works in the expected way. Doing so is a matter of
+using induction over the set of prop expressions, as we now see.%
+\footnote{Mathematical induction is a formal proof technique that can be thought of like a domino rally: if you knock over all the starting dominoes, and you're sure that each domino will be knocked down if its predecessors are, then you're sure every domino will eventually fall. If you want more rigor, or you want to understand the proof of \cref{prop.Simages} as a genuine case of induction, ask a friendly neighborhood mathematician!}%
+\index{induction}
+
+\begin{proposition} %
+\label{prop.Simages}
+  Let $g$ be a signal flow graph with $m$ inputs and $n$ outputs. The matrix
+  $S(g)$ is the $(m\times n)$-matrix whose $(i,j)$-entry describes the
+  amplification of the $i$th input that contributes to the $j$th output.
+\end{proposition}
+\begin{proof}
+  Recall from \cref{def.prop_expressions} that an arbitrary $G_R$-generated prop expression is built from the morphisms
+  $\id_0\colon 0 \to 0$, $\id_1\colon 1 \to 1$, $\sigma\colon 2 \to
+  2$, and the generators in $G_R$, using the following two rules:
+  \begin{itemize}
+    \item if $\alpha\colon m \to n$ and $\beta\colon p \to q$ are expressions, then
+      $(\alpha+\beta)\colon (m+p) \to (n+q)$ is an expression.
+    \item if $\alpha\colon m \to n$ and $\beta\colon n \to p$ are expressions, then
+      $\alpha\cp\beta\colon m \to p$ is an expression.
+  \end{itemize}
+  $S$ is a prop functor by \cref{thm.sfg_to_mat}, which by \cref{def.prop_functor}
+  must preserve identities, compositions, monoidal products, and symmetries.
+  We first show that the proposition is true when $g$ is equal
+  to $\id_0$, $\id_1$, and $\sigma$.
+  
+  The empty
+  signal flow graph $\id_0\colon 0 \to 0$ must be sent to the unique (empty) matrix
+  $()\colon 0 \to 0$. The morphisms $\id_1$, $\sigma$, and $a\in R$ map to the identity matrix, the swap matrix, and the scalar matrix $(a)$ respectively:%
+\index{identity!matrix}
+  \[
+    \idone{.08\textwidth}\;\mapsto\; \begin{pmatrix}1\end{pmatrix}
+    \qquad\text{and}\qquad
+    \swap{.06\textwidth}\;\mapsto\; \begin{pmatrix}0 & 1 \\ 1 & 0\end{pmatrix}
+    \qquad\text{and}\qquad
+    \scalar{3em}  \;\mapsto\; \begin{pmatrix}a\end{pmatrix}   
+  \]
+ In each case, the $(i,j)$-entry gives the amplification of the $i$th input to the $j$th output.
+ 
+ It remains to show that if the proposition holds for
+  $\alpha\colon m \to n$ and $\beta\colon p \to q$, then it holds for
+  (i) $\alpha\cp\beta$ (when $n=p$) and for (ii) $\alpha+\beta$ (in general).
+
+  To prove (i), consider the following picture of $\alpha\cp\beta$:
+\[
+  \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1]
+	\node[bb={5}{4}, minimum width = 2cm] (X) {$\alpha$};
+	\node[bb={4}{5}, right= 1 of X, minimum width = 2cm] (Y) {$\beta$};
+	\draw ($(X_in1)-(.2,0)$) to (X_in1);
+	\draw ($(X_in2)-(.2,0)$) to (X_in2);
+	\draw ($(X_in5)-(.2,0)$) to (X_in5);
+	\draw (X_out1) to (Y_in1);
+	\draw (X_out2) to (Y_in2);
+	\draw (X_out4) to (Y_in4);
+	\draw (Y_out1) to ($(Y_out1)+(.2,0)$);
+	\draw (Y_out2) to ($(Y_out2)+(.2,0)$);
+	\draw (Y_out5) to ($(Y_out5)+(.2,0)$);
+	\draw[label]
+		node at ($.5*(X_out3)+.5*(Y_in3)+(0,3pt)$) {$\vdots$}
+		node[left=3pt of X_in3] {$\vdots$}
+		node[left=12pt of X_in3] {\scriptsize $m$ inputs}
+		node[right=3pt of Y_out3] {$\vdots$}
+		node[right=12pt of Y_out3] {\scriptsize $q$ outputs}
+	;	
+\end{tikzpicture}
+\]
+Here $\alpha\colon m \to n$ and $\beta\colon n \to q$ are signal flow graphs,
+assumed to obey the proposition. Consider the $i$th input and $k$th output of
+$\alpha\cp\beta$; we'll just call these $i$ and $k$.  We want to show that the amplification that $i$
+contributes to $k$ is the sum---over all paths from $i$ to
+$k$---of the amplification along that path. So let's also fix some $j \in \ord{n}$, and consider paths from $i$ to $k$
+that run through $j$. By distributivity of the rig $R$, the total amplification from $i$ to $k$ through $j$
+is the total amplification over all paths from $i$ to $j$ times the total
+amplication over all paths from $j$ to $k$. Since all paths from $i$ to $k$ must
+run through some $j$th output of $\alpha$/input of $\beta$, the amplification
+that $i$ contributes to $k$ is
+\[
+  \sum_{j \in \ord{n}} \alpha(i,j)\ast\beta(j,k).
+\]
+This is exactly the formula for matrix multiplication, which is composition $S(\alpha)\cp S(\beta)$ in the prop $\mat(R)$; see \cref{def.prop_matrices}. So $\alpha\cp\beta$ obeys
+the proposition when $\alpha$ and $\beta$ do.
+ 
+
+  Proving (ii) is more straightforward. The monoidal product $\alpha+\beta$ of signal flow graphs looks
+  like this:
+\[
+  \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1]
+	\node[bb={5}{5}, minimum width = 2cm] (X) {$\alpha$};
+	\node[bb={5}{5}, below= 1 of X, minimum width = 2cm] (Y) {$\beta$};
+	\draw ($(X_in1)-(.2,0)$) to (X_in1);
+	\draw ($(X_in2)-(.2,0)$) to (X_in2);
+	\draw ($(X_in5)-(.2,0)$) to (X_in5);
+	\draw (X_out1) to ($(X_out1)+(.2,0)$);
+	\draw (X_out2) to ($(X_out2)+(.2,0)$);
+	\draw (X_out5) to ($(X_out5)+(.2,0)$);
+	\draw ($(Y_in1)-(.2,0)$) to (Y_in1);
+	\draw ($(Y_in2)-(.2,0)$) to (Y_in2);
+	\draw ($(Y_in5)-(.2,0)$) to (Y_in5);
+	\draw (Y_out1) to ($(Y_out1)+(.2,0)$);
+	\draw (Y_out2) to ($(Y_out2)+(.2,0)$);
+	\draw (Y_out5) to ($(Y_out5)+(.2,0)$);
+	\draw[label]
+		node[left=3pt of X_in3] {$\vdots$}
+		node[left=12pt of X_in3] {\scriptsize $m$ inputs}
+		node[right=3pt of X_out3] {$\vdots$}
+		node[right=12pt of X_out3] {\scriptsize $n$ outputs}
+		node[left=3pt of Y_in3] {$\vdots$}
+		node[left=12pt of Y_in3] {\scriptsize $p$ inputs}
+		node[right=3pt of Y_out3] {$\vdots$}
+		node[right=12pt of Y_out3] {\scriptsize $q$ outputs}
+	;	
+\end{tikzpicture}
+\]
+No new paths are created; the only change is to reindex the inputs and outputs.
+In particular, the $i$th input of $\alpha$ is the $i$th input of $\alpha+\beta$,
+the $j$th output of $\alpha$ is the $j$th output of $\alpha+\beta$, the $i$th
+input of $\beta$ is the $(m+i)$th output of $\alpha+\beta$, and the $j$th output
+of $\beta$ is the $(n+j)$th output of $\alpha+\beta$. This means that the matrix
+with $(i,j)$th entry describing the amplification of the $i$th input that
+contributes to the $j$th output is $S(\alpha)+S(\beta)=S(\alpha+\beta)$, as in \cref{def.prop_matrices}. This proves the proposition.
+\end{proof}
+
+\begin{exercise}%
+\label{exc.sig_flow_mats}
+\begin{enumerate}
+	\item  What matrix does the signal flow graph
+  \[
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out1] (b) {};
+	\draw (a_out1) to (b_in1);
+	\draw (a_out2) to (b_out1|-a_out2);
+\end{tikzpicture}
+\end{aligned}
+  \]
+  represent?
+  \item What about the signal flow graph
+  \[
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out2] (b) {};
+	\draw (a_out2) to (b_in1);
+	\draw (a_out1) to (b_out1|-a_out1);
+\end{tikzpicture}
+\end{aligned}
+  \]
+  \item Are they equal?
+\qedhere
+\end{enumerate}
+\end{exercise}
+%
+\index{matrix!associated to a signal flow graph|)}
+
+\subsection{The idea of functorial semantics} %
+\index{functorial semantics}
+
+Let's pause for a moment to reflect on what we have just learned. First, signal
+flow diagrams are the morphisms in a prop. This means we have two special
+operations we can do to form new signal flow diagrams from old, namely
+composition (combining in series) and monoidal product (combining in parallel). We might think of this as
+specifying a `grammar' or `syntax' for signal flow diagrams. 
+
+As a language, signal flow graphs have not only syntax but also semantics: each signal flow diagram can be interpreted as a matrix. Moreover, matrices have the same grammatical structure:
+they form a prop, and we can construct new matrices from old using composition
+and monoidal product. In \cref{thm.sfg_to_mat} we completed this
+picture by showing that semantic interpretation is a prop functor between the
+prop of signal flow graphs and the prop of matrices. Thus we say that matrices
+give \emph{functorial semantics} for signal flow diagrams.
+
+Functorial semantics is a key manifestation of compositionality. It says that
+the matrix meaning $S(g)$ for a big signal flow graph $g$ can be computed by:
+\begin{enumerate}
+	\item splitting $g$ up into little pieces,
+	\item computing the very simple matrices for each piece, and
+	\item using matrix multiplication and direct sum to put the pieces back together to obtain the desired meaning, $S(g)$.
+\end{enumerate}
+This functoriality is useful in practice, for example in
+speeding up computation of the semantics of signal flow graphs: for large signal
+flow graphs, composing matrices is much faster than tracing paths.
+
+%-------- Section --------%
+\section{Graphical linear algebra}
+
+In this section we will begin to develop something called graphical linear
+algebra, which extends the ideas above. This formalism is actually quite
+powerful. For example, with it we can easily and \emph{graphically} prove
+certain conjectures from control theory that, although they were eventually
+solved, required fairly elaborate matrix algebra arguments
+\cite{Fong.Sobocinski.Rapisardo:2016a}.
+
+%---- Subsection ----%
+\subsection{A presentation of $\mat(R)$}%
+\index{presentation!of linear algebra}
+
+Let $R$ be a rig, as defined in \cref{def.rig}. The main theorem of the previous section, \cref{thm.sfg_to_mat}, provided a functor $S\colon \sfg_R \to \mat(R)$ that converts any signal flow graph into a matrix. Next we show that $S$ is ``full'': that any matrix can be represented by a signal flow graph. 
+
+\begin{proposition} %
+\label{prop.Sfull}
+Given any matrix $M \in \mat(R)$, there exists a signal flow graph $g \in \sfg_R$
+such that such that $S(g)=M$.
+\end{proposition}
+\begin{proof}[Proof sketch]
+Let $M \in \mat(R)$ be an $(m \times n)$-matrix. We want a signal flow
+graph $g$ such that $S(g)=M$.  In particular, to compute
+$S(g)(i,j)$, we know that we can simply compute the amplification that the $i$th
+input contributes to the $j$th output. The key idea then is to construct $g$ so that there is exactly one path from
+$i$th input to the $j$th output, and that this path has
+exactly one scalar multiplication icon, namely $M(i,j)$.
+
+The general construction is a little technical (see
+\cref{exc.general_case_S_full}), but the idea is clear from just considering the
+case of $2 \times 2$-matrices. Suppose $M$ is the $2\times2$-matrix
+$(\begin{smallmatrix} a & b \\ c & d \end{smallmatrix})$. Then we define $g$ to
+be the signal flow graph
+\begin{equation}%
+\label{eqn.two_by_two}
+\begin{tikzpicture}[scale=.8]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-2, 0.75) {};
+		\node [style=bdot] (1) at (-1, 0.75) {};
+		\node [style=none] (2) at (0, 1.25) {};
+		\node [style=none] (3) at (0, 0.25) {};
+		\node [style=none] (4) at (0, -1.25) {};
+		\node [style=none] (5) at (0, -0.25) {};
+		\node [style=bdot] (6) at (-1, -0.75) {};
+		\node [style=none] (7) at (-2, -0.75) {};
+		\node [style=none] (8) at (1.1, 0.2) {};
+		\node [style=wdot] (9) at (1.5, -0.75) {};
+		\node [style=wdot] (10) at (1.5, 0.75) {};
+		\node [style=none] (11) at (2.5, -0.75) {};
+		\node [style=none] (12) at (2.5, 0.75) {};
+		\node [style=none] (13) at (1.1, -0.2) {};
+		\node [style=none] (14) at (0.5, 1.25) {};
+		\node [style=none] (15) at (0.5, -1.25) {};
+		\node [style=wamp] (16) at (0.25, 1.25) {\scriptsize$\mathsf a$};
+		\node [style=wamp] (17) at (0.25, 0.25) {\scriptsize$\mathsf b$};
+		\node [style=wamp] (18) at (0.25, -0.25) {\scriptsize$\mathsf c$};
+		\node [style=wamp] (19) at (0.25, -1.25) {\scriptsize$\mathsf d$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (0.center) to (1);
+		\draw [bend left, looseness=1.00] (1) to (2.center);
+		\draw [bend right, looseness=1.00] (1) to (3.center);
+		\draw (7.center) to (6);
+		\draw [bend left, looseness=1.00] (6) to (5.center);
+		\draw [bend right, looseness=1.00] (6) to (4.center);
+		\draw [bend left, looseness=1.00] (14.center) to (10);
+		\draw [bend right, looseness=1.00] (8.center) to (10);
+		\draw (10) to (12.center);
+		\draw [bend left, looseness=1.00] (13.center) to (9);
+		\draw [bend right, looseness=1.00] (15.center) to (9);
+		\draw (9) to (11.center);
+		\draw (5.center) to (18);
+		\draw (4.center) to (19);
+		\draw (3.center) to (17);
+		\draw [in=180, out=-10, looseness=1.30] (17) to (13.center);
+		\draw (2.center) to (16);
+		\draw (16) to (14.center);
+		\draw (19) to (15.center);
+		\draw [in=180, out=10, looseness=1.30] (18) to (8.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{equation}
+Tracing paths, it is easy to see that $S(g)=M$. Note that $g$ is the composite
+of four layers, each layer respectively a monoidal product of (i) copy and discard maps,
+(ii) scalar multiplications, (iii) swaps and identities, (iv) addition and zero maps.
+
+For the general case, see \cref{exc.general_case_S_full}.
+\end{proof}
+
+\begin{exercise} %
+\label{ex.drawsfgs}
+  Draw signal flow graphs that represent the following matrices:\\
+  \begin{enumerate*}[itemjoin=\hspace{1in}]
+  \item[] \hspace{-.2in}
+    \item $
+      \begin{pmatrix}
+	0\\ 
+	1 \\
+	2
+      \end{pmatrix}$
+    \item $
+      \begin{pmatrix}
+	0 & 0 \\ 
+	0 & 0
+      \end{pmatrix}$
+    \item $
+      \begin{pmatrix}
+	1 & 2 & 3\\ 
+	4 & 5 & 6
+      \end{pmatrix}$
+  \end{enumerate*}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.general_case_S_full}
+Write down a detailed proof of \cref{prop.Sfull}. Suppose $M$ is an $m \times
+n$-matrix. Follow the idea of the $(2\times 2)$-case in \cref{eqn.two_by_two},
+and construct the signal flow graph $g$---having $m$ inputs and $n$ outputs---as
+the composite of four layers, respectively comprising (i) copy and discard maps, (ii)
+scalars, (iii) swaps and identities, (iv) addition and zero maps.
+\erase{%Hide
+\begin{itemize}
+  \item For the first layer $g_1$, take
+    \[
+      g_1\coloneq c_n +\dots+ c_n\colon m \to (m \times n),
+    \]
+    where we take the monoidal product of $m$ copies of $c_n$, and 
+    \[
+      c_n\coloneq
+      \comult{1em}.(1+\comult{1em}).(1+1+\comult{1em}).\dots.(1+\dots+1+\comult{1em})\colon
+      1 \to n
+    \]
+    is the signal flow diagram that makes $n$ copies of a single input. 
+  \item Next, define
+    \begin{align*}
+      g_2\coloneq &\quad s_{M(1,1)}+\dots+s_{M(1,n)} \\
+      & +s_{M(2,1)}+\dots+s_{M(2,n)} \\
+      &+\dots \\
+      &+s_{M(m,1)}+\dots+s_{M(m,n)}\colon (m\times n) \to (m\times n),
+    \end{align*}
+    where $s_a\colon 1 \to 1$ is the scalar multiplication by $a$ signal flow
+    graph generator. This layer amplifies each copy of the input signal by the
+    relevant rig element.
+  \item The third layer rearranges wires. We will not write this down
+    explicitly, but simply say it is the signal flow graph $g_3\colon m \times
+    n \to m \times n$, that is the
+    composite and monoidal product of swap and identity maps, such that the
+    $(i-1)m+j$th input maps to the $(j-1)n+i$th output, where $1 \le i \le n$
+    and $1 \le j \le m$.
+  \item Finally, the fourth layer is similar to the first, but instead adds the
+    amplified input signals. We define 
+    \[
+      g_4\coloneq a_m+\dots+a_m \colon (m \times n)\to n,
+    \]
+    where 
+    \[
+      a_m\coloneq
+      (1+\dots+1+\add{1em}).\dots.(1+1+\add{1em}).(1+\add{1em}).\add{1em}\colon
+      m \to 1
+    \]
+    is the signal flom graph that adds $m$ inputs to produce a single output
+\end{itemize}
+Using \cref{prop.Simages}, it is easily checked that $g=g_1.g_2.g_3.g_4\colon m
+\to n$ has the property that $S(g)=M$.
+}
+\end{exercise}
+
+
+We can also use \cref{prop.Sfull} and its proof to give a presentation of
+$\mat(R)$, which was defined in \cref{def.prop_matrices}.
+
+\begin{theorem}%
+\label{thm.presentation_mat}%
+\index{prop!of matrices}
+  The prop $\mat(R)$ is isomorphic to the prop with the following presentation.
+  The set of generators is the set
+\[
+G_R := \left\{\add{.05\textwidth}, \zero{.05\textwidth},\comult{.05\textwidth},
+\counit{.05\textwidth}\right\} \cup \left\{
+\begin{aligned}
+  \resizebox{.05\textwidth}{!}{
+  \begin{tikzpicture}[spider diagram]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf a$};
+  \end{tikzpicture}}
+\end{aligned}
+\mid a \in R\right\},
+\]
+the same as the set of generators for $\sfg_R$; see \cref{def.sig_flow_graph_gens}.
+
+  We have the following equations for any $a,b\in R$:
+  \[
+  \arraycolsep=1.5ex
+  \renewcommand{\arraystretch}{2}
+  \begin{array}{ccc}
+  % cocommutativity
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\coordinate (b1) at ($(a_out1)+(.2,0)$);
+	\coordinate (b2) at ($(a_out2)+(.2,0)$);
+	\draw (a_out1) to (b1);
+	\draw (a_out2) to (b2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\coordinate (b1) at ($(a_out1)+(.6,0)$);
+	\coordinate (b2) at ($(a_out2)+(.6,0)$);
+	\draw (a_out2) to (b1);
+	\draw (a_out1) to (b2);
+\end{tikzpicture}
+\end{aligned}
+& 
+%commutativity
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\coordinate (b1) at ($(a_in1)-(.2,0)$);
+	\coordinate (b2) at ($(a_in2)-(.2,0)$);
+	\draw (a_in1) to (b1);
+	\draw (a_in2) to (b2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\coordinate (b1) at ($(a_in1)-(.6,0)$);
+	\coordinate (b2) at ($(a_in2)-(.6,0)$);
+	\draw (b1) to (a_in2);
+	\draw (b2) to (a_in1);
+\end{tikzpicture}
+\end{aligned} 
+&
+%bimonoid
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black,right =.3 of a] (b) {};
+	\draw (a.east) to (b_in1);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=12pt]
+	\node[spider={1}{2}, fill=black] (a1) {};
+	\node[spider={1}{2}, fill=black, below=.4 of a1] (a2) {};
+	\node[spider={2}{1}, fill=white, right=1.1 of a1] (b1) {};
+	\node[spider={2}{1}, fill=white, right=1.1 of a2] (b2) {};
+	\draw (a1_out1) to (b1_in1);
+	\draw (a1_out2) to (b2_in1);
+	\draw (a2_out1) to (b1_in2);
+	\draw (a2_out2) to (b2_in2);
+\end{tikzpicture}
+\end{aligned}
+\\
+%coassociativity
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out1] (b) {};
+	\draw (a_out1) to (b_in1);
+	\draw (a_out2) to (b_out1|-a_out2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black, right=.1 of a_out2] (b) {};
+	\draw (a_out2) to (b_in1);
+	\draw (a_out1) to (b_out1|-a_out1);
+\end{tikzpicture}
+\end{aligned}
+  & 
+%associativity
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={2}{1}{\leglen}{0}, fill=white, left=.1 of a_in1] (b) {};
+	\draw (a_in1) to (b.east);
+	\draw (a_in2) to (b_in1|-a_in2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={2}{1}{\leglen}{0}, fill=white, left=.1 of a_in2] (b) {};
+	\draw (a_in2) to (b.east);
+	\draw (a_in1) to (b_in1|-a_in1);
+\end{tikzpicture}
+\end{aligned} 
+&
+%bimonoid2
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={1}{0}{0}{\leglen}, fill=black,right =.3 of a] (b) {};
+	\draw (a.east) to (b_in1);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=12pt]
+	\node[spider={1}{0}, fill=black] (a1) {};
+	\node[spider={1}{0}, fill=black, below=.4 of a1] (a2) {};
+\end{tikzpicture}
+\end{aligned}
+\\
+%counitality
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[special spider={1}{0}{0}{\leglen}, fill=black, right=.1 of a_out1] (b) {};
+	\draw (a_out1) to (b_in1);
+	\draw (a_out2) to ($(a_out2)+(\leglen,0)$);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\coordinate (a) {};
+	\coordinate (b) at ($(a)+(3*\leglen,0)$) {};
+	\draw (a) to (b);
+\end{tikzpicture}
+\end{aligned}
+&
+%unitality
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={0}{1}{\leglen}{0}, fill=white, left=.1 of a_in1] (b) {};
+	\draw (a_in1) to (b.east);
+	\draw (a_in2) to ($(a_in2)-(\leglen,0)$);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\coordinate (a) {};
+	\coordinate (b) at ($(a)+(3*\leglen,0)$) {};
+	\draw (a) to (b);
+\end{tikzpicture}
+\end{aligned}
+&
+%bimonoid3
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={0}{1}, fill=white] (a) {};
+	\node[special spider={1}{2}{0}{\leglen}, fill=black,right =.3 of a] (b) {};
+	\draw (a.east) to (b_in1);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=12pt]
+	\node[spider={0}{1}, fill=white] (b1) {};
+	\node[spider={0}{1}, fill=white, below=.4 of b1] (b2) {};
+\end{tikzpicture}
+\end{aligned}
+\\ & & 
+%bimonoid4
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={0}{1}, fill=white] (a) {};
+	\node[spider={1}{0}, fill=black,right =.4 of a] (b) {};
+	\draw (a.east) to (b_in1);
+\end{tikzpicture}
+\end{aligned}
+=
+\quad\quad
+  \end{array}
+  \]
+  \[
+  \arraycolsep=5ex
+  \renewcommand{\arraystretch}{2}
+  \begin{array}{cc}
+%scalar mult
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf a$};
+	\node[spider={1}{1}, wamp,right=.3 of a] (b) {$\scriptstyle \mathsf b$};
+	\draw (a.east) to (b.west);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=20pt]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf{ab}$};
+\end{tikzpicture}
+\end{aligned}
+&
+%scalar add
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+	\node[spider={2}{1}, fill=white, right=1.5 of a] (b) {};
+	\node at ($(a_out1)!.5!(b_in1)$) (helper1) {};
+	\node[special spider={1}{1}{0.01}{0.01}, wamp] at (helper1) (scalar1) {$\scriptstyle \mathsf{a}$};
+	\node at ($(a_out2)!.5!(b_in2)$) (helper2) {};
+	\node[special spider={1}{1}{0.01}{0.01}, wamp] at (helper2) (scalar2) {$\scriptstyle \mathsf{b}$};
+	\draw (a_out1) to (scalar1.west);
+	\draw (scalar1.east) to (b_in1);
+	\draw (a_out2) to (scalar2.west);
+	\draw (scalar2.east) to (b_in2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=20pt]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf{a+b}$};
+\end{tikzpicture}
+\end{aligned}
+\\
+%one
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=20pt]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf 1$};
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\coordinate (a) {};
+	\coordinate (b) at ($(a)+(3*\leglen,0)$) {};
+	\draw (a) to (b);
+\end{tikzpicture}
+\end{aligned}
+&
+%zero
+\begin{aligned}
+\begin{tikzpicture}[spider diagram, leg length=20pt]
+	\node[spider={1}{1}, wamp] (a) {$\scriptstyle \mathsf 0$};
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{0}, fill=black] (a) {};
+	\node[spider={0}{1}, fill=white, right=.3 of a] (b) {};
+\end{tikzpicture}
+\end{aligned}
+\\
+%comult hom1
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[special spider={1}{2}{5pt}{\leglen}, fill=black] (a) {};
+	\coordinate (b1) at ($(a_out1)+(.2,0)$);
+	\coordinate (b2) at ($(a_out2)+(.2,0)$);
+	\node[special spider={1}{1}{20pt}{0.01}, wamp] (s) at ($(a_in1)-(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (s.east) to (a_in1);
+	\draw (a_out1) to (b1);
+	\draw (a_out2) to (b2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[special spider={1}{2}{\leglen}{\leglen}, fill=black] (a) {};
+	\node[special spider={1}{1}{0.01}{20pt}, wamp] (s1) at ($(a_out1)+(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\node[special spider={1}{1}{0.01}{20pt}, wamp] (s2) at ($(a_out2)+(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (a_out1) to (s1.west);
+	\draw (a_out2) to (s2.west);
+\end{tikzpicture}
+\end{aligned}
+& 
+%mult hom1
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[special spider={2}{1}{\leglen}{5pt}, fill=white] (a) {};
+	\coordinate (b1) at ($(a_in1)-(.2,0)$);
+	\coordinate (b2) at ($(a_in2)-(.2,0)$);
+	\node[special spider={1}{1}{0.01}{20pt}, wamp] (s) at ($(a_out1)+(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (a_out1) to (s.west);
+	\draw (a_in1) to (b1);
+	\draw (a_in2) to (b2);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={2}{1}, fill=white] (a) {};
+	\node[special spider={1}{1}{20pt}{0.01}, wamp] (s1) at ($(a_in1)-(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\node[special spider={1}{1}{20pt}{0.01}, wamp] (s2) at ($(a_in2)-(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (a_in1) to (s1.east);
+	\draw (a_in2) to (s2.east);
+\end{tikzpicture}
+\end{aligned} 
+\\
+%comult hom2
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[special spider={1}{0}{5pt}{\leglen}, fill=black] (a) {};
+	\node[special spider={1}{1}{20pt}{0.01}, wamp] (s) at ($(a_in1)-(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (s.east) to (a_in1);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{0}, fill=black] (a) {};
+\end{tikzpicture}
+\end{aligned}
+& 
+%mult hom2
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[special spider={0}{1}{\leglen}{5pt}, fill=white] (a) {};
+	\node[special spider={1}{1}{0.01}{20pt}, wamp] (s) at ($(a_out1)+(.4,0)$) {$\scriptstyle \mathsf{a}$};
+	\draw (a_out1) to (s.west);
+\end{tikzpicture}
+\end{aligned}
+=
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={0}{1}, fill=white] (a) {};
+\end{tikzpicture}
+\end{aligned}
+\end{array}
+\]
+\end{theorem}
+\begin{proof}
+  The key idea is that these equations are sufficient to rewrite any
+  $G_R$-generated prop expression into a normal form---the one used in the proof of
+  \cref{prop.Sfull}---with all the black nodes to the left, all the white nodes to the right, and all the scalars in the middle. This is enough to show the equality of any two
+  expressions that represent the same matrix.
+  Details can be found in
+  \cite{Baez.Erbele:2015a} or \cite{Bonchi.Sobocinski.Zanasi:2017a}.
+\end{proof}
+
+\paragraph{Sound and complete presentation of matrices.}%
+\index{soundness!of proof system}%
+\index{completeness!of proof system}
+
+Once you get used to it, \cref{thm.presentation_mat} provides an intuitive,
+visual way to reason about matrices. Indeed, the theorem implies two signal flow
+graphs represent the same matrix if and only if one can be turned into the other
+by local application of the above equations and the prop axioms.
+
+The fact that you can prove two SFGs to be the same by using only graphical rules can be stated in the jargon
+of logic: we say that the graphical rules provide a \emph{sound and complete reasoning system}. To be more
+specific, \emph{sound} refers to the forward direction of the above statement:
+two signal flow graphs represent the same matrix if one can be turned into the
+other using the given rules.  \emph{Complete} refers to the reverse direction:
+if two signal flow graphs represent the same matrix, then we can convert one into the other using the equations of \cref{thm.presentation_mat}.
+
+\begin{example}
+Both of the signal flow graphs below represent the same matrix, $0\choose6$\ :
+\[
+  \begin{aligned}
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (2.25, 0.5) {};
+		\node [style=none] (1) at (3.25, 2) {};
+		\node [style=none] (2) at (6, -0) {};
+		\node [style=bdot] (3) at (5, 1.5) {};
+		\node [style=none] (4) at (3.25, -0) {};
+		\node [style=wamp] (5) at (4, -0) {$\scriptstyle 3$};
+		\node [style=none] (6) at (0, 2) {};
+		\node [style=wdot] (7) at (4.25, 1.5) {};
+		\node [style=none] (8) at (3.25, 1) {};
+		\node [style=wamp] (9) at (1, 0.5) {$\scriptstyle 2$};
+		\node [style=none] (10) at (0, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (1.center) to (7);
+		\draw [bend left, looseness=1.00] (7) to (8.center);
+		\draw (7) to (3);
+		\draw [bend right, looseness=1.00] (8.center) to (0);
+		\draw [bend right, looseness=1.00] (0) to (4.center);
+		\draw (6.center) to (1.center);
+		\draw (10.center) to (9);
+		\draw (9) to (0);
+		\draw (4.center) to (5);
+		\draw (5) to (2.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  \quad \mbox{and} \quad
+\begin{aligned}
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (2, 1) {};
+		\node [style=none] (1) at (4, -0) {};
+		\node [style=wamp] (2) at (2, -0) {$\scriptstyle 6$};
+		\node [style=none] (3) at (0, 1) {};
+		\node [style=none] (4) at (0, -0) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (3.center) to (0.center);
+		\draw (2) to (1.center);
+		\draw (4.center) to (2);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\]
+%They both represent the matrix 
+%\[
+%  \begin{pmatrix}
+%    0\\
+%    6
+%  \end{pmatrix}.
+%\]
+This means that one can be transformed into the other by using only the
+equations from \cref{thm.presentation_mat}. Indeed, here 
+\begingroup
+\allowdisplaybreaks
+\begin{align*}
+  \begin{aligned}
+\begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (2.25, 0.5) {};
+		\node [style=none] (1) at (3.25, 2) {};
+		\node [style=none] (2) at (6, -0) {};
+		\node [style=bdot] (3) at (5, 1.5) {};
+		\node [style=none] (4) at (3.25, -0) {};
+		\node [style=wamp] (5) at (4, -0) {$\scriptstyle 3$};
+		\node [style=none] (6) at (0, 2) {};
+		\node [style=wdot] (7) at (4.25, 1.5) {};
+		\node [style=none] (8) at (3.25, 1) {};
+		\node [style=wamp] (9) at (1, 0.5) {$\scriptstyle 2$};
+		\node [style=none] (10) at (0, 0.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (1.center) to (7);
+		\draw [bend left, looseness=1.00] (7) to (8.center);
+		\draw (7) to (3);
+		\draw [bend right, looseness=1.00] (8.center) to (0);
+		\draw [bend right, looseness=1.00] (0) to (4.center);
+		\draw (6.center) to (1.center);
+		\draw (10.center) to (9);
+		\draw (9) to (0);
+		\draw (4.center) to (5);
+		\draw (5) to (2.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned} 
+&=
+\begin{aligned}
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (2.25, 0.5) {};
+		\node [style=bdot] (1) at (4, 2) {};
+		\node [style=none] (2) at (6, -0) {};
+		\node [style=none] (3) at (3.25, -0) {};
+		\node [style=wamp] (4) at (4, -0) {$\scriptstyle 3$};
+		\node [style=none] (5) at (0, 2) {};
+		\node [style=none] (6) at (3.25, 1) {};
+		\node [style=wamp] (7) at (1, 0.5) {$\scriptstyle 2$};
+		\node [style=none] (8) at (0, 0.5) {};
+		\node [style=bdot] (9) at (4, 1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend right, looseness=1.00] (6.center) to (0);
+		\draw [bend right, looseness=1.00] (0) to (3.center);
+		\draw (5.center) to (1.center);
+		\draw (8.center) to (7);
+		\draw (7) to (0);
+		\draw (3.center) to (4);
+		\draw (4) to (2.center);
+		\draw (6.center) to (9);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\\
+&=
+\begin{aligned}
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (spaceup) at (0,2.5) {};
+		\node [style=none] (spacedown) at (0,.5) {};
+		\node [style=bdot] (0) at (4, 2) {};
+		\node [style=none] (1) at (6, 1) {};
+		\node [style=wamp] (2) at (4, 1) {$\scriptstyle 3$};
+		\node [style=none] (3) at (0, 2) {};
+		\node [style=wamp] (4) at (1, 1) {$\scriptstyle 2$};
+		\node [style=none] (5) at (0, 1) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (3.center) to (0.center);
+		\draw (5.center) to (4);
+		\draw (2) to (1.center);
+		\draw (4) to (2);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\\
+&=
+\begin{aligned}
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (spaceup) at (0,1.5) {};
+		\node [style=none] (spacedown) at (0,-.5) {};
+		\node [style=bdot] (0) at (2, 1) {};
+		\node [style=none] (1) at (4, -0) {};
+		\node [style=wamp] (2) at (2, -0) {$\scriptstyle 6$};
+		\node [style=none] (3) at (0, 1) {};
+		\node [style=none] (4) at (0, -0) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (3.center) to (0.center);
+		\draw (2) to (1.center);
+		\draw (4.center) to (2);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+\qedhere
+\end{align*}
+\endgroup
+\end{example}
+
+\begin{exercise}%
+\label{exc.rep_mats}
+  \begin{enumerate}
+  	\item For each matrix in \cref{ex.drawsfgs}, draw another signal flow graph that
+  represents that matrix.
+  	\item Using the above equations and the prop axioms, prove
+  that the two signal flow graphs represent the same matrix.
+  \qedhere
+  \end{enumerate}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.proof_using_diag_lang}
+  Consider the signal flow graphs
+  \begin{equation}%
+\label{eqn.exc_two_sfgs}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (4, -0) {};
+		\node [style=none] (1) at (0, 1) {};
+		\node [style=none] (2) at (0, -0) {};
+		\node [style=none] (3) at (4, 1) {};
+		\node [style=bdot] (4) at (1.5, 1) {};
+		\node [style=wdot] (5) at (2.5, 1) {};
+		\node [style=bdot] (6) at (1.5, -0) {};
+		\node [style=wdot] (7) at (2.5, -0) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (1.center) to (4);
+		\draw (5) to (3.center);
+		\draw (2.center) to (6);
+		\draw (7) to (0.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  \quad \mbox{and} \quad
+\begin{aligned}
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (3) at (-9, 2) {};
+		\node [style=none] (22) at (-9, -0) {};
+		\node [style=bdot] (21) at (-8, -0) {};
+		\node [style=none] (20) at (-7, -0.5) {};
+		\node [style=wamp] (23) at (-7, 0.625) {$\scriptstyle 3$};
+		\node [style=wamp] (19) at (-6.5, 2) {$\scriptstyle 5$};
+		\node [style=bdot] (26) at (-6.25, 0.625) {};
+		\node [style=wamp] (18) at (-5.25, 2) {$\scriptstyle {3}$};
+		\node [style=wamp] (24) at (-5.25, 1) {$\scriptstyle 3$};
+		\node [style=none] (25) at (-5.25, 0.25) {};
+		\node [style=none] (28) at (-4.25, 1) {};
+		\node [style=none] (29) at (-4.25, 2) {};
+		\node [style=wamp] (0) at (-4, 0.25) {$\scriptstyle 3$};
+		\node [style=none] (1) at (-4, -0.5) {};
+		\node [style=wdot] (27) at (-3.25, 1.5) {};
+		\node [style=wdot] (2) at (-3, -0.125) {};
+		\node [style=bdot] (4) at (-2.5, 1.5) {};
+		\node [style=none] (5) at (-1.5, 1) {};
+		\node [style=none] (7) at (-1.5, 2) {};
+		\node [style=none] (16) at (-1.5, -0.125) {};
+		\node [style=wamp] (8) at (-0.75, 2) {$\scriptstyle 5$};
+		\node [style=wdot] (6) at (-0.5, 0.5) {};
+		\node [style=bdot] (11) at (0.25, 0.5) {};
+		\node [style=wamp] (14) at (0.5, 2) {$\scriptstyle {3}$};
+		\node [style=none] (10) at (1.25, 1) {};
+		\node [style=none] (12) at (1.25, -0) {};
+		\node [style=none] (15) at (1.25, 2) {};
+		\node [style=wdot] (9) at (2.25, 1.5) {};
+		\node [style=none] (13) at (3, -0) {};
+		\node [style=none] (17) at (3, 1.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (0.center) to (2);
+		\draw [bend right, looseness=0.9] (1.center) to (2);
+		\draw (2) to (16.center);
+		\draw [bend right, looseness=1.00] (16.center) to (6);
+		\draw [bend right, looseness=1.00] (6) to (5.center);
+		\draw [bend left, looseness=1.00] (5.center) to (4);
+		\draw [bend left, looseness=1.00] (4) to (7.center);
+		\draw (7.center) to (8.center);
+		\draw (8.center) to (14.center);
+		\draw (14.center) to (15.center);
+		\draw [bend left, looseness=1.00] (15.center) to (9);
+		\draw [bend left, looseness=1.00] (9) to (10.center);
+		\draw (9) to (17.center);
+		\draw [bend right, looseness=1.00] (10.center) to (11);
+		\draw (6) to (11);
+		\draw [bend right, looseness=1.00] (11) to (12.center);
+		\draw (12.center) to (13.center);
+		\draw (19) to (18);
+		\draw (3.center) to (19);
+		\draw (19) to (18);
+		\draw (22.center) to (21);
+		\draw [bend left, looseness=1.00] (21) to (23);
+		\draw [bend right, looseness=1.00] (21) to (20.center);
+		\draw [bend left, looseness=1.00] (26) to (24);
+		\draw [bend right, looseness=0.9] (26) to (25.center);
+		\draw (23) to (26);
+		\draw (20.center) to (1.center);
+		\draw [bend left, looseness=1.00] (29.center) to (27);
+		\draw [bend left, looseness=1.00] (27) to (28.center);
+		\draw (27) to (4);
+		\draw (18) to (29.center);
+		\draw (24) to (28.center);
+		\draw (25.center) to (0);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\end{aligned}
+  \end{equation}
+  \begin{enumerate}
+  	\item Let $R=(\NN,0,+,1,*)$. By examining the presentation of $\mat(R)$ in \cref{thm.presentation_mat}, and without computing the
+  matrices that the two signal flow graphs in \cref{eqn.exc_two_sfgs} represent, prove that they do \emph{not} represent the same
+  matrix.
+  	\item Now suppose the rig is $R=\NN/3\nn$; if you do not know what this means, just replace all 3's with 0's in the right-hand diagram of \cref{eqn.exc_two_sfgs}. Find what you would call a minimal representation of this diagram, using the presentation in \cref{thm.presentation_mat}.
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+%---- Subsection ----%
+\subsection{Aside: monoid objects in a monoidal category}
+%
+\label{ssec.alg_theories}%
+\index{algebraic theory}%
+\index{monoidal category!monoid object in|(}%
+\index{monoid|seealso {monoidal category, monoid object in}}
+
+Various subsets of the equations in \cref{thm.presentation_mat} encode
+structures that are familiar from many other parts of mathematics, e.g.\
+representation theory. For example one can find the axioms for (co)monoids,
+(co)monoid homomorphisms, Frobenius algebras, and (with a little rearranging)
+Hopf algebras, sitting inside this collection. The first example, the notion of
+monoids, is particularly familiar to us by now, so we briefly discuss it below,
+both in algebraic terms (\cref{def.monoid_object}) and in diagrammatic terms
+(\cref{ex.diagrammatic_monoid_obj}).%
+\index{Frobenius!algebra}
+
+\begin{definition}%
+\label{def.monoid_object}%
+\index{monoidal category!monoid object in}
+  A \emph{monoid object} $(M,\mu,\eta)$ in a symmetric monoidal category
+  $(\cat{C},I,\otimes)$ is an object $M$ of $\cat{C}$ together with morphisms
+  $\mu\colon M \otimes M \to M$ and $\eta\colon I \to M$ such that 
+\begin{enumerate}[label=(\alph*)]
+  \item $(\mu \otimes \id)\cp\mu = (\id \otimes \mu)\cp\mu$ and
+  \item $(\eta \otimes \id)\cp\mu = \id = (\id \otimes \eta)\cp\mu$.
+\end{enumerate}
+A \emph{commutative monoid object} is a monoid object that further obeys
+\begin{enumerate}[resume, label=(\alph*)]
+  \item $\sigma_{M,M}\cp\mu = \mu$.
+\end{enumerate}
+where $\sigma_{M,M}$ is the swap map on $M$ in $\cat{C}$. We often denote it simply by $\sigma$.
+\end{definition}
+
+Monoid objects are so-named because they are an abstraction of the usual concept
+of monoid.
+
+\begin{example}
+A monoid object in $(\smset,1,\times)$ is just a regular old monoid, as defined in \cref{ex.monoid}; see also \cref{ex.monoid_nats}. That is, it is a set $M$, a function $\mu\colon M\times M\to M$, which we denote by infix notation $*$, and an element $\eta(1)\in M$, which we denote by $e$, satisfying $(a*b)*c=a*(b*c)$ and $a*e=a=e*a$.
+\end{example}
+
+\begin{exercise}%
+\index{real numbers}%
+\label{exc.two_monoids_on_reals}
+Consider the set $\RR$ of real numbers.
+	\begin{enumerate}
+		\item Show that if $\mu\colon\RR\times\RR\to\RR$ is defined by $\mu(a,b)=a*b$ and if $\eta\in\RR$ is defined to be $\eta=1$, then $(\RR,*,1)$ satisfies all three conditions of \cref{def.monoid_object}.
+		\item Show that if $\mu\colon\RR\times\RR\to\RR$ is defined by $\mu(a,b)=a+b$ and if $\eta\in\RR$ is defined to be $\eta=0$, then $(\RR,+,0)$ satisfies all three conditions of \cref{def.monoid_object}.
+		\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.diagrammatic_monoid_obj}
+  Graphically, we can depict $\mu = \add{1em}$ and $\eta = \zero{1em}$. Then
+  axioms (a), (b), and (c) from \cref{def.monoid_object} become:
+  \begin{enumerate}[label=(\alph*)]
+    \item $
+      \begin{aligned}
+	\resizebox{4em}{!}{
+	  \begin{tikzpicture}[scale=.5]
+	    \begin{pgfonlayer}{nodelayer}
+	      \node [style=none] (spaceup) at (0, 1.75) {};
+	      \node [style=none] (spacedown) at (0, -.25) {};
+	      \node [style=none] (0) at (0, -0) {};
+	      \node [style=none] (1) at (1.75, -0) {};
+	      \node [style=wdot] (2) at (2.75, 0.5) {};
+	      \node [style=none] (3) at (3.5, 0.5) {};
+	      \node [style=none] (4) at (1.75, 1) {};
+	      \node [style=none] (5) at (0.5, 1.5) {};
+	      \node [style=none] (6) at (0.5, 0.5) {};
+	      \node [style=wdot] (7) at (1.5, 1) {};
+	      \node [style=none] (8) at (0, 1.5) {};
+	      \node [style=none] (9) at (0, 0.5) {};
+	    \end{pgfonlayer}
+	    \begin{pgfonlayer}{edgelayer}
+	      \draw (3.center) to (2);
+	      \draw [bend right, looseness=.8] (2) to (4.center);
+	      \draw [bend left, looseness=.8] (2) to (1.center);
+	      \draw [bend right, looseness=.8] (7) to (5.center);
+	      \draw [bend left, looseness=.8] (7) to (6.center);
+	      \draw (4.center) to (7);
+	      \draw (1.center) to (0.center);
+	      \draw (5.center) to (8.center);
+	      \draw (9.center) to (6.center);
+	    \end{pgfonlayer}
+	  \end{tikzpicture}}
+	\end{aligned}
+	=
+	\begin{aligned}
+	  \resizebox{4em}{!}{
+	    \begin{tikzpicture}[scale=.5]
+	      \begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, -0.25) {};
+		\node [style=none] (1) at (0, 1.75) {};
+		\node [style=none] (2) at (0, 1.5) {};
+		\node [style=none] (3) at (1.75, 1.5) {};
+		\node [style=wdot] (4) at (2.75, 1) {};
+		\node [style=none] (5) at (3.5, 1) {};
+		\node [style=none] (6) at (1.75, 0.5) {};
+		\node [style=none] (7) at (0.5, 0) {};
+		\node [style=none] (8) at (0.5, 1) {};
+		\node [style=wdot] (9) at (1.5, 0.5) {};
+		\node [style=none] (10) at (0, 0) {};
+		\node [style=none] (11) at (0, 1) {};
+	      \end{pgfonlayer}
+	      \begin{pgfonlayer}{edgelayer}
+		\draw (5.center) to (4);
+		\draw [bend left, looseness=0.80] (4) to (6.center);
+		\draw [bend right, looseness=0.80] (4) to (3.center);
+		\draw [bend left, looseness=0.80] (9) to (7.center);
+		\draw [bend right, looseness=0.80] (9) to (8.center);
+		\draw (6.center) to (9);
+		\draw (3.center) to (2.center);
+		\draw (7.center) to (10.center);
+		\draw (11.center) to (8.center);
+	      \end{pgfonlayer}
+	    \end{tikzpicture}
+	  }
+	\end{aligned}
+	$
+      \item $
+	\begin{aligned}
+	  \resizebox{4em}{!}{
+	    \begin{tikzpicture}[scale=.5]
+	      \begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, -0.25) {};
+		\node [style=none] (1) at (3.25, 0.5) {};
+		\node [style=none] (2) at (1.25, -0) {};
+		\node [style=none] (3) at (1.25, 1) {};
+		\node [style=wdot] (4) at (2.25, 0.5) {};
+		\node [style=wdot] (5) at (1, -0) {};
+		\node [style=none] (6) at (0, 1) {};
+		\node [style=none] (7) at (0, 1.25) {};
+	      \end{pgfonlayer}
+	      \begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=0.80] (4) to (2.center);
+		\draw [bend right, looseness=0.80] (4) to (3.center);
+		\draw (1.center) to (4);
+		\draw (2.center) to (5.center);
+		\draw (6.center) to (3.center);
+	      \end{pgfonlayer}
+	    \end{tikzpicture}
+	  }
+	\end{aligned}
+	=
+	\begin{aligned}
+	  \resizebox{4em}{!}{
+	    \begin{tikzpicture}[scale=.5]
+	      \begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, -0.25) {};
+		\node [style=none] (1) at (3, -0) {};
+		\node [style=none] (2) at (0, -0) {};
+		\node [style=none] (3) at (0, 0.25) {};
+	      \end{pgfonlayer}
+	      \begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (1.center);
+	      \end{pgfonlayer}
+	    \end{tikzpicture}
+	  }
+	\end{aligned}$
+      \item $
+	\begin{aligned}
+	  \resizebox{4em}{!}{
+	    \begin{tikzpicture}[scale=.5]
+	      \begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, -0.25) {};
+		\node [style=none] (1) at (1.25, 1) {};
+		\node [style=none] (2) at (0, 1) {};
+		\node [style=none] (3) at (0, 1.25) {};
+		\node [style=none] (4) at (0, -0) {};
+		\node [style=none] (5) at (1.25, -0) {};
+		\node [style=none] (6) at (3.25, 0.5) {};
+		\node [style=wdot] (7) at (2.25, 0.5) {};
+	      \end{pgfonlayer}
+	      \begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=0.80] (7) to (5.center);
+		\draw [bend right, looseness=0.80] (7) to (1.center);
+		\draw (6.center) to (7);
+		\draw [in=180, out=0, looseness=0.75] (2.center) to (5.center);
+		\draw [in=180, out=0, looseness=1.00] (4.center) to (1.center);
+	      \end{pgfonlayer}
+	    \end{tikzpicture}
+	  }
+	\end{aligned}
+	=
+	\begin{aligned}
+	  \resizebox{4em}{!}{
+	    \begin{tikzpicture}[scale=.5]
+	      \begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (0, -0.25) {};
+		\node [style=none] (1) at (1.25, 1) {};
+		\node [style=none] (2) at (0, 1) {};
+		\node [style=none] (3) at (0, 1.25) {};
+		\node [style=none] (4) at (0, -0) {};
+		\node [style=none] (5) at (1.25, -0) {};
+		\node [style=none] (6) at (3.25, 0.5) {};
+		\node [style=wdot] (7) at (2.25, 0.5) {};
+	      \end{pgfonlayer}
+	      \begin{pgfonlayer}{edgelayer}
+		\draw (2.center) to (1.center);
+		\draw (5.center) to (4.center);
+		\draw [bend left, looseness=0.80] (7) to (5.center);
+		\draw [bend right, looseness=0.80] (7) to (1.center);
+		\draw (6.center) to (7);
+	      \end{pgfonlayer}
+	    \end{tikzpicture}
+	  }
+	\end{aligned}$
+  \end{enumerate}
+  All three of these are found in \cref{thm.presentation_mat}. Thus we can immediately conclude the following: the triple
+  $(1,\add{1em},\zero{1em})$ is a commutative monoid object in the prop $\mat(R)$.
+\end{example}
+
+\begin{exercise}%
+\label{exc.check_monoid_obj}
+For any rig $R$, there is a functor $U\colon\mat(R)\to\smset$, sending the object $n\in\NN$ to the set $R^n$, and sending a morphism (matrix) $M\colon m\to n$ to the function $R^m\to R^n$ given by vector-matrix multiplication. %
+\index{vector}
+
+Recall that in $\mat(R)$, the monoidal unit is $0$ and the monoidal product is $+$, because it is a prop. Recall also that in (the usual monoidal structure on) $\smset$, the monoidal unit is $\{1\}$, a set with one element, and the monoidal product is $\times$ (see \cref{ex.set_as_mon_cat}).
+
+\begin{enumerate}
+	\item Check that the functor $U\colon\mat(R)\to\smset$, defined above, preserves the monoidal unit and the monoidal product.
+	\item Show that if $(M,\mu,\eta)$ is a monoid object in $\mat(R)$ then $(U(M),U(\mu),U(\eta))$ is a monoid object in $\smset$. (This works for any monoidal functor---which we will define in \cref{roughdef.monoidal_functor}---not just for $U$ in particular.)
+	\item In \cref{ex.diagrammatic_monoid_obj}, we said that the triple
+  $(1,\add{1em},\zero{1em})$ is a commutative monoid object in the prop $\mat(R)$. If $R=\RR$ is the rig of real numbers, this means that we have a monoid structure on the set $\RR$. But in \cref{exc.two_monoids_on_reals} we gave two such monoid structures. Which one is it?
+  \qedhere
+\end{enumerate}%
+\index{monoidal functor}
+\end{exercise}
+
+
+\begin{example}
+  The triple $(1,\comult{1em},\counit{1em})$ in $\mat(R)$ forms a commutative
+  monoid object in $\mat(R)\op$. We hence also say that
+  $(1,\comult{1em},\counit{1em})$ forms a \emph{co-commutative comonoid object} in $\mat(R)$.
+\end{example}
+
+\begin{example}
+A \emph{symmetric strict monoidal category}, is just a commutative monoid object in
+$(\Cat{Cat},\times,\Cat{1})$. We will unpack this in \cref{sec.monoidal_cats_full}. %
+\index{primordial ooze}
+\end{example}
+
+\begin{example}
+A symmetric monoidal preorder, which we defined in
+\cref{def.symm_mon_structure}, is just a commutative monoid object in the
+symmetric monoidal category $(\Cat{Preord},\times,\Cat{1})$ of preorders and
+monotone maps.
+\end{example}
+
+\begin{example}
+For those who know what tensor products of commutative monoids are (or can
+guess): A rig is a monoid object in the symmetric monoidal category
+$(\Cat{CMon},\otimes,\nn)$ of commutative monoids with tensor product.
+\end{example}
+
+\begin{remark}%
+\label{rem.theory_of_monoids}%
+\index{theory!of monoids}
+If we present a prop $\cat{M}$ using two generators $\mu\colon 2\to 1$ and
+$\eta\colon 0 \to 1$, and the three equations from \cref{def.monoid_object}, we could call it `the theory of monoids in monoidal categories.' This means that in any monoidal category $\cat C$, the monoid objects in $\cat{C}$ correspond
+to strict monoidal functors $\cat{M}\to\cat C$. This sort of idea leads to the study of
+algebraic theories, due to Bill Lawvere and extended by many others; see
+\cref{sec.ch5_further_reading}.%
+\index{monoidal functor}
+\end{remark}
+
+%%---- Subsection ----%
+%\subsection{The prop of linear relations}
+%
+%What are the advantages of the graphical framework? Let's reintepret.
+%
+%We call an assignment of numbers to these wires a \emph{state} of the diagram.
+%We say that a state is \emph{valid} if the two numbers assigned to the left of
+%the diagram add to the number on the right; intuitively, we think of this
+%representing a signal that enters on the left, flows through to meet at the
+%white circle, add, and exit on right. In any case, more formally we simply say
+%the states
+%\[
+%  \begin{aligned}
+%  \begin{tikzpicture}[scale=1.5]
+%	\begin{pgfonlayer}{nodelayer}
+%	  \node [style=none] (x) at (-1.25, 0.5)
+%	  {$2$};
+%		\node [style=none] (y) at (-1.25, -0.5) 
+%		{$3$};
+%		\node [style=none] (z) at (1.35, -0) 
+%		{$5$};
+%		\node [style=none] (0) at (1, -0) {};
+%		\node [style=none] (b) at (-2, -0) {\phantom{.}};
+%		\node [style=none] (e) at (2, -0) {\phantom{.}};
+%		\node [style=none] (u) at (0, 1) {\phantom{.}};
+%		\node [style=none] (d) at (0, -.6) {\phantom{.}};
+%		\node [style=wdot] (1) at (0.125, -0) {};
+%		\node [style=none] (2) at (-1, 0.5) {};
+%		\node [style=none] (3) at (-1, -0.5) {};
+%	\end{pgfonlayer}
+%	\begin{pgfonlayer}{edgelayer}
+%		\draw (0.center) to (1.center);
+%		\draw [in=0, out=120, looseness=1.3] (1.center) to (2.center);
+%		\draw [in=0, out=-120, looseness=1.3] (1.center) to (3.center);
+%	\end{pgfonlayer}
+%      \end{tikzpicture}
+%    \end{aligned}
+%    \qquad \mbox{and} \qquad 
+%  \begin{aligned}
+%  \begin{tikzpicture}[scale=1.5]
+%	\begin{pgfonlayer}{nodelayer}
+%	  \node [style=none] (x) at (-1.25, 0.5)
+%	  {$0.6$};
+%		\node [style=none] (y) at (-1.25, -0.5) 
+%		{$-1.3$};
+%		\node [style=none] (z) at (1.35, -0) 
+%		{$-.7$};
+%		\node [style=none] (0) at (1, -0) {};
+%		\node [style=none] (b) at (-2, -0) {\phantom{.}};
+%		\node [style=none] (e) at (2, -0) {\phantom{.}};
+%		\node [style=none] (u) at (0, 1) {\phantom{.}};
+%		\node [style=none] (d) at (0, -.6) {\phantom{.}};
+%		\node [style=wdot] (1) at (0.125, -0) {};
+%		\node [style=none] (2) at (-1, 0.5) {};
+%		\node [style=none] (3) at (-1, -0.5) {};
+%	\end{pgfonlayer}
+%	\begin{pgfonlayer}{edgelayer}
+%		\draw (0.center) to (1.center);
+%		\draw [in=0, out=120, looseness=1.3] (1.center) to (2.center);
+%		\draw [in=0, out=-120, looseness=1.3] (1.center) to (3.center);
+%	\end{pgfonlayer}
+%      \end{tikzpicture}
+%    \end{aligned}
+%    \tag{VALID}
+%    \]
+%are valid, while the state
+%\[
+%  \begin{aligned}
+%  \begin{tikzpicture}[scale=1.5]
+%	\begin{pgfonlayer}{nodelayer}
+%	  \node [style=none] (x) at (-1.25, 0.5)
+%	  {$2$};
+%		\node [style=none] (y) at (-1.25, -0.5) 
+%		{$2.7$};
+%		\node [style=none] (z) at (1.35, -0) 
+%		{$3$};
+%		\node [style=none] (0) at (1, -0) {};
+%		\node [style=none] (b) at (-2, -0) {\phantom{.}};
+%		\node [style=none] (e) at (2, -0) {\phantom{.}};
+%		\node [style=none] (u) at (0, 1) {\phantom{.}};
+%		\node [style=none] (d) at (0, -.6) {\phantom{.}};
+%		\node [style=wdot] (1) at (0.125, -0) {};
+%		\node [style=none] (2) at (-1, 0.5) {};
+%		\node [style=none] (3) at (-1, -0.5) {};
+%	\end{pgfonlayer}
+%	\begin{pgfonlayer}{edgelayer}
+%		\draw (0.center) to (1.center);
+%		\draw [in=0, out=120, looseness=1.3] (1.center) to (2.center);
+%		\draw [in=0, out=-120, looseness=1.3] (1.center) to (3.center);
+%	\end{pgfonlayer}
+%	\draw [red, dashed] (-1.5,-1) -- (1.25,1);
+%	\draw [red, dashed] (-1.5,1) -- (1.25,-1);
+%      \end{tikzpicture}
+%    \end{aligned}
+%    \tag{INVALID}
+%    \]
+%    is not. The behavior of this diagram is then the set of all valid states.
+%    Thus, we say that the behavior is the set
+%\[
+%  \left\{\; \left(\begin{smallmatrix} x \\ y \\ z \end{smallmatrix}\right) \; \bigg| \;x+y = z \right\}
+%  \subseteq \rr^3
+%\]
+%
+%the set of valid states is a called the behavior
+%
+%\begin{definition}
+%  Let $V,W$ be vector spaces. A linear relation $L\colon V \to W$ is a linear
+%  subspace of $V\oplus W$. 
+%\end{definition}
+%
+%
+%\begin{proposition}
+%The category of linear relations is a compact closed category.
+%\end{proposition}
+%
+%
+%We now have feedback.
+%
+%Two diagrams represent the same linear subspace if and only if one can be turned
+%into the other by local application of the equations:
+%
+%%---- Subsection ----%
+%\subsection{Linear algebra, done graphically}
+%For example, we prove that a matrix is injective if and only if it has zero
+%kernel.
+%
+%First, a matrix is injective if
+%
+%The kernel of a matrix is 
+%
+%We have also proved that a matrix is surjective if and only if its image is
+%the whole space (sort of)
+
+%
+\index{monoidal category!monoid object in|)}
+
+%-------- Section --------%
+\subsection{Signal flow graphs: feedback and more}%
+\label{subsec.full_SFGs}%
+\index{feedback}
+
+At this point in the story, we have seen that every signal flow graph represents
+a matrix, and this gives us a new way of reasoning about matrices. This is just
+the beginning of a beautiful tale, one not only of graphical matrices, but of
+graphical \emph{linear algebra}. We close this chapter with some brief hints at
+how the story continues.
+
+The pictoral nature of signal flow graphs invites us to play with them.
+While we normally draw the copy icon like so, $\comult{1em}$, we
+could just as easily reverse it and draw an icon $\mult{1em}$. What might it mean? Let's think
+again about the semantics of flow graphs.
+
+\paragraph{The behavioral approach.}%
+\index{behavioral approach}
+
+A signal flow graph $g\colon m \to n$ takes an input $x \in R^m$ and gives an output $y
+\in R^n$. In fact, since this is all we care about, we might just think about
+representing a signal flow graph $g$ as describing a set of input and
+output pairs $(x,y)$. We'll call this set the \emph{behavior} of $g$ and denote it $\beh(g)\ss 
+R^m\times R^n$. For example, the `copy' flow graph
+\[
+\begin{aligned}
+\begin{tikzpicture}[spider diagram]
+	\node[spider={1}{2}, fill=black] (a) {};
+\end{tikzpicture}
+\end{aligned}
+\]
+sends the input $1$ to the output $(1,1)$, so we consider $(1,(1,1))$ to be an element of copy-behavior. Similarly, $(x,(x,x))$ is copy behavior for every $x\in R$, thus we have
+\[
+\beh(\comult{1.3em}) = \{ (x,(x,x))\mid x \in R\}.
+\]
+In the abstract, the signal flow graph $g\colon m \to n$ has the behavior
+\begin{equation}%
+\label{eqn.behavior_g}
+\beh(g) = \big\{\big(x,S(g)(x)\big) \mid x \in R^m\big\} \subseteq R^m \times R^n.
+\end{equation}
+
+\paragraph{Mirror image of an icon.}%
+\index{mirror image|see {transpose}}%
+\index{reverse icon|see {transpose}}
+
+The above behavioral perspective provides a clue about how to interpret the mirror images of the
+diagrams discussed above. Reversing an icon $g\colon m\to n$ exchanges the inputs with the outputs, so if we denote this reversed icon by $g\op$, we must have $g\op\colon n\to m$. Thus if $\beh(g)\ss R^m\times R^n$ then we need $\beh(g\op)\ss R^n\times R^m$. One simple way to do this is to replace each $(a,b)$ with $(b,a)$, so we would have
+\begin{equation}%
+\label{eqn.behavior_gop}
+\beh(g\op)\coloneqq\big\{\big(S(g)(x),x\big) \mid x \in R^m\big\} \subseteq R^n \times R^m.
+\end{equation}
+This is called the \emph{transposed relation}.%
+\index{transpose}
+
+\begin{exercise}%
+\label{exc.understand_reversed_icons}
+\begin{enumerate}
+	\item What is the behavior $\beh(\coadd{1.3em})$ of the reversed addition icon $\coadd{1.3em}\colon 1 \to 2$?
+	\item What is the behavior $\beh(\mult{1.3em})$ of the reversed copy icon, $\mult{1.3em}\colon 2\to 1$?
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\cref{eqn.behavior_g,eqn.behavior_gop} give us formulas for interpreting signal flow graphs and their mirror
+images. But this would easily lead to disappointment, if we couldn't combine the two directions behaviorally; luckily we can. 
+
+\paragraph{Combining directions.}
+What
+should the behavior be for a diagram such as the following:
+\[
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-6, -0) {};
+		\node [style=bdot] (1) at (-5, -0) {};
+		\node [style=wamp] (2) at (-4, 0.5) {$\scriptstyle 3$};
+		\node [style=none] (3) at (-4, -0.5) {};
+		\node [style=wdot] (4) at (-3, -0) {};
+		\node [style=bdot] (5) at (-3, 1.5) {};
+		\node [style=bdot] (6) at (-2.5, 1.5) {};
+		\node [style=none] (7) at (-1.5, 1) {};
+		\node [style=wdot] (8) at (-0.5, 0.5) {};
+		\node [style=none] (9) at (-1.5, 2) {};
+		\node [style=wampop] (10) at (-0.75, 2) {$\scriptstyle{-1}$};
+		\node [style=bdot] (11) at (2.25, 1.5) {};
+		\node [style=none] (12) at (1.25, 1) {};
+		\node [style=bdot] (13) at (0.25, 0.5) {};
+		\node [style=none] (14) at (1.25, -0) {};
+		\node [style=none] (15) at (3, -0) {};
+		\node [style=wampop] (16) at (0.5, 2) {$\scriptstyle 3$};
+		\node [style=none] (17) at (1.25, 2) {};
+		\node [style=none] (18) at (-1.5, -0) {};
+		\node [style=bdot] (19) at (2.75, 1.5) {};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw (0.center) to (1);
+		\draw [bend left, looseness=1.00] (1) to (2.center);
+		\draw [bend right, looseness=1.00] (1) to (3.center);
+		\draw [bend left, looseness=1.00] (2.center) to (4);
+		\draw [bend right, looseness=1.00] (3.center) to (4);
+		\draw (4) to (18.center);
+		\draw [bend right, looseness=1.00] (18.center) to (8);
+		\draw [bend right, looseness=1.00] (8) to (7.center);
+		\draw [bend left, looseness=1.00] (7.center) to (6);
+		\draw (6) to (5);
+		\draw [bend left, looseness=1.00] (6) to (9.center);
+		\draw (9.center) to (10.center);
+		\draw (10.center) to (16.center);
+		\draw (16.center) to (17.center);
+		\draw [bend left, looseness=1.00] (17.center) to (11);
+		\draw [bend left, looseness=1.00] (11) to (12.center);
+		\draw (11) to (19);
+		\draw [bend right, looseness=1.00] (12.center) to (13);
+		\draw (8) to (13);
+		\draw [bend right, looseness=1.00] (13) to (14.center);
+		\draw (14.center) to (15.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+Let's formalize our thoughts a bit and begin by thinking about behaviors. The
+behavior of a signal flow graph $m \to n$ is a subset $B\ss R^m \times R^n$, i.e.\ a relation. Why
+not try to construct a prop where the morphisms $m \to n$ are relations?
+
+We'll need to know how to compose and take monoidal products of relations. And if we want this prop of relations to contain the old prop $\mat(R)$, we need the new compositions and monoidal products to generalize the old ones in $\mat(R)$. Given signal flow graphs with matrices $M\colon m \to n$ and $N\colon n
+\to p$, we see that their behaviors are the relations $B_1\coloneq\{(x,Mx) \mid x \in R^m\}$ and
+$B_2\coloneq\{(y,Ny) \mid y \in R^n\}$, while the behavior of $M\cp N$ is the relation
+$\{(x,x\cp M\cp N) \mid x \in R^m\}$. This is a case of relation composition. Given relations $B_1\ss R^m\times R^n$ and $B_2\ss R^n\times R^p$, their composite $B_1\cp B_2\ss R^m\times R^p$ is given by
+\begin{equation}%
+\label{eqn.comp_rule_rels}%
+\index{relations!composition of}
+  B_1\cp B_2\coloneqq
+  \{(x,z)\mid \textrm{there exists } y \in R^n\textrm{ such that } (x,y) \in
+  B_1\text{ and } (y,z) \in B_2\}.
+\end{equation}
+We shall use this as the general definition for composing two behaviors. 
+
+\begin{definition}%
+\label{def.rel_prop}%
+\index{prop!of $R$-relations}
+Let $R$ be a rig. We define the prop $\rel_R$ of $R$-relations to have subsets
+$B\ss R^m \times R^n$ as morphisms. These are composed by the composition
+rule from \cref{eqn.comp_rule_rels}, and we take the product of two sets to form their monoidal product.
+\end{definition}
+
+\begin{exercise}%
+\label{exc.monoidal_prod_+}
+In \cref{def.rel_prop} we went quickly through monoidal products $+$ in the prop $\rel_R$. If $B\ss R^m\times R^n$ and $C\ss R^p\times R^q$ are morphisms in $\rel_R$, write down $B+C$ in set-notation.
+\end{exercise}
+
+\paragraph{(No-longer simplified) signal flow graphs.}
+Recall that above, e.g.\ in \cref{def.sig_flow_graph_gens}, we wrote $G_R$ for the set of generators of signal flow graphs. In \cref{subsec.full_SFGs}, we wrote $g\op$ for the mirror image of $g$, for each $g\in G_R$. So let's write $G_R\op\coloneqq\{g\op\mid g\in G_R\}$ for the set of all the mirror images of generators.  We define a prop
+\begin{equation}%
+\label{eqn.SFG_plus}
+	\sfg_R^+\coloneqq \free\left(G_R\dju G_R\op\right).
+\end{equation}
+We call a morphism in the prop $\sfg_R^+$ a \emph{(non-simplified) signal flow
+graph}: these extend our simplified signal flow graphs from
+\cref{def.sig_flow_graph_gens} because now we can also use the mirrored icons.
+By the universal property of free props, since we have said what the behavior of
+the generators is (the behavior of a reversed icon is the transposed relation; see \cref{eqn.behavior_gop}), we have specified the behavior of any signal flow graph.
+%
+\index{signal flow graph!general}
+
+The following two exercises help us understand what this behavior is.
+
+\begin{exercise}%
+\label{exc.SFG_composite_behavior}
+Let $g\colon m \to n$, $h\colon \ell \to n$ be signal flow graphs. Note that
+$h\op\colon n \to \ell$ is a signal flow graph, and we can form the
+composite $g\cp (h\op)$:
+\[
+  \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1pt]
+    \node[bb={4}{4}, minimum width = 2cm] (X) 
+    {$\begin{array}{c} \longrightarrow \\ g \end{array}$};
+	\node[bb={4}{4}, right= 1 of X, minimum width = 2cm] (Y)
+    {$\begin{array}{c} \longleftarrow \\ h\op \end{array}$};
+	\draw ($(X_in1)-(.2,0)$) to (X_in1);
+	\draw ($(X_in2)-(.2,0)$) to (X_in2);
+	\draw ($(X_in4)-(.2,0)$) to (X_in4);
+	\draw (X_out1) to (Y_in1);
+	\draw (X_out2) to (Y_in2);
+	\draw (X_out4) to (Y_in4);
+	\draw (Y_out1) to ($(Y_out1)+(.2,0)$);
+	\draw (Y_out2) to ($(Y_out2)+(.2,0)$);
+	\draw (Y_out4) to ($(Y_out4)+(.2,0)$);
+	\draw[label]
+		node[above left=-4pt and 3pt of X_in3] (v) {$\vdots$}
+		node[above right=-4pt and 3pt of Y_out3] {$\vdots$}
+		node at ($(X.east)!.5!(Y.west)$|-v) {$\vdots$}
+	;	
+\end{tikzpicture}
+\]
+Show that the behavior of $g\cp(h\op)\ss R^m\times R^\ell$ is equal to 
+%\begin{equation}%
+%\label{eqn.one_composite_sfg}
+\[
+  \beh(g\cp(h\op))=\{(x,y)\,\mid\, S(g)(x)=S(h)(y)\}.
+  \qedhere
+\]
+%\end{equation}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.sfg_behavior_again}
+Let $g\colon m \to n$, $h\colon m \to p$ be signal flow graphs. Note that
+$(g\op)\colon n \to m$ is a signal flow graph, and we can form the
+composite $g\op\cp h$
+\[
+  \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1pt]
+    \node[bb={4}{4}, minimum width = 2cm] (X) 
+    {$\begin{array}{c} \longleftarrow \\ g\op \end{array}$};
+	\node[bb={4}{4}, right= 1 of X, minimum width = 2cm] (Y)
+    {$\begin{array}{c} \longrightarrow \\ h \end{array}$};
+	\draw ($(X_in1)-(.2,0)$) to (X_in1);
+	\draw ($(X_in2)-(.2,0)$) to (X_in2);
+	\draw ($(X_in4)-(.2,0)$) to (X_in4);
+	\draw (X_out1) to (Y_in1);
+	\draw (X_out2) to (Y_in2);
+	\draw (X_out4) to (Y_in4);
+	\draw (Y_out1) to ($(Y_out1)+(.2,0)$);
+	\draw (Y_out2) to ($(Y_out2)+(.2,0)$);
+	\draw (Y_out4) to ($(Y_out4)+(.2,0)$);
+	\draw[label]
+		node[above left=-4pt and 3pt of X_in3] (v) {$\vdots$}
+		node[above right=-4pt and 3pt of Y_out3] {$\vdots$}
+		node at ($(X.east)!.5!(Y.west)$|-v) {$\vdots$}
+	;	
+\end{tikzpicture}
+\]
+Show that the behavior of $g\op\cp h$ is equal to 
+\[
+  \beh((g\op)\cp h)=\{(S(g)(x),S(h)(x))\,\mid\, x \in R^m\}.
+  \qedhere
+\]
+\end{exercise}
+
+\paragraph{Linear algebra via signal flow graphs.}%
+\index{signal flow graph!and
+linear algebra}
+
+In \cref{eqn.behavior_g} we see that every matrix, or linear map, can be
+represented as the behavior of a signal flow graph, and in
+\cref{exc.SFG_composite_behavior} we see that solution sets of linear equations
+can also be represented. This includes central concepts in linear algebra, like
+kernels and images.
+
+\begin{exercise} %
+\label{exc.linear_relations}
+Here is an exercise for those that know linear algebra, in particular kernels and cokernels. Let $R$ be a field, let $g\colon
+m \to n$ be a signal flow graph, and let $S(g)\in\mat(R)$ be the associated $(m\times n)$-matrix (see \cref{thm.sfg_to_mat}).
+\begin{enumerate}
+  \item Show that the composite of $g$ with $0$-reverses, shown here
+  \[
+    \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1pt]
+      \node[bb={4}{4}, minimum width = 2cm] (X) 
+      {$\begin{array}{c} \longrightarrow \\ g \end{array}$};
+  	\draw ($(X_in1)-(.5,0)$) to (X_in1);
+  	\draw ($(X_in2)-(.5,0)$) to (X_in2);
+  	\draw ($(X_in4)-(.5,0)$) to (X_in4);
+  	\draw (X_out1) to ($(X_out1)+(.5,0)$);
+  	\draw (X_out2) to ($(X_out2)+(.5,0)$);
+  	\draw (X_out4) to ($(X_out4)+(.5,0)$);
+  	\draw[label]
+  		node[above left=-4pt and 3pt of X_in3] {$\vdots$}
+  		node[above right=-4pt and 3pt of X_out3] {$\vdots$}
+  		node[wdot] at ($(X_out1)+(.5,0)$) {}
+  		node[wdot] at ($(X_out2)+(.5,0)$) {}
+  		node[wdot] at ($(X_out4)+(.5,0)$) {}
+  	;	
+  \end{tikzpicture}
+  \]
+  is equal to the kernel of the matrix $S(g)$.
+  \item Show that the composite of discard-reverses with $g$, shown here 
+  \[
+    \begin{tikzpicture}[oriented WD, bb port length=0pt, bb port sep=1pt]
+      \node[bb={4}{4}, minimum width = 2cm] (X) 
+      {$\begin{array}{c} \longrightarrow \\ g \end{array}$};
+  	\draw ($(X_in1)-(.5,0)$) to (X_in1);
+  	\draw ($(X_in2)-(.5,0)$) to (X_in2);
+  	\draw ($(X_in4)-(.5,0)$) to (X_in4);
+  	\draw (X_out1) to ($(X_out1)+(.2,0)$);
+  	\draw (X_out2) to ($(X_out2)+(.2,0)$);
+  	\draw (X_out4) to ($(X_out4)+(.2,0)$);
+  	\draw[label]
+  		node[above left=-4pt and 3pt of X_in3] {$\vdots$}
+  		node[above right=-4pt and 3pt of X_out3] {$\vdots$}
+  		node[bdot] at ($(X_in1)-(.5,0)$) {}
+  		node[bdot] at ($(X_in2)-(.5,0)$) {}
+  		node[bdot] at ($(X_in4)-(.5,0)$) {}
+  	;	
+  \end{tikzpicture}
+  \]
+  is equal to the image of the matrix $S(g)$.
+  \item Show that for any signal flow graph $g$, the subset
+  $\beh(g)\subseteq R^m \times R^n$ is a linear subspace. That is, if $b_1,b_2\in \beh(g)$ then so are $b_1+b_2$ and $r*b_1$, for any $r\in R$.
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+We have thus seen that signal flow graphs provide a uniform, compositional
+language to talk about many concepts in linear algebra. Moreover, in \cref{exc.linear_relations} we showed that the behavior of a signal flow graph is a linear relation, i.e.\ a relation whose elements can be added and multiplied by scalars $r\in R$. In fact the converse is true too: any linear relation $B\ss R^m\times R^n$ can be represented by a signal flow graph.%
+\index{linear relation}%
+\index{relation!linear|see {linear relation}}
+
+
+\begin{exercise}%
+\label{exc.linrel_prop}
+One might want to show that linear relations on $R$ form a prop, $\Cat{LinRel}_R$. That is, one might want to show that there is a sub-prop of the prop $\rel_R$ from \cref{def.rel_prop}, where the morphisms $m\to n$ are the subsets $B\ss R^m\times R^n$ such that $B$ is linear. In other words, where for any $(x,y)\in B$ and $r\in R$, the element $(r*x,r*y)\in R^m\times R^n$ is in $B$, and for any $(x',y')\in B$, the element $(x+x',y+y')$ is in $B$.
+
+This is certainly doable, but for this exercise, we only ask that you prove that the composite of two linear relations is linear.
+\end{exercise}
+
+Just like we gave a sound and complete presentation for the prop of matrices in
+\cref{thm.presentation_mat}, it is possible to give a sound and complete
+presentation for linear relations on $R$. Moreover, it is possible to give such
+a presentation whose generating set is $G_R\sqcup G_R\op$ as in
+\cref{eqn.SFG_plus} and whose equations include those from
+\cref{thm.presentation_mat}, plus a few more. This presentation gives a
+graphical method for doing linear algebra: an equation between linear subspaces
+is true \emph{if and only if} it can be proved using the equations from the
+presentation.
+
+Although not difficult, we leave the full presentation to further reading
+(\cref{sec.ch5_further_reading}). Instead, we'll conclude our exploration of the
+prop of linear relations by noting that some of these `few more' equations state
+that relations---just like co-design problems in \cref{chap.codesign}---form a
+compact closed category.
+
+
+\paragraph{Compact closed structure.}%
+Using the icons available to us for signal flow graphs, we can build morphisms
+that look like the `cup' and `cap' from \cref{def.compact_closed}:
+\begin{equation}%
+\label{eqn.cup_cap_sfgs}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=bdot] (0) at (-0.25, -0) {};
+	\node [style=none] (1) at (0.75, -0.5) {};
+	\node [style=none] (2) at (0.75, 0.5) {};
+	\node [style=bdot] (3) at (-0.75, -0) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw [bend right, looseness=1.00] (2.center) to (0);
+	\draw [bend right, looseness=1.00] (0) to (1.center);
+	\draw (0) to (3);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+  \hspace{.1\textwidth}
+  \mbox{ and }
+  \hspace{.1\textwidth}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=bdot] (0) at (0.25, -0) {};
+	\node [style=none] (1) at (-0.75, -0.5) {};
+	\node [style=none] (2) at (-0.75, 0.5) {};
+	\node [style=bdot] (3) at (0.75, -0) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw [bend left, looseness=1.00] (2.center) to (0);
+	\draw [bend left, looseness=1.00] (0) to (1.center);
+	\draw (0) to (3);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+\end{equation}
+The behaviors of these graphs are respectively 
+\[
+ \{(0,(x,x)) \mid x\in R\} \subseteq R^0\times R^2  \quad\mbox{ and }\quad 
+ \{((x,x),0) \mid x\in R\} \subseteq R^2 \times R^0.
+\]
+In fact, these show the object $1$ in the prop $\rel_R$ is dual to itself: the
+morphisms from \cref{eqn.cup_cap_sfgs} serve as the $\eta_1$ and $\epsilon_1$
+from \cref{def.compact_closed}. Using monoidal products of these morphisms, one
+can show that any object in $\rel_R$ is dual to itself.
+
+Graphically, this means that the three signal flow graphs 
+\[
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=bdot] (0) at (-0.5, 0.5) {};
+	\node [style=bdot] (1) at (2.25, 1.5) {};
+	\node [style=none] (2) at (1.25, 1) {};
+	\node [style=bdot] (3) at (0.25, 0.5) {};
+	\node [style=none] (4) at (1.25, -0) {};
+	\node [style=none] (5) at (3.5, -0) {};
+	\node [style=none] (6) at (-1, 2) {};
+	\node [style=none] (7) at (1.25, 2) {};
+	\node [style=bdot] (8) at (3, 1.5) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (6.center) to (7.center);
+	\draw [bend left, looseness=1.00] (7.center) to (1);
+	\draw [bend left, looseness=1.00] (1) to (2.center);
+	\draw (1) to (8);
+	\draw [bend right, looseness=1.00] (2.center) to (3);
+	\draw (0) to (3);
+	\draw [bend right, looseness=1.00] (3) to (4.center);
+	\draw (4.center) to (5.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+  \hspace{.1\textwidth}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=bdot] (0) at (-0.75, 0.5) {};
+	\node [style=bdot] (1) at (-3.5, 1.5) {};
+	\node [style=none] (2) at (-2.5, 1) {};
+	\node [style=bdot] (3) at (-1.5, 0.5) {};
+	\node [style=none] (4) at (-2.5, -0) {};
+	\node [style=none] (5) at (-4.75, -0) {};
+	\node [style=none] (6) at (-0.25, 2) {};
+	\node [style=none] (7) at (-2.5, 2) {};
+	\node [style=bdot] (8) at (-4.25, 1.5) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (6.center) to (7.center);
+	\draw [bend right, looseness=1.00] (7.center) to (1);
+	\draw [bend right, looseness=1.00] (1) to (2.center);
+	\draw (1) to (8);
+	\draw [bend left, looseness=1.00] (2.center) to (3);
+	\draw (0) to (3);
+	\draw [bend left, looseness=1.00] (3) to (4.center);
+	\draw (4.center) to (5.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+  \hspace{.1\textwidth}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+      \begin{pgfonlayer}{nodelayer}
+	\node [style=none] (0) at (1.75, -0) {};
+	\node [style=none] (1) at (-1.75, -0) {};
+      \end{pgfonlayer}
+      \begin{pgfonlayer}{edgelayer}
+	\draw (0.center) to (1.center);
+      \end{pgfonlayer}
+    \end{tikzpicture}
+  \end{aligned}
+\]
+all represent the same relation.
+
+Using these relations, it is straightforward to check the following result.
+\begin{theorem} %
+\label{thm.rel_is_ccc}
+\index{compact closed category}
+The prop $\rel_R$ is a compact closed category in which every object $n\in\nn$ is dual to itself, $n=n^*$.%
+\index{dual!self}
+\end{theorem}
+
+To make our signal flow graphs simpler, we define new icons cup and cap
+by the equations
+\[
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (-0.25, -0) {};
+		\node [style=none] (1) at (0.75, -0.5) {};
+		\node [style=none] (2) at (0.75, 0.5) {};
+		\node [style=bdot] (3) at (-0.75, -0) {};
+		\node [style=none] (4) at (-2, 0.5) {};
+		\node [style=none] (5) at (-2, -0.5) {};
+		\node [style=none] (6) at (-1.5, -0) {$\coloneq$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend right, looseness=1.00] (2.center) to (0);
+		\draw [bend right, looseness=1.00] (0) to (1.center);
+		\draw (0) to (3);
+		\draw [bend right=90, looseness=3.50] (4.center) to (5.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+  \hspace{.1\textwidth}
+  \mbox{ and }
+  \hspace{.1\textwidth}
+  \begin{aligned}
+    \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=bdot] (0) at (-1, -0) {};
+		\node [style=none] (1) at (-2, -0.5) {};
+		\node [style=none] (2) at (-2, 0.5) {};
+		\node [style=bdot] (3) at (-0.5, -0) {};
+		\node [style=none] (4) at (0.75, 0.5) {};
+		\node [style=none] (5) at (0.75, -0.5) {};
+		\node [style=none] (6) at (0.25, -0) {$\coloneq$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (2.center) to (0);
+		\draw [bend left, looseness=1.00] (0) to (1.center);
+		\draw (0) to (3);
+		\draw [bend left=90, looseness=3.50] (4.center) to (5.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+  \end{aligned}
+\]
+
+\paragraph{Back to control theory.}%
+\index{control theory}
+
+Let's close by thinking about how to represent a simple control theory problem
+in this setting. Suppose we want to design a system to maintain the speed of a
+car at a desired speed $u$. We'll work in signal flow diagrams over the rig
+$\rr[s,s^{-1}]$ of polynomials in $s$ and $s\inv$ with coefficients in $\rr$ and
+where $ss\inv=s\inv s=1$. This is standard in control theory: we think of $s$ as
+integration, and $s\inv$ as differentiation.
+
+There are three factors that contribute to the actual speed
+$v$. First, there is the actual speed $v$. Second, there are external forces
+$F$. Third, we have our control system: this will take some linear combination
+$a*u+b*v$ of the desired speed and actual speed, amplify it by some factor $p$ to give a (possibly
+negative) acceleration. We can represent this system as follows, where $m$ is the
+mass of the car.
+\[
+  \begin{tikzpicture}[scale=.7]
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=none] (0) at (-5.75, 2.75) {};
+		\node [style=wamp] (1) at (-4, 2.75) {\scriptsize$\tfrac1m$};
+		\node [style=wamp] (2) at (-2.75, 2.75) {\scriptsize$s$};
+		\node [style=wdot] (3) at (-1, 2.25) {};
+		\node [style=none] (4) at (-2, 1.75) {};
+		\node [style=none] (5) at (-2, 2.75) {};
+		\node [style=wdot] (6) at (1.75, 1.5) {};
+		\node [style=none] (7) at (0.75, 0.675) {};
+		\node [style=none] (8) at (0.75, 2.25) {};
+		\node [style=none] (9) at (3.75, 2) {};
+		\node [style=none] (10) at (3.75, 1) {};
+		\node [style=bdot] (11) at (2.75, 1.5) {};
+		\node [style=none] (12) at (-5.75, 1.375) {};
+		\node [style=none] (13) at (-4, 1.75) {};
+		\node [style=none] (14) at (-4, 1) {};
+		\node [style=bdot] (15) at (-5, 1.375) {};
+		\node [style=none] (16) at (-2.75, 0.25) {};
+		\node [style=none] (17) at (-2.75, 1) {};
+		\node [style=wdot] (18) at (-1.75, 0.675) {};
+		\node [style=wamp] (19) at (-0.75, 0.675) {\scriptsize$p$};
+		\node [style=wamp] (20) at (0.25, 0.675) {\scriptsize$s$};
+		\node [style=none] (21) at (-4, -0.75) {};
+		\node [style=none] (22) at (3.75, -0.75) {};
+		\node [style=wamp] (23) at (-3.25, 1) {\scriptsize$a$};
+		\node [style=wamp] (24) at (-3.25, 0.25) {\scriptsize$b$};
+		\node [style=none] (25) at (-4, 0.25) {};
+		\node [style=none] (26) at (5.25, 2) {};
+		\node [style=none] (27) at (-6.25, 2.75) {$F$};
+		\node [style=none] (28) at (-6.25, 1.375) {$u$};
+		\node [style=none] (29) at (5.75, 2) {$v$};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [bend left, looseness=1.00] (5.center) to (3);
+		\draw [bend left, looseness=1.00] (3) to (4.center);
+		\draw [bend left, looseness=1.00] (8.center) to (6);
+		\draw [bend left, looseness=1.00] (6) to (7.center);
+		\draw [bend right, looseness=1.00] (9.center) to (11);
+		\draw [bend right, looseness=1.00] (11) to (10.center);
+		\draw [bend right, looseness=.80] (13.center) to (15);
+		\draw [bend right, looseness=.80] (15) to (14.center);
+		\draw [bend left, looseness=.80] (17.center) to (18);
+		\draw [bend left, looseness=.80] (18) to (16.center);
+		\draw (0.center) to (1);
+		\draw (1) to (2);
+		\draw (2) to (5.center);
+		\draw (3) to (8.center);
+		\draw (9.center) to (26.center);
+		\draw (6) to (11);
+		\draw (13.center) to (4.center);
+		\draw (12.center) to (15);
+		\draw (14.center) to (23);
+		\draw (23) to (17.center);
+		\draw (18) to (19);
+		\draw (19) to (20);
+		\draw (20) to (7.center);
+		\draw (25.center) to (24);
+		\draw (24) to (16.center);
+		\draw [bend right=90, looseness=2.75] (25.center) to (21.center);
+		\draw (21.center) to (22.center);
+		\draw [bend right=90, looseness=1.75] (22.center) to (10.center);
+	\end{pgfonlayer}
+\end{tikzpicture}
+\]
+This can be read as the following equation, where one notes that $v$ occurs twice:
+\[v=\int \frac{1}{m}F(t) dt + u(t) + p\int au(t)+bv(t) dt.\]
+
+Our control problem then asks: how do we choose $a$ and $b$ to make the
+behavior of this signal flow graph close to the relation $\{(F,u,v)\mid u=v\}$? By
+phrasing problems in this way, we can use extensions of the logic we have
+discussed above to reason about such complex, real-world problems.
+
+
+%-------- Section --------%
+\section{Summary and further reading}%
+\label{sec.ch5_further_reading}
+
+The goal of this chapter was to explain how props formalize signal flow graphs,
+and provide a new perspective on linear algebra. To do this, we examined the
+idea of free and presented structures in terms of universal properties. This
+allowed us to build props that exactly suited our needs.
+
+Pawe\l\ Soboci\'nski's \emph{Graphical Linear Algebra} blog is an accessible and
+fun exploration of the key themes of this chapter, which goes on to describe how
+concepts such as determinants, eigenvectors, and division by zero
+can be expressed using signal flow graphs \cite{Sobocinski:blog}. For
+the technical details, one could start with Baez and Erbele
+\cite{Baez.Erbele:2015a}, or Zanasi's thesis \cite{zanasi:thesis} and its
+related series of papers
+\cite{bonchi2014categorical,bonchi2015full,Bonchi.Sobocinski.Zanasi:2017a}.  For
+details about applications to control theory, see
+\cite{Fong.Sobocinski.Rapisardo:2016a}. From the control theoretic perspective,
+the ideas and philosophy of this chapter are heavily influenced by Willems'
+behavioral approach \cite{Willems:2007a}.
+
+For the reader that has not studied abstract algebra, we mention that rings,
+monoids, and matrices are standard fare in abstract algebra, and can be found in
+any standard introduction, such as \cite{Fraleign:1967a}. Rigs, also known as
+semirings, are a bit less well known, but no less interesting; a comprehensive
+survey of the literature can be found in \cite{Glazek:2013a}.%
+\index{semiring|see {rig}}
+
+Perhaps the most significant idea in this chapter is the separation of structure
+into syntax and semantics, related by a functor. This is not only present in the
+running theme of studying signal flow graphs, but in our aside
+\cref{ssec.alg_theories}, where we talk, for example, about monoid objects in
+monoidal categories. The idea of functorial semantics is yet another due to
+Lawvere, first appearing in his thesis \cite{Lawvere:2004}.
+
+%
+\index{prop|)}
+%
+\index{signal flow graph|)}
+
+\end{document}
