@@ -12,10 +12,14 @@ number: N
 
 **[Definition/Example/Exercise/Proposition] 2.N.** Paste the textbook text here.
 
+Use LaTeX for math: $d(x, y) := |y - x|$ for inline, or display:
+
+$$d(x, y) + d(y, z) \geq d(x, z)$$
+
 ## Diagram
 
 ```
-Draw any diagrams, matrices, tables, or worked examples here.
+Draw any diagrams, matrices, tables as ASCII.
 This helps make the Agda structure obvious.
 ```
 
@@ -25,10 +29,7 @@ This helps make the Agda structure obvious.
 module TYPE.chapter2.Name where
 
 -- Check src/plumbing/ for postulates (reals, classical logic)
--- open import plumbing.Reals using ([0,∞]; 0ℝ; ∞; _≥_; _+ℝ_)
-
 -- Check src/definitions/ before using stdlib
-open import definitions.chapter1.Preorder using (Preorder)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 -- Your formalization here

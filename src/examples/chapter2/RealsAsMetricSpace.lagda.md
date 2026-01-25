@@ -10,7 +10,7 @@ number: 37
 
 ## Textbook Description
 
-**Example 2.37.** The set ℝ of real numbers can be given a metric space structure, and hence a Lawvere metric space structure. Namely d(x, y) := |y - x|, the absolute value of the difference. So d(3, 7) = 4.
+**Example 2.37.** The set $\mathbb{R}$ of real numbers can be given a metric space structure, and hence a Lawvere metric space structure. Namely $d(x, y) := \lvert y - x \rvert$, the absolute value of the difference. So $d(3, 7) = 4$.
 
 ## Agda Setup
 
@@ -26,7 +26,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst
 
 ## The Example
 
-We construct ℝ as a Lawvere metric space with distance d(x, y) = |y - x|.
+We construct $\mathbb{R}$ as a Lawvere metric space with distance $d(x, y) = \lvert y - x \rvert$.
 
 ```agda
 -- We need: 0 ≥ dist x x, which follows from dist x x = 0∞ and x ≥ 0∞ for all x
@@ -39,7 +39,7 @@ We construct ℝ as a Lawvere metric space with distance d(x, y) = |y - x|.
 
 ### Implementation
 
-**Strategy:** We construct a Cost-category with ℝ as objects and dist as the hom-object.
+**Strategy:** We construct a Cost-category with $\mathbb{R}$ as objects and dist as the hom-object.
 
 ```agda
 ℝ-metric = record
@@ -54,9 +54,8 @@ We construct ℝ as a Lawvere metric space with distance d(x, y) = |y - x|.
 
 The real numbers with the standard distance function form a **symmetric** Lawvere metric space. This is a special case where:
 
-1. **Symmetry holds**: dist x y = dist y x for all x, y (from dist-sym)
-2. **Separation holds**: if dist x y = 0 then x = y
-3. **Distances are finite**: dist x y < ∞ for all x, y ∈ ℝ
+1. **Symmetry holds**: $d(x, y) = d(y, x)$ for all $x, y$ (from dist-sym)
+2. **Separation holds**: if $d(x, y) = 0$ then $x = y$
+3. **Distances are finite**: $d(x, y) < \infty$ for all $x, y \in \mathbb{R}$
 
 This example shows that ordinary metric spaces embed naturally into the more general framework of Lawvere metric spaces (Cost-categories).
-```

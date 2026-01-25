@@ -48,7 +48,8 @@ This makes the Agda obvious to write.
 
 ## Step 3: Write Minimal Agda
 
-Structure:
+Use `scripts/template.lagda.md` as base. Key structure:
+
 ```markdown
 ---
 layout: agda
@@ -62,18 +63,22 @@ number: N
 
 ## Textbook
 
-Quote the textbook definition/example/exercise.
+Quote textbook. Use LaTeX for math: $d(x,y)$ inline, $$d(x,y) \geq 0$$ display.
 
-## Diagram (if applicable)
+**LaTeX rendering pitfalls** (kramdown parses markdown before MathJax):
+- `|` for absolute value → use `\lvert x \rvert` not `|x|` (pipes become table delimiters)
+- `_` for subscripts in prose → escape as `\_` outside math mode
+- `*` for multiplication in prose → escape as `\*` outside math mode
+- `<` and `>` → use `\lt` and `\gt` if causing HTML issues
 
-Draw any diagrams, matrices, or examples as text.
+## Diagram
+
+ASCII diagrams, matrices, tables to clarify structure.
 
 ## Agda
 
 \```agda
 module TYPE.chapterN.Name where
-
--- imports
 -- code
 \```
 ```

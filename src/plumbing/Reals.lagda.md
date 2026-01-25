@@ -54,28 +54,43 @@ infix 8 -_
 
 ## Field Properties
 
+We postulate the minimal set and derive the rest.
+
 ```agda
 postulate
-  -- Addition
+  -- Addition (core)
   +-identityˡ : ∀ {x : ℝ} → 0ℝ + x ≡ x
-  +-identityʳ : ∀ {x : ℝ} → x + 0ℝ ≡ x
   +-assoc : ∀ {x y z : ℝ} → (x + y) + z ≡ x + (y + z)
   +-comm : ∀ {x y : ℝ} → x + y ≡ y + x
   +-inverseˡ : ∀ {x : ℝ} → (- x) + x ≡ 0ℝ
-  +-inverseʳ : ∀ {x : ℝ} → x + (- x) ≡ 0ℝ
 
-  -- Multiplication
+  -- Multiplication (core)
   *-identityˡ : ∀ {x : ℝ} → 1ℝ * x ≡ x
-  *-identityʳ : ∀ {x : ℝ} → x * 1ℝ ≡ x
   *-assoc : ∀ {x y z : ℝ} → (x * y) * z ≡ x * (y * z)
   *-comm : ∀ {x y : ℝ} → x * y ≡ y * x
 
   -- Distributivity
   *-distribˡ : ∀ {x y z : ℝ} → x * (y + z) ≡ (x * y) + (x * z)
-  *-distribʳ : ∀ {x y z : ℝ} → (x + y) * z ≡ (x * z) + (y * z)
 
-  -- Subtraction
+  -- Subtraction definition
   x-y≡x+-y : ∀ {x y : ℝ} → x - y ≡ x + (- y)
+
+-- Derived from commutativity
++-identityʳ : ∀ {x : ℝ} → x + 0ℝ ≡ x
++-identityʳ = trans +-comm +-identityˡ
+
++-inverseʳ : ∀ {x : ℝ} → x + (- x) ≡ 0ℝ
++-inverseʳ = trans +-comm +-inverseˡ
+
+*-identityʳ : ∀ {x : ℝ} → x * 1ℝ ≡ x
+*-identityʳ = trans *-comm *-identityˡ
+
+*-distribʳ : ∀ {x y z : ℝ} → (x + y) * z ≡ (x * z) + (y * z)
+*-distribʳ {x} {y} {z} = trans *-comm (trans *-distribˡ (trans (cong₂ _+_ *-comm *-comm) refl))
+  where
+    cong₂ : ∀ {A B C : Set} (f : A → B → C) {x₁ x₂ : A} {y₁ y₂ : B}
+          → x₁ ≡ x₂ → y₁ ≡ y₂ → f x₁ y₁ ≡ f x₂ y₂
+    cong₂ f refl refl = refl
 ```
 
 ## Ordered Field Properties
@@ -127,14 +142,6 @@ infixl 6 _+ℝ_
 infix 4 _≥_
 ```
 
-## Convenience: 0ℝ in [0,∞]
-
-```agda
--- 0ℝ as element of [0,∞] (using 0∞ for clarity, but we alias it)
-0ℝ[0,∞] : [0,∞]
-0ℝ[0,∞] = 0∞
-```
-
 ## [0, ∞] Properties
 
 ```agda
@@ -145,25 +152,30 @@ postulate
   ∞-greatest : ∀ {x : [0,∞]} → ∞ ≥ x
   0-least : ∀ {x : [0,∞]} → x ≥ 0∞
 
-  -- Addition
+  -- Addition (core)
   +ℝ-identityˡ : ∀ {x : [0,∞]} → 0∞ +ℝ x ≡ x
-  +ℝ-identityʳ : ∀ {x : [0,∞]} → x +ℝ 0∞ ≡ x
   +ℝ-assoc : ∀ {x y z : [0,∞]} → (x +ℝ y) +ℝ z ≡ x +ℝ (y +ℝ z)
   +ℝ-comm : ∀ {x y : [0,∞]} → x +ℝ y ≡ y +ℝ x
   +ℝ-mono : ∀ {x₁ x₂ y₁ y₂ : [0,∞]} → x₁ ≥ y₁ → x₂ ≥ y₂ → (x₁ +ℝ x₂) ≥ (y₁ +ℝ y₂)
   +ℝ-∞ˡ : ∀ {x : [0,∞]} → ∞ +ℝ x ≡ ∞
-  +ℝ-∞ʳ : ∀ {x : [0,∞]} → x +ℝ ∞ ≡ ∞
+
+-- Derived from commutativity
++ℝ-identityʳ : ∀ {x : [0,∞]} → x +ℝ 0∞ ≡ x
++ℝ-identityʳ = trans +ℝ-comm +ℝ-identityˡ
+
++ℝ-∞ʳ : ∀ {x : [0,∞]} → x +ℝ ∞ ≡ ∞
++ℝ-∞ʳ = trans +ℝ-comm +ℝ-∞ˡ
 ```
 
 ---
 
 # Metric Space Adaptations
 
-Properties connecting ℝ to metric space concepts via absolute difference.
+Properties connecting ℝ to metric space concepts via distance.
 
 ```agda
 postulate
-  -- Absolute difference as distance (|x - y| lifted to [0,∞])
+  -- Distance function (|x - y| lifted to [0,∞])
   dist : ℝ → ℝ → [0,∞]
 
   -- Self-distance is zero
