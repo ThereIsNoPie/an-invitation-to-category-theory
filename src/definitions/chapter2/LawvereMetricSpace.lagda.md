@@ -36,7 +36,10 @@ Since d(x, x) ∈ [0, ∞], if 0 ≥ d(x, x) then d(x, x) = 0. So the first cond
 module definitions.chapter2.LawvereMetricSpace where
 
 open import definitions.chapter2.VCategory using (VCategory)
+open import definitions.chapter2.MetricSpace using (MetricSpace)
 open import examples.chapter2.Cost using (Cost; [0,∞]; _≥_; _+ℝ_; 0ℝ; 0∞; ∞)
+open import plumbing.Reals using (0-least)
+open import Relation.Binary.PropositionalEquality using (_≡_; sym; subst)
 ```
 
 ## Agda Formalization
@@ -47,6 +50,21 @@ A Lawvere metric space is simply a V-category enriched in Cost.
 -- A Lawvere metric space is a Cost-category
 LawvereMetricSpace : Set₁
 LawvereMetricSpace = VCategory Cost
+```
+
+## Converting from Metric Space
+
+Every metric space gives rise to a Lawvere metric space by forgetting the symmetry and separation axioms.
+
+```agda
+fromMetricSpace : MetricSpace → LawvereMetricSpace
+fromMetricSpace M = record
+  { Ob = X
+  ; hom = d
+  ; identity = subst (0∞ ≥_) (sym zero-self) 0-least
+  ; composition = triangle
+  }
+  where open MetricSpace M
 ```
 
 ## Unpacking the Definition

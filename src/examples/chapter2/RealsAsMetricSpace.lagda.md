@@ -17,37 +17,34 @@ number: 37
 ```agda
 module examples.chapter2.RealsAsMetricSpace where
 
-open import plumbing.Reals using (ℝ; [0,∞]; 0∞; _≥_; _+ℝ_; dist; dist-refl; dist-triangle; dist-sym; 0-least)
-open import definitions.chapter2.LawvereMetricSpace using (LawvereMetricSpace)
-open import definitions.chapter2.VCategory using (VCategory)
-open import examples.chapter2.Cost using (Cost)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
+open import plumbing.Reals using (ℝ; [0,∞]; 0∞; dist; dist-refl; dist-triangle; dist-sym; dist-zero→eq)
+open import definitions.chapter2.MetricSpace using (MetricSpace)
+open import definitions.chapter2.LawvereMetricSpace using (LawvereMetricSpace; fromMetricSpace)
 ```
 
-## The Example
+## The Real Numbers as a Metric Space
 
-We construct $\mathbb{R}$ as a Lawvere metric space with distance $d(x, y) = \lvert y - x \rvert$.
-
-```agda
--- We need: 0 ≥ dist x x, which follows from dist x x = 0∞ and x ≥ 0∞ for all x
-0≥dist-refl : ∀ {x : ℝ} → 0∞ ≥ dist x x
-0≥dist-refl {x} = subst (0∞ ≥_) (sym dist-refl) 0-least
-
--- The reals form a Lawvere metric space
-ℝ-metric : LawvereMetricSpace
-```
-
-### Implementation
-
-**Strategy:** We construct a Cost-category with $\mathbb{R}$ as objects and dist as the hom-object.
+We first construct $\mathbb{R}$ as an ordinary metric space with distance $d(x, y) = \lvert y - x \rvert$.
 
 ```agda
-ℝ-metric = record
-  { Ob = ℝ
-  ; hom = dist
-  ; identity = 0≥dist-refl
-  ; composition = dist-triangle
+ℝ-MetricSpace : MetricSpace
+ℝ-MetricSpace = record
+  { X = ℝ
+  ; d = dist
+  ; zero-self = dist-refl
+  ; separation = dist-zero→eq
+  ; symmetry = dist-sym
+  ; triangle = dist-triangle
   }
+```
+
+## The Real Numbers as a Lawvere Metric Space
+
+Every metric space gives rise to a Lawvere metric space. We simply apply the conversion.
+
+```agda
+ℝ-LawvereMetricSpace : LawvereMetricSpace
+ℝ-LawvereMetricSpace = fromMetricSpace ℝ-MetricSpace
 ```
 
 ## Interpretation
