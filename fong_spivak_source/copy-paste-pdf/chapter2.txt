@@ -1,0 +1,1421 @@
+breaking an egg. To obtain the things we want
+requires resources, and the process of transforming what we have into what we want is
+often an intricate one. In this chapter, we will discuss how monoidal preorders can help
+us think about this matter.
+Consider the following three questions you might ask yourself:
+● Given what I have, is it possible to get what I want?
+● Given what I have, what is the minimum cost to get what I want?
+● Given what I have, what is the set of ways to get what I want?
+These questions are about resources– those you have and those you want– but, perhaps
+more importantly, they are about moving from have to want: possibility of, cost of, and
+ways to.
+Such questions come up not only in our lives, but also in science and industry. In
+chemistry, one asks whether a certain set of compounds can be transformed into another
+set, how much energy such a reaction will require, or what methods exist for making it
+happen. In manufacturing, one asks similar questions.
+From an external point of view, both a chemist and an industrial firm might be
+regarded as store-houses of information on the above subjects. The chemist knows which
+compounds she can make given other ones, and how to do so; the firm has stored knowl
+edge of the same sort. The research work of the chemist and the firm is to use what they
+know in order to derive– or discover– new knowledge.
+This is roughly the first goal of this chapter: to discuss a formalism for express
+ing recipes– methods for transforming one set of resources into another– and for
+deriving new recipes from old. The idea here is not complicated, neither in life nor
+in our mathematical formalism. The value added then is to simply see how it works,
+so we can build on it within the book, and so others can build on it in their own
+work.
+We briefly discuss the categorical approach to this idea– namely that of monoidal
+preorders– for building new recipes from old. The following wiring diagram shows,
+assuming one knows how to implement each of the interior boxes, how to implement
+the preparation of a lemon meringue pie:
+2.1 Getting from a to b
+39
+(2.1)
+The wires show resources: we start with prepared crust, lemon, butter, sugar, and egg
+resources, and we end up with an unbaked pie resource. We could take this whole
+method and combine it with others, e.g. baking the pie:
+In the above example we see that resources are not always consumed when they are
+used. For example, we use an oven to convert– or catalyze the transformation of– an
+unbaked pie into a baked pie, and we get the oven back after we are done. It’s a nice
+feature of ovens! To use economic terms, the oven is a “means of production” for pies.
+String diagrams are important mathematical objects that will come up repeatedly in
+this book. They were invented in the mathematical context– more specifically in the
+context of monoidal categories– by Joyal and Street [JS93], but they have been used
+less formally by engineers and scientists in various contexts for a long time.
+As we said above, our first goal in this chapter is to use monoidal preorders, and
+the corresponding wiring diagrams, as a formal language for building new recipes from
+old. Our second goal is to discuss something called V-categories for various monoidal
+preorders V.
+A V-category is a set of objects, which one may think of as points on a map, where
+V somehow “structures the question” of getting from point a to point b. The examples
+of monoidal preorders V that we will be most interested in are called Bool and Cost.
+Roughly speaking, a Bool-category is a set of points where the question of getting from
+point a to point b has a true / false answer. A Cost-category is a set of points where
+the question of getting from a to b has an answer d ∈[0,∞], a cost.
+40
+Resource Theories: Monoidal Preorders and Enrichment
+This story works in more generality than monoidal preorders. Indeed, in Chapter 4 we
+will discuss something called a monoidal category, a notion which generalizes monoidal
+preorders, and we will generalize the definition of V-category accordingly. In this more
+general setting, V-categories can also address our third question above, describing meth
+ods of getting between points. For example a Set-category is a set of points where the
+question of getting from point a to point b has a set of answers (elements of which might
+be called methods).
+We will begin in Section 2.2 by defining symmetric monoidal preorders, giving a
+few preliminary examples and discussing wiring diagrams. We then give many more
+examples of symmetric monoidal preorders, including some real-world examples, in the
+form of resource theories, and some mathematical examples that will come up again
+throughout the book. In Section 2.3 we discuss enrichment and V-categories– how a
+monoidal preorder V can “structure the question” of getting from a to b– and then give
+some important constructions on V-categories (Section 2.4), and analyze them using a
+sort of matrix multiplication technique (Section 2.5).
+2.2
+2.2.1
+Symmetric Monoidal Preorders
+In Section 1.2.2 we introduced preorders. The notation for a preorder, namely (X,≤),
+refers to two pieces of structure: a set called X and a relation called ≤ that is reflexive
+and transitive.
+We want to add to the concept of preorders a way of combining elements in X,an
+operation taking two elements and adding or multiplying them together. However, the
+operation does not have to literally be addition or multiplication; it only needs to satisfy
+some of the properties one expects from them.
+Definition and First Examples
+Webegin with a formal definition of symmetric monoidal preorders.
+Definition 2.1. A(strict)symmetric monoidal structure on a preorder (X,≤) consists
+of two constituents:
+(i) an element I ∈ X, called the monoidal unit,
+(ii) a function ⊗: X × X → X, called the monoidal product.
+These constituents must satisfy the following properties, where we write ⊗(x1, x2) =
+x1 ⊗x2:
+(a) for all x1, x2, y1, y2 ∈ X,ifx1 ≤ y1 and x2 ≤ y2, then x1 ⊗ x2 ≤ y1 ⊗ y2,
+(b) for all x ∈ X, the equations I ⊗ x = x and x ⊗ I = x hold,
+(c) for all x, y,z ∈ X, the equation (x ⊗ y) ⊗ z = x ⊗(y ⊗ z) holds,
+(d) for all x, y ∈ X, the equation x ⊗ y = y ⊗ x holds.
+We call these conditions monotonicity, unitality, associativity, and symmetry respec
+tively. A preorder equipped with a symmetric monoidal structure, (X,≤, I,⊗), is called
+a symmetric monoidal preorder.
+2.2SymmetricMonoidalPreorders 41
+Anyonecanproposeaset X, anorder≤onX, anelement I inX, andabinary
+operation⊗onXandaskwhether (X,≤,I,⊗) isasymmetricmonoidal preorder.
+And it will indeed be one, as long as it satisfies rules (a), (b), (c), and (d) of
+Definition2.1.
+Remark2.2. It isoftenuseful toreplace=with∼ =throughoutDefinition2.1.The
+resultisaperfectlygoodnotion,calledaweakmonoidalstructure.Thereasonwechose
+equalityisthatitmakesequationslooksimpler,whichwehopeaidsfirst-timereaders.
+Thenotationfor themonoidalunit andthemonoidalproductmayvary:monoidal
+unitswehaveseenincludeI (asinthedefinition),0,1,true,false,{∗},andmore.
+Monoidalproductswehaveseeninclude⊗(asinthedefinition),+,∗,∧,∨,and×.The
+preferrednotationinagivensettingiswhateverbesthelpsourbrainsrememberwhat
+we’retryingtodo;thenamesIand⊗arejustdefaults.
+Example2.3. Thereisawell-knownpreorderstructure,denoted≤,onthesetRofreal
+numbers;e.g.−5≤√2.Wepropose0asamonoidalunitand+:R×R→Rasa
+monoidalproduct.Does(R,≤,0,+)satisfytheconditionsofDefinition2.1?
+Ifx1≤y1andx2≤y2,itistruethatx1+x2≤y1+y2.Itisalsotruethat0+x=x
+andx+0=x,that(x+y)+z=x+(y+z),andthatx+y=y+x.Thus(R,≤,0,+)
+satisfiestheconditionsofbeingasymmetricmonoidalpreorder.
+Exercise2.4. Consideragainthepreorder (R,≤) fromExample2.3.Someonepro
+poses1asamonoidal unit and∗(usualmultiplication) asamonoidal product.But
+anexpertwalksbyandsays“thatwon’twork.”Figureoutwhy,orprove theexpert
+wrong!
+Example2.5. AmonoidconsistsofasetM,afunction∗:M×M→Mcalledthe
+monoidmultiplication,andanelemente∈Mcalledthemonoidunit,suchthat,when
+youwrite∗(m,n)asm∗n,i.e.usinginfixnotation,theequations
+m∗e=m, e∗m=m, (m∗n)∗p=m∗(n∗p) (2.2)
+holdforallm,n,p∈M.Itiscalledcommutativeifalsom∗n=n∗m.
+Everyset SdeterminesadiscretepreorderDiscS (wherem≤n iffm=n; see
+Example1.27),andit iseasytocheckthat if(M,e,∗)isacommutativemonoidthen
+(DiscM,=,e,∗)isasymmetricmonoidalpreorder.
+Exercise2.6. Wesaiditwaseasytocheckthat if(M,∗,e)isacommutativemonoid
+then(DiscM,=,∗,e)isasymmetricmonoidalpreorder.Werewetellingthetruth?
+Example2.7. Hereisanon-exampleforpeoplewhoknowthegame“standardpoker.”
+Let Hbe the set of all poker hands,where ahandmeans a choiceof five cards
+42
+Resource Theories: Monoidal Preorders and Enrichment
+from the standard 52-card deck. As an order, put h ≤ h if h beats or equals h in
+poker.
+One could propose a monoidal product ⊗: H × H → H by assigning h1 ⊗h2 to be
+“the best hand one can form out of the ten cards in h1 and h2.” If some cards are in both
+h1 and h2, just throw the duplicates away. So for example {2♥, 3♥, 4♥, 6♠, 7♠}⊗
+{2♥, 5♥, 6♥, 6♠, 7♠}={2♥, 3♥, 4♥, 5♥, 6♥}, because the latter is the best
+hand you can make with the former two.
+This proposal for a monoidal structure will fail the condition (a) of Definition 2.1:it
+could be the case that h1 ≤ i1 and h2 ≤ i2, and yet not be the case that h1⊗h2 ≤ i1⊗i2.
+For example, consider this case:
+h1 :={2♥, 3♥, 10♠, J♠, Q♠},
+Here, h1 ≤ i1 and h2 ≤ i2,buth1 ⊗ h2 ={10♠, J♠, Q♠, K♠, A♠} is the best
+possible hand and beats i1 ⊗ i2 ={5♠, 5♥, 6♥, 6♦, Q♦}.
+i1 :={4♣, 4♠, 6♥, 6♦, 10♦},
+h2 :={2♦, 3♦, 4♦, K♠, A♠},
+i2 :={5♠, 5♥, 7♥, J♦, Q♦}.
+Subsections 2.2.3 and 2.2.4 are dedicated to examples of symmetric monoidal pre
+orders. Some are aligned with the notion of resource theories, others come from pure
+math. When discussing the former, we will use wiring diagrams, so here is a quick
+primer.
+2.2.2
+Introducing Wiring Diagrams
+Wiring diagrams are visual representations for building new relationships from old. In
+a preorder without a monoidal structure, the only sort of relationship between objects is
+≤, and the only way you build a new ≤ relationship from old ones is by chaining them
+together. We denote the relationship x ≤ y by
+(2.3)
+Wecanchain somenumberofthese ≤-relationships– say 0, 1, 2, or 3 of them– together
+in series as shown here
+(2.4)
+If we add a symmetric monoidal structure, we can combine relationships not only in
+series but also in parallel. Here is an example:
+(2.5)
+2.2 Symmetric Monoidal Preorders
+43
+Different styles of wiring diagrams
+In fact, we shall see later that there are many styles of wiring diagrams. When we are
+dealing with preorders, the sort of wiring diagram we can draw is that with single-input,
+single-output boxes connected in series. When we are dealing with symmetric monoidal
+preorders, we can have more complex boxes and morecomplexwiringdiagrams, includ
+ing parallel composition. Later we shall see that for other sorts of categorical structures
+there are other styles of wiring diagrams:
+Wiring diagrams for symmetric monoidal preorders
+(2.6)
+The style of wiring diagram that makes sense in any symmetric monoidal preorder is
+that shown in Eq. (2.5): boxes can have multiple inputs and outputs, and they may be
+arranged in series and parallel. Symmetric monoidal preorders and their wiring diagrams
+are tightly coupled with each other. How so?
+The answer is that a monoidal preorder (X,≤, I,⊗) has some notion of element
+(x ∈ X), relationship (≤), and combination (using transitivity and ⊗), and so do wiring
+diagrams: the wires represent elements, the boxes represent relationships, and the wiring
+diagrams themselves show how relationships can be combined. We call boxes and wires
+icons; we will encounter several more icons in this chapter, and throughout the book.
+To get a bit more rigorous about the connection, let’s start with a monoidal preorder
+(X,≤, I,⊗) as in Definition 2.1. Wiring diagrams have wires on the left and the right.
+Each element x ∈ X can be made the label of a wire. Note that, given two objects x, y,
+we can either draw two wires in parallel– one labeled x and one labeled y–orwecan
+draw one wire labeled x ⊗ y.
+We consider wires in parallel to represent the monoidal product of their labels, so we
+consider both cases above to represent the element x ⊗ y. Note also that a wire labeled
+I or an absence of wires:
+both represent the monoidal unit I; another way of thinking of this is that the unit is the
+empty monoidal product.
+Awiring diagram runs between a set of parallel wires on the left and a set of parallel
+wires on the right. We say that a wiring diagram is valid if the monoidal product of the
+elements on the left is less than the monoidal product of those on the right. For example,
+if we have the inequality x ≤ y, the the diagram that is a box with a wire labeled x on
+the left and a wire labeled y on the right is valid; see the first box below:
+44
+Resource Theories: Monoidal Preorders and Enrichment
+The validity of the second box corresponds to the inequality x1 ⊗ x2 ≤ y1 ⊗ y2 ⊗ y3.
+Before going on to the properties from Definition 2.1, let us pause for an example of
+what we’ve discussed so far.
+Example 2.8. Recall the symmetric monoidal preorder (R,≤,0,+) from Example 2.3.
+The wiring diagrams for it allow wires labeled by real numbers. Drawing wires in par
+allel corresponds to adding their labels, and the wire labeled 0 is equivalent to no wires
+at all.
+And here we express a couple of facts about (R,≤,0,+) in this language: 4 ≤ 7 and
+2 +5≤−1+5+3.
+We now return to how the properties of symmetric monoidal preorders correspond
+to properties of this sort of wiring diagram. Let’s first talk about the order structure:
+conditions (a)– reflexivity– and (b)– transitivity– from Definition 1.25. Reflexivity
+says that x ≤ x, this means the diagram just consisting of a wire
+is always valid. Transitivity allows us to connect facts together: it says that if x ≤ y and
+y ≤z,then x ≤ z. This means that if the diagrams
+are valid, we can put them together and obtain the valid diagram
+Next let’s talk about the properties (a)–(d) from the definition of symmetric monoidal
+structure (Definition 2.1). Property (a) says that if x1 ≤ y1 and x2 ≤ y2 then x1 ⊗ x2 ≤
+y1 ⊗y2. This corresponds to the idea that stacking any two valid boxes in parallel is still
+valid:
+2.2 Symmetric Monoidal Preorders
+45
+Condition (b), that I ⊗ x = x and x ⊗ I = x, says we don’t need to worry about I or
+blank space; in particular diagrams such as the following are valid:
+Condition (c), that (x ⊗ y) ⊗ z = x ⊗ (y ⊗ z), says that we don’t have to worry about
+whether we build up diagrams from the top or from the bottom
+But this looks much harder than it is: the associative property should be thought of as
+saying that there is no distinction between the stuff on the very left above and the stuff
+on the very right, i.e.
+and indeed a diagram that moves from one to the other is valid.
+Finally, the symmetry condition (d), that x ⊗ y = y ⊗ x, says that a diagram is valid
+even if its wires cross:
+Onemayregardthepair ofcrossing wires as another icon in our iconography, in addition
+to the boxes and wires we already have.
+Wiring diagrams as graphical proofs
+Given a monoidal preorder X = (X,≤, I,⊗), a wiring diagram is a graphical proof of
+something about X. Each box in the diagram has a left side and a right side, say x and
+y, and represents the assertion that x ≤ y.
+Awiring diagram is a bunch of interior boxes connected together inside an exterior box.
+It represents a graphical proof that says: if all of the interior assertions are valid, then so
+is the exterior assertion.
+46
+Resource Theories: Monoidal Preorders and Enrichment
+The inner boxes in diagram (2.7) translate into the assertions:
+t ≤v+w, w+u≤x+z, v
+and the outer box translates into the assertion:
+t +u ≤ y+z.
+(2.7)
++x ≤y,
+(2.8)
+(2.9)
+The whole wiring diagram (2.7) says “if you know that the assertions in (2.8) are true,
+then I am a proof that the assertion in (2.9) is also true.” What exactly is the proof that
+diagram (2.7) represents? It is the proof
+t +u ≤ v+w+u ≤ v+x+z ≤ y+z.
+(2.10)
+Indeed, each inequality here is a vertical slice of the diagram (2.7), and the transitivity
+of these inequalities is expressed by connecting these vertical slices together.
+Example 2.9. Recall the lemon meringue pie wiring diagram from Eq. (2.1). It has five
+interior boxes, such as “separate egg” and “fill crust,” and it has one exterior box called
+“Prepare lemon meringue pie.” Each box is the assertion that, given the collection of
+resources on the left, say an egg, you can transform it into the collection of resources
+on the right, say an egg white and an egg yolk. The whole string diagram is a proof that
+if each of the interior assertions is true– i.e. you really do know how to separate eggs,
+make lemon filling, make meringue, fill crust, and add meringue– then the exterior
+assertion is true: you can prepare a lemon meringue pie.
+Exercise 2.10. The string of inequalities in Eq. (2.10) is not quite a proof, because
+technically there is no such thing as v+w+u, for example. Instead, there is (v+w)+u
+and v +(w+u),and so on.
+1. Formally prove, using only the rules of symmetric monoidal preorders (Defi
+nition 2.1) that, given the assertions in Eq. (2.8), the conclusion in Eq. (2.9)
+follows.
+2. Reflexivity and transitivity should show up in your proof. Make sure you are explicit
+about where they do.
+3. How can you look at the wiring diagram (2.5) and know that the symmetry axiom
+(Definition 2.1(d)) does not need to be invoked?
+We next discuss some examples of symmetric monoidal preorders. We begin in Sec
+tion 2.2.3 with some more concrete examples, from science, commerce, and informatics.
+2.2 Symmetric Monoidal Preorders
+47
+Then in Section 2.2.4 we discuss some examples arising from pure math, some of which
+will get a good deal of use later on, e.g. in Chapter 4.
+2.2.3
+Applied Examples
+Resource theories are studies of how resources are exchanged in a given arena. For
+example, in social resource theory one studies a marketplace where combinations of
+goods can be traded for– as well as converted into– other combinations of goods.
+Whereas marketplaces are very dynamic, and an apple might be tradable for an orange
+onSundaybutnotonMonday,whatwemeanbyresourcetheoryinthischapterisastatic
+notion: deciding “what buys what,” once and for all.1 This sort of static notion of con
+version might occur in chemistry: the chemical reactions that are possible one day will
+quite likely be possible on a different day as well. Manufacturing may be somewhere in
+between: the set of production techniques– whereby a company can convert one set of
+resources into another– do not change much from day to day.
+We learned about resource theories from [CFS16; Fri17], who go much further than
+we will; see Section 2.6 for more information. In this section we will focus only on
+the main idea. While there are many beautiful mathematical examples of symmetric
+monoidal preorders, as we shall see in Section 2.2.4, there are also ad hoc examples com
+ing from life experience. In the next chapter, on databases, we shall see the same theme:
+while there are some beautiful mathematical categories out there, database schemas are
+ad hoc organizational patterns of information. Describing something as “ad hoc” is often
+considered derogatory, but it just means “formed, arranged, or done for a particular
+purpose only.” There is nothing wrong with doing things for a particular purpose; it’s
+common outside of pure math and pure art. Let’s get to it.
+Chemistry
+In high school chemistry, we work with chemical equations, where material collections
+such as
+H2O, NaCl, 2NaOH, CH4+3O2
+are put together in the form of reaction equations, such as
+2H2O+2Na →2NaOH+H2.
+The collection on the left, 2H2O + 2Na, is called the reactant, and the collection on the
+right, 2NaOH + H2, is called the product.
+We can consider reaction equations such as the one above as taking place inside a
+single symmetric monoidal preorder (Mat,→,0,+). Here Mat is the set of all collec
+tions of atoms and molecules, sometimes called materials.SowehaveNaCl∈ Mat and
+4H2O+6Ne ∈ Mat.
+The set Mat has a preorder structure denoted by the → symbol, which is the preferred
+symbol in the setting of chemistry. To be clear, → is taking the place of the order relation
+1 Using some sort of temporal theory, e.g. the one presented in Chapter 7, one could take the notion here and
+have it change in time.
+48
+Resource Theories: Monoidal Preorders and Enrichment
+≤from Definition 2.1.The+ symbol is the preferred notation for the monoidal product
+in the chemistry setting, taking the place of ⊗. While it does not come up in practice,
+we use 0 to denote the monoidal unit.
+Exercise 2.11. Here is an exercise for people familiar with reaction equations: check
+that conditions (a), (b), (c), and (d) of Definition 2.1 hold.
+An important notion in chemistry is that of catalysis: one compound catalyzes a
+certain reaction. For example, one might have the following set of reactions:
+y +k →y+k, x+y→z, z+k→z+k.
+(2.11)
+Using the laws of monoidal preorders, we obtain the composed reaction
+x +y+k →x+y+k→z+k→z+k.
+(2.12)
+Here k is the catalyst because it is found in both the reactant and the product of the
+reaction. It is said to catalyze the reaction x + y → z. The idea is that the reaction
+x + y → z cannot take place given the reactions in Eq. (2.11). But if k is present,
+meaning if we add k to both sides, the resulting reaction can take place.
+The wiring diagram for the reaction in Eq. (2.12) isshowninEq. (2.13). The three
+interior boxes correspond to the three reactions given in Eq. (2.11), and the exterior box
+corresponds to the composite reaction x + y + k → z + k.
+Manufacturing
+(2.13)
+Whether we are talking about baking pies, building smart phones, or following pharma
+ceutical recipes, manufacturing firms need to store basic recipes, and build new recipes
+by combining simpler recipes in schemes like the one shown in Eq. (2.1)orEq.(2.13).
+The basic idea in manufacturing is exactly the same as that for chemistry, except
+there is an important assumption we can make in manufacturing that does not hold for
+chemical reactions:
+You can trash anything you want, and it disappears from view.
+This simple assumption has caused the world some significant problems, but it is still in
+effect. In our meringue pie example, we can ask: “what happened to the egg shell, or the
+paper wrapping the stick of butter”? The answer is they were trashed, i.e. thrown in the
+garbage bin. It would certainly clutter our diagram and our thinking if we had to carry
+these resources through the diagram:
+2.2 Symmetric Monoidal Preorders
+49
+Instead, in our daily lives and in manufacturing, we do not have to hold on to some
+thing if we don’t need it; we can just discard it. In terms of wiring diagrams, this can be
+shown using a new icon
+, as follows:
+(2.14)
+To model this concept of waste using monoidal categories, one just adds an additional
+axiom to (a), (b), (c), and (d) from Definition 2.1:
+(e) x ≤ I for all x ∈ X.
+(discard axiom)
+It says that every x can be converted into the monoidal unit I. In the notation of the
+chemistry section, we would write instead x → 0: any x yields nothing. But this is
+certainly not accepted in the chemistry setting. For example,
+H2O+NaCl →? H2O
+is certainly not a legal chemical equation. It is easy to throw things away in manufac
+turing, because we assume that we have access to– the ability to grab onto and directly
+manipulate– each item produced. In chemistry, when you have 1023 of substance A
+dissolved in something else, you cannot just simply discard A. So axiom (e) is valid in
+manufacturing but not in chemistry.
+Recall that in Section 2.2.2 we said that there were many different styles of wiring
+diagrams. Now we’re saying that adding the discard axiom changes the wiring dia
+gram style, in that it adds this new discard icon that allows wires to terminate, as
+shown in Eq. (2.14). In informatics, we will change the wiring diagram style yet
+again.
+50
+Resource Theories: Monoidal Preorders and Enrichment
+Informatics
+A major difference between information and a physical object is that information can
+be copied. Whereas one cup of butter never becomes two, it is easy for a single email to
+be sent to two different people. It is much easier to copy a music file than it is to copy a
+CD. Here we do not mean “copy the information from one compact disc onto another”– of course that’s easy– instead, we mean that it’s quite difficult to copy the physical
+disc, thereby forming a second physical disc! In diagrams, the distinction is between the
+relation
+and the relation
+The former is possible, the latter is magic.
+Of course material objects can sometimes be copied; cell mitosis is a case in point.
+But this is a remarkable biological process, certainly not something that is expected for
+ordinary material objects. In the physical world, we would make mitosis a box trans
+forming one cell into two. But in (classical, not quantum) information, everything can
+be copied, so we add a new icon to our repertoire.
+Namely, in wiring diagram notation, copying information appears as a new icon,
+allowing us to split wires:
+Nowwith two copies of the email, we can send one to Alice and one to Bob.
+,
+(2.15)
+Information can also be discarded, at least in the conventional way of thinking, so in
+addition to axioms (a) to (d) from Definition 2.1, we can keep axiom (e) from page 49
+and add a new copy axiom:
+(f) x ≤ x +x forall x ∈ X
+(copy axiom)
+allowing us to make mathematical sense of diagrams like Eq. (2.15).
+2.2SymmetricMonoidalPreorders 51
+Nowthatwehaveexamplesofmonoidalpreordersunderourbelts,let’sdiscusssome
+nicemathematicalexamples.
+2.2.4 AbstractExamples
+In this sectionwe discuss severalmathematical examples of symmetricmonoidal
+structuresonpreorders.
+Thebooleans
+Thesimplestnontrivialpreorderisthebooleans:B={true,false}withfalse≤
+true.Therearetwodifferentsymmetricmonoidalstructuresonit.
+Example2.12(BooleanswithAND).WecandefineamonoidalstructureonBbyletting
+themonoidalunitbetrueandthemonoidalproductbe∧(AND). Ifonethinksof
+false=0andtrue=1, then∧correspondstotheusualmultiplicationoperation
+∗.Thatis,withthiscorrespondence,thetwotablesbelowmatchup:
+∧ false true
+false false false
+true false true
+∗ 0 1
+0 0 0
+1 0 1
+(2.16)
+Onecancheckthatall thepropertiesinDefinition2.1hold,sowehaveamonoidal
+preorderwhichwedenoteBool :=(B,≤,true,∧).
+Boolwill be importantwhenweget to thenotionof enrichment.Enriching ina
+monoidalpreorderV=(V,≤,I,⊗)means“lettingVstructurethequestionofget
+tingfroma tob.”Allof thestructuresofamonoidalpreorder–i.e. thesetV, the
+orderingrelation≤, themonoidalunit I,andthemonoidalproduct⊗–playarolein
+howenrichmentworks.
+For example, let’s lookat thecaseofBool =(B,≤,true,∧).The fact that its
+underlyingsetisB={false,true}willtranslateintosayingthat“gettingfromato
+bisatrue/falsequestion.”Thefact thattrueisthemonoidalunitwill translate
+intosaying“youcanalwaysgetfromatoa.”Thefact that∧isthemonoidalproduct
+willtranslateintosaying“ifyoucangetfromatobANDyoucangetfrombtocthen
+youcangetfromatoc.”Finally,the“if–then”formoftheprevioussentenceiscoming
+fromtheorderrelation≤.WewillmakethismorepreciseinSection2.3.
+Wewillbeabletoplaythesamegamewithothermonoidalpreorders,asweshallsee
+afterwedefineamonoidalpreordercalledCostinExample2.21.
+Someothermonoidalpreorders
+It isabit imprecise tocallBool “the”booleanmonoidal preorder, because there is
+anothermonoidal structureon(B,≤),whichwedescribe inExercise2.13.Thefirst
+structure,however,seemstobemoreusefulinpracticethanthesecond.
+52 ResourceTheories:MonoidalPreordersandEnrichment
+Exercise2.13. Let(B,≤)beasabove,butnowconsiderthemonoidalproducttobe∨
+(OR).
+∨ false true
+false false true
+true true true
+max 0 1
+0 0 1
+1 1 1
+WhatmustthemonoidalunitbeinordertosatisfytheconditionsofDefinition2.1?
+Doesitsatisfytherestoftheconditions?
+InExample2.14andExercise2.15wegivetwodifferentmonoidalstructuresonthe
+preorder(N,≤)ofnaturalnumbers,where≤istheusualordering(0≤1and5≤16).
+Example2.14(Naturalnumberswithaddition). Thereisamonoidal structureon(N,≤)
+wherethemonoidalunitis0andthemonoidalproductis+, i.e.6+4=10.Itiseasy
+tocheckthatx1≤y1andx2≤y2 impliesx1+x2≤y1+y2,aswellasall theother
+conditionsofDefinition2.1.
+Exercise2.15. Showthere is amonoidal structureon(N,≤)where themonoidal
+productis∗,i.e.6∗4=24.Whatshouldthemonoidalunitbe?
+Example2.16(Divisibilityandmultiplication). Recall fromExample1.40that there isa
+“divisibility”orderonN:wewritem|ntomeanthatmdividesintonwithoutremainder.
+So1|mforallmand4|12.
+There is amonoidal structureon (N,| ),where themonoidal unit is1and the
+monoidalproductis∗,i.e.6∗4=24.Thenifx1|y1andx2|y2,then(x1∗x2)|(y1∗y2).
+Indeed, if thereissomep1,p2∈Nsuchthatx1∗p1=y1andx2∗p2=y2, then
+(p1∗p2)∗(x1∗x2)=y1∗y2.
+Exercise2.17. Againtakingthedivisibilityorder(N,| ),someoneproposes0asthe
+monoidalunitand+asthemonoidalproduct.Doesthatproposalsatisfytheconditions
+ofDefinition2.1?Whyorwhynot?
+Exercise 2.18. Consider the preorder (P,≤) with Hasse diagram
+no→maybe→yes.Weproposeamonoidalstructurewithyesasthemonoidal
+unitand“min”asthemonoidalproduct.
+1.Makesenseof“min”byfillinginthemultiplicationtablewithelementsofP.
+min no maybe yes
+no ? ? ?
+maybe ? ? ?
+yes ? ? ?
+2. Checkthat theaxiomsofDefinition2.1holdforNMY:=(P,≤,yes,min),given
+yourdefinitionofmin.Ifnot,changeyourdefinitionofmin.
+2.2 Symmetric Monoidal Preorders
+53
+Exercise 2.19. Let S be a set and let P(S) be its power set, the set of all subsets of
+S, including the empty subset, ∅ ⊆ S, and the “everything” subset, S ⊆ S. We can
+give P(S) an order: A ≤ B is given by the subset relation A ⊆ B, as discussed in
+Example 1.45. We propose a symmetric monoidal structure on P(S) with monoidal unit
+S and monoidal product given by intersection A ∩ B.
+Does it satisfy the conditions of Definition 2.1?
+Exercise 2.20. Let PropN denote the set of all mathematical statements one can make
+about a natural number, where we consider two statements to be the same if one is true
+if and only if the other is true. For example “n is prime” is an element of PropN, and
+so are “n = 2” and “n ≥ 11.” The statements “n + 2 = 5” and “n is the least odd
+prime” are considered the same. Given P, Q ∈ PropN,wesayP ≤ Q if for all n ∈ N,
+whenever P(n) is true, so is Q(n).
+Define a monoidal unit and a monoidal product on PropN that satisfy the conditions
+of Definition 2.1.
+The Monoidal preorder cost
+As wesaid above, when we enrich in monoidal preorders we see them as different ways
+to structure the question of “getting from here to there.” We will explain this in more
+detail in Section 2.3. The following monoidal preorder will eventually structure a notion
+of distance or cost for getting from here to there.
+Example 2.21 (Lawvere’s monoidal preorder, Cost). Let [0,∞] denote the set of nonneg
+ative real numbers– such as 0, 1, 15.333, and 2π– together with ∞. Consider the
+preorder ([0,∞],≥), with the usual notion of ≥, where of course ∞≥ x for all
+x ∈[0,∞].
+There is a monoidal structure on this preorder, where the monoidal unit is 0 and the
+monoidal product is +. In particular, x +∞=∞for any x ∈[0,∞]. Let’s call this
+monoidal preorder
+Cost := ([0,∞],≥,0,+),
+because we can think of the elements of [0,∞] as costs. In terms of structuring “getting
+from here to there,” Cost seems to say “getting from a to b is a question of cost.”
+The monoidal unit being 0 will translate into saying that you can always get from
+a to a at no cost. The monoidal product being + will translate into saying that the
+cost of getting from a to c is at most the cost of getting from a to bplus the cost
+of getting from b to c. Finally, the “at most” in the previous sentence comes from
+the ≥.
+The opposite of a monoidal preorder
+One can take the opposite of any preorder, just flip the order: (X,≤)op := (X,≥);see
+Example 1.53. Proposition 2.22 says that if the preorder had a symmetric monoidal
+structure, so does its opposite.
+54
+Resource Theories: Monoidal Preorders and Enrichment
+Proposition 2.22. Suppose X = (X,≤) is a preorder and Xop = (X,≥) is its
+opposite. If (X,≤, I,⊗) is a symmetric monoidal preorder then so is its opposite,
+(X,≥, I,⊗).
+Proof. Let’s first check monotonicity. Suppose x1 ≥ y1 and x2 ≥ y2 in Xop; we need
+to show that x1 ⊗ x2 ≥ y1 ⊗ y2. But by definition of opposite order, we have y1 ≤ x1
+and y2 ≤ x2 in X, and thus y1 ⊗ y2 ≤ x1 ⊗ x2 in X. Thus indeed x1 ⊗ x2 ≥ y1 ⊗ y2 in
+Xop. The other three conditions are even easier; see Exercise 2.23.
+Exercise 2.23. Complete the proof of Proposition 2.22 by proving that the three
+remaining conditions of Definition 2.1 are satisfied.
+Exercise 2.24. Since Cost is a symmetric monoidal preorder, Proposition 2.22 says that
+Costop is too.
+1. What is Costop as a preorder?
+2. What is its monoidal unit?
+3. What is its monoidal product?
+2.2.5
+Monoidal Monotone Maps
+Recall from Example 1.44 that for any preorder (X,≤) there is an induced equivalence
+relation ∼
+=on X,where x ∼ = x iff both x ≤ x and x ≤ x.
+Definition 2.25. Let P = (P,≤P, IP,⊗P) and Q = (Q,≤Q,IQ,⊗Q) be monoidal
+preorders. A monoidal monotone from P to Q is a monotone map f : (P,≤P) →
+(Q,≤Q), satisfying two conditions:
+(a) IQ ≤Q f(IP),
+(b) f(p1) ⊗Q f(p2) ≤Q f(p1 ⊗P p2)
+for all p1, p2 ∈ P.
+There are strengthenings of these conditions that are also important. If f satisfies the
+following conditions, it is called a strong monoidal monotone:
+(a) IQ ∼ = f(IP),
+(b) f(p1) ⊗Q f(p2) ∼ = f(p1 ⊗P p2);
+and if it satisfies the following conditions it is called a strict monoidal monotone:
+(a ) IQ = f(IP),
+(b ) f(p1)⊗Q f(p2) = f(p1 ⊗P p2).
+Monoidal monotones are examples of monoidal functors, which we shall see various
+incarnations of throughout the book; see Definition 6.58. What we call monoidal mono
+tones could also be called lax monoidal monotones, and there is a dual notion of oplax
+2.2 Symmetric Monoidal Preorders
+55
+monoidal monotones, where the inequalities in (a) and (b) are reversed; we will not use
+oplaxity in this book.
+Example 2.26. There is a monoidal monotone i : (Z,≤,0,+) → (R,≤,0,+), where
+i(n) = n for all n ∈ Z. It is clearly monotonic, m ≤ n implies i(m) ≤ i(n).It iseven
+strict monoidal because i(0) = 0 and i(m + n) = i(m) +i(n).
+There is also a monoidal monotone f : (R,≤,0,+) → (Z,≤,0,+) going the other
+way. Here f(x) := x is the floor function, e.g. f (3.14) = 3. It is monotonic because
+x ≤ y implies f(x) ≤ f(y).Also f(0) = 0 and f(x) + f(y) ≤ f(x + y),soit is
+a monoidal monotone. But it is not strict or even strong because f (0.5) + f (0.5)=
+f (0.5 + 0.5).
+Recall Bool = (B,≤,true,∧) from Example 2.12 and Cost = ([0,∞],≥,0,+)
+from Example 2.21. There is a monoidal monotone g: Bool → Cost, given by
+g(false) :=∞and g(true) := 0.
+Exercise 2.27.
+1. Check that the map g: (B,≤,true,∧) → ([0,∞],≥,0,+) presented above
+indeed
+● is monotonic,
+● satisfies condition (a) of Definition 2.25,
+● satisfies condition (b) of Definition 2.25.
+2. Is g strict?
+Exercise 2.28. Let Bool and Cost be as above, and consider the following quasi-inverse
+functions d,u: [0,∞] → B defined as follows:
+d(x) := false if x >0,
+true
+1. Is d monotonic?
+if x = 0,
+u(x) := false if x =∞,
+true
+2. Does d satisfy conditions (a) and (b) of Definition 2.25?
+3. Is d strict?
+4. Is u monotonic?
+5. Does u satisfy conditions (a) and (b) of Definition 2.25?
+6. Is u strict?
+Exercise 2.29.
+if x < ∞.
+1. Is (N,≤,1,∗) a monoidal preorder, where ∗ is the usual multiplication of natural
+numbers?
+2. If not, why not? If so, does there exist a monoidal monotone (N,≤,0,+) →
+(N,≤,1,∗)? If not, why not? If so, find it.
+3. Is (Z,≤,1,∗) a monoidal preorder?
+56
+Resource Theories: Monoidal Preorders and Enrichment
+2.3
+2.3.1
+Enrichment
+In this section we will introduce V-categories, where V is a symmetric monoidal pre
+order. We shall see that Bool-categories are preorders, and that Cost-categories are a
+nice generalization of the notion of metric space.
+V-Categories
+While V-categories can be defined even when V is not symmetric, i.e. just obeys con
+ditions (a)–(c) of Definition 2.1, certain things don’t work quite right. For example, we
+shall see later in Exercise 2.54 that the symmetry condition is necessary in order for
+products of V-categories to exist. Anyway, here’s the definition.
+Definition 2.30. Let V = (V,≤,I,⊗) be a symmetric monoidal preorder. A V
+category X consists of two constituents, satisfying two properties. To specify X,
+(i) one specifies a set Ob(X), elements of which are called objects;
+(ii) for every two objects x, y, one specifies an element X(x, y) ∈ V, called the hom
+object.2
+The above constituents are required to satisfy two properties:
+(a) for every object x ∈ Ob(X) we have I ≤ X(x,x),
+(b) for every three objects x, y,z ∈ Ob(X),wehaveX(x, y) ⊗ X(y,z) ≤ X(x,z).
+Wecall V the base of the enrichment for X or say that X is enriched in V.
+Example 2.31. As we shall see in the next subsection, from every preorder we can con
+struct a Bool-category, and vice versa. So, to get a feel for V-categories, let us consider
+the preorder generated by the Hasse diagram
+How does this correspond to a Bool-category X? Well, the objects of X are simply
+the elements of the preorder, i.e. Ob(X) ={p,q,r,s,t}. Next, for every pair of objects
+(2.17)
+2 The word “hom” is short for homomorphism and reflects the origins of this subject. A more descriptive
+name for X(x, y) might be mapping object, but we use “hom” mainly because it is an important jargon
+word to know in the field.
+2.3 Enrichment
+57
+(x, y) we need an element of B ={false,true}: simply take true if x ≤ y, and
+false otherwise. So, for example, since s ≤ t and t≤ s,wehaveX(s,t) = true
+and X(t,s) = false. Recalling from Example 2.12 that the monoidal unit I of Bool
+is true, it’s straightforward to check that this obeys both (a) and (b), so we have a
+Bool-category.
+In general, it’s sometimes convenient to represent a V-category X with a square
+matrix. The rows and columns of the matrix correspond to the objects of X, and the
+(x, y)th entry is simply the hom-object X(x, y). So, for example, the above preorder in
+Eq. (2.17) can be represented by the matrix
+·≤· p q r s t
+p true true true true true
+q false true false true true
+r false false true true true
+s false false false true true
+t false false false false true
+2.3.2
+Preorders as Bool-Categories
+Our colleague Peter Gates has called category theory “a primordial ooze,” because so
+much of it can be defined in terms of other parts of it. There is nowhere to rightly call
+the beginning, because that beginning can be defined in terms of something else. So be
+it; this is part of the fun.
+Theorem 2.32. There is a one-to-one correspondence between preorders and Bool
+categories.
+Here we find ourselves in the ooze, because we are saying that preorders are the same
+as Bool-categories, whereas Bool is itself a preorder. “So then Bool is like ...enriched
+in itself?” Yes, every preorder, including Bool, is enriched in Bool, as we shall now see.
+Proof of Theorem 2.32. Let’s check that we can construct a preorder from any Bool
+category. Since B ={false,true}, Definition 2.30 says a Bool-category consists of
+two things:
+(i) a set Ob(X),
+(ii) for every x, y ∈ Ob(X) an element X(x, y) ∈ B, i.e. the element X(x, y) is either
+true or false.
+Wewill use these two things to begin forming a preorder whose elements are the objects
+of X. So let’s call the preorder (X,≤), and let X := Ob(X).For the≤ relation, let’s
+declare x ≤ y iff X(x, y) = true. We have the makings of a preorder, but for it to
+work, the ≤ relation must be reflexive and transitive. Let’s see if we get these from the
+properties guaranteed by Definition 2.30:
+58
+Resource Theories: Monoidal Preorders and Enrichment
+(a) for every element x ∈ X we have true ≤ X(x,x),
+(b) for every three elements x, y,z ∈ X we have X(x, y) ∧ X(y,z) ≤ X(x,z).
+For b ∈ Bool, iftrue ≤ b then b = true, so the first statement says X(x,x) =
+true, which means x ≤ x. For the second statement, one can consult Eq. (2.16). Since
+false ≤ bforallb ∈ B,theonlywaystatement(b)hasanyforceisifX(x, y) = true
+and X(y,z) = true, in which case it forces X(x,z) = true. This condition exactly
+translates as saying that x ≤ y and y ≤ z implies x ≤ z. Thus we have obtained
+reflexivity and transitivity from the two axioms of Bool-categories.
+In Example 2.31, we constructed a Bool-category from a preorder. We leave it to the
+reader to generalize this example and show that the two constructions are inverses; see
+Exercise 2.33.
+Exercise 2.33.
+1. Start with a preorder (P,≤), and use it to define a Bool-category as we did in Exam
+ple 2.31. In the proof of Theorem 2.32 we showed how to turn that Bool-category
+back into a preorder. Show that, doing so, you get the preorder you started with.
+2. Similarly, show that if you turn a Bool-category into a preorder using the above proof,
+and then turn the preorder back into a Bool-category using your method, you get the
+Bool-category you started with.
+We now discuss a beautiful application of the notion of enriched categories: metric
+spaces.
+2.3.3
+Lawvere Metric Spaces
+Metric spaces offer a precise way to describe spaces of points, each pair of which is
+separated by some distance. Here is the usual definition:
+Definition 2.34. A metric space (X,d) consists of:
+(i) a set X, elements of which are called points,
+(ii) a function d: X × X → R≥0, where d(x,y) is called the distance between x
+and y.
+These constituents must satisfy four properties:
+(a) for every x ∈ X,wehaved(x,x) = 0,
+(b) for every x, y ∈ X,ifd(x, y) = 0 then x = y,
+(c) for every x, y ∈ X,wehaved(x, y) = d(y,x),
+(d) for every x, y,z ∈ X,wehaved(x, y) +d(y,z) ≥ d(x,z).
+The fourth property is called the triangle inequality.
+If we ask instead in (ii) for a function d: X × X →[0,∞] = R≥0 ∪{∞}, we call
+(X,d) an extended metric space.
+2.3 Enrichment
+59
+The triangle inequality says that when plotting a route from x to z, the distance is
+always at most what yougetbychoosing anintermediate point y and going x → y → z.
+It can be invoked in three different ways in the above picture: 3 + 5 ≥ 7.2, but also
+5+7.2 ≥ 3,and 3+7.2 ≥ 5.Ohyeah, and 5+3 ≥ 7.2,7.2+5 ≥ 3,and7.2+3 ≥ 5.
+The triangle inequality wonderfully captures something about distance, as does
+the fact that d(x,x) = 0 for any x. However, the other two conditions are not
+quite as general as we would like. Indeed, there are many examples of things that
+“should” be metric spaces, but which do not satisfy conditions (b) or (c) of Defini
+tion 2.34.
+For example, what if we take X to be places in your neighborhood, but instead of
+measuring distance, you want d(x, y) to measure effort to get from x to y. Then if there
+are any hills, the symmetry axiom, d(x, y) =? d(y,x), fails: it’s easier to get from x
+downhill to y then to go from y uphill to x.
+Another way to find a model that breaks the symmetry axiom is to imagine that the
+elements of X are not points, but whole regions such as the US, Spain, and Boston. Say
+that the distance from region A to region B is understood using the setup “I will put you
+in an arbitrary part of A and you just have to get anywhere in B; what is the distance
+in the worst-case scenario?” So d(US,Spain) is the distance from somewhere in the
+western US to the western tip of Spain: you just have to get into Spain, but you start in
+the worst possible part of the US for doing so.
+Exercise 2.35. Which distance is bigger under the above description, d(Spain,US) or
+d(US,Spain)?
+This notion of distance, which is strongly related to something called Hausdorff dis
+tance,3 will again satisfy the triangle inequality, but it violates the symmetry condition.
+It also violates another condition, because d(Boston,US) = 0. No matter where you
+are in Boston, the distance to the nearest point of the US is 0. On the other hand,
+d(US,Boston)= 0.
+Finally, one can imagine a use for distances that are not finite. In terms of my effort,
+the distance from here to Pluto is ∞, and it would not be any better if Pluto was still a
+3 The Hausdorff distance gives a metric on the set of all subsets U ⊆ X of a given metric space (X,d).One
+f
+irst defines
+dL(U,V) := sup
+u∈U
+d(u,v),
+inf
+v∈V
+and this is exactly the formula we intend above; the result will be a Lawvere metric space. However, if one
+wants the Hausdorff distance to define a (symmetric) metric, as in Definition 2.34, one must take the above
+formula and symmetrize it: d(U, V) := max(dL(U,V),dL(V,U)). We happen to see the unsymmetrized
+notion as more interesting.
+60
+Resource Theories: Monoidal Preorders and Enrichment
+planet. Similarly, in terms of Hausdorff distance, discussed above, the distance between
+two regions is often infinite, e.g. the distance between {r ∈ R | r < 0} and {0} as subsets
+of (R,d) is infinite.
+When we drop conditions (b) and (c) and allow for infinite distances, we get the fol
+lowing relaxed notion of metric space, first proposed by Lawvere. Recall the symmetric
+monoidal preorder Cost = ([0,∞],≥,0,+) from Example 2.21.
+Definition 2.36. A Lawvere metric space is a Cost-category.
+This is a very compact definition, but it packs a punch. Let’s work out what it means,
+by relating it to the usual definition of metric space. By Definition 2.30,aCost-category
+Xconsists of:
+(i) a set Ob(X),
+(ii) for every x, y ∈ Ob(X) an element X(x, y) ∈[0,∞].
+Here the set Ob(X) is playing the role of the set of points, and X(x, y) ∈[0,∞] is
+playing the role of distance, so let’s write a little translator:
+X := Ob(X),
+d(x, y) := X(x, y).
+The properties of a category enriched in Cost are:
+(a) 0 ≥ d(x,x) for all x ∈ X,
+(b) d(x, y) +d(y,z) ≥ d(x,z) for all x, y,z ∈ X.
+Since d(x,x) ∈ [0,∞], if0≥ d(x,x) then d(x,x) = 0. So the first condition is
+equivalent to the first condition from Definition 2.34, namely d(x, x) = 0. The second
+condition is the triangle inequality.
+Example 2.37. The set R of real numbers can be given a metric space structure, and
+hence a Lawvere metric space structure. Namely d(x, y) :=|y − x|, the absolute value
+of the difference. So d(3,7) = 4.
+Exercise 2.38. Consider the symmetric monoidal preorder (R≥0,≥,0,+), which is
+almost the same as Cost, except it does not include ∞. How would you characterize the
+difference between a Lawvere metric space and a (R≥0,≥,0,+)-category in the sense
+of Definition 2.30?
+Presenting metric spaces with weighted graphs
+Just as one can convert a Hasse diagram into a preorder, one can convert any weighted
+graph– a graph whose edges are labeled with numbers w ≥ 0– into a Lawvere metric
+2.3 Enrichment
+61
+space. In fact, we will consider these as graphs labeled with elements of [0,∞], and
+more precisely call them Cost-weighted graphs.4
+One might think of a Cost-weighted graph as describing a city with some one-way
+roads (a two-way road is modeled as two one-way roads), each having some effort-to
+traverse, which for simplicity we just call distance. For example, consider the following
+weighted graphs:
+(2.18)
+Given a weighted graph, one forms a metric dX on its set X of vertices by setting d(p,q)
+to be the length of the shortest path from p to q. For example, here is the the table of
+distances for Y
+d( ) x y z
+x 0 4 3
+y 3 0 6
+z 7 4 0
+(2.19)
+Exercise 2.39. Copy and complete the following table of distances in the weighted
+graph X from Eq. (2.18).
+d( ) A B C D
+A 0 ? ? ?
+B 2 ? 5 ?
+C ? ? ? ?
+D ? ? ? ?
+Above we converted a weighted graph G, e.g. as shown in Eq. (2.18), into a table of
+distances, but this takes a bit of thinking. There is a more direct construction for taking
+G andgetting a square matrix MG, whose rows and columns are indexed by the vertices
+of G.Todoso,setMG to be 0along the diagonal, to be ∞ wherever an edge is missing,
+and to be the edge weight if there is an edge.
+4 This generalizes Hasse diagrams, which we could call Bool-weighted graphs– the edges of a Hasse
+diagram are thought of as weighted with true; we simply ignore any edges that are weighted with
+false, and neglect to even draw them!
+62
+Resource Theories: Monoidal Preorders and Enrichment
+For example, the matrix associated to Y in Eq. (2.18) would be
+MY :=
+x y z
+x 0 4 3
+y 3 0 ∞
+z ∞ 4 0
+(2.20)
+As soon as you see how we did this, you’ll understand that it takes no thinking to
+turn a weighted graph G into a matrix MG in this way. We shall see in Section 2.5.3
+that the more difficult “distance matrices” dY, such as (2.19), can be obtained from
+the easy graph matrices MY, such as (2.20), by repeating a certain sort of “matrix
+multiplication.”
+Exercise 2.40. Copy and complete the matrix MX associated to the graph X in
+Eq. (2.18):
+A B C D
+A 0 ? ? ?
+B 2 0 ∞ ?
+C ? ? ? ?
+D ? ? ? ?
+MX =
+2.3.4
+V-Variations on Preorders and Metric Spaces
+We have told the story of Bool and Cost. But in Section 2.2.4 we gave examples
+of many other monoidal preorders, and each one serves as the base of enrichment
+for a kind of enriched category. Which of them are useful? Something only becomes
+useful when someone finds a use for it. We will find uses for some and not others,
+though we encourage readers to think about what it would mean to enrich in the var
+ious monoidal categories discussed above; maybe they can find a use we have not
+explored.
+Exercise 2.41. Recall the monoidal preorder NMY := (P,≤,yes,min) from
+Exercise 2.18. Interpret what a NMY-category is.
+In the next two exercises, we use V-weighted graphs to construct V-categories. This
+is possible because we will use preorders that, like Bool and Cost, have joins.
+Exercise 2.42. Let M be a set and let M := (P(M),⊆, M,∩) be the monoidal preorder
+whose elements are subsets of M.
+Someone gives the following interpretation, “for any set M, imagine it as the set
+of modes of transportation (e.g. car, boat, foot). Then an M-category X tells you
+all the modes that will get you from a all the way to b, for any two points a,b ∈
+Ob(X).”
+2.4 Constructions on V-Categories
+63
+1. Draw a graph with four vertices and four or five edges, each labeled with a subset of
+M ={car,boat,foot}.
+2. Fromthis graph is it possible to construct an M-category, where the hom-object from
+x to y is computed as follows: for each path p from x to y, take the intersection of
+the sets labeling the edges in p. Then, take the union of the these sets over all paths p
+from x to y. Write out the corresponding 4×4-matrix of hom-objects, and convince
+yourself that this is indeed an M-category.
+3. Does the person’s interpretation look right, or is it subtly mistaken somehow?
+Exercise 2.43. Consider the monoidal preorder W := (N ∪{∞},≤,∞,min).
+1. Draw a small graph labeled by elements of N ∪{∞}.
+2. Write out the matrix whose rows and columns are indexed by the nodes in the graph,
+and whose (x, y)th entry is given by the maximum over all paths p from x to y of the
+minimum edge label in p.
+3. Prove that this matrix is the matrix of hom-objects for a W-category. This will give
+you a feel for how W works.
+4. Make up an interpretation, like that in Exercise 2.42, for how to imagine enrichment
+in W.
+2.4
+2.4.1
+Constructions on V-Categories
+Now that we have a good intuition for what V-categories are, we give three examples
+of what can be done with V-categories. The first (Section 2.4.1) is known as change of
+base. This allows us to use a monoidal monotone f : V → W to construct W-categories
+from V-categories. The second construction (Section 2.4.2), that of V-functors, allows
+us to complete the analogy: a preorder is to a Bool-category as a monotone map is to
+what? The third construction (Section 2.4.2) is known as a V-product and gives us a way
+of combining two V-categories.
+Changing the Base of Enrichment
+Any monoidal monotone V → W between symmetric monoidal preorders lets us
+convert V-categories into W-categories.
+Construction 2.44. Let f : V → W be a monoidal monotone. Given a V-category C,
+one forms the associated W-category, say Cf , as follows.
+(i) We take the same objects: Ob(Cf ) := Ob(C).
+(ii) For any c,d ∈ Ob(C), put Cf(c,d) := f(C(c,d)).
+This construction Cf does indeed obey the definition of a W-category, as can be
+seen by applying Definition 2.25 (of monoidal monotone) and Definition 2.30 (of
+V-category):
+64
+Resource Theories: Monoidal Preorders and Enrichment
+(a) for every c ∈ C,wehave
+IW ≤ f(IV)
+≤ f(C(c,c))
+=Cf(c,c)
+(b) for every c,d,e ∈ Ob(C),wehave
+Cf (c,d) ⊗W Cf(d,e) = f(C(c,d))⊗W f(C(d,e))
+≤ f C(c,d)⊗V C(d,e)
+≤ f(C(c,e))
+=Cf(c,e)
+( f is monoidal monotone)
+(C is V-category)
+(definition of Cf );
+(definition of Cf )
+( f is monoidal monotone)
+(C is V-category)
+(definition of Cf ).
+Example 2.45. As an example, consider the function f : [0,∞] → {true,false}
+given by
+f (x) := true ifx =0,
+(2.21)
+false ifx >0.
+It is easy to check that f is monotonic and that f preserves the monoidal product
+and monoidal unit; that is, it’s easy to show that f is a monoidal monotone. (Recall
+Exercise 2.28.)
+Thus f lets us convert Lawvere metric spaces into preorders.
+Exercise 2.46. Recall the “regions of the world” Lawvere metric space from Exer
+cise 2.35 and the text above it. We just learned that, using the monoidal monotone f in
+Eq. (2.21), we can convert it to a preorder. Draw the Hasse diagram for the preorder cor
+responding to the regions US, Spain, and Boston. How could you interpret this preorder
+relation?
+Exercise 2.47.
+1. Find another monoidal monotone g: Cost → Bool different from the one defined in
+Eq. (2.21).
+2. Using Construction 2.44, both your monoidal monotone g and the monoidal mono
+tone f in Eq. (2.21) can be used to convert a Lawvere metric space into a
+preorder. Find a Lawvere metric space X on which they give different answers,
+Xf =Xg.
+2.4.2
+Enriched Functors
+The notion of functor provides the most important type of relationship between
+categories.
+2.4ConstructionsonVVV-Categories 65
+Definition 2.48. Let Vbe a symmetricmonoidal preorder and let XandYbe
+V-categories.AV-functorfromXtoY,denotedF:X→Y,consistsofoneconstituent
+(i) afunctionF: Ob(X)→Ob(Y)
+subjecttooneconstraint
+(a) forallx1,x2∈Ob(X),onehasX(x1,x2)≤Y(F(x1),F(x2)).
+Example2.49. Forexample,wehavesaidseveral times–e.g. inTheorem2.32–that
+preordersareBool-categories,whereX(x1,x2)=trueisdenotedx1 ≤x2.One
+wouldhopethatmonotonemapsbetweenpreorderswouldcorrespondexactlytoBool
+functors,andthat’strue.Amonotonemap(X,≤X)→(Y,≤Y)isafunctionF:X→Y
+suchthat,foreveryx1,x2∈X, ifx1≤X x2thenF(x1)≤Y F(x2).Inotherwords,we
+have
+X(x1,x2)≤Y(F(x1),F(x2)),
+wheretheabove≤takesplaceintheenrichingcategoryV=Bool; thisisexactlythe
+conditionfromDefinition2.48.
+Remark2.50. Infact,wehavewhatiscalledanequivalenceofcategoriesbetweenthe
+categoryofpreordersandthecategoryofBool-categories. Inthenextchapterwewill
+developtheideasnecessarytostatewhatthismeansprecisely(Remark3.50).
+Example2.51. Lawveremetric spaces areCost-categories. ThedefinitionofCost
+functorshouldhopefullyreturnanicenotion–a“friend”–fromthetheoryofmetric
+spaces,anditdoes: it recoversthenotionofLipschitzfunction.ALipschitz(ormore
+precisely,1-Lipschitz) functionisoneunderwhichthedistancebetweenanypairof
+pointsdoesnot increase.That is,givenLawveremetricspaces(X,dX)and(Y,dY),a
+Cost-functorbetweenthemisafunctionF:X→Ysuchthatforeveryx1,x2∈Xwe
+havedX(x1,x2)≥dY(F(x1),F(x2)).
+Exercise2.52. Theconceptsofopposite,dagger,andskeleton(seeExamples1.53and
+1.67andRemark1.30)extendfrompreorders toV-categories.TheoppositeofaV
+categoryXisdenotedXopandisdefinedby
+(i)Ob(Xop):=Ob(X),and
+(ii) forallx,y∈X,wehaveXop(x,y):=X(y,x).
+AV-categoryXisadaggerV-categoryiftheidentityfunctionisaV-functor†:X→
+Xop.AndaskeletalV-categoryisoneinwhichif I≤X(x,y)andI≤X(y,x), then
+x=y.
+Recallthatanextendedmetricspace(X,d)isaLawveremetricspacewithtwoextra
+properties;seeproperties(b)and(c)inDefinition2.34.
+66
+Resource Theories: Monoidal Preorders and Enrichment
+1. Show that a skeletal dagger Cost-category is an extended metric space.
+2. Use Exercise 1.68 to make sense of the following analogy: “preorders are to sets as
+Lawvere metric spaces are to extended metric spaces.”
+2.4.3
+Product V-Categories
+If V = (V,≤,I,⊗) is a symmetric monoidal preorder and X and Y are V-categories,
+then we can define their V-product, which is a new V-category.
+Definition 2.53. Let X and Y be V-categories. Define their V-product, or simply
+product,tobetheV-category X × Y with
+(i) Ob(X ×Y) := Ob(X)×Ob(Y),
+(ii) (X × Y) (x, y),(x, y) := X(x,x)⊗Y(y,y),
+for two objects (x, y) and (x, y) in Ob(X × Y).
+Product V-categories are indeed V-categories (Definition 2.30); see Exercise 2.54.
+Exercise 2.54. Let X × Y be the V-product of V-categories as in Definition 2.53.
+1. Check that for every object (x, y) ∈ Ob(X×Y) we have I ≤ (X×Y) (x, y),(x, y) .
+2. Check that for every three objects (x1, y1), (x2, y2), and (x3, y3),wehave
+(X×Y) (x1, y1),(x2, y2)⊗(X×Y) (x2, y2),(x3, y3) ≤ (X×Y) (x1, y1),(x3, y3) .
+3. We said at the start of Section 2.3.1 that the symmetry of V (condition (d) of
+Definition 2.1) would be required here. Point out exactly where that condition
+is used.
+When taking the product of two preorders (P,≤P) × (Q,≤Q), as first described in
+Example 1.51, we say that (p1,q1) ≤ (p2,q2) iff both p1 ≤ p2 ANDq1 ≤ q2;theAND
+is the monoidal product ⊗ from Bool. Thus the product of preorders is an example of a
+Bool-product.
+Example 2.55. Let X and Y be the Lawvere metric spaces (i.e. Cost-categories) defined
+by the following weighted graphs:
+(2.22)
+2.4 Constructions on V-Categories
+67
+Their product is defined by taking the product of their sets of objects, so there are six
+objects in X × Y. And the distance dX×Y((x, y),(x, y)) between any two points is
+given by the sum dX(x,x) +dY(y, y).
+Examine the following graph, and make sure you understand how easy it is to derive
+from the weighted graphs for X and Y in Eq. (2.22):
+Exercise 2.56. Consider R as a Lawvere metric space, i.e. as a Cost-category (see
+Example 2.37). Form the Cost-product R × R. What is the distance from (5,6) to
+(−1,4)? Hint: apply Definition 2.53; the answer is not √40.
+In terms of matrices, V-products are also quite straightforward. They generalize what
+is known as the Kronecker product of matrices. The matrices for X and Y in Eq. (2.22)
+are shown below
+X A B C
+A 0 2 5
+B ∞ 0 3
+C ∞∞ 0
+and their product is:
+X×Y
+Y p q
+p 0 5
+q 8 0
+(A, p) (B,p) (C,p) (A,q) (B,q) (C,q)
+(A, p)
+(B, p)
+(C, p)
+0 2 5 5 7 10
+∞ 0 3 ∞ 5 8
+∞ ∞ 0 ∞ ∞ 5
+(A,q)
+(B,q)
+(C,q)
+8 10 13 0 2 5
+∞ 8 11 ∞ 0 3
+∞ ∞ 8 ∞ ∞ 0
+Wehave drawn the product matrix as a block matrix, where there is one block– shaped
+like X– for every entry of Y. Make sure you can see each block as the X-matrix shifted
+by an entry in Y. This comes directly from the formula from Definition 2.53 and the fact
+that the monoidal product in Cost is +.
+68
+Resource Theories: Monoidal Preorders and Enrichment
+2.5
+2.5.1
+Computing Presented V-Categories with Matrix Multiplication
+In Section 2.3.3 we promised a straightforward way to construct the matrix representa
+tion of a Cost-category from a Cost-weighted graph. To do this, we use a generalized
+matrix multiplication. We shall show that this works, not just for Cost, but also for
+Bool, and many other monoidal preorders. The property required of the preorder is that
+of being a unital, commutative quantale. These are preorders with all joins, plus one
+additional ingredient, being monoidal closed, which we define next, in Section 2.5.1.
+The definition of a quantale will be given in Section 2.5.2.
+Monoidal Closed Preorders
+The definition of V-category makes sense for any symmetric monoidal preorder V.
+But that does not mean that any base of enrichment V is as useful as any other.
+In this section we define closed monoidal categories, which in particular enrich
+themselves! “Before you can really enrich others, you should really enrich your
+self.”
+Definition 2.57. A symmetric monoidal preorder V = (V,≤, I,⊗) is called symmetric
+monoidal closed (or just closed) if, for every two elements v,w ∈ V, there is an element
+v 
+win V, called the hom-element, with the property
+for all a,v,w∈ V.
+(a ⊗v)≤ w iff a ≤(v w)
+(2.23)
+Remark2.58. Theterm‘closed’referstothefactthat a hom-element canbeconstructed
+for any two elements, so the preorder can be seen as closed under the operation of
+“taking homs.” In later chapters we’ll meet the closely related concepts of compact
+closed categories (Definition 4.44) and cartesian closed categories (Section 7.2.1) that
+make this idea more precise. See especially Exercise 7.8.
+Onecan consider the hom-element v 
+wasakindof“single-use v-to-w converter.”
+So Eq. (2.23) says that a and v are enough to get w if and only if a is enough to get a
+single-use v-to-w converter.
+Exercise 2.59. Condition (2.23) says precisely that there is a Galois connection in the
+sense of Definition 1.90. Let’s prove this fact. In particular, we’ll prove that a monoidal
+preorder is monoidal closed iff, given any v ∈ V, themap(−⊗v): V → V given by
+multiplying with v has a right adjoint. We write this right adjoint (v 
+−): V →V.
+1. Using Definition 2.1, show that (−⊗v) is monotone.
+2. Supposing that V is closed, show that for all v,w ∈ V we have (v 
+3. Using part 2, show that (v 
+−) is monotone.
+w)⊗v ≤w.
+4. Conclude that a symmetric monoidal preorder is closed if and only if the monotone
+map (−⊗v)has aright adjoint.
+2.5ComputingPresentedV-CategorieswithMatrixMultiplication 69
+Example2.60. ThemonoidalpreorderCost=([0,∞],≥,0,+) ismonoidalclosed.
+Indeed,foranyx,y∈[0,∞],definex y:=max(0,y−x).Then,foranya,x,y∈
+[0,∞],wehave
+a+x≥y iff a≥y−x iff max(0,a)≥max(0,y−x) iff a≥(x y)
+so satisfiestheconditionofEq.(2.23).
+Note that we have not considered subtraction inCost before; we can in fact
+usemonoidal closure to define subtraction in terms of the order andmonoidal
+structure!
+Exercise2.61. ShowthatBool=(B,≤,true,∧)ismonoidalclosed.
+Example2.62. Anon-exampleis(B,≤,false,∨).Indeed,supposewehada oper
+atorasinDefinition2.57.Notethatfalse≤p q,foranyp,qnomatterwhat
+is,becausefalseis less thaneverything.Butusinga=false, p=true, and
+q=false,wethengetacontradiction:(a∨p)≤qandyeta≤(p q).
+Example2.63.Westartedthischapterbytalkingaboutresourcetheories.Whatdoesthe
+closedstructurelooklikefromthatperspective?Forexample,inchemistryitwouldsay
+that foreverytwomaterialcollectionsc,donecanformamaterialcollectionc d
+withthepropertythat,foranya,onehas
+a+c→d iff a→(c d).
+Or,moredowntoearth,sincewehavethereaction2H2O+2Na→2NaOH+H2,we
+mustalsohave
+2H2O→(2Na (2NaOH+H2)).
+So,fromjust twomoleculesofwater,youcanformacertainsubstance,andnotmany
+substancesfitthebill–ourpreorderMatofchemicalmaterialsisnotclosed.
+Butitisnotsofar-fetched:thishypotheticalnewsubstance(2Na (2NaOH+H2))
+is not really a substance, but a potential reaction: namely that of converting
+sodium to sodium-hydroxide-plus-hydrogen. Twomolecules of water unlock that
+potential.
+Proposition2.64. SupposeV=(V,≤,I,⊗, ) isasymmetricmonoidalpreorder
+thatisclosed.Thenthefollowinghold.
+(a) Foreveryv∈V, themonotonemap−⊗v: (V,≤)→(V,≤) isleftadjoint to
+v −: (V,≤)→(V,≤).
+70
+Resource Theories: Monoidal Preorders and Enrichment
+(b) For any element v ∈ V and set of elements A ⊆ V, if the join a∈Aa exists then
+so does a∈Av ⊗a andwehave
+v ⊗
+a ∼ = 
+a∈A
+(c) For any v,w ∈ V,wehavev ⊗(v w)≤ w.
+(d) For any v ∈ V,wehavev ∼ = (I 
+(v ⊗a).
+a∈A
+v).
+(e) For any u,v,w∈ V,wehave(u v)⊗(v w)≤(u w).
+Proof. We go through the claims in order.
+(a) The definition of (−⊗v) being left adjoint to (v 
+(2.24)
+−) is exactly the condition
+Eq. (2.23); see Definition 1.90 and Exercise 2.59.
+(b) This follows from (a), using the fact that left adjoints preserve joins (Proposi
+tion 1.104).
+(c) This follows from (a), using the equivalent characterization of Galois connection in
+Proposition 1.101. More concretely, from reflexivity (v 
+w) ≤ (v w),we
+obtain (v 
+w) ⊗v ≤ wEq. (2.23), and we are done by symmetry, which says
+v ⊗(v w)=(v w)⊗v.
+(d) Since v⊗I = v ≤ v,Eq.(2.23)says v ≤ (I 
+(I 
+v) = I ⊗(I v)≤vby(c).
+(e) To obtain this inequality, we just need u ⊗ (u 
+follows by two applications of (c).
+v). For the other direction, we have
+v) ⊗ (v 
+w) ≤ w. But this
+One might read (c) as saying “if I have a v and a single-use v-to-w converter, I can
+have a w.” One might read (d) as saying “having a v is the same as having a single-use
+nothing-to-v converter.” And one might read (e) as saying “if I have a single-use u-to-v
+converter and a single-use v-to-w converter, I can get a single-use u-to-w converter.”
+Remark 2.65. We can consider V to be enriched in itself. That is, for every v,w ∈
+Ob(V), we can define V(v,w) := (v 
+w) ∈ V. For this to really be an enrichment,
+we just need to check the two conditions of Definition 2.30. The first condition I ≤
+X(x,x) = (x 
+x) is satisfied because I ⊗ x ≤ x. The second condition is satisfied by
+Proposition 2.64(e).
+2.5.2
+Quantales
+To perform matrix multiplication over a monoidal preorder, we need one more thing:
+joins. These were first defined in Definition 1.76.
+Definition 2.66. A unital commutative quantale is a symmetric monoidal closed pre
+order V = (V,≤, I,⊗, )thathasalljoins: A existsforevery A ⊆ V.Inparticular,
+we often denote the empty join by 0 := ∅.
+2.5 Computing Presented V-Categories with Matrix Multiplication
+71
+Whenever wespeakofquantales in this book, we mean unital commutative quantales.
+We will try to remind the reader of that. There are also very interesting applications of
+noncommutative quantales; see Section 2.6.
+Example 2.67. In Example 2.60, we sawthat Cost is monoidal closed. To check whether
+Cost is a quantale, we take an arbitrary set of elements A ⊆[0,∞] and ask if it has a
+join 
+A. To be a join, it needs to satisfy two properties:
+a. a ≥ Aforalla ∈ A,and
+b. if b ∈[0,∞] is any element such that a ≥ b for all a ∈ A, then A ≥ b.
+In fact we can define such a join: it is typically called the infimum, or greatest lower
+bound, of A.5 For example, if A ={2,3} then A = 2. We have joins for infinite
+sets too: if B ={2.5,2.05,2.005,...}, its infimum is 2. Finally, in order to say that
+([0, ∞],≥) has all joins, we need a join to exist for the empty set A = ∅ too. The first
+condition becomes vacuous– there are no asinA– but the second condition says that
+for any b ∈[0,∞] we have ∅ ≥ b;thismeans ∅ =∞.
+Thus indeed ([0,∞],≥) has all joins, so Cost is a quantale.
+Exercise 2.68.
+1. What is ∅,whichwegenerally denote 0, in the case
+a. V =Bool = (B,≤,true,∧)?
+b. V =Cost = ([0,∞],≥,0,+)?
+2. What is the join x ∨ y in the case
+a. V =Bool, and x,y ∈ Bare booleans?
+b. V =Cost, and x,y ∈[0,∞] are distances?
+Exercise 2.69. Show that Bool = (B,≤,true,∧) is a quantale.
+Exercise 2.70. Let S beasetandrecall the power set monoidal preorder (P(S),⊆, S,∩)
+from Exercise 2.19. Is it a quantale?
+Remark2.71. Onecanpersonifythenotionofunital, commutative quantale as a kind of
+navigator. A navigator is someone who understands “getting from one place to another.”
+Different navigators may care about or understand different aspects– whether one can
+get from A to B, how much time it will take, what modes of travel will work, etc.– but
+they certainly have some commonalities. Most importantly, a navigator needs to be able
+to read a map: given routes A to B and B to C, they understand how to get a route A
+to C. And they know how to search over the space of way-points to get from A to C.
+These will correspond to the monoidal product and the join operations, respectively.
+5 Here, by the infimum of a subset A ⊆[0,∞], we mean infimum in the usual order on [0,∞]: the largest
+number that is ≤ everything in A. For example, the infimum of {3.1,3.01,3.001,...} is 3. But note that
+this is the supremum in the reversed, ≥,orderofCost.
+72
+Resource Theories: Monoidal Preorders and Enrichment
+Proposition 2.72. Let P = (P,≤) be a preorder. It has all joins iff it has all meets.
+Proof. The joins (resp. meets) in P are the meets (resp. joins) in Pop, so the two claims
+are dual: it suffices to show that if P has all joins then it has all meets.
+Suppose P has all joins and suppose that A ⊆ P is a subset for which we want the
+meet. Consider the set MA :={p ∈ P | p ≤ a foralla ∈ A} of elements below
+everything in A.LetmA := p∈MA 
+p be their join. We claim that mA is a meet for A.
+We first need to know that for any a ∈ A we have mA ≤ a, but this is by definition
+of join: since all p ∈ MA satisfy p ≤ a, so does their join mA ≤ a. We second need
+to know that for any m ∈ P with m≤ a for all a ∈ A,wehavem≤ m. But every
+such m is actually an element of MA and m is their join, so m≤ m. This completes the
+proof.
+In particular, a quantale has all meets and all joins, even though we only define it to
+have all joins.
+Remark 2.73. The notion of Hausdorff distance can be generalized, allowing the role
+of Cost to be taken by any quantale V.IfX is a V-category with objects X, and U ⊆ X
+and V ⊆ X, we can generalize the usual Hausdorff distance, on the left below, to the
+formula on the right:
+d(U,V) := sup
+u∈U
+inf
+v∈V
+d(u,v),
+X(U,V) :=
+X(u,v).
+u∈Uv∈V
+For example, if V = Bool, the Hausdorff distance between sub-preorders U and V
+answers the question “can I get into V from every u ∈ U,” i.e. ∀u∈U.∃v∈V.u ≤ v.6 Or
+for another example, use V = P(M) with its interpretation as modes of transportation,
+as in Exercise 2.42. Then the Hausdorff distance d(U,V) ∈ P(M) tells us those modes
+of transportation that will get us into V from every point in U.
+Proposition 2.74. Suppose V = (V,≤, I,⊗) is any symmetric monoidal preorder that
+has all joins. Then V is closed– i.e. it has a 
+operation and hence is a quantale– if
+and only if ⊗ distributes over joins, i.e. if Eq. (2.24) holds for all v ∈ V and A ⊆ V.
+Proof. We showed one direction in Proposition 2.64(b): if V is monoidal closed then
+Eq. (2.24) holds. We need to show that if Eq. (2.24) holds then −⊗v: V → V has a
+right adjoint v 
+−. This is just the adjoint functor theorem, Theorem 1.108. It says
+we can define v 
+wto be
+v 
+w :=
+a.
+{a∈V|a⊗v≤w}
+6 Here ∀ is the universal quantifier, “for all,” and ∃ is the existential quantifier, “there exists.”
+2.5 Computing Presented V-Categories with Matrix Multiplication
+73
+2.5.3
+Matrix Multiplication in a Quantale
+Aquantale V = (V,≤, I,⊗, ), as defined in Definition 2.57, provides what is neces
+sary to perform matrix multiplication.7 The usual formula for matrix multiplication is:
+(M ∗ N)(i,k) =
+M(i, j) ∗ N(j,k).
+j
+(2.25)
+Wewill get a formula where joins stand in for the sum operation , and ⊗ stands in for
+the product operation ∗. Recall our convention of writing 0 := ∅.
+Definition 2.75. Let V = (V,≤,⊗, I) beaquantale. Given sets X and Y,amatrix with
+entries in V,orsimplyaV-matrix, is a function M: X × Y → V. For any x ∈ X and
+y ∈Y,wecall M(x,y) the (x, y)-entry.
+Here is how you multiply V-matrices M: X × Y → V and N: Y × Z → V. Their
+product is defined to be the matrix (M ∗ N): X × Z → V, whose entries are given by
+the formula
+(M ∗ N)(x,z) :=
+Note how similar this is to Eq. (2.25).
+M(x, y) ⊗ N(y,z).
+y∈Y
+(2.26)
+Example 2.76. Let V = Bool. Here is an example of matrix multiplication M ∗ N.
+Here X = {1,2,3}, Y = {1,2}, and Z = {1,2,3}, matrices M: X × Y → B
+and N: Y × Z → Bare shown to the left below, and their product is shown to the
+right:
+⎛
+⎞
+⎝
+false false
+false true
+true true
+⎠ ∗ true true false
+true false true =
+⎛
+⎝
+false false false
+true false true
+true true true
+The identity V-matrix on a set X is IX : X × X → V given by
+IX(x, y) := I if x = y,
+0 ifx=y.
+⎞
+⎠
+Exercise 2.77. Write down the (2 × 2)-identity matrix for each of the quantales
+(N,≤,1,∗), Bool = (B,≤,true,∧), and Cost = ([0,∞],≥,0,+).
+Exercise 2.78. Let V = (V,≤, I,⊗, ) be a quantale. Use Eq. (2.26) and Proposi
+tion 2.64 to do the following.
+7 This works for noncommutative quantales as well.
+74
+Resource Theories: Monoidal Preorders and Enrichment
+1. Prove the identity law: for any sets X and Y and V-matrix M: X ×Y → V, one has
+IX ∗ M = M.
+2. Prove the associative law: for any matrices M : W × X → V, N : X ×Y → V, and
+P: Y ×Z →V,onehas(M ∗N)∗ P = M∗(N ∗ P).
+Recall the weighted graph Y from Eq. (2.18). One can read off the associated matrix
+MY, and one can calculate the associated metric dY:
+Here we fully explain how to compute dY using only MY.
+The matrix MY can be thought of as recording the length of paths that traverse either
+0 or 1 edges: the diagonals being 0 mean we can get from x to x without traversing any
+edges. When we can get from x to y in one edge we record its length in MY, otherwise
+we use ∞.
+When we multiply MY by itself using the formula Eq. (2.26), the result M2
+Y tells us
+the length of the shortest path traversing two edges or fewer. Similarly M3
+Y tells us about
+the shortest path traversing three edges or fewer:
+M2
+Y =
+x y z
+x 0 4 3
+y 3 0 6
+z 7 4 0
+M3
+Y =
+x y z
+x 0 4 3
+y 3 0 6
+z 7 4 0
+One sees that the powers stabilize: M2
+Y = M3
+Y; as soon as that happens one has the
+matrix of distances, dY. Indeed Mn
+Y records the lengths of the shortest path traverse n
+edges or fewer, and the powers will always stabilize if the set of vertices is finite, since
+the shortest path from one vertex to another will never visit a given vertex more than
+once.8
+Exercise 2.79. Recall from Exercise 2.40 the matrix MX,forX as in Eq. (2.18). Cal
+culate M2
+X, M3
+X, and M4
+X. Check that M4
+X is what you got for the distance matrix in
+Exercise 2.39.
+This procedure gives an algorithm for computing the V-category presented by any
+V-weighted graph using matrix multiplication.
+8 The method works even in the infinite case: one takes the infimum of all powers Mn
+Y . The result always
+defines a Lawvere metric space.
+2.6 Summary and Further Reading
+75
+2.6
+Summary and Further Reading
+In this chapter we thought of elements of preorders as describing resources, with the
+order detailing whether one resource could be obtained from another. This naturally led
+to the question of how to describe what could be built from a pair of resources, which
+led us to consider monoid structures on preorders. More abstractly, these monoidal
+preorders were seen to be examples of enriched categories, or V-categories, over the
+symmetric monoidal preorder Bool. Changing Bool to the symmetric monoidal preorder
+Cost, we arrived upon Lawvere metric spaces, a slight generalization of the usual notion
+of metric space. In terms of resources, Cost-categories tell us the cost of obtaining one
+resource from another.
+At this point, we sought to get a better feel for V-categories in two ways. First, we
+introduced various important constructions: base change, functors, products. Second, we
+looked at how to present V-categories using labeled graphs; here, perhaps surprisingly,
+we saw that matrix multiplication gives an algorithm to compute the hom-objects from
+a labeled graph.
+Resource theories are discussed in much more detail in [CFS16; Fri17]. The
+authors provide many more examples of resource theories in science, includ
+ing in thermodynamics, Shannon’s theory of communication channels, and quan
+tum entanglement. They also discuss more of the numerical theory than we did,
+including calculating the asymptotic rate of conversion from one resource into
+another.
+Enrichment is a fundamental notion in category theory, and we will return to it in
+Chapter 4, generalizing the definition so that categories, rather than mere preorders,
+can serve as bases of enrichment. In this more general setting we can still perform the
+constructions we introduced in Section 2.4– base change, functors, products– and many
+others; the authoratitive, but by no means easy, reference on this is the book by Kelly
+[Kel05].
+While preorders were familiar before category theory came along, Lawvere metric
+spaces are a beautiful generalization of the previous notion of (symmetric) metric space,
+that is due to, well, Lawvere. A deeper exploration than the taste we gave here can be
+found in his classic paper [Law73], where he also discusses ideas like Cauchy com
+pleteness in category-theoretic terms, and which hence generalize to other categorical
+settings.
+We observed that, while any symmetric monoidal preorder can serve as a base
+for enrichment, certain preorders– quantales– are better than others. Quantales are
+well known for links to other parts of mathematics too. The word quantale is in fact
+a portmanteau of ‘quantum locale’, where quantum refers to quantum physics, and
+locale is a fundamental structure in topology. For a book-length introduction to quan
+tales and their applications, one might check [Ros90]. The notion of cartesian closed
+categories, later generalized to monoidal closed categories, is due to Ronnie Brown
+[Bro61].
+Note that while we have considered only commutative quantales, the noncom
+mutative variety also arise naturally. For example, the power set of any monoid
+76
+Resource Theories: Monoidal Preorders and Enrichment
+forms a quantale that is commutative iff the monoid is. Another example is the set
+of all binary relations on a set X, where multiplication is relational composition;
+this is noncommutative. Such noncommutative quantales have application to con
+currency theory, and in particular process semantics and automata; see [AV93] for
+details

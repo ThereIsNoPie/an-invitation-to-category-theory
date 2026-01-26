@@ -6,16 +6,43 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last completed:** Example 2.37 (Reals as Metric Space)
-- **Next item:** Exercise 2.38
+- **Last completed:** Proposition 2.72 (Joins iff Meets)
+- **Next item:** Proposition 2.74 (closed iff ⊗ distributes over joins)
+
+### Completed in this session (verified against PDF):
+- Example 2.45: CostToBoolMonotone
+- Definition 2.48: VFunctor
+- Example 2.49: BoolFunctorsAreMonotone
+- Example 2.51: CostFunctorsAreLipschitz
+- Exercise 2.52: OppositeDaggerSkeletal
+- Definition 2.53: VProduct
+- Definition 2.57: MonoidalClosed
+- Example 2.60: CostIsMonoidalClosed
+- Exercise 2.61: BoolIsMonoidalClosed
+- Example 2.62: BoolOrNotClosed
+- Proposition 2.64: ClosedMonoidalProperties
+- Definition 2.66: Quantale
+- Example 2.67: CostIsQuantale
+- Proposition 2.72: JoinsIffMeets
+
+(Note: Construction 2.44 "Change of Base" was skipped as it's formalized implicitly by the monoidal monotone machinery)
 
 ## Step 1: Find the Next Item
 
-```bash
-grep -n '\\begin{definition}\|\\begin{example}\|\\begin{exercise}\|\\begin{theorem}\|\\begin{proposition}' fong_spivak_source/C2-Resource_theory.tex | nl
-```
+**Primary Method (recommended):** Use the copy-paste PDF files in `fong_spivak_source/copy-paste-pdf/`:
 
-The left number (31, 32, ...) is the textbook number for Chapter 2.
+1. Check the last completed `.lagda.md` file's YAML frontmatter for `number:`
+2. Search the copy-paste file for that number: `grep "Definition 2.XX\|Example 2.XX" fong_spivak_source/copy-paste-pdf/chapter2.txt`
+3. The PDF copy-paste has explicit numbering like "Definition 2.48", "Example 2.49", etc.
+4. This is the most reliable method since numbers are explicit in the text
+
+**Fallback Method:** Count from the LaTeX source:
+
+1. Search for the item's unique text in the LaTeX source
+2. Read the LaTeX from that line onwards
+3. Count: each `\begin{definition}`, `\begin{example}`, `\begin{exercise}`, `\begin{theorem}`, `\begin{proposition}`, or `\begin{construction}` increments the number by 1
+
+**Note:** `\begin{remark}` is NOT a numbered item, but `\begin{construction}` IS numbered.
 
 ## Step 2: Read and Understand
 
@@ -153,8 +180,12 @@ Chapter 2:
 - `SymmetricMonoidalPreorder`, `SymmetricMonoidalStructure`
 - `MonoidalMonotone`
 - `VCategory`
+- `VFunctor`, `IsVFunctor`
+- `VProduct` (`_×V_`)
 - `MetricSpace`, `ExtendedMetricSpace`
 - `LawvereMetricSpace`
+- `MonoidalClosed`, `IsMonoidalClosed`, `MonoidalClosedPreorder`
+- `Quantale`, `HasAllJoins`
 
 Examples:
 - `Cost` - uses `plumbing.Reals` for `[0,∞]`
