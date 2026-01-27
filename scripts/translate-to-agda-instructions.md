@@ -7,6 +7,7 @@ Create clean, minimal Agda that's easy to understand and learn from.
 ## Current Progress
 
 - **Last completed:** Proposition 2.72 (Joins iff Meets)
+- **Last Learnt/reviewed** Example 2.41
 - **Next item:** Proposition 2.74 (closed iff ⊗ distributes over joins)
 
 ### Completed in this session (verified against PDF):
