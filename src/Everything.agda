@@ -64,7 +64,8 @@ import exercises.chapter2.MonoidalMonotoneBoolToCost
 import exercises.chapter2.MonoidalMonotoneCostToBool
 import exercises.chapter2.BoolOr
 import exercises.chapter2.OppositeDaggerSkeletal
-import exercises.chapter2.BoolIsMonoidalClosed 
+import exercises.chapter2.BoolIsMonoidalClosed
+import exercises.chapter2.NMYCategory
 
 -- Chapter 1 Examples
 import examples.chapter1.AdjunctionFromClosure
