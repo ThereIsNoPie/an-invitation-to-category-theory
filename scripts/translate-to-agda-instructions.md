@@ -6,9 +6,8 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last completed:** Exercise 2.41 (NMY-Category)
-- **Last Learnt/reviewed** Exercise 2.41
-- **Next item:** Proposition 2.74 (closed iff ⊗ distributes over joins)
+- **Last completed:** Construction 2.44 (Change of Base)
+- **Last Learnt/reviewed** Exercise 2.47
 
 ### Completed in this session (verified against PDF):
 - Example 2.45: CostToBoolMonotone
@@ -25,8 +24,8 @@ Create clean, minimal Agda that's easy to understand and learn from.
 - Definition 2.66: Quantale
 - Example 2.67: CostIsQuantale
 - Proposition 2.72: JoinsIffMeets
-
-(Note: Construction 2.44 "Change of Base" was skipped as it's formalized implicitly by the monoidal monotone machinery)
+- Exercise 2.41: NMYCategory
+- Construction 2.44: ChangeOfBase
 
 ## Step 1: Find the Next Item
 
@@ -98,6 +97,12 @@ Quote textbook. Use LaTeX for math: $d(x,y)$ inline, $$d(x,y) \geq 0$$ display.
 - `_` for subscripts in prose → escape as `\_` outside math mode
 - `*` for multiplication in prose → escape as `\*` outside math mode
 - `<` and `>` → use `\lt` and `\gt` if causing HTML issues
+
+**Display equations:**
+- Single-line: `$$I_W \leq f(I_V) \leq f(C(c,c))$$`
+- **Avoid** `\begin{aligned}`, `\begin{gather}`, `\begin{array}` — often unsupported
+- For multi-step derivations, use a single long line or multiple separate `$$...$$` blocks
+- If a derivation is complex, prefer prose with inline math over display blocks
 
 ## Diagram
 

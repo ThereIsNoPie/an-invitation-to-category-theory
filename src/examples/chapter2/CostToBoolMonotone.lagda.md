@@ -10,14 +10,10 @@ number: 45
 
 ## Textbook Description
 
-**Example 2.44.** Consider the function $f : [0,\infty] \to \{\mathsf{true}, \mathsf{false}\}$ given by
+**Example 2.45.** Consider the function $f : [0,\infty] \to \{\mathsf{true}, \mathsf{false}\}$ given by:
 
-$$
-f(x) := \begin{cases}
-\mathsf{true} & \text{if } x = 0 \\
-\mathsf{false} & \text{if } x > 0
-\end{cases}
-$$
+- $f(x) = \mathsf{true}$ if $x = 0$
+- $f(x) = \mathsf{false}$ if $x > 0$
 
 It is easy to check that $f$ is monotonic and that $f$ preserves the monoidal product and monoidal unit; that is, it's easy to show that $f$ is a monoidal monotone.
 
@@ -77,6 +73,20 @@ Cost→Bool = f , record
   ; preserves-unit = f-preserves-unit
   ; preserves-mult = f-preserves-mult
   }
+```
+
+## Applying Change of Base
+
+Using Construction 2.44, we can convert any Lawvere metric space (Cost-category) into a preorder (Bool-category).
+
+```agda
+open import definitions.chapter2.ChangeOfBase using (changeOfBase)
+open import definitions.chapter2.VCategory using (VCategory)
+open import definitions.chapter2.LawvereMetricSpace using (LawvereMetricSpace)
+
+-- Convert any Lawvere metric space to a preorder
+toPreorder : LawvereMetricSpace → VCategory Bool-SMP
+toPreorder = changeOfBase Cost→Bool
 ```
 
 ## Interpretation

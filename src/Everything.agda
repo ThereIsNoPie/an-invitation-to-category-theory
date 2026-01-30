@@ -35,6 +35,7 @@ import definitions.chapter2.VFunctor
 import definitions.chapter2.VProduct
 import definitions.chapter2.MonoidalClosed
 import definitions.chapter2.Quantale
+import definitions.chapter2.ChangeOfBase
 
 -- Chapter 1 Propositions
 import propositions.chapter1.AdjointFunctorTheorem
