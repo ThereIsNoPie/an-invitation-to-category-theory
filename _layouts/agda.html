@@ -83,6 +83,28 @@
             padding: 0;
         }
 
+        .agda-content table {
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            width: auto;
+        }
+
+        .agda-content th,
+        .agda-content td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            text-align: left;
+        }
+
+        .agda-content th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        .agda-content tr:nth-child(even) td {
+            background-color: var(--bg-code, #f8f8f8);
+        }
+
         /* Collapsible section styles */
         .collapsible-section {
             border: 1px solid var(--border-color);
