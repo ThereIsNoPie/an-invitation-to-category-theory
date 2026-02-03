@@ -1,0 +1,909 @@
+\begin{theindex}
+
+  \item adjoint, \see {adjunction}{102}
+  \item adjoint functor theorem, \hyperpage{32}, \hyperpage{73}
+  \item adjunction, \hyperpage{35}, \hyperpage{69}, \hyperpage{99--107}
+    \subitem examples of, \hyperpage{27, 28}, \hyperpage{35}, 
+		\hyperpage{86}, \hyperpage{102}, \hyperpage{104}
+    \subitem from   closure operator, \hyperpage{34}
+    \subitem Galois connection as, \hyperpage{27}
+    \subitem of preorders, \hyperpage{26--36}
+    \subitem preservation of meets and joins, \hyperpage{31}
+    \subitem relationship to companions   and conjoints, 
+		\hyperpage{131}
+  \item algebraic theory, \hyperpage{172}
+  \item AND operation, \hyperpage{230}, \hyperpage{245}
+  \item applied category theory, \hyperpage{1--257}
+  \item associativity, \hyperpage{82, 83}, \hyperpage{125}, 
+		\hyperpage{135}
+    \subitem as coherence condition, \hyperpage{115}
+    \subitem in enriched categories, \hyperpage{139}
+    \subitem in product category, \hyperpage{110}
+    \subitem in wiring diagrams, \hyperpage{46}
+    \subitem of composition in an operad, \hyperpage{213}
+    \subitem of function composition, \hyperpage{87}
+    \subitem of monoid operation, wiring diagram for, \hyperpage{198}
+    \subitem of monoidal product, \hyperpage{42}
+    \subitem of morphism composition, \hyperpage{81}
+    \subitem of profunctor composition, \hyperpage{129}
+    \subitem of quantale matrix multiplication, \hyperpage{74}
+    \subitem property vs.\ structure, \hyperpage{136}
+    \subitem weak, \hyperpage{130}
+
+  \indexspace
+
+  \item behavior, \hyperpage{221--225}
+    \subitem contract, \hyperpage{255}
+    \subitem properties of, \hyperpage{224}
+    \subitem topos for, \hyperpage{252}
+  \item behavioral approach, \hyperpage{174}
+  \item Beyonc\'e, \hyperpage{51}
+  \item bicategory, \hyperpage{130}
+  \item binary relation, \see {relation, binary}{8}, \hyperpage{150}
+  \item booleans, \hyperpage{4}
+    \subitem alternative   monoidal structure, \hyperpage{53}
+    \subitem and feasibility, \hyperpage{119}
+    \subitem as base of enrichment for preorders, \hyperpage{58}, 
+		\hyperpage{236}
+    \subitem as monoidal closed, \hyperpage{70}, \hyperpage{231}
+    \subitem as preorder, \hyperpage{13}, \hyperpage{22}
+    \subitem as quantale, \hyperpage{72}
+    \subitem as rig, \hyperpage{160}
+    \subitem as set, \hyperpage{6, 7}
+    \subitem as subobject classifier, \hyperpage{229}, \hyperpage{244}
+    \subitem meets and joins in, \hyperpage{25}
+    \subitem usual monoidal structure, \hyperpage{52}
+
+  \indexspace
+
+  \item cardinality, \hyperpage{19}
+    \subitem and isomorphisms, \hyperpage{88}
+  \item categorification, \hyperpage{129}, \hyperpage{132--134}
+  \item category, \hyperpage{81--89}
+    \subitem as database schema, \hyperpage{89}
+    \subitem codiscrete, \hyperpage{104}
+    \subitem compact closed, \see {compact closed category}{141}
+    \subitem composition in, \hyperpage{81}
+    \subitem discrete, \hyperpage{104}
+    \subitem examples of, \hyperpage{87}
+    \subitem finitely presented, \see {presentation of}{93}
+    \subitem free, \hyperpage{82}, \hyperpage{104}, \hyperpage{154}
+    \subitem having finite colimits, \hyperpage{192}, \hyperpage{206}
+    \subitem hypergraph structure on, \hyperpage{201}
+    \subitem identity in, \hyperpage{81}
+    \subitem indexing, \hyperpage{95}, \hyperpage{111}
+    \subitem monoidal structure on, \hyperpage{136}
+    \subitem morphism in, \hyperpage{81}
+    \subitem object in, \hyperpage{81}
+    \subitem of algebras for an operad, \hyperpage{218}
+    \subitem of bijections, \hyperpage{150}
+    \subitem of categories, \hyperpage{93}
+    \subitem of cocones, \hyperpage{191}
+    \subitem of cones, \hyperpage{110}
+    \subitem of cospans, \hyperpage{195}
+    \subitem of database instances, \hyperpage{232}
+    \subitem of finite sets, \hyperpage{87}, \hyperpage{150}, 
+		\hyperpage{205}
+    \subitem of functors, \hyperpage{96}
+    \subitem of graphs, \hyperpage{97}
+    \subitem of instances on a database schema, \hyperpage{97}
+    \subitem of operads, \hyperpage{218}
+    \subitem of preorders, \hyperpage{21}
+    \subitem of presheaves, \hyperpage{233}
+    \subitem of sets, \hyperpage{87}, \hyperpage{224}
+    \subitem of sheaves, \hyperpage{223}, \hyperpage{237}
+    \subitem opposite of, \hyperpage{88}
+    \subitem preorder reflection of, \hyperpage{86}
+    \subitem presentation of, \hyperpage{84}, \hyperpage{93}, 
+		\hyperpage{158}
+  \item category of categories, \see {category, of categories}{93}
+  \item category theory
+    \subitem as central hub of mathematics, \hyperpage{iii}
+    \subitem books on, \hyperpage{iv}
+  \item ceiling function, \hyperpage{27}
+  \item change of base, \see {enrichment, change of base}{64}
+  \item chemistry, \hyperpage{39}, \hyperpage{70}, \hyperpage{219}
+    \subitem catalysis, \hyperpage{49}
+    \subitem monoidal preorder of, \hyperpage{48}
+  \item closed category
+    \subitem cartesian, \hyperpage{76}, \hyperpage{225}, 
+		\hyperpage{227}
+    \subitem compact, \see {compact closed category}{141}
+    \subitem compact implies monoidal, \hyperpage{142}
+    \subitem hom object in, \see {hom object}{57}
+    \subitem monoidal, \see {monoidal closed category}{69}, 
+		\hyperpage{76}
+  \item closure operator, \hyperpage{33--35}, \hyperpage{250}
+  \item co-design, \seealso {feasibility}{117}, \hyperpage{117--146}
+    \subitem diagram, \hyperpage{118}, \hyperpage{124}
+    \subitem problem, \hyperpage{119}
+  \item cocone, \hyperpage{114}
+  \item codomain, \see {morphism, codomain}{81}
+  \item coequalizer, \hyperpage{194}
+  \item coherence, \hyperpage{v}, \hyperpage{114}, \hyperpage{204}
+    \subitem as bookkeeping, \hyperpage{136}
+    \subitem conditions, \hyperpage{136}
+    \subitem Mac Lane's theorem, \hyperpage{137}
+  \item colimit, \hyperpage{113}, \hyperpage{182--194}, 
+		\hyperpage{224, 225}, \hyperpage{231}
+    \subitem and interconnection, \hyperpage{194}
+    \subitem coequalizer as, \hyperpage{194}
+    \subitem coproduct as, \hyperpage{186}
+    \subitem finite, \hyperpage{191--194}
+    \subitem formula for finite colimits in $\smset$, \hyperpage{193}
+    \subitem initial object as, \hyperpage{184}
+    \subitem presheaves form colimit completion, \hyperpage{233}
+    \subitem pushout as, \hyperpage{188}
+  \item collage, \hyperpage{122}, \hyperpage{131--132}
+  \item collection, \hyperpage{81}
+  \item commutative diagram, \hyperpage{95}
+  \item commutative square, \hyperpage{84}, \hyperpage{91}, 
+		\hyperpage{95}
+  \item comonoid, \hyperpage{198}
+  \item compact closed category, \hyperpage{139--145}, \hyperpage{150}, 
+		\hyperpage{178}
+    \subitem duals in, \hyperpage{141}
+    \subitem hypergraph   category as, \hyperpage{203}
+  \item companion profunctor, \hyperpage{130}
+  \item comparable, \hyperpage{15}
+  \item completeness
+    \subitem of proof system, \hyperpage{170}
+  \item composition
+    \subitem in a category, \see {category, composition in}{81}
+    \subitem in enriched categories, 
+		\see {enriched categories, composition in}{139}
+  \item compositionality, \hyperpage{1}, \hyperpage{222}, 
+		\hyperpage{257}
+  \item cone, \hyperpage{111}
+  \item conjoint profunctor, \hyperpage{130}
+  \item connected, \hyperpage{10}
+  \item connectedness, \hyperpage{3}
+  \item connection
+    \subitem as colimit, \hyperpage{183}
+  \item context free grammar, \hyperpage{214}
+  \item continuous function, \hyperpage{234}
+  \item control theory, \hyperpage{149}, \hyperpage{178}
+  \item cooking, \hyperpage{iv}
+  \item coproduct, \hyperpage{186--188}
+  \item corelation, \hyperpage{142}, \hyperpage{150}
+  \item corelations
+    \subitem hypergraph category of, 
+		\see {hypergraph category, of corelations}{202}
+  \item cospan, \hyperpage{194--197}
+    \subitem apex of, \hyperpage{194}
+    \subitem decorated, \hyperpage{206}
+    \subitem foot of, \hyperpage{194}
+  \item cospans
+    \subitem as theory of Frobenius monoids, \hyperpage{200}
+    \subitem category of, \hyperpage{196}
+    \subitem composition of, \hyperpage{195}
+    \subitem decorated, \hyperpage{203}
+    \subitem hypergraph   category of, 
+		\see {hypergraph category, of cospans}{202}
+  \item $\Cost$, \hyperpage{54}, \hyperpage{69}, \hyperpage{71}
+  \item counit, \hyperpage{141}
+  \item cover, \hyperpage{234}, \hyperpage{237}
+    \subitem empty, \hyperpage{237}
+  \item cowlick
+    \subitem inevitability of, \hyperpage{242}
+  \item cross section, \see {section}{238}
+  \item currying, \hyperpage{103}, \hyperpage{227}, \hyperpage{249}
+  \item cyber-physical system, \hyperpage{147}
+
+  \indexspace
+
+  \item dagger, \hyperpage{21}, \hyperpage{66}
+  \item data migration, \hyperpage{99}, \hyperpage{104}
+    \subitem adjoints, \hyperpage{102}
+    \subitem left pushforward, \hyperpage{104}
+    \subitem pullback, \hyperpage{100}, \hyperpage{102}
+    \subitem right pushforward, \hyperpage{104}
+  \item database, \hyperpage{77--81}, \hyperpage{224}
+    \subitem as interlocking tables, \hyperpage{77}
+    \subitem communication between, \hyperpage{79}
+    \subitem constraints, \hyperpage{79}, \hyperpage{94}
+    \subitem data migration, \hyperpage{80}
+    \subitem foreign key, \hyperpage{78}
+    \subitem ID columns of, \hyperpage{77}
+    \subitem instance, \hyperpage{93--94}, \hyperpage{97}
+    \subitem instance homomorphism, \hyperpage{97}
+    \subitem instances form a topos, \hyperpage{232}
+    \subitem query, \hyperpage{106}, \hyperpage{112}
+    \subitem schema, \see {database schema}{89}, \hyperpage{158}
+  \item database schema, \hyperpage{78}, \hyperpage{93}
+    \subitem as category presentation, \hyperpage{79}, \hyperpage{85}
+    \subitem free, \hyperpage{78}
+    \subitem mapping between, \hyperpage{80}
+  \item design, \hyperpage{117}
+  \item diagram
+    \subitem as functor, \hyperpage{95}
+    \subitem commutative, \hyperpage{95}
+  \item differential equation, \hyperpage{162}
+  \item discrete dynamical system, \hyperpage{100}
+    \subitem induced graph of, \hyperpage{105}
+  \item disjoint union, \see {union, disjoint}{186}
+  \item divides relation, \hyperpage{8}, \hyperpage{25}
+    \subitem as preorder, \hyperpage{15}
+  \item domain, \see {morphism, domain}{81}
+  \item dual, \seealso {properties, dual}{33}
+    \subitem as opposite, \hyperpage{72}
+    \subitem category as opposite, in $\Prof$, \hyperpage{145}
+    \subitem double, \hyperpage{142}
+    \subitem object, \hyperpage{141}
+    \subitem of lax monoidal monotone, \hyperpage{56}
+    \subitem self, \hyperpage{143}, \hyperpage{178}, \hyperpage{203}
+  \item dual notions
+    \subitem colimits and limits as, \hyperpage{113}
+    \subitem subobjects and quotients, \hyperpage{193}
+  \item dynamical system, \hyperpage{257}
+    \subitem continuous, \hyperpage{211}
+    \subitem discrete, \hyperpage{101}, 
+		\see {discrete dynamical system}{105}
+    \subitem hybrid, \hyperpage{254}
+
+  \indexspace
+
+  \item effort
+    \subitem as metric, \hyperpage{60}
+  \item electric circuit, \hyperpage{181}
+  \item electrical circuit, \hyperpage{182}, \hyperpage{194}, 
+		\hyperpage{204--211}
+    \subitem closed, \hyperpage{211}
+    \subitem via cospans, \hyperpage{209}
+  \item enriched categories, \hyperpage{139}
+  \item enriched category
+    \subitem composition in, \hyperpage{139}
+    \subitem general   definition, \hyperpage{138}
+    \subitem identity in, \hyperpage{139}
+    \subitem metric space as, \hyperpage{61}
+    \subitem preorders as, \hyperpage{57}
+    \subitem vs category, \hyperpage{87}
+  \item enriched functor, \hyperpage{65}
+  \item enrichment, \hyperpage{57--69}
+    \subitem base of, \hyperpage{57}
+    \subitem change of base, \hyperpage{64}
+  \item epi-mono factorization, \hyperpage{28}, \hyperpage{225}, 
+		\hyperpage{227}, \hyperpage{243}
+    \subitem and existential quantification, \hyperpage{250}
+  \item epimorphism, \hyperpage{225, 226}
+    \subitem surjection as, \hyperpage{227}
+  \item equivalence of categories, \hyperpage{66}, \hyperpage{97}
+  \item equivalence relation, \hyperpage{9}, \hyperpage{193, 194}
+    \subitem and partition, \hyperpage{8--10}, \hyperpage{16}
+    \subitem as   corelation, \hyperpage{142}
+    \subitem as binary relation, \hyperpage{9}
+    \subitem as symmetric preorder, \hyperpage{13}
+    \subitem generated by a preorder, \hyperpage{13}, \hyperpage{55}
+
+  \indexspace
+
+  \item feasibility relation, \hyperpage{119--125}
+    \subitem as $\Bool$-profunctor, \hyperpage{121}, \hyperpage{127}
+    \subitem compact closed category of, \hyperpage{143--145}
+  \item feedback, \hyperpage{174}
+  \item fiber, \see {preimage}{238}
+  \item flip-flop, \hyperpage{181}
+  \item floor function, \hyperpage{27}
+  \item foreign key, \see {database, foreign key}{78}
+  \item free
+    \subitem category, \hyperpage{82}, \hyperpage{89}, \hyperpage{154}
+    \subitem monoid, \hyperpage{155}
+    \subitem preorder, \hyperpage{153}
+    \subitem prop, \hyperpage{155}
+    \subitem schema, \hyperpage{78}
+  \item Frobenius
+    \subitem algebra, \hyperpage{172}
+    \subitem law, \hyperpage{198}
+    \subitem monoid, \hyperpage{198}
+    \subitem structure, \hyperpage{197--201}
+  \item function, \hyperpage{2}, \hyperpage{10}
+    \subitem as database instance, \hyperpage{90}
+    \subitem as relation, \hyperpage{10}
+    \subitem bijective, \hyperpage{10}, \hyperpage{150}, 
+		\hyperpage{156}
+    \subitem composite, \hyperpage{12}
+    \subitem identity, \hyperpage{11}
+    \subitem injective, \hyperpage{10}, \hyperpage{226}
+    \subitem structure preserving, \hyperpage{2}
+    \subitem surjective, \hyperpage{10}
+  \item functor, \hyperpage{91--93}
+    \subitem data migration, \see {data migration}{102}
+    \subitem diagram as, \hyperpage{95}
+    \subitem enriched, \see {enriched functor}{65}
+    \subitem operad, \hyperpage{217}
+    \subitem presheaf as, \hyperpage{232}
+    \subitem prop, \hyperpage{151}
+    \subitem $\smset$-valued, \hyperpage{98, 99}, \hyperpage{102}, 
+		\hyperpage{112}, \hyperpage{217}
+  \item functorial query language, FQL, \hyperpage{79}
+  \item functorial semantics, \hyperpage{168}
+  \item future
+    \subitem as not yet arrived, \hyperpage{183}
+
+  \indexspace
+
+  \item Galois connection, \hyperpage{26--36}
+  \item generative effect, \hyperpage{2}, \hyperpage{4}, \hyperpage{6}, 
+		\hyperpage{26}, \hyperpage{37}, \hyperpage{242}
+  \item generators and relations, \see {presentation}{158}
+  \item gluing, \hyperpage{237}
+  \item graph, \hyperpage{14}
+    \subitem arrow, \hyperpage{14}
+    \subitem as $\smset$-valued functor, \hyperpage{97}
+    \subitem complete, \hyperpage{104}
+    \subitem discrete, \hyperpage{104}
+    \subitem free category on, \hyperpage{82}
+    \subitem homomorphism, \hyperpage{98}
+    \subitem paths in, \hyperpage{14}
+    \subitem vertex, \hyperpage{14}
+    \subitem weighted, \hyperpage{62}
+  \item graphs
+    \subitem database schema for, \hyperpage{97--102}
+    \subitem homomorphism of, \hyperpage{97}
+    \subitem topos of, \hyperpage{233}
+  \item graphs 
+    \subitem homomorphism of, \hyperpage{99}
+  \item greatest common divisor, \hyperpage{25}
+  \item greatest lower bound, \hyperpage{23}
+  \item group, \hyperpage{84}, \hyperpage{88}
+    \subitem commutator subgroup, \hyperpage{104}
+    \subitem free, \hyperpage{104}
+
+  \indexspace
+
+  \item Hasse diagram, \hyperpage{5}, \hyperpage{14}, 
+		\hyperpage{16--18}, \hyperpage{35}, \hyperpage{54}
+    \subitem database schema as, \hyperpage{78}
+    \subitem for metric spaces, \hyperpage{62}
+    \subitem for preorders, \hyperpage{5}
+    \subitem for profunctors, \hyperpage{132}
+    \subitem weighted graph as, \hyperpage{62}
+  \item Hausdorff distance, \hyperpage{60}, \hyperpage{73}
+  \item hom object, \hyperpage{57, 58}, \hyperpage{64}, \hyperpage{128}, 
+		\hyperpage{138, 139}
+    \subitem matrix of, \hyperpage{64}
+  \item hom-set, \hyperpage{81}
+  \item hypergraph category, \hyperpage{197--203}
+    \subitem of corelations, \hyperpage{202}
+    \subitem of cospans, \hyperpage{202}
+    \subitem of linear relations, \hyperpage{203}
+  \item hypergraph prop
+    \subitem operad for, \hyperpage{216}
+    \subitem theory of, \hyperpage{218}
+
+  \indexspace
+
+  \item icon, \hyperpage{44}, \hyperpage{140}, \hyperpage{157}, 
+		\hyperpage{160--163}, \hyperpage{183}, \hyperpage{197}
+    \subitem copy, \hyperpage{51}
+    \subitem crossing wires, \hyperpage{46}
+    \subitem cup and cap, \hyperpage{140}
+    \subitem discard, \hyperpage{50}
+    \subitem spider, \hyperpage{184}, \hyperpage{199}
+  \item identity
+    \subitem function, \hyperpage{11}, 
+		\seealso {function, identity}{20}
+    \subitem functor, \hyperpage{93}
+    \subitem in enriched categories, 
+		\see {enriched category, identity in}{139}
+    \subitem in wiring diagrams, \hyperpage{135}
+    \subitem matrix, \hyperpage{74}, \hyperpage{166}
+    \subitem morphism, \hyperpage{81, 82}
+    \subitem natural transformation, \hyperpage{96}
+    \subitem port graph, \hyperpage{153}
+    \subitem profunctor, \seealso {unit}{128}
+  \item iff, \hyperpage{14}
+  \item IMPLIES operation, \hyperpage{231}, \hyperpage{245}
+  \item induction, \hyperpage{166}, \hyperpage{191}
+  \item infimum, \hyperpage{25}
+  \item infix notation, \hyperpage{8, 9}, \hyperpage{13}, 
+		\hyperpage{42}, \hyperpage{230}
+  \item informatics
+    \subitem discarding in, \hyperpage{52}
+    \subitem duplication in, \hyperpage{52}
+    \subitem monoidal preorder of, \hyperpage{51}
+  \item initial object, \hyperpage{184--186}
+    \subitem as colimit, \hyperpage{192}
+    \subitem empty set as, \hyperpage{185}
+  \item interaction, \hyperpage{221}
+  \item interconnection, \hyperpage{182}
+    \subitem as variable sharing, \hyperpage{147}
+    \subitem network-type, \hyperpage{183}
+    \subitem via Frobenius structures, \hyperpage{197}
+  \item interface, \hyperpage{182}, \hyperpage{222}
+  \item intersection, \hyperpage{8}, \hyperpage{54}, \hyperpage{224}
+    \subitem as meet, \hyperpage{25}
+  \item interval domain, $\IR$, \hyperpage{252--255}
+  \item involution, \hyperpage{280}
+  \item isomorphism, \hyperpage{88--89}
+    \subitem adjunction as relaxed version of, \hyperpage{27}
+    \subitem as stable under pullback, \hyperpage{226}
+    \subitem as stable under pushout, \hyperpage{189}
+    \subitem bijection as, \hyperpage{88}
+    \subitem of preorders, \hyperpage{21}
+
+  \indexspace
+
+  \item join, \hyperpage{4}, \hyperpage{23--25}, \hyperpage{73}
+    \subitem as coproduct, \hyperpage{186}
+  \item joins
+    \subitem preservation of, \hyperpage{5}, \hyperpage{31}
+    \subitem required in a quantale, \hyperpage{71}
+
+  \indexspace
+
+  \item Kan extension, \hyperpage{115}
+
+  \indexspace
+
+  \item language, \hyperpage{223}
+    \subitem internal, \hyperpage{223}, \hyperpage{251}
+  \item Lawvere metric space, \hyperpage{59--65}
+    \subitem as $\Cost$-category, \hyperpage{59}
+    \subitem of regions, \hyperpage{60}
+  \item least common multiple, \hyperpage{25}
+  \item least upper bound, \hyperpage{23}
+  \item level shift, \hyperpage{18}, \hyperpage{35}, 
+		\seealso {primordial ooze}{35}
+  \item lifting problems, \hyperpage{94}
+  \item limit, \hyperpage{107--113}, \hyperpage{224, 225}, 
+		\hyperpage{231}
+    \subitem formula for finite limits in   $\smset$, \hyperpage{112}
+    \subitem product as, \hyperpage{108}
+    \subitem pullback as, \hyperpage{112}
+    \subitem terminal object as, \hyperpage{107}
+  \item linear relation, \hyperpage{177}
+  \item linear relations
+    \subitem hypergraph category of, 
+		\see {hypergraph category, of linear relations}{203}
+  \item logic, \hyperpage{34}, \hyperpage{224}, \hyperpage{230--232}
+    \subitem implication in, \hyperpage{6}
+    \subitem in a topos, \hyperpage{243}
+
+  \indexspace
+
+  \item manufacturing, \hyperpage{39}
+    \subitem discard operation in, \hyperpage{50}
+    \subitem monoidal preorder of, \hyperpage{49}
+  \item map
+    \subitem monotone, \seealso {monotone map}{18}, \hyperpage{18--22}
+    \subitem order-preserving, \see {map, monotone}{18}
+    \subitem structure preserving, \hyperpage{1}, \hyperpage{18}
+  \item mapping object
+    \subitem see {hom object}, \hyperpage{57}
+  \item matching family, \hyperpage{237}
+  \item matrices
+    \subitem multiplication of, \hyperpage{74}
+    \subitem rig of, \hyperpage{160}
+  \item matrix, \hyperpage{63}, \hyperpage{73}, \hyperpage{123}
+    \subitem associated to a signal flow graph, \hyperpage{165--168}
+    \subitem feasibility, \hyperpage{122}
+    \subitem identity, \hyperpage{74}
+    \subitem of distances, \hyperpage{62}
+  \item meet, \hyperpage{23--25}, \hyperpage{109}
+  \item meets
+    \subitem preservation of, \hyperpage{26}, \hyperpage{31}
+  \item metric space, \hyperpage{66}
+    \subitem as $\Cost$-category, \hyperpage{61}
+    \subitem as topological space, \hyperpage{235}
+    \subitem discrete, \hyperpage{104}
+    \subitem extended, \hyperpage{59}
+    \subitem ordinary, \hyperpage{59}
+    \subitem presentation of, \hyperpage{62}
+  \item mirror image, \see {transpose}{174}
+  \item modal operator, \hyperpage{250}
+  \item modes of transport, \hyperpage{63}
+  \item monoid, \hyperpage{42}, \hyperpage{83}, 
+		\seealso {monoidal category, monoid object in}{172}
+    \subitem as one-object category, \hyperpage{83}
+    \subitem free, \hyperpage{104}, \hyperpage{155}
+    \subitem group as, \hyperpage{88}
+  \item monoidal category, \hyperpage{iv}, \hyperpage{136--138}
+    \subitem monoid object in, \hyperpage{172--173}
+  \item monoidal closed category, \hyperpage{69}
+    \subitem booleans as, \hyperpage{70}
+    \subitem $\Cost$, \see {Cost}{69}
+  \item monoidal functor, \hyperpage{173}, \hyperpage{204}, 
+		\hyperpage{206}, \hyperpage{209}, \hyperpage{213}
+    \subitem monoidal monotone as, \hyperpage{56}
+  \item monoidal monotone, \hyperpage{55--57}
+  \item monoidal preorder, \hyperpage{41--57}
+    \subitem opposite of, \hyperpage{55}
+  \item monoidal product, \hyperpage{41}
+    \subitem as stacking, \hyperpage{197}, \hyperpage{211}
+  \item monoidal structure, \hyperpage{41}
+    \subitem weak, \hyperpage{42}
+  \item monoidal unit, \hyperpage{41}
+    \subitem drawn as nothing, \hyperpage{45}
+  \item monomorphism, \hyperpage{225, 226}
+    \subitem as stable under pullback, \hyperpage{226}
+    \subitem injection as, \hyperpage{226}
+  \item monotone map, \seealso {map, monotone}{18}
+    \subitem as   $\Bool$-functor, \hyperpage{66}
+    \subitem as functor, \hyperpage{92}
+  \item morphism, \hyperpage{v}
+    \subitem codomain, \hyperpage{81}
+    \subitem domain, \hyperpage{81}
+    \subitem identity, \hyperpage{81}
+    \subitem in free category, \hyperpage{82}
+    \subitem inequality as mere existence of, \hyperpage{86}
+    \subitem invertible, \hyperpage{88}
+
+  \indexspace
+
+  \item natural numbers, \hyperpage{15}, \hyperpage{42}, \hyperpage{53}
+    \subitem as free category, \hyperpage{83}
+    \subitem as free monoid, \hyperpage{155}
+    \subitem as rig, \hyperpage{159}
+  \item natural numbers as
+    \subitem as set, \hyperpage{7}
+  \item natural transformation, \hyperpage{95--97}
+    \subitem as presheaf morphism, \hyperpage{233}
+    \subitem between monotone maps, \hyperpage{97}
+    \subitem component of, \hyperpage{95, 96}
+    \subitem graph homomorphism as, \hyperpage{98}
+    \subitem identity, \hyperpage{96}
+    \subitem naturality condition, \hyperpage{95}
+  \item navigator, \hyperpage{72}, \hyperpage{126}
+  \item network
+    \subitem diagram, \hyperpage{181}
+    \subitem language, \hyperpage{201}
+  \item NOT operation, \hyperpage{231}, \hyperpage{245}
+  \item notation, \seealso {icon}{51}
+    \subitem for classified subobjects, \hyperpage{229}
+    \subitem for common sets, \hyperpage{7}
+    \subitem for monoidal structures, \hyperpage{42}
+    \subitem infix, \see {infix}{8}
+    \subitem set builder, \hyperpage{7}
+
+  \indexspace
+
+  \item obvious
+    \subitem conventional mathematical meaning of, \hyperpage{150}
+  \item ooze
+    \subitem primordial, \see {primordial ooze}{58}
+  \item open set, \hyperpage{234}
+  \item open system, \hyperpage{182}
+  \item operad, \hyperpage{184}, \hyperpage{211--218}
+    \subitem algebra of , \hyperpage{217}
+    \subitem as custom compositionality, \hyperpage{184}
+    \subitem from monoidal category, \hyperpage{214}
+    \subitem of cospans, \hyperpage{215}
+    \subitem of sets, \hyperpage{214}
+    \subitem of wiring diagrams, \hyperpage{211}
+    \subitem operation in, \hyperpage{213}
+  \item operation, \see {operad}{213}
+    \subitem logical, \hyperpage{224}
+  \item opposite
+    \subitem $\cat{V}$-category, \hyperpage{66}
+    \subitem category, \see {category, opposite}{88}
+    \subitem preorder, \hyperpage{18}
+  \item opposite category
+    \subitem and presheaves, \hyperpage{232}
+    \subitem as dual, \hyperpage{145}
+  \item OR operation, \hyperpage{230}, \hyperpage{245}
+  \item order, \seealso {preorder}{5}
+    \subitem preservation of, \hyperpage{5}
+    \subitem total, \hyperpage{16}
+  \item ordinals
+    \subitem as categories, \hyperpage{83}
+
+  \indexspace
+
+  \item partial order, \hyperpage{13}, 
+		\seealso {preorder, skeletal}{13}, \hyperpage{127}
+  \item partition, \hyperpage{9}, \hyperpage{20}, \hyperpage{28--30}
+    \subitem as   surjection, \hyperpage{11}
+    \subitem associated equivalence relation of, \hyperpage{10}
+    \subitem from preorder, \hyperpage{16}
+    \subitem label irrelevance of, \hyperpage{9}
+    \subitem part of, \hyperpage{9}
+    \subitem pullback of, \hyperpage{29}
+    \subitem pushforward of, \hyperpage{29}
+  \item pie
+    \subitem lemon meringue, \hyperpage{40}, \hyperpage{47}
+  \item poker, \hyperpage{43}
+  \item port graph, \hyperpage{151--153}, \hyperpage{155}
+    \subitem acyclicity condition, \hyperpage{151}
+    \subitem as morphism, \hyperpage{152}, \hyperpage{156}
+  \item poset, \see {partial order}{13}
+  \item power set, \hyperpage{16, 17}, \hyperpage{19}, \hyperpage{54}, 
+		\seealso {preorder, of subobjects}{54}, 
+		\hyperpage{204}
+  \item predicate, \hyperpage{224}, \hyperpage{228}, \hyperpage{247}, 
+		\hyperpage{256}
+  \item prediction vs.\ possibility, \hyperpage{221}
+  \item preimage, \hyperpage{10, 11}, \hyperpage{32}, \hyperpage{120}, 
+		\hyperpage{234}, \hyperpage{238}
+  \item preorder, \hyperpage{12--18}
+    \subitem as $\Bool$-category, \hyperpage{57, 58}
+    \subitem as category, \hyperpage{85}
+    \subitem codiscrete, \hyperpage{13}, \hyperpage{104}, 
+		\hyperpage{303}
+    \subitem $\Cost$, \see {Cost}{71}
+    \subitem dagger, \see {dagger}{21}
+    \subitem discrete, \hyperpage{13}, \hyperpage{20}, \hyperpage{104}, 
+		\hyperpage{303}
+    \subitem free, \hyperpage{104}
+    \subitem free on a relation, \hyperpage{153}
+    \subitem monoidal, \see {monoidal preorder}{41}
+    \subitem of open sets, \hyperpage{236}
+    \subitem of partitions, \hyperpage{17}
+    \subitem of subobjects, \hyperpage{247}
+    \subitem partial order as, \hyperpage{13}
+    \subitem presentation of, \hyperpage{14}
+    \subitem skeletal, \hyperpage{13}, \hyperpage{21}
+    \subitem symmetric monoidal, \see {monoidal preorder}{41}, 
+		\hyperpage{137}
+  \item preorder relation
+    \subitem as binary relation, \hyperpage{12}
+  \item presentation
+    \subitem of linear algebra, \hyperpage{168}
+    \subitem of metric space, \hyperpage{62}
+    \subitem of monoid, \hyperpage{85}
+    \subitem of preorder, \hyperpage{14}
+    \subitem of prop, \hyperpage{158}
+  \item presheaf, \hyperpage{232--234}
+    \subitem as database instance, \hyperpage{233}
+    \subitem restriction maps, \hyperpage{232}
+    \subitem sections, \hyperpage{232}
+  \item presheaves
+    \subitem morphism of, \hyperpage{233}
+    \subitem topos of, \hyperpage{232}
+  \item primordial ooze, \seealso {ooze, primordial}{58}, 
+		\hyperpage{93}, \hyperpage{97}, \hyperpage{134}, 
+		\hyperpage{173}
+  \item product
+    \subitem as limit, \hyperpage{111}
+    \subitem in a category, \hyperpage{108}
+    \subitem meet as, \hyperpage{109}
+    \subitem monoidal, \hyperpage{136}
+    \subitem of $\cat{V}$-categories, \hyperpage{67}
+    \subitem of categories, \hyperpage{110}, \hyperpage{144}
+    \subitem of preorders, \hyperpage{17}
+    \subitem of sets, \hyperpage{8}, \hyperpage{109}
+  \item profunctor, \hyperpage{119--132}
+    \subitem $\Cost$, \hyperpage{122}, \seealso {Cost}{122}
+    \subitem as bridges, \hyperpage{122}, \hyperpage{131}
+    \subitem $\Bool$, \hyperpage{119}
+    \subitem collage of, \see {collage}{131}
+    \subitem enriched, \hyperpage{121}, \see {profunctor}{140}
+    \subitem unit, \hyperpage{128}, \hyperpage{130}
+  \item profunctors
+    \subitem category of, \hyperpage{125--130}
+    \subitem compact closed category of, \hyperpage{139}
+    \subitem composition of, \hyperpage{125}, \hyperpage{127}
+  \item program semantics, \hyperpage{34}, \hyperpage{37}
+  \item prop, \hyperpage{149--179}
+    \subitem $\finset$, \hyperpage{150}
+    \subitem expression in, \hyperpage{157}
+    \subitem free, \hyperpage{155}
+    \subitem hypergraph, \hyperpage{202}
+    \subitem of $R$-relations, \hyperpage{175}
+    \subitem of matrices, \hyperpage{164}, \hyperpage{170}
+    \subitem posetal, \hyperpage{151}
+    \subitem presentation of, \hyperpage{158}
+    \subitem signature of, \hyperpage{155}
+  \item properties
+    \subitem dual, \hyperpage{33}
+  \item proposition, \hyperpage{54}, \seealso {logic}{54}
+  \item pullback, \hyperpage{225}
+    \subitem along a map, \hyperpage{22}, \hyperpage{32}, 
+		\hyperpage{101}
+    \subitem as limit, \hyperpage{112}
+    \subitem monomorphism in terms of, \hyperpage{226}
+    \subitem of isomorphism, \hyperpage{226}
+  \item pullbacks
+    \subitem pasting of, \hyperpage{225}
+  \item pushout, \hyperpage{28}, \hyperpage{188--191}
+    \subitem along isomorphism, \hyperpage{189}
+    \subitem as colimit, \hyperpage{188}
+    \subitem epimorphism in terms of, \hyperpage{226}
+    \subitem in cospan composition, \hyperpage{195}
+
+  \indexspace
+
+  \item quantale, \hyperpage{68}, \hyperpage{71--76}, \hyperpage{121}, 
+		\hyperpage{123}, \hyperpage{160}
+    \subitem commutative, \hyperpage{71}
+    \subitem $\Cost$ as, \see {Cost}{71}
+    \subitem matrix multiplication in, \hyperpage{73}
+    \subitem of open sets, \hyperpage{236}
+  \item quantales
+    \subitem as self-enriched, \hyperpage{71}
+  \item quantification, \hyperpage{248}
+  \item quotient, \hyperpage{10}, \hyperpage{104}, \hyperpage{157}, 
+		\hyperpage{193}
+    \subitem as data migration, \hyperpage{107}
+
+  \indexspace
+
+  \item real numbers, \hyperpage{16}, \hyperpage{42}, \hyperpage{45}, 
+		\hyperpage{172}
+    \subitem as metric   space, \hyperpage{61}
+    \subitem as preorder, \hyperpage{23}
+    \subitem as set, \hyperpage{7}
+    \subitem topology on, \hyperpage{234}
+  \item recipes, \hyperpage{40}
+  \item reflexivity, \hyperpage{9}, \hyperpage{12}
+    \subitem as identity in a preorder, \hyperpage{85}
+  \item relation, \hyperpage{8}, \hyperpage{151}
+    \subitem binary, \hyperpage{8}, \hyperpage{35}
+    \subitem divides, \see {divides relation}{15}
+    \subitem equivalence, \see {equivalence relation}{9}
+    \subitem free preorder on, \hyperpage{35}, \hyperpage{153}
+    \subitem function as, \hyperpage{10}
+    \subitem linear, \see {linear relation}{177}
+    \subitem preorder, \see {preorder}{12}
+    \subitem subset, \hyperpage{54}
+  \item relations
+    \subitem composition of, \hyperpage{175}
+  \item resource, \hyperpage{117}
+    \subitem theory, \hyperpage{39--52}
+  \item restriction map, \see {presheaf, restriction map}{232}
+  \item retraction, \hyperpage{89}
+  \item reverse icon, \see {transpose}{174}
+  \item rig, \hyperpage{159--160}
+    \subitem matrices as, \hyperpage{160}
+    \subitem matrices over, \hyperpage{164}
+    \subitem vs.\ ring, \hyperpage{160}
+  \item ring
+    \subitem free, \hyperpage{104}
+
+  \indexspace
+
+  \item safety proof, \hyperpage{255}
+  \item schema, \see database schema{89}
+  \item semantics, \hyperpage{223}, \hyperpage{251}
+    \subitem sound, \hyperpage{251}
+  \item semiring, \see {rig}{179}
+  \item set, \hyperpage{7--8}
+    \subitem $n\th$ ordinal as, \hyperpage{7}
+    \subitem as sheaf on one-point space, \hyperpage{242}
+    \subitem booleans as, \hyperpage{7}
+    \subitem empty, \hyperpage{7}, \hyperpage{11}
+    \subitem integers as, \hyperpage{7}
+    \subitem natural numbers as, \hyperpage{7}
+    \subitem one element, \hyperpage{7}
+    \subitem real numbers as, \hyperpage{7}
+  \item sets
+    \subitem category of, \hyperpage{87}
+  \item sheaf, \hyperpage{223}, \hyperpage{232--242}
+    \subitem condition, \hyperpage{237}
+    \subitem constant, \hyperpage{253}
+    \subitem of local functions, \hyperpage{254}
+    \subitem of sections of a function, \hyperpage{237}, 
+		\hyperpage{240}
+    \subitem of vector fields, \hyperpage{241}
+    \subitem on $\IR$ as semantics of behavior, \hyperpage{253}
+  \item sheaves
+    \subitem morphism of, \hyperpage{237}
+    \subitem topos of, \hyperpage{242}
+  \item Sierpinski space, \hyperpage{235}, \hyperpage{242}
+  \item signal flow graph, \hyperpage{148--179}
+    \subitem and linear algebra, \hyperpage{176}
+    \subitem as morphism, \hyperpage{162}
+    \subitem general, \hyperpage{175}
+    \subitem semantics of, \hyperpage{163}
+    \subitem simplified, \hyperpage{160}
+  \item site, \hyperpage{232}
+    \subitem database schema as, \hyperpage{232}
+    \subitem topological space as, \hyperpage{234}
+  \item skeleton, \hyperpage{13}, \hyperpage{66}
+  \item snake equations, \hyperpage{141}
+  \item soundness
+    \subitem of proof system, \hyperpage{170}
+  \item spider, \hyperpage{183}, \hyperpage{199}
+    \subitem as iconography, \hyperpage{184}
+  \item spiderable wire
+    \subitem Frobenius structure as, \hyperpage{199}
+  \item stacking, \see {monoidal product}{144}
+  \item subobject classifier, \hyperpage{225}, \hyperpage{228--230}, 
+		\hyperpage{243--251}
+    \subitem and logic, \hyperpage{230}
+    \subitem as superdense nugget from outer space, \hyperpage{228}
+    \subitem for behavior types, \hyperpage{254}
+    \subitem in $\smset$, \hyperpage{229}
+  \item subset, \hyperpage{7}, \seealso {power set}{7}
+  \item summaries
+    \subitem limits and colimits as, \hyperpage{106}
+  \item supremum, \hyperpage{25}
+  \item symmetry, \hyperpage{9}, \hyperpage{13}, \hyperpage{42}, 
+		\hyperpage{149}
+    \subitem and dagger, \hyperpage{21}
+    \subitem as required for enriched products, \hyperpage{67}
+    \subitem in wiring diagrams, \hyperpage{46}
+    \subitem lack of for effort, \hyperpage{60}
+    \subitem of monoid operation, wiring diagram for, \hyperpage{198}
+    \subitem of monoidal product, \hyperpage{42}
+  \item system
+    \subitem component, \hyperpage{222}
+    \subitem property, \hyperpage{223}
+
+  \indexspace
+
+  \item tangent bundle, \hyperpage{241}
+    \subitem vector fields as sections of, \hyperpage{241}
+  \item terminal object, \hyperpage{108}
+    \subitem as limit, \hyperpage{107}
+    \subitem limit as, \hyperpage{111}
+    \subitem universal property of, \hyperpage{108}
+  \item theory
+    \subitem of hypergraph props, \hyperpage{218}
+    \subitem of monoids, \hyperpage{173}
+  \item top element, \see {terminal object}{108}
+  \item topological space, \hyperpage{234--240}, \hyperpage{252}
+  \item topology
+    \subitem codiscrete, \hyperpage{104}
+    \subitem discrete, \hyperpage{104}, \hyperpage{235}
+    \subitem subspace, \hyperpage{236}
+  \item topos, \hyperpage{223}, \hyperpage{242--257}
+    \subitem as category of sheaves, \hyperpage{237}, \hyperpage{242}
+    \subitem database instances as, \hyperpage{231}
+    \subitem of sets, \hyperpage{224}
+    \subitem properties of, \hyperpage{225--230}
+  \item total order, \hyperpage{15}, \hyperpage{28}
+  \item transitive closure, \hyperpage{29}
+  \item transitivity, \hyperpage{9}, \hyperpage{12}
+    \subitem as composition in a preorder, \hyperpage{85}
+  \item transpose, \hyperpage{174}
+  \item tree of life, \hyperpage{19}
+  \item triangle inequality, \hyperpage{60}
+  \item trivial path, \hyperpage{82}, \hyperpage{91}, \hyperpage{151}
+  \item type theory, \hyperpage{251}
+
+  \indexspace
+
+  \item union, \hyperpage{4}, \hyperpage{8}, \hyperpage{64}
+    \subitem and data migration, \hyperpage{105}
+    \subitem as join, \hyperpage{25}
+    \subitem disjoint, \hyperpage{8}, \hyperpage{107}, \hyperpage{133}, 
+		\hyperpage{186}
+  \item unique up to unique isomorphism, \hyperpage{24}, 
+		\hyperpage{108}
+  \item unit, \hyperpage{141}
+    \subitem monoidal, \hyperpage{41}, \seealso {monoidal unit}{45}
+    \subitem profunctor, \hyperpage{128}
+  \item unitality, \hyperpage{81}, \hyperpage{83}, \hyperpage{125}, 
+		\hyperpage{135}
+    \subitem as coherence condition, \hyperpage{115}
+    \subitem in enriched categories, \hyperpage{139}
+    \subitem of identity functions, \hyperpage{87}
+    \subitem of monoid operation, wiring diagram for, \hyperpage{198}
+    \subitem of monoidal product, \hyperpage{42}
+    \subitem weak, \hyperpage{130}
+  \item universal property, \hyperpage{23}, \hyperpage{108}, 
+		\hyperpage{115}, \hyperpage{153--159}, \hyperpage{184}
+  \item upper set, \hyperpage{17}, \hyperpage{22}
+
+  \indexspace
+
+  \item $\cat{V}$-category, \see {enrichment}{57}
+  \item $\cat{V}$-profunctor, \see {profunctor, enriched}{121}
+  \item vector, \hyperpage{164, 165}, \hyperpage{173}
+    \subitem tangent, \hyperpage{241}
+  \item vector field, \hyperpage{241}
+  \item vector space, \hyperpage{212}
+    \subitem free, \hyperpage{104}
+
+  \indexspace
+
+  \item weighted graph, \see {graph, weighted}{67}
+  \item wiring diagram, \hyperpage{iv}, \hyperpage{40}, 
+		\hyperpage{43--48}, \hyperpage{134--136}, 
+		\hyperpage{140}
+    \subitem as graphical proof, \hyperpage{47}
+    \subitem for categories, \hyperpage{134}
+    \subitem for hypergraph categories, \hyperpage{200}
+    \subitem for monoidal categories, \hyperpage{136}
+    \subitem for monoidal preorders, \hyperpage{44}
+    \subitem icon of, \hyperpage{44}, \hyperpage{46}, \hyperpage{51}
+    \subitem styles of, \hyperpage{44}, \hyperpage{146}, 
+		\hyperpage{183}
+
+  \indexspace
+
+  \item Yoneda lemma
+    \subitem for preorders, \hyperpage{20}
+
+\end{theindex}

@@ -1,0 +1,2770 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.8 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist[entry]{anyt/global/}
+    \entry{Adam:2017a}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=e00f8905033061a0dfbabc88d9eba366}{%
+           family={Adam},
+           familyi={A\bibinitperiod},
+           given={Elie\bibnamedelima M.},
+           giveni={E\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Massachusetts Institute of Technology}%
+      }
+      \strng{namehash}{e00f8905033061a0dfbabc88d9eba366}
+      \strng{fullhash}{e00f8905033061a0dfbabc88d9eba366}
+      \strng{authornamehash}{e00f8905033061a0dfbabc88d9eba366}
+      \strng{authorfullhash}{e00f8905033061a0dfbabc88d9eba366}
+      \field{labelalpha}{Ada17}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{7}
+      \field{note}{Available online: \url{http://www.mit.edu/~eadam/eadam_PhDThesis.pdf}}
+      \field{title}{Systems, Generativity and Interactional Effects}
+      \field{type}{phdthesis}
+      \field{year}{2017}
+    \endentry
+    \entry{Artin.Grothendieck.Verdier:1971a}{book}{}
+      \name{author}{3}{}{%
+        {{hash=69a473a63b6a5b334a00dacc5c3ef319}{%
+           family={Artin},
+           familyi={A\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=fb0e3184fdd2fcd28fa74ca67d7cdcc1}{%
+           family={Grothendieck},
+           familyi={G\bibinitperiod},
+           given={Alexander},
+           giveni={A\bibinitperiod}}}%
+        {{hash=988565fd6f279c5f5305b5a685a10e8f}{%
+           family={Verdier},
+           familyi={V\bibinitperiod},
+           given={Jean-Louis},
+           giveni={J\bibinithyphendelim L\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{c4c7924d9701b712dfd0f6d113cedb95}
+      \strng{fullhash}{c4c7924d9701b712dfd0f6d113cedb95}
+      \strng{authornamehash}{c4c7924d9701b712dfd0f6d113cedb95}
+      \strng{authorfullhash}{c4c7924d9701b712dfd0f6d113cedb95}
+      \field{labelalpha}{AGV71}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{series}{Lecture Notes in Mathematics}
+      \field{title}{Theorie de Topos et Cohomologie Etale des Schemas {I}, {II}, {III}}
+      \field{volume}{269, 270, 305}
+      \field{year}{1971}
+    \endentry
+    \entry{Abramsky.Jung:1994a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=f4721a56c3b94b002e7ef8e0ef2b89fa}{%
+           family={Abramsky},
+           familyi={A\bibinitperiod},
+           given={Samson},
+           giveni={S\bibinitperiod}}}%
+        {{hash=9ab5f8ff2ac52c2c96195e7657762b85}{%
+           family={Jung},
+           familyi={J\bibinitperiod},
+           given={Achim},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{46a110c8f163baeb67690ee59cc8d902}
+      \strng{fullhash}{46a110c8f163baeb67690ee59cc8d902}
+      \strng{authornamehash}{46a110c8f163baeb67690ee59cc8d902}
+      \strng{authorfullhash}{46a110c8f163baeb67690ee59cc8d902}
+      \field{labelalpha}{AJ94}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Handbook of logic in computer science}
+      \field{title}{Domain theory}
+      \field{year}{1994}
+    \endentry
+    \entry{Ames.Sastry:2005a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=20533b8d6bc1b6046d22ca7121873fa6}{%
+           family={Ames},
+           familyi={A\bibinitperiod},
+           given={Aaron\bibnamedelima D.},
+           giveni={A\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=5c157a074e2c2a026714694e735d6b6a}{%
+           family={Sastry},
+           familyi={S\bibinitperiod},
+           given={Shankar},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{5d71fe51ff0ac82f882b8ee7dddd39d4}
+      \strng{fullhash}{5d71fe51ff0ac82f882b8ee7dddd39d4}
+      \strng{authornamehash}{5d71fe51ff0ac82f882b8ee7dddd39d4}
+      \strng{authorfullhash}{5d71fe51ff0ac82f882b8ee7dddd39d4}
+      \field{labelalpha}{AS05}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{American Control Conference, 2005. Proceedings of the 2005}
+      \field{title}{Characterization of Zeno behavior in hybrid systems using homological methods}
+      \field{year}{2005}
+      \field{pages}{1160\bibrangedash 1165}
+      \range{pages}{6}
+    \endentry
+    \entry{Abramsky.Vickers:1993a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=f4721a56c3b94b002e7ef8e0ef2b89fa}{%
+           family={Abramsky},
+           familyi={A\bibinitperiod},
+           given={Samson},
+           giveni={S\bibinitperiod}}}%
+        {{hash=47a67eb9b58b22034aac7760a2f94f39}{%
+           family={Vickers},
+           familyi={V\bibinitperiod},
+           given={Steven},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{1e5b38972b61ef53f0bbd9e6f4756d5c}
+      \strng{fullhash}{1e5b38972b61ef53f0bbd9e6f4756d5c}
+      \strng{authornamehash}{1e5b38972b61ef53f0bbd9e6f4756d5c}
+      \strng{authorfullhash}{1e5b38972b61ef53f0bbd9e6f4756d5c}
+      \field{labelalpha}{AV93}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematical Structures in Computer Science}
+      \field{number}{2}
+      \field{title}{Quantales, observational logic and process semantics}
+      \field{volume}{3}
+      \field{year}{1993}
+      \field{pages}{161\bibrangedash 227}
+      \range{pages}{67}
+    \endentry
+    \entry{Awodey:2010a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=b8171e993b0288bf0b7716cdcc9aa013}{%
+           family={Awodey},
+           familyi={A\bibinitperiod},
+           given={Steve},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press, Oxford}%
+      }
+      \strng{namehash}{b8171e993b0288bf0b7716cdcc9aa013}
+      \strng{fullhash}{b8171e993b0288bf0b7716cdcc9aa013}
+      \strng{authornamehash}{b8171e993b0288bf0b7716cdcc9aa013}
+      \strng{authorfullhash}{b8171e993b0288bf0b7716cdcc9aa013}
+      \field{labelalpha}{Awo10}
+      \field{sortinit}{A}
+      \field{sortinithash}{3248043b5fe8d0a34dab5ab6b8d4309b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{Second}
+      \field{series}{Oxford Logic Guides}
+      \field{title}{Category theory}
+      \field{volume}{52}
+      \field{year}{2010}
+      \field{pages}{xvi+311}
+      \range{pages}{-1}
+    \endentry
+    \entry{Baez.Dolan:1998}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=4a23faac5f2968ffd7506c37d7c2e135}{%
+           family={Baez},
+           familyi={B\bibinitperiod},
+           given={John\bibnamedelima C},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=9b4b17234c0b36cca484e60803290135}{%
+           family={Dolan},
+           familyi={D\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{b7fa09fef2c190b9bfadcb31720e291a}
+      \strng{fullhash}{b7fa09fef2c190b9bfadcb31720e291a}
+      \strng{authornamehash}{b7fa09fef2c190b9bfadcb31720e291a}
+      \strng{authorfullhash}{b7fa09fef2c190b9bfadcb31720e291a}
+      \field{labelalpha}{BD98}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Categorification}
+      \field{year}{1998}
+      \verb{eprint}
+      \verb math/9802029
+      \endverb
+    \endentry
+    \entry{Baez.Erbele:2015a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=ab1aafd907691f61277607d4db8b7f0c}{%
+           family={Baez},
+           familyi={B\bibinitperiod},
+           given={John\bibnamedelima C.},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=f152833a31c996e5c111ad79e9ec5894}{%
+           family={Erbele},
+           familyi={E\bibinitperiod},
+           given={Jason},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{ebd456df0bd99d16605e3fb0fd70259a}
+      \strng{fullhash}{ebd456df0bd99d16605e3fb0fd70259a}
+      \strng{authornamehash}{ebd456df0bd99d16605e3fb0fd70259a}
+      \strng{authorfullhash}{ebd456df0bd99d16605e3fb0fd70259a}
+      \field{labelalpha}{BE15}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{title}{Categories in control}
+      \field{volume}{30}
+      \field{year}{2015}
+      \field{pages}{Paper No. 24\bibrangessep 836\bibrangedash 881}
+      \range{pages}{-1}
+    \endentry
+    \entry{baez2015compositional}{article}{}
+      \name{author}{2}{}{%
+        {{hash=ab1aafd907691f61277607d4db8b7f0c}{%
+           family={Baez},
+           familyi={B\bibinitperiod},
+           given={John\bibnamedelima C.},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{1753ba3e1599a0371bc94a65331931e0}
+      \strng{fullhash}{1753ba3e1599a0371bc94a65331931e0}
+      \strng{authornamehash}{1753ba3e1599a0371bc94a65331931e0}
+      \strng{authorfullhash}{1753ba3e1599a0371bc94a65331931e0}
+      \field{labelalpha}{BF15}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A compositional framework for passive linear networks}
+      \field{year}{2015}
+      \verb{url}
+      \verb https://arxiv.org/abs/1504.05625
+      \endverb
+    \endentry
+    \entry{baez2016compositional}{article}{}
+      \name{author}{3}{}{%
+        {{hash=ab1aafd907691f61277607d4db8b7f0c}{%
+           family={Baez},
+           familyi={B\bibinitperiod},
+           given={John\bibnamedelima C.},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+        {{hash=7ee1045570de59a23b2471787bcb028a}{%
+           family={Pollard},
+           familyi={P\bibinitperiod},
+           given={Blake\bibnamedelima S},
+           giveni={B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {AIP Publishing}%
+      }
+      \strng{namehash}{af0f970ba86037a0c1b771343346e441}
+      \strng{fullhash}{af0f970ba86037a0c1b771343346e441}
+      \strng{authornamehash}{af0f970ba86037a0c1b771343346e441}
+      \strng{authorfullhash}{af0f970ba86037a0c1b771343346e441}
+      \field{labelalpha}{BFP16}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Mathematical Physics}
+      \field{number}{3}
+      \field{title}{A compositional framework for Markov processes}
+      \field{volume}{57}
+      \field{year}{2016}
+    \endentry
+    \entry{bernstein.Hass:2008a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=2bd461ff6831674efc46e2939b0bf8cf}{%
+           family={Bernstein},
+           familyi={B\bibinitperiod},
+           given={Philip\bibnamedelima A},
+           giveni={P\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=8e4ca25489d92a5625fb8bbe0b38ddd4}{%
+           family={Haas},
+           familyi={H\bibinitperiod},
+           given={Laura\bibnamedelima M},
+           giveni={L\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{df5ab9dd5d32a5f849a152c086a2f85a}
+      \strng{fullhash}{df5ab9dd5d32a5f849a152c086a2f85a}
+      \strng{authornamehash}{df5ab9dd5d32a5f849a152c086a2f85a}
+      \strng{authorfullhash}{df5ab9dd5d32a5f849a152c086a2f85a}
+      \field{labelalpha}{BH08}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Communications of the ACM}
+      \field{number}{9}
+      \field{title}{Information integration in the enterprise}
+      \field{volume}{51}
+      \field{year}{2008}
+      \field{pages}{72\bibrangedash 79}
+      \range{pages}{8}
+    \endentry
+    \entry{Borceux:1994a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=c9259674b0e31a3252b2a81d66e21923}{%
+           family={Borceux},
+           familyi={B\bibinitperiod},
+           given={Francis},
+           giveni={F\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press, Cambridge}%
+      }
+      \strng{namehash}{c9259674b0e31a3252b2a81d66e21923}
+      \strng{fullhash}{c9259674b0e31a3252b2a81d66e21923}
+      \strng{authornamehash}{c9259674b0e31a3252b2a81d66e21923}
+      \strng{authorfullhash}{c9259674b0e31a3252b2a81d66e21923}
+      \field{labelalpha}{Bor94}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Basic category theory}
+      \field{series}{Encyclopedia of Mathematics and its Applications}
+      \field{title}{Handbook of categorical algebra 1}
+      \field{volume}{50}
+      \field{year}{1994}
+    \endentry
+    \entry{baez2017compositional}{article}{}
+      \name{author}{2}{}{%
+        {{hash=4a23faac5f2968ffd7506c37d7c2e135}{%
+           family={Baez},
+           familyi={B\bibinitperiod},
+           given={John\bibnamedelima C},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=7ee1045570de59a23b2471787bcb028a}{%
+           family={Pollard},
+           familyi={P\bibinitperiod},
+           given={Blake\bibnamedelima S},
+           giveni={B\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {World Scientific}%
+      }
+      \strng{namehash}{dc07b4a56b2d72d0f48a431b7087b2ff}
+      \strng{fullhash}{dc07b4a56b2d72d0f48a431b7087b2ff}
+      \strng{authornamehash}{dc07b4a56b2d72d0f48a431b7087b2ff}
+      \strng{authorfullhash}{dc07b4a56b2d72d0f48a431b7087b2ff}
+      \field{labelalpha}{BP17}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Reviews in Mathematical Physics}
+      \field{number}{09}
+      \field{title}{A compositional framework for reaction networks}
+      \field{volume}{29}
+      \field{year}{2017}
+    \endentry
+    \entry{brown1961some}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=204117cd8a11d17252244ffa83693675}{%
+           family={Brown},
+           familyi={B\bibinitperiod},
+           given={Ronnie},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of Oxford}%
+      }
+      \strng{namehash}{204117cd8a11d17252244ffa83693675}
+      \strng{fullhash}{204117cd8a11d17252244ffa83693675}
+      \strng{authornamehash}{204117cd8a11d17252244ffa83693675}
+      \strng{authorfullhash}{204117cd8a11d17252244ffa83693675}
+      \field{labelalpha}{Bro61}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Some problems of algebraic topology: a study of function spaces, function complexes, and FD-complexes}
+      \field{type}{phdthesis}
+      \field{year}{1961}
+    \endentry
+    \entry{Bonchi.Sobocinski.Zanasi:2017a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=bf27f2176d4e71dccf8f7cb8912be2ae}{%
+           family={Bonchi},
+           familyi={B\bibinitperiod},
+           given={Filippo},
+           giveni={F\bibinitperiod}}}%
+        {{hash=366e159165d4388195d1bab7c172001b}{%
+           family={Sobociński},
+           familyi={S\bibinitperiod},
+           given={Fabio},
+           giveni={F\bibinitperiod},
+           suffix={Pawełand\bibnamedelima Zanasi},
+           suffixi={P\bibinitperiod\bibinitdelim Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{47b9663c2b7da4205679e333b873e7ad}
+      \strng{fullhash}{47b9663c2b7da4205679e333b873e7ad}
+      \strng{authornamehash}{47b9663c2b7da4205679e333b873e7ad}
+      \strng{authorfullhash}{47b9663c2b7da4205679e333b873e7ad}
+      \field{labelalpha}{BS17}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Information and Computation}
+      \field{title}{The calculus of signal flow diagrams {I}: {L}inear relations on streams}
+      \field{volume}{252}
+      \field{year}{2017}
+      \field{pages}{2\bibrangedash 29}
+      \range{pages}{28}
+    \endentry
+    \entry{bonchi2014categorical}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=bf27f2176d4e71dccf8f7cb8912be2ae}{%
+           family={Bonchi},
+           familyi={B\bibinitperiod},
+           given={Filippo},
+           giveni={F\bibinitperiod}}}%
+        {{hash=0004d7a47cd45d3a0a1821f5f233f0b5}{%
+           family={Sobociński},
+           familyi={S\bibinitperiod},
+           given={Pawe{ł}},
+           giveni={P\bibinitperiod}}}%
+        {{hash=89c6b224e96f4982a42da5fa8512050b}{%
+           family={Zanasi},
+           familyi={Z\bibinitperiod},
+           given={Fabio},
+           giveni={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{153b125ce12cd45fda0ca602d3e3e0f8}
+      \strng{fullhash}{153b125ce12cd45fda0ca602d3e3e0f8}
+      \strng{authornamehash}{153b125ce12cd45fda0ca602d3e3e0f8}
+      \strng{authorfullhash}{153b125ce12cd45fda0ca602d3e3e0f8}
+      \field{labelalpha}{BSZ14}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Conference on Concurrency Theory}
+      \field{title}{A categorical semantics of signal flow graphs}
+      \field{year}{2014}
+      \field{pages}{435\bibrangedash 450}
+      \range{pages}{16}
+    \endentry
+    \entry{bonchi2015full}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=bf27f2176d4e71dccf8f7cb8912be2ae}{%
+           family={Bonchi},
+           familyi={B\bibinitperiod},
+           given={Filippo},
+           giveni={F\bibinitperiod}}}%
+        {{hash=120fbc179d408431d1edc3a34fbe8d6f}{%
+           family={Sobocinski},
+           familyi={S\bibinitperiod},
+           given={Pawel},
+           giveni={P\bibinitperiod}}}%
+        {{hash=89c6b224e96f4982a42da5fa8512050b}{%
+           family={Zanasi},
+           familyi={Z\bibinitperiod},
+           given={Fabio},
+           giveni={F\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{757dfa9601d147acc787c1d1062e48f3}
+      \strng{fullhash}{757dfa9601d147acc787c1d1062e48f3}
+      \strng{authornamehash}{757dfa9601d147acc787c1d1062e48f3}
+      \strng{authorfullhash}{757dfa9601d147acc787c1d1062e48f3}
+      \field{labelalpha}{BSZ15}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{ACM SIGPLAN Notices}
+      \field{number}{1}
+      \field{title}{Full abstraction for signal flow graphs}
+      \field{volume}{50}
+      \field{year}{2015}
+      \field{pages}{515\bibrangedash 526}
+      \range{pages}{12}
+    \endentry
+    \entry{Barr.Wells:1990a}{book}{}
+      \name{author}{2}{}{%
+        {{hash=1f590f436d602e75c03b0fa9947edc3c}{%
+           family={Barr},
+           familyi={B\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=a0acd594dc6393fda9703e412ef40bac}{%
+           family={Wells},
+           familyi={W\bibinitperiod},
+           given={Charles},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall New York}%
+      }
+      \strng{namehash}{2d741f7e706a6ef34c35fea1376d499a}
+      \strng{fullhash}{2d741f7e706a6ef34c35fea1376d499a}
+      \strng{authornamehash}{2d741f7e706a6ef34c35fea1376d499a}
+      \strng{authorfullhash}{2d741f7e706a6ef34c35fea1376d499a}
+      \field{labelalpha}{BW90}
+      \field{sortinit}{B}
+      \field{sortinithash}{5f6fa000f686ee5b41be67ba6ff7962d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Category theory for computing science}
+      \field{volume}{49}
+      \field{year}{1990}
+    \endentry
+    \entry{Carboni:1991a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=6d15751d0944ed4b8f504e5cec17d37b}{%
+           family={Carboni},
+           familyi={C\bibinitperiod},
+           given={Aurelio},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{6d15751d0944ed4b8f504e5cec17d37b}
+      \strng{fullhash}{6d15751d0944ed4b8f504e5cec17d37b}
+      \strng{authornamehash}{6d15751d0944ed4b8f504e5cec17d37b}
+      \strng{authorfullhash}{6d15751d0944ed4b8f504e5cec17d37b}
+      \field{labelalpha}{Car91}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Algebra}
+      \field{number}{2}
+      \field{title}{Matrices, relations, and group representations}
+      \field{volume}{136}
+      \field{year}{1991}
+      \field{pages}{497\bibrangedash 529}
+      \range{pages}{33}
+      \verb{url}
+      \verb http://www.sciencedirect.com/science/article/pii/002186939190057F
+      \endverb
+    \endentry
+    \entry{Cadish.Diskin:1995a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=6776282264b57230c042b62e09bc643d}{%
+           family={Cadish},
+           familyi={C\bibinitperiod},
+           given={Boris},
+           giveni={B\bibinitperiod}}}%
+        {{hash=b101434eba7ad0974ed1b1f2a7f73f68}{%
+           family={Diskin},
+           familyi={D\bibinitperiod},
+           given={Zinovy},
+           giveni={Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{2f1811d5744e74019d05aa43cb7ad8cf}
+      \strng{fullhash}{2f1811d5744e74019d05aa43cb7ad8cf}
+      \strng{authornamehash}{2f1811d5744e74019d05aa43cb7ad8cf}
+      \strng{authorfullhash}{2f1811d5744e74019d05aa43cb7ad8cf}
+      \field{labelalpha}{CD95}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{proceedings of Next Generation of Information Technologies and Systems, NGITS}
+      \field{title}{Algebraic graph-based approach to management of multibase systems, I: Schema integration via sketches and equations}
+      \field{volume}{95}
+      \field{year}{1995}
+    \endentry
+    \entry{Censi:2015a}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=107bb5e3e8936f7821b7f89b0052dba9}{%
+           family={Censi},
+           familyi={C\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{fullhash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{authornamehash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{authorfullhash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \field{labelalpha}{Cen15}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A mathematical theory of co-design}
+      \field{year}{2015}
+      \verb{eprint}
+      \verb arXiv:1512.08055
+      \endverb
+    \endentry
+    \entry{censi:2017a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=107bb5e3e8936f7821b7f89b0052dba9}{%
+           family={Censi},
+           familyi={C\bibinitperiod},
+           given={Andrea},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{fullhash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{authornamehash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \strng{authorfullhash}{107bb5e3e8936f7821b7f89b0052dba9}
+      \field{labelalpha}{Cen17}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Robotics and Automation Letters}
+      \field{month}{2}
+      \field{title}{Uncertainty in Monotone Co-Design Problems}
+      \field{year}{2017}
+      \verb{file}
+      \verb https://arxiv.org/pdf/1609.03103
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/1609.03103
+      \endverb
+    \endentry
+    \entry{Coecke.Fritz.Spekkens:2016a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=c8d0d6b0d8ca354b544208d9fa6abd9d}{%
+           family={Coecke},
+           familyi={C\bibinitperiod},
+           given={Bob},
+           giveni={B\bibinitperiod}}}%
+        {{hash=485f579f829f8629fec8c85c28a33f28}{%
+           family={Fritz},
+           familyi={F\bibinitperiod},
+           given={Tobias},
+           giveni={T\bibinitperiod}}}%
+        {{hash=f67b076551893f28681945ed365385bd}{%
+           family={Spekkens},
+           familyi={S\bibinitperiod},
+           given={Robert\bibnamedelima W.},
+           giveni={R\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \strng{namehash}{a2b57dd35d08dfa7ed3863a10a3a5eb6}
+      \strng{fullhash}{a2b57dd35d08dfa7ed3863a10a3a5eb6}
+      \strng{authornamehash}{a2b57dd35d08dfa7ed3863a10a3a5eb6}
+      \strng{authorfullhash}{a2b57dd35d08dfa7ed3863a10a3a5eb6}
+      \field{labelalpha}{CFS16}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Information and Computation}
+      \field{title}{A mathematical theory of resources}
+      \field{volume}{250}
+      \field{year}{2016}
+      \field{pages}{59\bibrangedash 86}
+      \range{pages}{28}
+    \endentry
+    \entry{Coecke.Kissinger:2017a}{book}{}
+      \name{author}{2}{}{%
+        {{hash=c8d0d6b0d8ca354b544208d9fa6abd9d}{%
+           family={Coecke},
+           familyi={C\bibinitperiod},
+           given={Bob},
+           giveni={B\bibinitperiod}}}%
+        {{hash=0dcc317455baeefdf9b65140659af27d}{%
+           family={Kissinger},
+           familyi={K\bibinitperiod},
+           given={Aleks},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{125ba65696ccd5f6b57722426b3a1bd0}
+      \strng{fullhash}{125ba65696ccd5f6b57722426b3a1bd0}
+      \strng{authornamehash}{125ba65696ccd5f6b57722426b3a1bd0}
+      \strng{authorfullhash}{125ba65696ccd5f6b57722426b3a1bd0}
+      \field{labelalpha}{CK17}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Picturing quantum processes}
+      \field{year}{2017}
+    \endentry
+    \entry{coecke2010categories}{incollection}{}
+      \name{author}{2}{}{%
+        {{hash=c8d0d6b0d8ca354b544208d9fa6abd9d}{%
+           family={Coecke},
+           familyi={C\bibinitperiod},
+           given={Bob},
+           giveni={B\bibinitperiod}}}%
+        {{hash=1c64b671f3e6243b2a70fce8f6cc546d}{%
+           family={Paquette},
+           familyi={P\bibinitperiod},
+           given={Eric\bibnamedelima Oliver},
+           giveni={E\bibinitperiod\bibinitdelim O\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d064a96daf8c0b8c01feeaf9ca57f816}
+      \strng{fullhash}{d064a96daf8c0b8c01feeaf9ca57f816}
+      \strng{authornamehash}{d064a96daf8c0b8c01feeaf9ca57f816}
+      \strng{authorfullhash}{d064a96daf8c0b8c01feeaf9ca57f816}
+      \field{labelalpha}{CP10}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{New Structures for Physics}
+      \field{title}{Categories for the practising physicist}
+      \field{year}{2010}
+      \field{pages}{173\bibrangedash 286}
+      \range{pages}{114}
+    \endentry
+    \entry{Carboni:1987a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=ab4a7a903686c9cd20eb3836fbcfe8ff}{%
+           family={Carboni},
+           familyi={C\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=b08845cd1cd95dec6a2659ce0f139603}{%
+           family={Walters},
+           familyi={W\bibinitperiod},
+           given={R.F.C.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{28545ecfde1d3c43339d93b0cb9552d5}
+      \strng{fullhash}{28545ecfde1d3c43339d93b0cb9552d5}
+      \strng{authornamehash}{28545ecfde1d3c43339d93b0cb9552d5}
+      \strng{authorfullhash}{28545ecfde1d3c43339d93b0cb9552d5}
+      \field{labelalpha}{CW87}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Pure and Applied Algebra}
+      \field{number}{1}
+      \field{title}{Cartesian bicategories I}
+      \field{volume}{49}
+      \field{year}{1987}
+      \field{pages}{11\bibrangedash 32}
+      \range{pages}{22}
+      \verb{url}
+      \verb http://www.sciencedirect.com/science/article/pii/0022404987901216
+      \endverb
+    \endentry
+    \entry{Crane.Yetter:1996a}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=f051271f70ebe0a9697d372b1f140496}{%
+           family={Crane},
+           familyi={C\bibinitperiod},
+           given={Louis},
+           giveni={L\bibinitperiod}}}%
+        {{hash=6dd665690863f15bae907d2a9638f330}{%
+           family={Yetter},
+           familyi={Y\bibinitperiod},
+           given={David\bibnamedelima N},
+           giveni={D\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+      }
+      \strng{namehash}{d046f88976ed29eaabf23670ca433e32}
+      \strng{fullhash}{d046f88976ed29eaabf23670ca433e32}
+      \strng{authornamehash}{d046f88976ed29eaabf23670ca433e32}
+      \strng{authorfullhash}{d046f88976ed29eaabf23670ca433e32}
+      \field{labelalpha}{CY96}
+      \field{sortinit}{C}
+      \field{sortinithash}{095692fd22cc3c74d7fe223d02314dbd}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Examples of categorification}
+      \field{year}{1996}
+      \verb{eprint}
+      \verb q-alg/9607028
+      \endverb
+    \endentry
+    \entry{Fleming.Gunther.Rosebrugh:2003a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=ebc35bfbfa49ba01b760f9d28642e2ac}{%
+           family={Fleming},
+           familyi={F\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=fc3e744e62ea2d3561b0db34fb50912f}{%
+           family={Gunther},
+           familyi={G\bibinitperiod},
+           given={Ryan},
+           giveni={R\bibinitperiod}}}%
+        {{hash=39e10cb6b4b0377de47ea8c88533b70a}{%
+           family={Rosebrugh},
+           familyi={R\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{799a94179c47c55dcb741cf8cd33df34}
+      \strng{fullhash}{799a94179c47c55dcb741cf8cd33df34}
+      \strng{authornamehash}{799a94179c47c55dcb741cf8cd33df34}
+      \strng{authorfullhash}{799a94179c47c55dcb741cf8cd33df34}
+      \field{labelalpha}{FGR03}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Symbolic Computation}
+      \field{title}{A database of categories}
+      \field{volume}{35}
+      \field{year}{2003}
+      \field{pages}{Paper No. 2\bibrangessep 127\bibrangedash 135}
+      \range{pages}{-1}
+    \endentry
+    \entry{fong2015decorated}{article}{}
+      \name{author}{1}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{fullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authornamehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authorfullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \field{labelalpha}{Fon15}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{number}{33}
+      \field{title}{Decorated cospans}
+      \field{volume}{30}
+      \field{year}{2015}
+      \field{pages}{1096\bibrangedash 1120}
+      \range{pages}{25}
+    \endentry
+    \entry{Fong:2016a}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {University of Oxford}%
+      }
+      \strng{namehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{fullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authornamehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authorfullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \field{labelalpha}{Fon16}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Algebra of Open and Interconnected Systems}
+      \field{type}{phdthesis}
+      \field{year}{2016}
+    \endentry
+    \entry{fong2017decorated}{article}{}
+      \name{author}{1}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{fullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authornamehash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \strng{authorfullhash}{73645f147c1a5ec6f127cac2c822e9c6}
+      \field{labelalpha}{Fon18}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{number}{22}
+      \field{title}{Decorated corelations}
+      \field{volume}{33}
+      \field{year}{2018}
+      \field{pages}{608\bibrangedash 643}
+      \range{pages}{36}
+    \endentry
+    \entry{Fraleign:1967a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=31d66e2c01c8ecbc6c5f86b54805105c}{%
+           family={Fraleigh},
+           familyi={F\bibinitperiod},
+           given={John\bibnamedelima B.},
+           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley Publishing Co., Reading, Mass.-London-Don Mills, Ont.}%
+      }
+      \strng{namehash}{31d66e2c01c8ecbc6c5f86b54805105c}
+      \strng{fullhash}{31d66e2c01c8ecbc6c5f86b54805105c}
+      \strng{authornamehash}{31d66e2c01c8ecbc6c5f86b54805105c}
+      \strng{authorfullhash}{31d66e2c01c8ecbc6c5f86b54805105c}
+      \field{labelalpha}{Fra67}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A first course in abstract algebra}
+      \field{year}{1967}
+      \field{pages}{xvi+447}
+      \range{pages}{-1}
+    \endentry
+    \entry{Fritz:2017a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=485f579f829f8629fec8c85c28a33f28}{%
+           family={Fritz},
+           familyi={F\bibinitperiod},
+           given={Tobias},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{485f579f829f8629fec8c85c28a33f28}
+      \strng{fullhash}{485f579f829f8629fec8c85c28a33f28}
+      \strng{authornamehash}{485f579f829f8629fec8c85c28a33f28}
+      \strng{authorfullhash}{485f579f829f8629fec8c85c28a33f28}
+      \field{labelalpha}{Fri17}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematical Structures in Computer Science}
+      \field{number}{6}
+      \field{title}{Resource convertibility and ordered commutative monoids}
+      \field{volume}{27}
+      \field{year}{2017}
+      \field{pages}{850\bibrangedash 938}
+      \range{pages}{89}
+    \endentry
+    \entry{Fong.Sarazola:2018}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+        {{hash=ed2bb2d2f8c00be0a310bd39d4c84bf3}{%
+           family={Sarazola},
+           familyi={S\bibinitperiod},
+           given={Maru},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{ad449c28182733c7d72d7d07ed7276c0}
+      \strng{fullhash}{ad449c28182733c7d72d7d07ed7276c0}
+      \strng{authornamehash}{ad449c28182733c7d72d7d07ed7276c0}
+      \strng{authorfullhash}{ad449c28182733c7d72d7d07ed7276c0}
+      \field{labelalpha}{FS18}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{extraalpha}{1}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A recipe for black box functors}
+      \field{year}{2018}
+    \endentry
+    \entry{fong2018hypergraph}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+        {{hash=3d67d18322a5ec9cdc1d38c98697b104}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \strng{namehash}{d572a807991f601ad29b73b730ccaee6}
+      \strng{fullhash}{d572a807991f601ad29b73b730ccaee6}
+      \strng{authornamehash}{d572a807991f601ad29b73b730ccaee6}
+      \strng{authorfullhash}{d572a807991f601ad29b73b730ccaee6}
+      \field{labelalpha}{FS18}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{extraalpha}{2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Hypergraph Categories}
+      \field{year}{2018}
+      \verb{eprint}
+      \verb arXiv:1806.08304
+      \endverb
+    \endentry
+    \entry{Fong.Sobocinski.Rapisardo:2016a}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=73645f147c1a5ec6f127cac2c822e9c6}{%
+           family={Fong},
+           familyi={F\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+        {{hash=0004d7a47cd45d3a0a1821f5f233f0b5}{%
+           family={Sobociński},
+           familyi={S\bibinitperiod},
+           given={Pawe{ł}},
+           giveni={P\bibinitperiod}}}%
+        {{hash=c5706aaac6d2fae46c744ad0dbb28503}{%
+           family={Rapisarda},
+           familyi={R\bibinitperiod},
+           given={Paolo},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{13685cbb55cfae6fb4e4389b038d77fe}
+      \strng{fullhash}{13685cbb55cfae6fb4e4389b038d77fe}
+      \strng{authornamehash}{13685cbb55cfae6fb4e4389b038d77fe}
+      \strng{authorfullhash}{13685cbb55cfae6fb4e4389b038d77fe}
+      \field{labelalpha}{FSR16}
+      \field{sortinit}{F}
+      \field{sortinithash}{276475738cc058478c1677046f857703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 31st Annual ACM/IEEE Symposium on Logic in Computer Science}
+      \field{title}{A categorical approach to open and interconnected dynamical systems}
+      \field{year}{2016}
+      \field{pages}{495\bibrangedash 504}
+      \range{pages}{10}
+    \endentry
+    \entry{Gierz.Keimel.Lawson.Mislove.Scott:2003a}{book}{}
+      \name{author}{6}{}{%
+        {{hash=6c88478139dd14626b133fc3b4c02a07}{%
+           family={Gierz},
+           familyi={G\bibinitperiod},
+           given={G.},
+           giveni={G\bibinitperiod}}}%
+        {{hash=4c5b37181812f363832b4b1e58ae1534}{%
+           family={Hofmann},
+           familyi={H\bibinitperiod},
+           given={K.\bibnamedelimi H.},
+           giveni={K\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=2c3856dea16e78aa622a99d7245e5112}{%
+           family={Keimel},
+           familyi={K\bibinitperiod},
+           given={K.},
+           giveni={K\bibinitperiod}}}%
+        {{hash=9f67438d25f1188c96a11c2bafb02fb8}{%
+           family={Lawson},
+           familyi={L\bibinitperiod},
+           given={J.\bibnamedelimi D.},
+           giveni={J\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=be528bb2b38e18c7472dfa00c1fd37d1}{%
+           family={Mislove},
+           familyi={M\bibinitperiod},
+           given={M.},
+           giveni={M\bibinitperiod}}}%
+        {{hash=bbe82befd81c4ee37e482c5f082ea3fd}{%
+           family={Scott},
+           familyi={S\bibinitperiod},
+           given={D.\bibnamedelimi S.},
+           giveni={D\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press, Cambridge}%
+      }
+      \strng{namehash}{c2d64b8590a8336d2f798d766e6e501d}
+      \strng{fullhash}{1ab8de9ef60f4f5b200829d3a524c228}
+      \strng{authornamehash}{c2d64b8590a8336d2f798d766e6e501d}
+      \strng{authorfullhash}{1ab8de9ef60f4f5b200829d3a524c228}
+      \field{labelalpha}{Gie+03}
+      \field{sortinit}{G}
+      \field{sortinithash}{618d986594b7198ba52cf8b00d348f3f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{series}{Encyclopedia of Mathematics and its Applications}
+      \field{title}{Continuous lattices and domains}
+      \field{volume}{93}
+      \field{year}{2003}
+      \field{pages}{xxxvi+591}
+      \range{pages}{-1}
+    \endentry
+    \entry{Glazek:2013a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=1feeaaebca65f696e5c40123cb3daba7}{%
+           family={Glazek},
+           familyi={G\bibinitperiod},
+           given={K},
+           giveni={K\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer Science \& Business Media}%
+      }
+      \strng{namehash}{1feeaaebca65f696e5c40123cb3daba7}
+      \strng{fullhash}{1feeaaebca65f696e5c40123cb3daba7}
+      \strng{authornamehash}{1feeaaebca65f696e5c40123cb3daba7}
+      \strng{authorfullhash}{1feeaaebca65f696e5c40123cb3daba7}
+      \field{labelalpha}{Gla13}
+      \field{sortinit}{G}
+      \field{sortinithash}{618d986594b7198ba52cf8b00d348f3f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A Guide to the Literature on Semirings and their Applications in Mathematics and Information Sciences: With Complete Bibliography}
+      \field{year}{2013}
+    \endentry
+    \entry{Grandis:2018}{book}{}
+      \name{author}{1}{}{%
+        {{hash=f3ff8e8348a1d26e349b582af6718524}{%
+           family={Grandis},
+           familyi={G\bibinitperiod},
+           given={Marco},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {World Scientific}%
+      }
+      \strng{namehash}{f3ff8e8348a1d26e349b582af6718524}
+      \strng{fullhash}{f3ff8e8348a1d26e349b582af6718524}
+      \strng{authornamehash}{f3ff8e8348a1d26e349b582af6718524}
+      \strng{authorfullhash}{f3ff8e8348a1d26e349b582af6718524}
+      \field{labelalpha}{Gra18}
+      \field{sortinit}{G}
+      \field{sortinithash}{618d986594b7198ba52cf8b00d348f3f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Category Theory and Applications}
+      \field{year}{2018}
+    \endentry
+    \entry{Hermida.Makkai.Power:1998a}{incollection}{}
+      \name{author}{3}{}{%
+        {{hash=28f6519fb1e0ae61f078dcff0d1a28f9}{%
+           family={Hermida},
+           familyi={H\bibinitperiod},
+           given={Claudio},
+           giveni={C\bibinitperiod}}}%
+        {{hash=9fe9b07a6d2433e2262dfdddd43177fb}{%
+           family={Makkai},
+           familyi={M\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=1ed57742541edb5e5c6e46f1b372aa6c}{%
+           family={Power},
+           familyi={P\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE Computer Soc., Los Alamitos, CA}%
+      }
+      \strng{namehash}{e39dcc5389d5c9475e770fe2a4c8cc1d}
+      \strng{fullhash}{e39dcc5389d5c9475e770fe2a4c8cc1d}
+      \strng{authornamehash}{e39dcc5389d5c9475e770fe2a4c8cc1d}
+      \strng{authorfullhash}{e39dcc5389d5c9475e770fe2a4c8cc1d}
+      \field{labelalpha}{HMP98}
+      \field{sortinit}{H}
+      \field{sortinithash}{2f664b453ec75da1fe3804ca92633405}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Thirteenth {A}nnual {IEEE} {S}ymposium on {L}ogic in {C}omputer {S}cience ({I}ndianapolis, {IN}, 1998)}
+      \field{title}{Higher-dimensional multigraphs}
+      \field{year}{1998}
+      \field{pages}{199\bibrangedash 206}
+      \range{pages}{8}
+    \endentry
+    \entry{Haghverdi.Tabuada.Pappas:2003a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=75f5ed94471b0bf990bf3f19d59669e0}{%
+           family={Haghverdi},
+           familyi={H\bibinitperiod},
+           given={Esfandiar},
+           giveni={E\bibinitperiod}}}%
+        {{hash=fa077b33d45928296923ab6a3c97f740}{%
+           family={Tabuada},
+           familyi={T\bibinitperiod},
+           given={Paulo},
+           giveni={P\bibinitperiod}}}%
+        {{hash=e5488f354cfec1a4f86243331b4986dc}{%
+           family={Pappas},
+           familyi={P\bibinitperiod},
+           given={George},
+           giveni={G\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{20742c5d5789ad0677ebfa5b794f971a}
+      \strng{fullhash}{20742c5d5789ad0677ebfa5b794f971a}
+      \strng{authornamehash}{20742c5d5789ad0677ebfa5b794f971a}
+      \strng{authorfullhash}{20742c5d5789ad0677ebfa5b794f971a}
+      \field{labelalpha}{HTP03}
+      \field{sortinit}{H}
+      \field{sortinithash}{2f664b453ec75da1fe3804ca92633405}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Electronic Notes in Theoretical Computer Science}
+      \field{title}{Bisimulation relations for dynamical and control systems}
+      \field{volume}{69}
+      \field{year}{2003}
+      \field{pages}{120\bibrangedash 136}
+      \range{pages}{17}
+    \endentry
+    \entry{Islam.Phoa:1994a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=51e1a73498e17522f55aadc53f5ce46a}{%
+           family={Islam},
+           familyi={I\bibinitperiod},
+           given={Amitavo},
+           giveni={A\bibinitperiod}}}%
+        {{hash=19c32e9fb446b3a1fd00b924bad6e0ce}{%
+           family={Phoa},
+           familyi={P\bibinitperiod},
+           given={Wesley},
+           giveni={W\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{bc9ce39b23c6281080a4ca7e63784149}
+      \strng{fullhash}{bc9ce39b23c6281080a4ca7e63784149}
+      \strng{authornamehash}{bc9ce39b23c6281080a4ca7e63784149}
+      \strng{authorfullhash}{bc9ce39b23c6281080a4ca7e63784149}
+      \field{labelalpha}{IP94}
+      \field{sortinit}{I}
+      \field{sortinithash}{a3dcedd53b04d1adfd5ac303ecd5e6fa}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Symposium on Theoretical Aspects of Computer Software}
+      \field{title}{Categorical models of relational databases I: Fibrational formulation, schema integration}
+      \field{year}{1994}
+      \field{pages}{618\bibrangedash 641}
+      \range{pages}{24}
+    \endentry
+    \entry{Jacobs:1999a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=bf424ec58729aa7d35e9d57ec1c7d40d}{%
+           family={Jacobs},
+           familyi={J\bibinitperiod},
+           given={Bart},
+           giveni={B\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {North-Holland Publishing Co., Amsterdam}%
+      }
+      \strng{namehash}{bf424ec58729aa7d35e9d57ec1c7d40d}
+      \strng{fullhash}{bf424ec58729aa7d35e9d57ec1c7d40d}
+      \strng{authornamehash}{bf424ec58729aa7d35e9d57ec1c7d40d}
+      \strng{authorfullhash}{bf424ec58729aa7d35e9d57ec1c7d40d}
+      \field{labelalpha}{Jac99}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{series}{Studies in Logic and the Foundations of Mathematics}
+      \field{title}{Categorical logic and type theory}
+      \field{volume}{141}
+      \field{year}{1999}
+      \field{pages}{xviii+760}
+      \range{pages}{-1}
+    \endentry
+    \entry{Joyal.Nielsen.Winskel:1996a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=879e6f70ccf8d5999602c642fcda57b3}{%
+           family={Joyal},
+           familyi={J\bibinitperiod},
+           given={André},
+           giveni={A\bibinitperiod}}}%
+        {{hash=3281cbf0581655dba2dcc4960e9b2bc2}{%
+           family={Nielsen},
+           familyi={N\bibinitperiod},
+           given={Mogens},
+           giveni={M\bibinitperiod}}}%
+        {{hash=ac9148668fcbbf80b9bd8c23d6a42e58}{%
+           family={Winskel},
+           familyi={W\bibinitperiod},
+           given={Glynn},
+           giveni={G\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{38b8ecfde1fd7fbcf5a993b59d72a445}
+      \strng{fullhash}{38b8ecfde1fd7fbcf5a993b59d72a445}
+      \strng{authornamehash}{38b8ecfde1fd7fbcf5a993b59d72a445}
+      \strng{authorfullhash}{38b8ecfde1fd7fbcf5a993b59d72a445}
+      \field{labelalpha}{JNW96}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Information and Computation}
+      \field{number}{2}
+      \field{title}{Bisimulation from open maps}
+      \field{volume}{127}
+      \field{year}{1996}
+      \field{pages}{164\bibrangedash 185}
+      \range{pages}{22}
+    \endentry
+    \entry{Johnstone:2002a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=d075d5a701e048ff858b40bfaa8f928a}{%
+           family={Johnstone},
+           familyi={J\bibinitperiod},
+           given={Peter\bibnamedelima T.},
+           giveni={P\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {The Clarendon Press Oxford University Press}%
+      }
+      \strng{namehash}{d075d5a701e048ff858b40bfaa8f928a}
+      \strng{fullhash}{d075d5a701e048ff858b40bfaa8f928a}
+      \strng{authornamehash}{d075d5a701e048ff858b40bfaa8f928a}
+      \strng{authorfullhash}{d075d5a701e048ff858b40bfaa8f928a}
+      \field{labelalpha}{Joh02}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{series}{Oxford Logic Guides}
+      \field{title}{Sketches of an elephant: a topos theory compendium.}
+      \field{volume}{43}
+      \field{year}{2002}
+      \field{pages}{xxii+468+71}
+      \range{pages}{-1}
+    \endentry
+    \entry{Johnstone:1977a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=f87d3a668b242e2d29dde310ba49fd24}{%
+           family={Johnstone},
+           familyi={J\bibinitperiod},
+           given={P.\bibnamedelimi T.},
+           giveni={P\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Academic Press [Harcourt Brace Jovanovich, Publishers], London-New York}%
+      }
+      \strng{namehash}{f87d3a668b242e2d29dde310ba49fd24}
+      \strng{fullhash}{f87d3a668b242e2d29dde310ba49fd24}
+      \strng{authornamehash}{f87d3a668b242e2d29dde310ba49fd24}
+      \strng{authorfullhash}{f87d3a668b242e2d29dde310ba49fd24}
+      \field{labelalpha}{Joh77}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{London Mathematical Society Monographs, Vol. 10}
+      \field{title}{Topos theory}
+      \field{year}{1977}
+      \field{pages}{xxiii+367}
+      \range{pages}{-1}
+    \endentry
+    \entry{Johnson.Rosebrugh:2002a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=aa4a83405eb5652cfc269f0942daea0a}{%
+           family={Johnson},
+           familyi={J\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=39e10cb6b4b0377de47ea8c88533b70a}{%
+           family={Rosebrugh},
+           familyi={R\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{461652ec8ea9e5c766c6d6048d6dbd8a}
+      \strng{fullhash}{461652ec8ea9e5c766c6d6048d6dbd8a}
+      \strng{authornamehash}{461652ec8ea9e5c766c6d6048d6dbd8a}
+      \strng{authorfullhash}{461652ec8ea9e5c766c6d6048d6dbd8a}
+      \field{labelalpha}{JR02}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Electronic Notes in Theoretical Computer Science}
+      \field{note}{CATS'02, Computing}
+      \field{title}{Sketch Data Models, Relational Schema and Data Specifications}
+      \field{volume}{61}
+      \field{year}{2002}
+      \field{pages}{51\bibrangedash 63}
+      \range{pages}{13}
+    \endentry
+    \entry{Joyal.Street:1993a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=879e6f70ccf8d5999602c642fcda57b3}{%
+           family={Joyal},
+           familyi={J\bibinitperiod},
+           given={André},
+           giveni={A\bibinitperiod}}}%
+        {{hash=faea870f61e1c45828077d18a31465d2}{%
+           family={Street},
+           familyi={S\bibinitperiod},
+           given={Ross},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{d92010c48602800b7ba54dde2f390632}
+      \strng{fullhash}{d92010c48602800b7ba54dde2f390632}
+      \strng{authornamehash}{d92010c48602800b7ba54dde2f390632}
+      \strng{authorfullhash}{d92010c48602800b7ba54dde2f390632}
+      \field{labelalpha}{JS93}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Advances in Mathematics}
+      \field{number}{1}
+      \field{title}{Braided tensor categories}
+      \field{volume}{102}
+      \field{year}{1993}
+      \field{pages}{20\bibrangedash 78}
+      \range{pages}{59}
+    \endentry
+    \entry{Joyal.Street.Verity:1996a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=d22bcd06f6cf94c88ec6771b4732117b}{%
+           family={Joyal},
+           familyi={J\bibinitperiod},
+           given={Andr{é}},
+           giveni={A\bibinitperiod}}}%
+        {{hash=faea870f61e1c45828077d18a31465d2}{%
+           family={Street},
+           familyi={S\bibinitperiod},
+           given={Ross},
+           giveni={R\bibinitperiod}}}%
+        {{hash=71d856beec0192ccd2aa5c73f8a3e259}{%
+           family={Verity},
+           familyi={V\bibinitperiod},
+           given={Dominic},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{5bd5af2f572fd70e762d5c7adeb9f3c5}
+      \strng{fullhash}{5bd5af2f572fd70e762d5c7adeb9f3c5}
+      \strng{authornamehash}{5bd5af2f572fd70e762d5c7adeb9f3c5}
+      \strng{authorfullhash}{5bd5af2f572fd70e762d5c7adeb9f3c5}
+      \field{labelalpha}{JSV96}
+      \field{sortinit}{J}
+      \field{sortinithash}{c86bd6cced82a15683b396c2169909ef}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematical Proceedings of the Cambridge Philosophical Society}
+      \field{title}{Traced monoidal categories}
+      \field{volume}{119}
+      \field{year}{1996}
+      \field{pages}{Paper No. 3\bibrangessep 447\bibrangedash 468}
+      \range{pages}{-1}
+    \endentry
+    \entry{Kelly:1982a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=a674d8065c1ac2a68b2af1fd18d1587e}{%
+           family={Kelly},
+           familyi={K\bibinitperiod},
+           given={G.\bibnamedelimi M.},
+           giveni={G\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{origpublisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{a674d8065c1ac2a68b2af1fd18d1587e}
+      \strng{fullhash}{a674d8065c1ac2a68b2af1fd18d1587e}
+      \strng{authornamehash}{a674d8065c1ac2a68b2af1fd18d1587e}
+      \strng{authorfullhash}{a674d8065c1ac2a68b2af1fd18d1587e}
+      \field{labelalpha}{Kel05}
+      \field{sortinit}{K}
+      \field{sortinithash}{4c244ceae61406cdc0cc2ce1cb1ff703}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Reprints in Theory and Applications of Categories}
+      \field{origyear}{1982}
+      \field{title}{Basic concepts of enriched category theory}
+      \field{year}{2005}
+      \field{origdateera}{ce}
+      \field{pages}{Paper No. 10}
+      \range{pages}{-1}
+      \verb{url}
+      \verb http://www.tac.mta.ca/tac/reprints/articles/10/tr10abs.html
+      \endverb
+    \endentry
+    \entry{Lawvere:2004}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b4084e0a5b8b412e8a7ecd62f2099f7b}{%
+           family={Lawvere},
+           familyi={L\bibinitperiod},
+           given={F\bibnamedelima William},
+           giveni={F\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \strng{namehash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{fullhash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{authornamehash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{authorfullhash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \field{labelalpha}{Law04}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Reprints in Theory and Applications of Categories}
+      \field{title}{Functorial Semantics of Algebraic Theories and Some Algebraic Problems in the context of Functorial Semantics of Algebraic Theories}
+      \field{volume}{5}
+      \field{year}{2004}
+      \field{pages}{1\bibrangedash 121}
+      \range{pages}{121}
+    \endentry
+    \entry{Lawvere:1973a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b4084e0a5b8b412e8a7ecd62f2099f7b}{%
+           family={Lawvere},
+           familyi={L\bibinitperiod},
+           given={F\bibnamedelima William},
+           giveni={F\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{fullhash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{authornamehash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \strng{authorfullhash}{b4084e0a5b8b412e8a7ecd62f2099f7b}
+      \field{labelalpha}{Law73}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Rendiconti del seminario matématico e fisico di Milano}
+      \field{number}{1}
+      \field{title}{Metric spaces, generalized logic, and closed categories}
+      \field{volume}{43}
+      \field{year}{1973}
+      \field{pages}{135\bibrangedash 166}
+      \range{pages}{32}
+    \endentry
+    \entry{Lawvere:1986a}{unpublished}{}
+      \name{author}{1}{}{%
+        {{hash=c04792f50f45cfd2dfa843343e10b8f5}{%
+           family={Lawvere},
+           familyi={L\bibinitperiod},
+           given={Bill},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{c04792f50f45cfd2dfa843343e10b8f5}
+      \strng{fullhash}{c04792f50f45cfd2dfa843343e10b8f5}
+      \strng{authornamehash}{c04792f50f45cfd2dfa843343e10b8f5}
+      \strng{authorfullhash}{c04792f50f45cfd2dfa843343e10b8f5}
+      \field{labelalpha}{Law86}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{State categories and response functors}
+      \field{year}{1986}
+      \field{dateera}{ce}
+    \endentry
+    \entry{Leinster:2004a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=82417a4f76230e108804a8ce467246af}{%
+           family={Leinster},
+           familyi={L\bibinitperiod},
+           given={Tom},
+           giveni={T\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press, Cambridge}%
+      }
+      \strng{namehash}{82417a4f76230e108804a8ce467246af}
+      \strng{fullhash}{82417a4f76230e108804a8ce467246af}
+      \strng{authornamehash}{82417a4f76230e108804a8ce467246af}
+      \strng{authorfullhash}{82417a4f76230e108804a8ce467246af}
+      \field{labelalpha}{Lei04}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{298}
+      \field{series}{London Mathematical Society Lecture Note Series}
+      \field{title}{Higher operads, higher categories}
+      \field{year}{2004}
+      \field{dateera}{ce}
+    \endentry
+    \entry{Leinster:2014a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=82417a4f76230e108804a8ce467246af}{%
+           family={Leinster},
+           familyi={L\bibinitperiod},
+           given={Tom},
+           giveni={T\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{82417a4f76230e108804a8ce467246af}
+      \strng{fullhash}{82417a4f76230e108804a8ce467246af}
+      \strng{authornamehash}{82417a4f76230e108804a8ce467246af}
+      \strng{authorfullhash}{82417a4f76230e108804a8ce467246af}
+      \field{labelalpha}{Lei14}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Basic category theory}
+      \field{volume}{143}
+      \field{year}{2014}
+    \endentry
+    \entry{Lambek.Scott:1988a}{book}{}
+      \name{author}{2}{}{%
+        {{hash=bd1ac39e6ad192b9581e4d9c585c51ce}{%
+           family={Lambek},
+           familyi={L\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod}}}%
+        {{hash=5f21ca812d1a5a58a9c9c6d541f32510}{%
+           family={Scott},
+           familyi={S\bibinitperiod},
+           given={P.\bibnamedelimi J.},
+           giveni={P\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press, Cambridge}%
+      }
+      \strng{namehash}{8d85e38365b7495113b12c7e9a9bf676}
+      \strng{fullhash}{8d85e38365b7495113b12c7e9a9bf676}
+      \strng{authornamehash}{8d85e38365b7495113b12c7e9a9bf676}
+      \strng{authorfullhash}{8d85e38365b7495113b12c7e9a9bf676}
+      \field{labelalpha}{LS88}
+      \field{sortinit}{L}
+      \field{sortinithash}{7bba64db83423e3c29ad597f3b682cf3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Reprint of the 1986 original}
+      \field{series}{Cambridge Studies in Advanced Mathematics}
+      \field{title}{Introduction to higher order categorical logic}
+      \field{volume}{7}
+      \field{year}{1988}
+      \field{pages}{x+293}
+      \range{pages}{-1}
+    \endentry
+    \entry{MacLane:1998a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=412e255483e0d09fd0b0895d355a28a8}{%
+           family={Mac\bibnamedelima Lane},
+           familyi={M\bibinitperiod\bibinitdelim L\bibinitperiod},
+           given={Saunders},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {Springer-Verlag}%
+      }
+      \strng{namehash}{412e255483e0d09fd0b0895d355a28a8}
+      \strng{fullhash}{412e255483e0d09fd0b0895d355a28a8}
+      \strng{authornamehash}{412e255483e0d09fd0b0895d355a28a8}
+      \strng{authorfullhash}{412e255483e0d09fd0b0895d355a28a8}
+      \field{labelalpha}{Mac98}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2}
+      \field{number}{5}
+      \field{series}{Graduate Texts in Mathematics}
+      \field{title}{Categories for the working mathematician}
+      \field{year}{1998}
+    \endentry
+    \entry{May:1972a}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=8313ba90a9fc4dbc14936ee72b219f8d}{%
+           family={May},
+           familyi={M\bibinitperiod},
+           given={J\bibnamedelima Peter},
+           giveni={J\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer-Verlag, New York}%
+      }
+      \strng{namehash}{8313ba90a9fc4dbc14936ee72b219f8d}
+      \strng{fullhash}{8313ba90a9fc4dbc14936ee72b219f8d}
+      \strng{authornamehash}{8313ba90a9fc4dbc14936ee72b219f8d}
+      \strng{authorfullhash}{8313ba90a9fc4dbc14936ee72b219f8d}
+      \field{labelalpha}{May72}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The geometry of iterated loop spaces, volume 271 of Lecture Notes in Mathematics}
+      \field{year}{1972}
+    \endentry
+    \entry{Mclarty:1990a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=bfd18cdba587608eac8588f66ecb15ce}{%
+           family={McLarty},
+           familyi={M\bibinitperiod},
+           given={Colin},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{fullhash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{authornamehash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{authorfullhash}{bfd18cdba587608eac8588f66ecb15ce}
+      \field{labelalpha}{McL90}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{The British Journal for the Philosophy of Science}
+      \field{number}{3}
+      \field{title}{The uses and abuses of the history of topos theory}
+      \field{volume}{41}
+      \field{year}{1990}
+      \field{pages}{351\bibrangedash 375}
+      \range{pages}{25}
+    \endentry
+    \entry{Mclarty:1992a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=bfd18cdba587608eac8588f66ecb15ce}{%
+           family={McLarty},
+           familyi={M\bibinitperiod},
+           given={Colin},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Clarendon Press}%
+      }
+      \strng{namehash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{fullhash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{authornamehash}{bfd18cdba587608eac8588f66ecb15ce}
+      \strng{authorfullhash}{bfd18cdba587608eac8588f66ecb15ce}
+      \field{labelalpha}{McL92}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Elementary categories, elementary toposes}
+      \field{year}{1992}
+    \endentry
+    \entry{MacLane.Moerdijk:1992a}{book}{}
+      \name{author}{2}{}{%
+        {{hash=d35756c9f39a938d9533376dfaa5ad43}{%
+           family={MacLane},
+           familyi={M\bibinitperiod},
+           given={Saunders},
+           giveni={S\bibinitperiod}}}%
+        {{hash=1fc4bc57ad663c84359227240f5bc42f}{%
+           family={Moerdijk},
+           familyi={M\bibinitperiod},
+           given={Ieke},
+           giveni={I\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{5ddd5fc6ef7aceb84cfa1296eb79bdb9}
+      \strng{fullhash}{5ddd5fc6ef7aceb84cfa1296eb79bdb9}
+      \strng{authornamehash}{5ddd5fc6ef7aceb84cfa1296eb79bdb9}
+      \strng{authorfullhash}{5ddd5fc6ef7aceb84cfa1296eb79bdb9}
+      \field{labelalpha}{MM92}
+      \field{sortinit}{M}
+      \field{sortinithash}{c26a05ef03e4429073ed5c825140fac3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Sheaves in Geometry and Logic: A First Introduction to Topos Theory}
+      \field{year}{1992}
+    \endentry
+    \entry{Nlab:symmeric-monoidal-category}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=dce37654717a7511e39a98fc37ab50d5}{%
+           family={nLab},
+           familyi={n\bibinitperiod},
+           given={Contributors\bibnamedelima To},
+           giveni={C\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{dce37654717a7511e39a98fc37ab50d5}
+      \strng{fullhash}{dce37654717a7511e39a98fc37ab50d5}
+      \strng{authornamehash}{dce37654717a7511e39a98fc37ab50d5}
+      \strng{authorfullhash}{dce37654717a7511e39a98fc37ab50d5}
+      \field{labelalpha}{nLa18}
+      \field{sortinit}{n}
+      \field{sortinithash}{1163c28585427c673ad5a010cbf82f52}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Symmetric monoidal category}
+      \field{year}{2018}
+      \verb{url}
+      \verb https://ncatlab.org/nlab/revision/symmetric+monoidal+category/30
+      \endverb
+    \endentry
+    \entry{Nielson:1999:PPA:555142}{book}{}
+      \name{author}{3}{}{%
+        {{hash=a4a1d0b12b1b99c1c382e8addbc40e96}{%
+           family={Nielson},
+           familyi={N\bibinitperiod},
+           given={Flemming},
+           giveni={F\bibinitperiod}}}%
+        {{hash=4d80825eede80012a94e3ced7c3240f6}{%
+           family={Nielson},
+           familyi={N\bibinitperiod},
+           given={Hanne\bibnamedelima R.},
+           giveni={H\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=07d9480ad086f8ed8bbaaf0f5165bb57}{%
+           family={Hankin},
+           familyi={H\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Secaucus, NJ, USA}%
+      }
+      \list{publisher}{1}{%
+        {Springer-Verlag New York, Inc.}%
+      }
+      \strng{namehash}{328c8375682fa540930ce0aed6515ee3}
+      \strng{fullhash}{328c8375682fa540930ce0aed6515ee3}
+      \strng{authornamehash}{328c8375682fa540930ce0aed6515ee3}
+      \strng{authorfullhash}{328c8375682fa540930ce0aed6515ee3}
+      \field{labelalpha}{NNH99}
+      \field{sortinit}{N}
+      \field{sortinithash}{1163c28585427c673ad5a010cbf82f52}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Principles of Program Analysis}
+      \field{year}{1999}
+    \endentry
+    \entry{Pierce:1991}{book}{}
+      \name{author}{1}{}{%
+        {{hash=8eb1c0a7778a466aa612ab3259d489ec}{%
+           family={Pierce},
+           familyi={P\bibinitperiod},
+           given={Benjamin\bibnamedelima C.},
+           giveni={B\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {MIT Press}%
+      }
+      \strng{namehash}{8eb1c0a7778a466aa612ab3259d489ec}
+      \strng{fullhash}{8eb1c0a7778a466aa612ab3259d489ec}
+      \strng{authornamehash}{8eb1c0a7778a466aa612ab3259d489ec}
+      \strng{authorfullhash}{8eb1c0a7778a466aa612ab3259d489ec}
+      \field{labelalpha}{Pie91}
+      \field{sortinit}{P}
+      \field{sortinithash}{24100cef455d7974167575052c29146e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Basic Category Theory for Computer Scientists}
+      \field{year}{1991}
+    \endentry
+    \entry{Piessens.Steegmans:1995a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=e4d66bba00377abcfc59991fe739ed13}{%
+           family={Piessens},
+           familyi={P\bibinitperiod},
+           given={Frank},
+           giveni={F\bibinitperiod}}}%
+        {{hash=9f7333c8c2c62a587ea3930f766111c4}{%
+           family={Steegmans},
+           familyi={S\bibinitperiod},
+           given={Eric},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Theory Appl. Categ., Sackville, NB}%
+      }
+      \strng{namehash}{42f692f142215642fcd20ddeb22bd83e}
+      \strng{fullhash}{42f692f142215642fcd20ddeb22bd83e}
+      \strng{authornamehash}{42f692f142215642fcd20ddeb22bd83e}
+      \strng{authorfullhash}{42f692f142215642fcd20ddeb22bd83e}
+      \field{labelalpha}{PS95}
+      \field{sortinit}{P}
+      \field{sortinithash}{24100cef455d7974167575052c29146e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{number}{8}
+      \field{title}{Categorical data specifications}
+      \field{volume}{1}
+      \field{year}{1995}
+      \field{pages}{156\bibrangedash 173}
+      \range{pages}{18}
+    \endentry
+    \entry{Riehl:2017a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=45a94503b2898b54c4e429a46414d3ad}{%
+           family={Riehl},
+           familyi={R\bibinitperiod},
+           given={Emily},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Courier Dover Publications}%
+      }
+      \strng{namehash}{45a94503b2898b54c4e429a46414d3ad}
+      \strng{fullhash}{45a94503b2898b54c4e429a46414d3ad}
+      \strng{authornamehash}{45a94503b2898b54c4e429a46414d3ad}
+      \strng{authorfullhash}{45a94503b2898b54c4e429a46414d3ad}
+      \field{labelalpha}{Rie17}
+      \field{sortinit}{R}
+      \field{sortinithash}{c15bc8eb6936bc6b3c8baa9e8575af53}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Category theory in context}
+      \field{year}{2017}
+    \endentry
+    \entry{Rosenthal:1990a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=8fcb6dea9e77090909cb122352f9f750}{%
+           family={Rosenthal},
+           familyi={R\bibinitperiod},
+           given={Kimmo\bibnamedelima I},
+           giveni={K\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \list{publisher}{2}{%
+        {Longman Scientific}%
+        {Technical}%
+      }
+      \strng{namehash}{8fcb6dea9e77090909cb122352f9f750}
+      \strng{fullhash}{8fcb6dea9e77090909cb122352f9f750}
+      \strng{authornamehash}{8fcb6dea9e77090909cb122352f9f750}
+      \strng{authorfullhash}{8fcb6dea9e77090909cb122352f9f750}
+      \field{labelalpha}{Ros90}
+      \field{sortinit}{R}
+      \field{sortinithash}{c15bc8eb6936bc6b3c8baa9e8575af53}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Quantales and their applications}
+      \field{volume}{234}
+      \field{year}{1990}
+    \endentry
+    \entry{Rupel.Spivak:2013a}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=ef9949c8904c45830e584b98be34a3b2}{%
+           family={Rupel},
+           familyi={R\bibinitperiod},
+           given={Dylan},
+           giveni={D\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \strng{namehash}{19957abf7322c6b4bb80448c2a07112f}
+      \strng{fullhash}{19957abf7322c6b4bb80448c2a07112f}
+      \strng{authornamehash}{19957abf7322c6b4bb80448c2a07112f}
+      \strng{authorfullhash}{19957abf7322c6b4bb80448c2a07112f}
+      \field{labelalpha}{RS13}
+      \field{sortinit}{R}
+      \field{sortinithash}{c15bc8eb6936bc6b3c8baa9e8575af53}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The operad of temporal wiring diagrams: formalizing a graphical language for discrete-time processes}
+      \field{year}{2013}
+      \verb{eprint}
+      \verb arXiv:1307.6894
+      \endverb
+    \endentry
+    \entry{Rosebrugh.Wood:1992a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=39e10cb6b4b0377de47ea8c88533b70a}{%
+           family={Rosebrugh},
+           familyi={R\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=41c9ec8dedcf292ee8d995e6d668ce7e}{%
+           family={Wood},
+           familyi={W\bibinitperiod},
+           given={R.\bibnamedelimi J.},
+           giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=9d1a1283ca7be79b56794ee41db264c2}{%
+           family={Seely},
+           familyi={S\bibinitperiod},
+           given={R.\bibnamedelimi A.\bibnamedelimi G.},
+           giveni={R\bibinitperiod\bibinitdelim A\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {American Mathematical Society}%
+      }
+      \strng{namehash}{3c8b2dd20512641a21d77de3a3cc82b9}
+      \strng{fullhash}{3c8b2dd20512641a21d77de3a3cc82b9}
+      \strng{authornamehash}{3c8b2dd20512641a21d77de3a3cc82b9}
+      \strng{authorfullhash}{3c8b2dd20512641a21d77de3a3cc82b9}
+      \strng{editornamehash}{9d1a1283ca7be79b56794ee41db264c2}
+      \strng{editorfullhash}{9d1a1283ca7be79b56794ee41db264c2}
+      \field{labelalpha}{RW92}
+      \field{sortinit}{R}
+      \field{sortinithash}{c15bc8eb6936bc6b3c8baa9e8575af53}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Canadian Mathematical Society Conference Procedings}
+      \field{eventday}{23}
+      \field{eventendday}{30}
+      \field{eventendmonth}{6}
+      \field{eventendyear}{1991}
+      \field{eventmonth}{6}
+      \field{eventtitle}{International Summer Category Theory Meeting}
+      \field{eventyear}{1991}
+      \field{title}{Relational Databases and Indexed Categories}
+      \field{volume}{13}
+      \field{year}{1992}
+      \field{dateera}{ce}
+      \field{eventenddateera}{ce}
+      \field{eventdateera}{ce}
+      \field{pages}{391\bibrangedash 407}
+      \range{pages}{17}
+    \endentry
+    \entry{Subrahmanian.Lee.Granger:2015a}{article}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=7d1eac2c75fc9e03edbd06a47a0f3d1d}{%
+           family={Subrahmanian},
+           familyi={S\bibinitperiod},
+           given={Eswaran},
+           giveni={E\bibinitperiod}}}%
+        {{hash=7daf6dcaea40934d3ab03189e5967e23}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+        {{hash=5e36833aa501ba81ba8b12f91a926f87}{%
+           family={Granger},
+           familyi={G\bibinitperiod},
+           given={Helen},
+           giveni={H\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d2e7fb8aadc12ce423dc44a068a7c905}
+      \strng{fullhash}{8a6cd4e0c3028876b200a4491300999e}
+      \strng{authornamehash}{d2e7fb8aadc12ce423dc44a068a7c905}
+      \strng{authorfullhash}{8a6cd4e0c3028876b200a4491300999e}
+      \field{labelalpha}{S+15}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Research in Engineering Design}
+      \field{number}{3}
+      \field{title}{Managing and supporting product life cycle through engineering change management for a complex product}
+      \field{volume}{26}
+      \field{year}{2015}
+      \field{pages}{189\bibrangedash 217}
+      \range{pages}{29}
+    \endentry
+    \entry{Schultz.Spivak.Vasilakopoulou.Wisnesky:2017a}{article}{}
+      \name{author}{4}{}{%
+        {{hash=d55be4fa0f0a35a27c7791b389793466}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Patrick},
+           giveni={P\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=6beb4284a6bc9b080a052a9a0629c930}{%
+           family={Vasilakopoulou},
+           familyi={V\bibinitperiod},
+           given={Christina},
+           giveni={C\bibinitperiod}}}%
+        {{hash=56b9df2574d1015df100c6ee823a4080}{%
+           family={Wisnesky},
+           familyi={W\bibinitperiod},
+           given={Ryan},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{81fbdc07e8b5b2655dba5029d6bd3bb3}
+      \strng{fullhash}{f2b0f9d7160d217328e2def229f792cc}
+      \strng{authornamehash}{81fbdc07e8b5b2655dba5029d6bd3bb3}
+      \strng{authorfullhash}{f2b0f9d7160d217328e2def229f792cc}
+      \field{labelalpha}{Sch+17}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{title}{Algebraic Databases}
+      \field{volume}{32}
+      \field{year}{2017}
+      \field{pages}{Paper No. 16\bibrangessep 547\bibrangedash 619}
+      \range{pages}{-1}
+    \endentry
+    \entry{selinger2010survey}{incollection}{}
+      \name{author}{1}{}{%
+        {{hash=0d665e53102b24b5d852725ad829d803}{%
+           family={Selinger},
+           familyi={S\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{0d665e53102b24b5d852725ad829d803}
+      \strng{fullhash}{0d665e53102b24b5d852725ad829d803}
+      \strng{authornamehash}{0d665e53102b24b5d852725ad829d803}
+      \strng{authorfullhash}{0d665e53102b24b5d852725ad829d803}
+      \field{labelalpha}{Sel10}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{New structures for physics}
+      \field{title}{A survey of graphical languages for monoidal categories}
+      \field{year}{2010}
+      \field{pages}{289\bibrangedash 355}
+      \range{pages}{67}
+    \endentry
+    \entry{Shulman:2008a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=a49cc4742950659ae680e1c40f2295a9}{%
+           family={Shulman},
+           familyi={S\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{fullhash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{authornamehash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{authorfullhash}{a49cc4742950659ae680e1c40f2295a9}
+      \field{labelalpha}{Shu08}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{title}{Framed bicategories and monoidal fibrations}
+      \field{volume}{20}
+      \field{year}{2008}
+      \field{dateera}{ce}
+      \field{pages}{Paper No. 18\bibrangessep 650\bibrangedash 738}
+      \range{pages}{-1}
+    \endentry
+    \entry{Shulman:2010a}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=a49cc4742950659ae680e1c40f2295a9}{%
+           family={Shulman},
+           familyi={S\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{fullhash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{authornamehash}{a49cc4742950659ae680e1c40f2295a9}
+      \strng{authorfullhash}{a49cc4742950659ae680e1c40f2295a9}
+      \field{labelalpha}{Shu10}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Constructing symmetric monoidal bicategories}
+      \field{year}{2010}
+      \field{dateera}{ce}
+      \verb{eprint}
+      \verb arXiv: 1004.0993
+      \endverb
+    \endentry
+    \entry{Sobocinski:blog}{online}{}
+      \field{labelalpha}{Sob}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labeltitlesource}{title}
+      \field{label}{Sob}
+      \field{title}{Graphical Linear Algebra}
+      \field{urlday}{11}
+      \field{urlmonth}{3}
+      \field{urlyear}{2018}
+      \field{urldateera}{ce}
+      \verb{url}
+      \verb https://graphicallinearalgebra.net/
+      \endverb
+    \endentry
+    \entry{Spivak.Dobson.Kumari.Wu:2016a}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=28532d86317ba8914235a88b429ac858}{%
+           family={Dobson},
+           familyi={D\bibinitperiod},
+           given={Magdalen\bibnamedelimb R.\bibnamedelimi C.},
+           giveni={M\bibinitperiod\bibinitdelim R\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=35b527b28f5c81aee29afba46e1c92b0}{%
+           family={Kumari},
+           familyi={K\bibinitperiod},
+           given={Sapna},
+           giveni={S\bibinitperiod}}}%
+        {{hash=d1878a29cb0e122d5d72dd85cf50e194}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Lawrence},
+           giveni={L\bibinitperiod}}}%
+      }
+      \strng{namehash}{cdb2f1003fa2580bc661de65da58e004}
+      \strng{fullhash}{48498378e1f6d74fa3e1b5d9ced27f72}
+      \strng{authornamehash}{cdb2f1003fa2580bc661de65da58e004}
+      \strng{authorfullhash}{48498378e1f6d74fa3e1b5d9ced27f72}
+      \field{labelalpha}{Spi+16}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Pixel Arrays: A fast and elementary method for solving nonlinear systems}
+      \field{year}{2016}
+      \verb{eprint}
+      \verb arXiv:1609.00061
+      \endverb
+    \endentry
+    \entry{spivakfunctorial2012}{article}{}
+      \name{author}{1}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \strng{namehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{fullhash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authornamehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authorfullhash}{554dfcf703448b4ad52c20c990941f27}
+      \field{labelalpha}{Spi12}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Information and Computation}
+      \field{title}{Functorial data migration}
+      \field{volume}{217}
+      \field{year}{2012}
+      \field{pages}{31\bibrangedash 51}
+      \range{pages}{21}
+    \endentry
+    \entry{Spivak:2013b}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \strng{namehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{fullhash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authornamehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authorfullhash}{554dfcf703448b4ad52c20c990941f27}
+      \field{labelalpha}{Spi13}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The operad of wiring diagrams: formalizing a graphical language for databases, recursion, and plug-and-play circuits}
+      \field{volume}{abs/1305.0297}
+      \field{year}{2013}
+      \verb{eprint}
+      \verb arXiv: 1305.0297
+      \endverb
+    \endentry
+    \entry{Spivak:2014a}{book}{}
+      \name{author}{1}{}{%
+        {{hash=3d67d18322a5ec9cdc1d38c98697b104}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {MIT Press}%
+      }
+      \strng{namehash}{3d67d18322a5ec9cdc1d38c98697b104}
+      \strng{fullhash}{3d67d18322a5ec9cdc1d38c98697b104}
+      \strng{authornamehash}{3d67d18322a5ec9cdc1d38c98697b104}
+      \strng{authorfullhash}{3d67d18322a5ec9cdc1d38c98697b104}
+      \field{labelalpha}{Spi14}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{extraalpha}{1}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Category theory for the sciences}
+      \field{year}{2014}
+    \endentry
+    \entry{Spivak:2014c}{article}{}
+      \name{author}{1}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \strng{namehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{fullhash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authornamehash}{554dfcf703448b4ad52c20c990941f27}
+      \strng{authorfullhash}{554dfcf703448b4ad52c20c990941f27}
+      \field{labelalpha}{Spi14}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{extraalpha}{2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Mathematical Structures in Computer Science}
+      \field{number}{6}
+      \field{title}{Database queries and constraints via lifting problems}
+      \field{volume}{24}
+      \field{year}{2014}
+      \field{pages}{e240602\bibrangessep 55}
+      \range{pages}{-1}
+      \verb{url}
+      \verb http://dx.doi.org/10.1017/S0960129513000479
+      \endverb
+    \endentry
+    \entry{Schultz.Spivak:2017a}{book}{}
+      \name{author}{2}{}{%
+        {{hash=d55be4fa0f0a35a27c7791b389793466}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Patrick},
+           giveni={P\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer, Berkhäuser, \emph{To appear}}%
+      }
+      \strng{namehash}{a318bba89b5c898bdb9cd96f7b23d1b3}
+      \strng{fullhash}{a318bba89b5c898bdb9cd96f7b23d1b3}
+      \strng{authornamehash}{a318bba89b5c898bdb9cd96f7b23d1b3}
+      \strng{authorfullhash}{a318bba89b5c898bdb9cd96f7b23d1b3}
+      \field{labelalpha}{SS18}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Temporal Type Theory: A topos-theoretic approach to systems and behavior}
+      \field{year}{2018}
+    \endentry
+    \entry{speranzon2018abstraction}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=0220feeebaa7081b5770580efe86767a}{%
+           family={Speranzon},
+           familyi={S\bibinitperiod},
+           given={Alberto},
+           giveni={A\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=f894bc0739fe0a7f95f0550b200ac97a}{%
+           family={Varadarajan},
+           familyi={V\bibinitperiod},
+           given={Srivatsan},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{cfbabadbc6f0d1086fb4ef66b4fc05d5}
+      \strng{fullhash}{cfbabadbc6f0d1086fb4ef66b4fc05d5}
+      \strng{authornamehash}{cfbabadbc6f0d1086fb4ef66b4fc05d5}
+      \strng{authorfullhash}{cfbabadbc6f0d1086fb4ef66b4fc05d5}
+      \field{labelalpha}{SSV18}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Abstraction, Composition and Contracts: A Sheaf Theoretic Approach}
+      \field{year}{2018}
+      \verb{eprint}
+      \verb arXiv:1802.03080
+      \endverb
+    \endentry
+    \entry{Spivak.Vasilakopoulou.Schultz:2016a}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=6beb4284a6bc9b080a052a9a0629c930}{%
+           family={Vasilakopoulou},
+           familyi={V\bibinitperiod},
+           given={Christina},
+           giveni={C\bibinitperiod}}}%
+        {{hash=d55be4fa0f0a35a27c7791b389793466}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Patrick},
+           giveni={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{950d1d5db4a6ee13d5c332dd35578904}
+      \strng{fullhash}{950d1d5db4a6ee13d5c332dd35578904}
+      \strng{authornamehash}{950d1d5db4a6ee13d5c332dd35578904}
+      \strng{authorfullhash}{950d1d5db4a6ee13d5c332dd35578904}
+      \field{labelalpha}{SVS16}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Dynamical Systems and Sheaves}
+      \field{year}{2016}
+      \verb{eprint}
+      \verb arXiv:1609.08086
+      \endverb
+    \endentry
+    \entry{Schultz.Wisnesky:2015a}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=d55be4fa0f0a35a27c7791b389793466}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Patrick},
+           giveni={P\bibinitperiod}}}%
+        {{hash=56b9df2574d1015df100c6ee823a4080}{%
+           family={Wisnesky},
+           familyi={W\bibinitperiod},
+           given={Ryan},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{58925488e9fbb7462d96ffdb7543b817}
+      \strng{fullhash}{58925488e9fbb7462d96ffdb7543b817}
+      \strng{authornamehash}{58925488e9fbb7462d96ffdb7543b817}
+      \strng{authorfullhash}{58925488e9fbb7462d96ffdb7543b817}
+      \field{labelalpha}{SW15}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{extraalpha}{1}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Algebraic Data Integration}
+      \field{year}{2015}
+      \verb{eprint}
+      \verb arXiv:1503.03571
+      \endverb
+    \endentry
+    \entry{Spivak.Wisnesky:2015a}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=56b9df2574d1015df100c6ee823a4080}{%
+           family={Wisnesky},
+           familyi={W\bibinitperiod},
+           given={Ryan},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Pittsburgh, PA}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{41f666275c62ee95da20418dbf62ee58}
+      \strng{fullhash}{41f666275c62ee95da20418dbf62ee58}
+      \strng{authornamehash}{41f666275c62ee95da20418dbf62ee58}
+      \strng{authorfullhash}{41f666275c62ee95da20418dbf62ee58}
+      \field{labelalpha}{SW15}
+      \field{sortinit}{S}
+      \field{sortinithash}{3c1547c63380458f8ca90e40ed14b83e}
+      \field{extraalpha}{2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 15th Symposium on Database Programming Languages}
+      \field{series}{DBPL}
+      \field{title}{Relational Foundations for Functorial Data Migration}
+      \field{year}{2015}
+      \field{pages}{21\bibrangedash 28}
+      \range{pages}{8}
+    \endentry
+    \entry{Tuijn.Gyssens:1996a}{article}{}
+      \name{author}{2}{}{%
+        {{hash=0920fa28ac6c01c2fa7acabc2d7e9a8b}{%
+           family={Tuijn},
+           familyi={T\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+        {{hash=d8578042cfa69dc5f77d2f2013a2f0d9}{%
+           family={Gyssens},
+           familyi={G\bibinitperiod},
+           given={Marc},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier}%
+      }
+      \strng{namehash}{379a9e6b819c9d317f3c01942238f287}
+      \strng{fullhash}{379a9e6b819c9d317f3c01942238f287}
+      \strng{authornamehash}{379a9e6b819c9d317f3c01942238f287}
+      \strng{authorfullhash}{379a9e6b819c9d317f3c01942238f287}
+      \field{labelalpha}{TG96}
+      \field{sortinit}{T}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theoretical Computer Science}
+      \field{number}{1-2}
+      \field{title}{CGOOD, a categorical graph-oriented object data model}
+      \field{volume}{160}
+      \field{year}{1996}
+      \field{pages}{217\bibrangedash 239}
+      \range{pages}{23}
+    \endentry
+    \entry{vigna2003guided}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=fb3b77ad742e7c12096b67272f1cf7e5}{%
+           family={Vigna},
+           familyi={V\bibinitperiod},
+           given={Sebastiano},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{fb3b77ad742e7c12096b67272f1cf7e5}
+      \strng{fullhash}{fb3b77ad742e7c12096b67272f1cf7e5}
+      \strng{authornamehash}{fb3b77ad742e7c12096b67272f1cf7e5}
+      \strng{authorfullhash}{fb3b77ad742e7c12096b67272f1cf7e5}
+      \field{labelalpha}{Vig03}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A Guided Tour in the Topos of Graphs}
+      \field{year}{2003}
+      \verb{eprint}
+      \verb arXiv:math/0306394
+      \endverb
+    \endentry
+    \entry{Vagner.Spivak.Lerman:2015a}{article}{}
+      \name{author}{3}{}{%
+        {{hash=33d5a51556491026d640973bbe37793b}{%
+           family={Vagner},
+           familyi={V\bibinitperiod},
+           given={Dmitry},
+           giveni={D\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=f0d0cfcdc89465ad02536cb80833d846}{%
+           family={Lerman},
+           familyi={L\bibinitperiod},
+           given={Eugene},
+           giveni={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{b795a14dba1b3ea6c48bdd8a464c0b7d}
+      \strng{fullhash}{b795a14dba1b3ea6c48bdd8a464c0b7d}
+      \strng{authornamehash}{b795a14dba1b3ea6c48bdd8a464c0b7d}
+      \strng{authorfullhash}{b795a14dba1b3ea6c48bdd8a464c0b7d}
+      \field{labelalpha}{VSL15}
+      \field{sortinit}{V}
+      \field{sortinithash}{555737dafdcf1396ebfeae5822e5bde2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Theory and Applications of Categories}
+      \field{title}{Algebras of open dynamical systems on the operad of wiring diagrams}
+      \field{volume}{30}
+      \field{year}{2015}
+      \field{pages}{Paper No. 51\bibrangessep 1793\bibrangedash 1822}
+      \range{pages}{-1}
+    \endentry
+    \entry{Walters:1992}{book}{}
+      \name{author}{1}{}{%
+        {{hash=898ae73b98312bdc9b7e69335111dd09}{%
+           family={Walters},
+           familyi={W\bibinitperiod},
+           given={R.\bibnamedelimi F.\bibnamedelimi C.},
+           giveni={R\bibinitperiod\bibinitdelim F\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{898ae73b98312bdc9b7e69335111dd09}
+      \strng{fullhash}{898ae73b98312bdc9b7e69335111dd09}
+      \strng{authornamehash}{898ae73b98312bdc9b7e69335111dd09}
+      \strng{authorfullhash}{898ae73b98312bdc9b7e69335111dd09}
+      \field{labelalpha}{Wal92}
+      \field{sortinit}{W}
+      \field{sortinithash}{6d25b3eefe5aa2147d1f339686808918}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Categories and Computer Science}
+      \field{year}{1992}
+    \endentry
+    \entry{wiki:Symmetric-monoidal-category}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=62f2f0f1ebe06766d3db95b70d33980a}{%
+           family={Wikipedia},
+           familyi={W\bibinitperiod},
+           given={Contributors\bibnamedelima To},
+           giveni={C\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{62f2f0f1ebe06766d3db95b70d33980a}
+      \strng{fullhash}{62f2f0f1ebe06766d3db95b70d33980a}
+      \strng{authornamehash}{62f2f0f1ebe06766d3db95b70d33980a}
+      \strng{authorfullhash}{62f2f0f1ebe06766d3db95b70d33980a}
+      \field{labelalpha}{Wik18}
+      \field{sortinit}{W}
+      \field{sortinithash}{6d25b3eefe5aa2147d1f339686808918}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{[Online; accessed 22-February-2018]}
+      \field{title}{Symmetric monoidal category --- Wikipedia{,} The Free Encyclopedia}
+      \field{year}{2018}
+      \verb{url}
+      \verb https://en.wikipedia.org/wiki/Symmetric_monoidal_category
+      \endverb
+    \endentry
+    \entry{Willems:2007a}{article}{}
+      \name{author}{1}{}{%
+        {{hash=1238337d86755c2ad567cfa7f26a87a5}{%
+           family={Willems},
+           familyi={W\bibinitperiod},
+           given={Jan\bibnamedelima C},
+           giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{1238337d86755c2ad567cfa7f26a87a5}
+      \strng{fullhash}{1238337d86755c2ad567cfa7f26a87a5}
+      \strng{authornamehash}{1238337d86755c2ad567cfa7f26a87a5}
+      \strng{authorfullhash}{1238337d86755c2ad567cfa7f26a87a5}
+      \field{labelalpha}{Wil07}
+      \field{sortinit}{W}
+      \field{sortinithash}{6d25b3eefe5aa2147d1f339686808918}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Control Systems}
+      \field{number}{6}
+      \field{title}{The behavioral approach to open and interconnected systems}
+      \field{volume}{27}
+      \field{year}{2007}
+      \field{pages}{46\bibrangedash 99}
+      \range{pages}{54}
+    \endentry
+    \entry{Wisnesky.Spivak.Schultz.Subrahmanian:2015a}{report}{}
+      \name{author}{4}{}{%
+        {{hash=56b9df2574d1015df100c6ee823a4080}{%
+           family={Wisnesky},
+           familyi={W\bibinitperiod},
+           given={Ryan},
+           giveni={R\bibinitperiod}}}%
+        {{hash=554dfcf703448b4ad52c20c990941f27}{%
+           family={Spivak},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima I.},
+           giveni={D\bibinitperiod\bibinitdelim I\bibinitperiod}}}%
+        {{hash=d55be4fa0f0a35a27c7791b389793466}{%
+           family={Schultz},
+           familyi={S\bibinitperiod},
+           given={Patrick},
+           giveni={P\bibinitperiod}}}%
+        {{hash=7d1eac2c75fc9e03edbd06a47a0f3d1d}{%
+           family={Subrahmanian},
+           familyi={S\bibinitperiod},
+           given={Eswaran},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{institution}{2}{%
+        {National Institute of Standards}%
+        {Technology}%
+      }
+      \strng{namehash}{15bfc0deedde43893475c5dfeae939b3}
+      \strng{fullhash}{035d99520efea571540c3d8209572b07}
+      \strng{authornamehash}{15bfc0deedde43893475c5dfeae939b3}
+      \strng{authorfullhash}{035d99520efea571540c3d8209572b07}
+      \field{labelalpha}{Wis+15}
+      \field{sortinit}{W}
+      \field{sortinithash}{6d25b3eefe5aa2147d1f339686808918}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{number}{G2015-1701}
+      \field{title}{Functorial Data Migration: From Theory to Practice}
+      \field{type}{Report}
+      \field{year}{2015}
+      \field{dateera}{ce}
+      \verb{eprint}
+      \verb 1502.05947v2
+      \endverb
+    \endentry
+    \entry{zanasi:thesis}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=89c6b224e96f4982a42da5fa8512050b}{%
+           family={Zanasi},
+           familyi={Z\bibinitperiod},
+           given={Fabio},
+           giveni={F\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Ecole normale supérieure de lyon - ENS LYON}%
+      }
+      \strng{namehash}{89c6b224e96f4982a42da5fa8512050b}
+      \strng{fullhash}{89c6b224e96f4982a42da5fa8512050b}
+      \strng{authornamehash}{89c6b224e96f4982a42da5fa8512050b}
+      \strng{authorfullhash}{89c6b224e96f4982a42da5fa8512050b}
+      \field{labelalpha}{Zan15}
+      \field{sortinit}{Z}
+      \field{sortinithash}{35589aa085e881766b72503e53fd4c97}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{10}
+      \field{number}{2015ENSL1020}
+      \field{title}{{Interacting Hopf Algebras- the Theory of Linear Systems}}
+      \field{type}{Theses}
+      \field{year}{2015}
+      \verb{file}
+      \verb https://tel.archives-ouvertes.fr/tel-01218015/file/ZANASI_Fabio_2015ENSL1020_These.pdf
+      \endverb
+      \verb{url}
+      \verb https://tel.archives-ouvertes.fr/tel-01218015
+      \endverb
+      \keyw{Frobenius algebra ; Hopf algebra ; Distributive law ; Control theory ; Category theory ; Semantics ; Linear algebra ; Signal flow graph ; Graphe de flots de signaux ; Algèbre linéaire ; Algèbre de Frobenius ; Algèbre de Hopf ; Loi distributive ; PROP ; Sémantique ; Théorie des catégories ; Théorie du contrôle}
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+

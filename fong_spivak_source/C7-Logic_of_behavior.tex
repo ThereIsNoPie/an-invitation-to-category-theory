@@ -1,0 +1,1996 @@
+\documentclass[7Sketches]{subfiles}
+\begin{document}
+
+\setcounter{chapter}{6}%Just finished 6.
+%------------ Chapter ------------%
+\chapter[Logic of behavior: Sheaves, toposes, languages]{Logic of behavior:\\Sheaves, toposes, and internal languages}%
+\label{chap.temporal_topos}
+
+%\settocdepth{subsubsection}
+%\tableofcontents*
+
+
+%In this chapter, we will study the notion of behavior and interaction by defining a category $\Cat{BT}$ whose objects we call behavior types. Doing so will refine exactly what we mean by behavior, as well as how different types of behavior relate. However, our formulation will do much more: it will give us a formal language and logic in which to prove properties of behaviors in systems.
+
+%-------- Section --------=%
+\section{How can we prove our machine is safe?}%
+\label{sec.safe_machines}
+
+Imagine you are trying to design a system of interacting components. You
+wouldn't be doing this if you didn't have a goal in mind: you want the system to
+do something, to behave in a certain way. In other words, you want to restrict
+its possibilities to a smaller set: you want the car to remain on the road, you
+want the temperature to remain in a particular range, you want the bridge to be safe for
+trucks to pass. Out of all the possibilities, your system should only permit some.
+
+Since your system is made of components that interact in specified ways, the possible behavior of the whole---in any environment---is determined by the possible behaviors of each of its components in their local environments, together with the precise way in which they interact.%
+\footnote{
+The well-known concept of emergence is not about possibilities, it is about
+prediction. Predicting the behavior of a system given predictions of its
+components is notoriously hard. The behavior of a double pendulum is
+chaotic---meaning extremely sensitive to initial conditions---whereas those of
+the two component pendulums are not. However, the set of possibilities for the
+double pendulum is completely understood: it is the set of possible angular
+positions and velocities of both arms. When we speak of a machine's properties
+in this chapter, we always mean the guarantees on its behaviors, not the
+probabilities involved, though the latter would certainly be an interesting
+thing to contemplate.%
+\index{prediction vs.\ possibility}
+}
+In this chapter, we will discuss a logic wherein one can describe general types
+of behavior that occur over time, and prove properties of a larger-scale system
+from the properties and interaction patterns of its components.%
+\index{behavior|(}%
+\index{interaction}
+
+%---- Subsection ----%
+%\subsection{Systems and components}%
+\label{subsec.systems_and_components}
+
+For example, suppose we want an autonomous vehicle to maintain a distance of some $\const{safe}\in\rr$ from other objects. To do so, several
+components must interact: a sensor that approximates the real distance by an
+internal variable $S'$, a controller that uses $S'$ to decide what action $A$ to
+take, and a motor that moves the vehicle with an acceleration based on $A$.
+This in turn affects the real distance $S$, so there is a feedback loop.
+
+Consider the following model diagram:
+\begin{equation}%
+\label{eqn.sens_cont_mot}
+\begin{tikzpicture}[oriented WD, baseline=(controller)]
+	\node[bb={1}{1}] (sensor) {sensor};
+	\node[bb={1}{1}, right=of sensor] (controller) {controller};
+	\node[bb={1}{1}, right=of controller] (motor) {motor};
+	\node[bb={0}{0}, fit={(sensor) ($(controller.north)+(0,2.5)$) (motor)}] (system) {};
+	\draw (sensor_out1) to node[below=3pt, label] {$S'$} (controller_in1);
+	\draw (controller_out1) to node[below=3pt, label] {$A$} (motor_in1);
+	\draw (motor_out1) to node[below=3pt, label] {$S$} (system.east|-motor_out1) -- +(.15cm,0);
+	\draw let \p1=(motor.north east), \p2=(sensor.north west) in
+		(motor_out1) to[in=0] (\x1+\bbportlen,\y1+\bby) to[in=0, out=180] node[above=3pt, label] {$S$} (\x2-\bbportlen,\y1+\bby) to[out=180] (sensor_in1);
+\end{tikzpicture}
+\end{equation}
+In the diagram shown, the distance $S$ is exposed by the exterior interface. This just means we imagine $S$ as being a variable that other components of a larger system may want to interact with. We could have exposed no variables (making it a closed system) or we could have exposed $A$ and/or $S'$ as well.%
+\index{interface}
+
+In order for the system to ensure $S\geq\const{safe}$, we need each of the components to ensure a property of its own. But what are these components, `sensor, controller, motor', and what do they do?
+
+One way to think about any of the components is to open it up and see how it is put together; with a detailed study we may be able to say what it will do. For example, just as $S$ was exposed in the diagram above, one could imagine opening up the `sensor' component box in \cref{eqn.sens_cont_mot} and seeing an interaction between subcomponents%
+\index{system!component}
+\[
+\begin{tikzpicture}[oriented WD]
+	\node[bb={1}{1}] (radar) {radar};
+	\node[bb={1}{1}, below=of radar] (sonar) {sonar};
+	\node (halfway) at ($(radar)!.5!(sonar)$) {};
+	\node[bb={2}{1}] at ($(halfway)+(2,0)$) (processor) {processor};
+	\node[bb={1}{1}, fit={($(radar.north west)+(0,1)$) ($(sonar.south west)+(0,-1)$) (processor)}, bb name=sensor] (sensor) {};
+	\node [bdot, right=.4 of sensor_in1] (dot) {};
+	\draw (sensor_in1') to node[label, above=2pt] {$S$} (dot);
+	\draw (dot) to[out=45] (radar_in1);
+	\draw (dot) to[out=-45] (sonar_in1);
+	\draw (radar_out1) to (processor_in1);
+	\draw (sonar_out1) to (processor_in2);
+	\draw (processor_out1) to node[label, above=2pt] {$S'$} (sensor_out1');
+\end{tikzpicture}
+\]
+This ability to zoom in and see a single unit as being composed of others is
+important for design. But at the end of the day, you eventually need to stop
+diving down and simply use the properties of the components in front of you to
+prove properties of the composed system. Have no fear: everything we do in this chapter will be fully compositional, i.e.\ compatible with opening up lower-level subsystems and using the fractal-like nature of composition. However at a given time, your job is to design the system at a
+given level, taking the component properties of lower-level systems as given.%
+\index{compositionality}
+
+We will think of each component in terms of the relationship it maintains (through time) between the changing values on its ports. ``Whenever I see a flash, I will increase pressure on the button'': this is a relationship I maintain through time between the changing values on my eye port and my finger port. We will make this more precise soon, but fleshing out the situation in \cref{eqn.sens_cont_mot} should help. The sensor maintains a relationship between $S$ and $S'$, e.g.\ that the real distance $S$ and its internal representation $S'$ differ by no more than $5\mathrm{cm}$. The controller maintains a relationship between $S'$ and the action signal $A$, e.g.\ that if at any time $S<\const{safe}$, then within one second it will emit the signal $A=\const{go}$. The motor maintains a relationship between $A$ and $S$, e.g.\ that $A$ dictates the second derivative of $S$ by the formula 
+\begin{equation}%
+\label{eqn.go_stop}
+  \left((A=\const{go})\imp\ddot{S}>1\right)\wedge\left((A=\const{stop})\imp\ddot{S}=0\right).
+\end{equation}
+If we want to prove properties of the whole interacting system, then the relationships maintained by each component need to be written in a formal logical language, something like what we saw in \cref{eqn.go_stop}. From that basis, we can use standard proof techniques to combine properties of subsystems into properties of the whole. This is our objective in the present chapter.%
+\index{system!property}
+
+We have said how component systems, wired together in some arrangement, create larger-scale systems. We have also said that, given the wiring arrangement, the behavioral properties of the component systems dictate the behavioral properties of the whole. But what exactly are behavioral properties?
+
+In this chapter, we want to give a formal language and semantics for a very
+general notion of behavior. Mathematics is itself a formal language; the usual
+style of mathematical modeling is to use any piece of this vast language at any
+time and for any reason. One uses ``human understanding'' to ensure that the
+different models are fitting together in an appropriate way when
+different systems are combined.%
+\index{language}
+%For example, someone might say ``replace the
+%directed graph by its underlying symmetric simple graph, and use the
+%second-smallest eigenvalue of its Laplacian to approximate the sparsest cut of
+%the original graph.''
+The present work differs in that we want to find a
+domain-specific language for modeling behavior, any sort of behavior, and
+nothing but behavior. Unlike in the wide world of math, we want a setting where
+the only things that can be discussed are behaviors.
+
+For this, we will construct what is called a \emph{topos}, which is a special kind of category. Our topos, let's call it $\Cat{BT}$, will have behavior types---roughly speaking, sets whose elements can change through time---as its objects. An amazing fact about toposes%
+\footnote{The plural of topos is often written \emph{topoi}, rather than toposes. This seems a bit fancy for our taste. As Johnstone suggests in \cite{Johnstone:1977a}, we might ask those who ``persist in talking about topoi whether, when they go out for a ramble on a cold day, they carry supplies of hot tea with them in thermoi.'' It's all in good fun; either term is perfectly reasonable and well-accepted.%
+\index{topos}
+}
+is that they come with an \emph{internal language} that looks very much like the
+usual formal language of mathematics itself. Thus one can define graphs, groups,
+topological spaces, etc.\ in any topos. But in $\Cat{BT}$, what we call graphs
+will actually be graphs that change through time, and similarly what we call
+groups and spaces will actually be groups and spaces that change through time.
+%
+\index{language!internal}
+
+The topos $\Cat{BT}$ not only has an internal language, but also a
+mathematical semantics using the notion of sheaves. Technically, a sheaf is a
+certain sort of functor, but one can imagine it as a space of possibilities, varying in a controlled way; in our case it will be a space of possible behaviors varying in a certain notion of time. Every property we prove in our logic of
+behavior types will have meaning in this category of sheaves.%
+\index{sheaf}%
+\index{semantics}%
+\index{category!of sheaves}
+
+When discussing systems and components---such as sensors, controllers, motors, etc.---we mentioned behavior types; these will be the objects in the topos $\Cat{BT}$. Every wire in the picture below will stand for a behavior type, and every box $X$ will stand for a behavioral property, a relation that $X$ maintains between the changing values on its ports.\[
+\begin{tikzpicture}[oriented WD]
+	\node[bb={1}{1}] (sensor) {sensor};
+	\node[bb={1}{1}, right=of sensor] (controller) {controller};
+	\node[bb={1}{1}, right=of controller] (motor) {motor};
+	\node[bb={0}{0}, fit={(sensor) ($(controller.north)+(0,2)$) (motor)}] (system) {};
+	\draw (sensor_out1) to node[below=3pt, label] {$S'$} (controller_in1);
+	\draw (controller_out1) to node[below=3pt, label] {$A$} (motor_in1);
+	\draw (motor_out1) to node[below=3pt, label] {$A$} (system.east|-motor_out1) -- +(.15cm,0);
+	\draw let \p1=(motor.north east), \p2=(sensor.north west) in
+		(motor_out1) to[in=0] (\x1+\bbportlen,\y1+\bby) to[in=0, out=180] node[above=3pt, label] {$S$} (\x2-\bbportlen,\y1+\bby) to[out=180] (sensor_in1);
+\end{tikzpicture}
+\]
+For example we could imagine that
+\begin{itemize}
+	\item $S$ (wire): The behavior of $S$ over a time-interval $[a,b]$ is that of all continuous real-valued functions $[a,b]\to\RR$.
+	\item $A$ (wire): The behavior of $A$ over a time-interval $[a,b]$ is all piecewise constant functions, taking values in the finite set such as $\{\const{go}, \const{stop}\}$.
+	\item controller (box): the relation $\{(S',A)\mid\cref{eqn.go_stop}\}$,
+	i.e.\ all behavioral pairs $(S',A)$ that conform to what we said our controller is supposed to do in \cref{eqn.go_stop}.
+\end{itemize}%
+\index{behavior!properties of}
+
+
+%-------- Section --------=%
+\section{The category $\smset$ as an exemplar topos}%
+\label{sec.logic_and_set}
+%
+\index{topos!of sets}%
+\index{category!of sets}
+
+We want to think about a very abstract sort of thing, called a topos, because we will see that behavior types form a topos. To get started, we begin with one of the easiest toposes to think about, namely the topos $\smset$ of sets. In this section we will discuss commonalities between sets and every other topos. We will go into some details about the category of sets, so as to give intuition for other toposes. In particular, we'll pay careful attention to the logic of sets, because we eventually want to understand the logic of behaviors.%
+\index{logic}
+
+Indeed, logic and sets are closely related. For example, the logical statement---more
+formally known as a predicate---\texttt{likes\_cats} defines a function from the
+set $P$ of people to the set $\BB=\{\false,\true\}$ of truth values, where
+$\texttt{Brendan} \in P$ maps to $\true$ because he likes cats whereas
+$\texttt{Ursula} \in P$ maps to $\false$ because she does not. Alternatively,
+\texttt{likes\_cats} also defines a subset of $P$, consisting of exactly the
+people that do like cats%
+\index{predicate}
+\[
+\{p\in P\mid \texttt{likes\_cats}(p)\}.
+\]
+In terms of these subsets, logical operations correspond to set operations, e.g. AND corresponds to intersection: indeed, the set of people for
+(mapped to $\true$ by) the predicate \texttt{likes\_cats\_AND\_likes\_dogs} is equal to the
+intersection of the set for \texttt{likes\_cats} and the set for \texttt{likes\_dogs}.%
+\index{operation!logical}%
+\index{intersection}
+
+We saw in \cref{chap.databases} that such operations, which are examples of
+database queries, can be described in terms of limits and colimits in $\smset$. Indeed, the
+category $\smset$ has many such structures and properties, which together make logic possible in that setting. In this
+section we want to identify these properties, and show how logical operations
+can be defined using them. %
+\index{limit}%
+\index{colimit}%
+\index{database}
+
+Why would we want to abstractly find such structures and properties? In the next section, we'll
+start our search for other categories that also have them. Such
+categories, called toposes, will be $\smset$-like enough to do logic, but
+have much more complex and interesting semantics. Indeed, we will discuss one whose logic allows us to reason not about properties of sets, but about behavioral properties of very general machines.%
+\index{behavior|)}
+
+%---- Subsection ----%
+\subsection{$\smset$-like properties enjoyed by any topos}%
+\label{subsec.set_like}%
+\index{topos!properties of|(}
+
+Although we will not prove it in this book, toposes are categories that are similar to $\smset$ in many ways. Here are some facts that are true of any topos $\cat{E}$:
+\begin{enumerate}%
+\label{page.topos_properties}
+	\item $\cat{E}$ has all limits,
+	\item $\cat{E}$ has all colimits,
+	\item $\cat{E}$ is cartesian closed,%
+\index{closed category!cartesian}
+	\item $\cat{E}$ has epi-mono factorizations,%
+\index{epimorphism}%
+\index{monomorphism}%
+\index{epi-mono factorization}
+	\item $\cat{E}$ has a subobject classifier $1\To{\true}\Omega$.%
+\index{subobject classifier}
+\end{enumerate}
+In particular, since $\smset$ is a topos, all of the above facts are true for $\cat{E}=\smset$. Our first goal is to briefly review these concepts, focusing most on the subobject classifier.
+
+\paragraph{Limits and colimits.}%
+\index{limit}%
+\index{colimit}
+We discussed limits and colimits briefly in \cref{subsec.adjoints_lims_colims},
+but the basic idea is that one can make new objects from old by taking products,
+using equations to define subobjects, forming disjoint unions, and taking
+quotients.% \index{quotient} There is also a terminal object $1$ and an initial
+object $0$.  One of the most important types of limit (resp.\ colimit) is that
+of pullbacks (resp.\ pushouts); see \cref{ex.pullback,def.pushout}.
+%
+\index{pullback} For our work below, we'll need to know a touch more about
+pullbacks than we have discussed so far, so let's begin there.
+
+Suppose that $\cat{C}$ is a category and consider the diagrams below:
+\[
+\begin{tikzcd}
+	A\ar[r]\ar[d]&B\ar[r]\ar[d]&C\ar[d]\\
+	D\ar[r]&E\ar[r]&F\ar[ul, phantom, very near end, "\lrcorner"]
+\end{tikzcd}
+\hspace{.8in}
+\begin{tikzcd}
+	A\ar[r]\ar[d]&B\ar[r]\ar[d]&C\ar[d]\\
+	D\ar[r]&E\ar[r]\ar[ul, phantom, very near end, "\lrcorner"]&F
+\end{tikzcd}
+\]
+In the left-hand square, the corner symbol $\lrcorner$ unambiguously means that the square $(B,C,E,F)$ is a pullback. But in the right-hand square, does the corner symbol mean that $(A,B,D,E)$ is a pullback or that $(A,C,D,F)$ is a pullback? It's ambiguous, but as we next show, it becomes unambiguous if the right-hand square is a pullback.
+
+\begin{proposition}%
+\label{prop.pullback_pasting}%
+\index{pullbacks!pasting of}
+In the commutative diagram below, suppose that the $(B,C,B',C')$ square is a pullback:
+\[
+\begin{tikzcd}
+	A\ar[r]\ar[d]&B\ar[r]\ar[d]&C\ar[d]\\
+	A'\ar[r]&B'\ar[r]\ar[ul, phantom, very near end, "\lrcorner"]&C'\ar[ul, phantom, very near end, "\lrcorner"]
+\end{tikzcd}
+\]
+Then the $(A,B,A',B')$ square is a pullback iff the $(A,C,A',C')$ rectangle is a pullback.
+\end{proposition}
+
+\begin{exercise}%
+\label{exc.pullback_pasting}
+Prove \cref{prop.pullback_pasting} using the definition of limit from \cref{subsec.adjoints_lims_colims}.
+\end{exercise}
+
+\paragraph{Epi-mono factorizations.}
+The abbreviation `epi' stands for \emph{epimorphism}, and the abbreviation `mono' stands for monomorphism. Epimorphisms are maps that act like surjections, and monomorphisms are maps that act like injections.%
+\footnote{
+Surjections are sometimes called `onto' and injections are sometimes called `one-to-one', hence the Greek prefixes \emph{epi} and \emph{mono}.}
+We can define them formally in terms of pushouts and pullbacks.
+\begin{definition}%
+\index{epimorphism}%
+\index{monomorphism}%
+\label{def.mono_epi}
+Let $\cat{C}$ be a category, and let $f\colon A\to B$ be a morphism. It is called a \emph{monomorphism} (resp.\ \emph{epimorphism}) if the square to the left is a pullback (resp.\ the square to the right is a pushout):
+\[
+\begin{tikzcd}
+	A\ar[r, "\id_A"]\ar[d, "\id_A"']&A\ar[d, "f"]&[10pt]
+		A\ar[r, "f"]\ar[d, "f"']&B\ar[d, "\id_B"]\\
+	A\ar[r, "f"']&B\ar[ul, phantom, very near end, "\lrcorner"]&
+		B\ar[r, "\id_B"']&B\ar[ul, phantom, very near start, "\ulcorner"]
+\end{tikzcd}
+\]
+\end{definition} %
+\index{pullback!monomorphism in terms of}%
+\index{pushout!epimorphism in terms of}
+
+\begin{exercise}%
+\index{function!injective}%
+\label{exc.mono_inj}%
+\index{monomorphism!injection as}
+Show that in $\smset$, monomorphisms are just injections:
+\begin{enumerate}
+	\item Show that if $f$ is a monomorphism then it is injective.
+	\item Show that if $f\colon A\to B$ is injective then it is a monomorphism.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.pullback_iso_iso}%
+\index{pullback!of isomorphism}
+\begin{enumerate}
+	\item	Show that the pullback of an isomorphism along any morphism is an isomorphism. That is, suppose that $i\colon B'\to B$ is an isomorphism and $f\colon A\to B$ is any morphism. Show that $i'$ is an isomorphism, in the following diagram:%
+\index{isomorphism!as stable under pullback}
+	\[
+	\begin{tikzcd}[ampersand replacement=\&]
+		A'\ar[r, "f'"]\ar[d, pos=.6, "i'"', "\cong"]\&B'\ar[d, pos=.6, "i", "\cong"']\\
+		A\ar[r, "f"']\&B\ar[ul, phantom, very near end, "\lrcorner"]
+	\end{tikzcd}
+	\]	
+	\item Show that for any map $f\colon A\to B$, the square shown is a pullback:
+	\[
+	\begin{tikzcd}
+		A\ar[r, "f"]\ar[d, equal]&
+		B\ar[d, equal]\\
+		A\ar[r, "f"']&
+		B\ar[ul, phantom, very near end, "\lrcorner"]
+	\end{tikzcd}
+	\qedhere
+	\]
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}%
+\label{exc.monos_pb_pasting}
+Suppose the following diagram is a pullback in a category $\cat{C}$:
+\[
+\begin{tikzcd}
+	A'\ar[r, "g"]\ar[d, "f'"']&A\ar[d, tail, "f"]\\
+	B'\ar[r, "h"']&B\ar[ul, phantom, very near end, "\lrcorner"]
+\end{tikzcd}
+\]
+Use \cref{prop.pullback_pasting,exc.pullback_iso_iso} to show that if $f$ is a monomorphism, then so is $f'$.%
+\index{monomorphism!as stable under pullback}
+\end{exercise}
+
+Now that we have defined epimorphisms and monomorphisms, we can say what epi-mono factorizations are. We say that a morphism $f\colon C\to D$ in $\cat{E}$ has an epi-mono factorization if it has an `image'; that is, there is an object $\im(f)$, an epimorphism $C\surj\im(f)$, and a monomorphism $\im(f)\inj D$, whose composite is $f$.%
+\index{epi-mono factorization}
+
+In $\smset$, epimorphisms are surjections and monomorphisms are injections.
+Every function $f\colon C \to D$ may be factored as a surjective function onto
+its image $\im(f)=\{f(c) \mid c \in C\}$, followed by the inclusion of this
+image into the codomain $D$. Moreover, this factorization is unique up to
+isomorphism.%
+\index{epimorphism!surjection as}
+
+\begin{exercise}%
+\label{exc.epi_mono_practice}
+Factor the following function $f\colon \ord{3}\to \ord{3}$ as an epimorphism followed by a monomorphism.
+\[
+  \begin{tikzpicture}[short=0pt]
+		\foreach \x in {0,...,2} 
+			{\draw (0,.4-.4*\x) node (X0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(X00) (X02)] (X0) {};
+		\foreach \x in {0,...,2} 
+			{\draw (2,.4-.4*\x) node (Y0\x) {$\bullet$};}
+		\node[draw, ellipse, inner sep=0pt, fit=(Y00) (Y02)] (Y0) {};
+		\draw[mapsto] (X00) -- (Y01);
+		\draw[mapsto] (X01) -- (Y01);
+		\draw[mapsto] (X02) -- (Y02);
+  \end{tikzpicture}
+  \qedhere
+\]
+\end{exercise}
+
+This is the case in any topos $\cat{E}$: for any morphism $f\colon c\to d$,
+there exists an epimorphism $e$ and a monomorphism $m$ such that $f=(e\cp m)$ is their composite.
+
+\paragraph{Cartesian closed.}%
+\index{closed category!cartesian}
+A category $\cat{C}$ being cartesian closed means that $\cat{C}$ has a symmetric
+monoidal structure given by products, and it is monoidal closed with respect to
+this. (We previously saw monoidal closure in \cref{def.monoidal_closed} (for
+preorders) and \cref{prop.double_dual}, as a corollary of compact closure.)
+Slightly more down-to-earth, cartesian closure means that for any two objects
+$C,D\in\cat{C}$, there is a `hom-object' $D^C\in\cat{C}$ and a natural
+isomorphism for any $A\in\cat{C}$:
+\begin{equation}%
+\label{eqn.currying}
+	\cat{C}(A\times C,D)\cong\cat{C}(A,D^C)
+\end{equation}
+
+Think of it this way. Suppose you're $A$ and I'm $C$, and we're interacting through some game $f(-,-)\colon A\times C\to D$: for whatever action $a\in A$ that you take and action $c\in C$ that I take, $f(a,c)$ is some value in $D$. Since you're self-centered but loving, you think of this situation as though you're creating a game experience for me. When you do $a$, you make a game $f(a,-)\colon C\to D$ for me alone. In the formalism, $D^C$ represents the set of games for me. So now you've transformed a two-player game, valued in $D$, into a one-player game, you're the player, valued in... one player games valued in $D$. This transformation is invertible---you can switch your point of view at will---and it's called \emph{currying}. This is the content of \cref{ex.currying}.%
+\index{currying}
+
+\begin{exercise}%
+\label{ex.ccposet_quantale}
+Let $\cat{V}=(V,\leq,I,\otimes)$ be a (unital, commutative) quantale---see
+\cref{def.quantale}---and suppose it satisfies the following for all $v,w,x\in V$:
+\begin{itemize}
+	\item $v\leq I$,
+	\item $v\otimes w\leq v$ and $v\otimes w\leq w$, and
+	\item if $x\leq v$ and $x\leq w$ then $x\leq v\otimes w$.\bigskip
+\end{itemize}
+\begin{enumerate}
+	\item Show that $\cat{V}$ is a cartesian closed category, in fact a cartesian closed preorder.
+	\item Can every cartesian closed preorder be obtained in this way?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+\paragraph{Subobject classifier.}%
+\index{subobject classifier|(}
+The concept of a subobject classifier requires more attention, because its existence has huge consequences for a category $\cat{C}$. In particular, it creates the setting for a rich system of \emph{higher order logic} to exist inside $\cat{C}$; it does so by providing some things called `truth values'. The higher order logic manifests in its fully glory when $\cat{C}$ has finite limits and is cartesian closed, because these facts give rise to the logical operations on truth values.%
+\footnote{A category that has finite limits, is cartesian closed, and has a subobject classifier is called an \emph{elementary topos}. We will not discuss these further, but they are the most general notion of topos in ordinary category theory. When someone says topos, you might ask ``Grothendieck topos or elementary topos?,'' because there does not seem to be widespread agreement on which is the default.
+}
+In particular, the higher order logic exists in any topos.
+
+We will explain subobject classifiers in as much detail as we can; in fact, it will be our subject for the rest of \cref{sec.logic_and_set}.
+
+%---- Subsection ----%
+\subsection{The subobject classifier}%
+\label{subsec.subobj_classifier}
+Before giving the definition of subobject classifiers, recall that monomorphisms in $\smset$ are injections, and any injection $X\inj Y$ is isomorphic to a subset of $Y$. This gives a simple and useful way to conceptualize monomorphisms into $Y$ when reading the following definition: it will do no harm to think of them as subobjects of $Y$.
+
+\begin{definition}%
+\label{def.subobject_classifier}%
+\index{subobject classifier}
+Let $\cat{E}$ be a category with finite limits, i.e.\ with pullbacks and a terminal object $1$. A \emph{subobject classifier} in $\cat{E}$ consists of an object $\Omega\in\cat{E}$, together with a monomorphism $\true\colon 1\to\Omega$, satisfying the following property: for any objects $X$ and $Y$ and monomorphism $m\colon X\inj Y$ in $\cat{E}$, there is a unique morphism $\corners{m}\colon Y\to\Omega$ such that the diagram on the left of \cref{eqn.subobj_class_pullbacks} is a pullback in $\cat{E}$:
+\begin{equation}%
+\label{eqn.subobj_class_pullbacks}
+\begin{tikzcd}[sep=large]
+	X\ar[r, "!"]\ar[d, tail, "m"']&1\ar[d,"\true"]\\
+	Y\ar[r, "\corners{m}"']&\Omega\ar[ul, phantom, very near end, "\lrcorner"]
+\end{tikzcd}
+\hspace{1in}
+\begin{tikzcd}[sep=large]
+	\{Y\mid p\}\ar[r, "!"]\ar[d, tail]&1\ar[d,"\true"]\\
+	Y\ar[r, "p"']&\Omega\ar[ul, phantom, very near end, "\lrcorner"]
+\end{tikzcd}
+\end{equation}
+We refer to $\corners{m}$ as the \emph{characteristic map} of $m$, or we say that $\corners{m}$ \emph{classifies} $m$. Conversely, given any map $p\colon Y\to\Omega$, we denote the pullback of $\true$ as on the right of \cref{eqn.subobj_class_pullbacks}.
+
+A \emph{predicate} on $Y$ is a morphism $Y\to\Omega$.%
+\index{predicate}
+\end{definition}
+
+\cref{def.subobject_classifier} is a bit difficult to get one's mind around,
+partly because it is hard to imagine its consequences. It is like a superdense
+nugget from outer space, and through scientific explorations in the latter half
+of the 20th century, we have found that it brings super powers to whichever
+categories possess it. We will explain some of the consequences below, but very
+quickly, the idea is the following.%
+\index{subobject classifier!as superdense nugget from outer space}
+
+When a category has a subobject classifier, it provides a translator, turning subobjects of any object $Y$ into maps from that $Y$ to the particular object $\Omega$. Pullback of the monomorphism $\true\colon 1\to\Omega$ provides a translator going back, turning maps $Y\to\Omega$ into subobjects of $Y$. We can replace our fantasy of the superdense nugget with a slightly more refined story: ``any object $Y$ understands itself---its parts and the logic of how they fit together---by asking questions of the oracle $\Omega$, looking for what's true.'' Or to fully be precise but dry, ``subobjects of $Y$ are classified by predicates on $Y$.''
+
+Let's move from stories and slogans to concrete facts.
+
+\paragraph{The subobject classifier in $\smset$.}
+%
+\index{subobject classifier!in $\smset$}%
+\index{booleans!as subobject classifier}
+Since $\smset$ is a topos, it has a subobject classifier. It will be a set with supposedly wonderful properties; what set is it?
+
+The subobject classifier in $\smset$ is the set of booleans,
+\begin{equation}%
+\label{eqn.Omega_Set}
+	\Omega_\smset\coloneqq\BB=\{\true,\false\}.
+\end{equation}
+So in $\smset$, the truth values are true and false.
+
+By definition (Def.~\ref{def.subobject_classifier}), the subobject classifier comes equipped with a morphism, generically called $\true\colon1\to\Omega$; in the case of $\smset$ it is played by the function $1\to\{\true,\false\}$ that sends 1 to $\true$. In other words, the morphism $\true$ is aptly named in this case.
+
+For sets, monomorphism just means injection, as we mentioned above. So
+\cref{def.subobject_classifier} says that for any injective function $m\colon
+X\inj Y$ between sets, we are supposed to be able to find a characteristic
+function $\corners{m}\colon Y\to\{\true,\false\}$ with some sort of pullback
+property. We propose the following definition of $\corners{m}$:
+\[
+\corners{m}(y)\coloneqq
+\begin{cases}
+	\true&\tn{ if }m(x)=y\text{ for some $x\in X$}\\
+	\false&\tn{ otherwise}
+\end{cases}
+\]
+In other words, if we think of $X$ as a subobject of $Y$, then we make $\corners{m}(y)$ equal to $\true$ iff $y\in X$.
+
+In particular, the subobject classifier property turns subsets $X\ss Y$ into functions $p\colon Y \to \BB$, and vice versa. How it works is encoded in \cref{def.subobject_classifier}, but the basic idea is that $X$ will be the set of all things in $Y$ that $p$ sends to $\true$:
+\begin{equation}%
+\label{eqn.pullback_concrete_sets}
+	X=\{y\in Y\mid p(y)=\true\}.
+\end{equation}
+This might help explain our abstract notation $\{Y\mid p\}$ in \cref{eqn.subobj_class_pullbacks}.%
+\index{notation!for classified subobjects}
+
+\begin{exercise}%
+\label{exc.characteristic_practice}
+  Let $X=\NN=\{0,1,2,\ldots\}$ and $Y=\ZZ=\{\ldots,-1,0,1,2,\ldots\}$; we have
+  $X\ss Y$, so consider it as a monomorphism $m\colon X\inj Y$. It has a
+  characteristic function $\corners{m}\colon Y\to\BB$, as in
+  \cref{def.subobject_classifier}.
+  \begin{enumerate}
+    \item What is $\corners{m}(-5)\in\BB$?
+    \item What is $\corners{m}(0)\in\BB$?
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.simple_char_funs}
+  \begin{enumerate}
+    \item Consider the identity function $\id_\NN\colon \NN\to \NN$. It is an
+      injection, so it has a characteristic function $\corners{\id_\NN}\colon
+      \NN\to\BB$.  Give a concrete description of $\corners{\id_\NN}$, i.e.\ its
+      exact value for each natural number $n\in\NN$.
+    \item Consider the unique function $!_\NN\colon\varnothing\to\NN$ from the
+      empty set. Give a concrete description of $\corners{!_\NN}\colon\nn\to\bb$.
+  \qedhere
+\end{enumerate}
+\end{exercise}
+
+%
+\index{subobject classifier|)}%
+\index{topos!properties of|)}
+
+
+% Subsubsection %
+\subsection{Logic in the topos $\smset$}%
+\label{subsubsec.logic_set}%
+\index{logic|(}
+
+As we said above, the subobject classifier of any topos $\cat{E}$ gives the setting in which to do logic. Before we explain a bit about how topos logic works in general, we continue to work concretely by focusing on logic in the topos $\smset$.%
+\index{subobject classifier!and logic}
+
+\paragraph{Obtaining the AND operation.}%
+\index{AND operation}
+
+Consider the function $1\to\BB\times\BB$ picking out the element $(\true,\true)$. This is a monomorphism, so it defines a characteristic function $\corners{(\true,\true)}\colon\BB\times\BB\to\BB$. What function is it? By \cref{eqn.pullback_concrete_sets} the only element of $\BB\times\BB$ that can be sent to $\true$ is $(\true,\true)$. Thus $\corners{(\true,\true)}(P,Q)\in\BB$ must be given by the following truth table
+\[
+\begin{array}{cc||c}
+	P&Q&\corners{(\true,\true)}(P,Q)\\\hline
+	\true&\true&\true\\
+	\true&\false&\false\\
+	\false&\true&\false\\
+	\false&\false&\false
+\end{array}
+\]
+This is exactly the truth table for the AND of $P$ and $Q$, i.e.\ for $P\wedge Q$. In
+other words, $\corners{(\true,\true)}=\wedge$. Note that this defines $\wedge$
+as a function $\wedge\colon \BB \times \BB \to \BB$, and we use the usual
+infix notation $x \wedge y\coloneqq \wedge(x,y)$.%
+\index{infix notation}
+
+\paragraph{Obtaining the OR operation.}%
+\index{OR operation}
+Let's go backwards this time. The truth table for the OR of $P$ and $Q$, i.e.\ that of the function $\vee\colon\BB\times\BB\to\BB$ defining OR, is:
+\begin{equation}%
+\label{eqn.function_vee}
+\begin{array}{cc||c}
+	P&Q&P\vee Q\\\hline
+	\true&\true&\true\\
+	\true&\false&\true\\
+	\false&\true&\true\\
+	\false&\false&\false
+\end{array}
+\end{equation}
+If we wanted to obtain this function as the characteristic function
+$\corners{m}$ of some subset $m\colon X\ss\BB\times\BB$, what subset would $X$
+be? By \cref{eqn.pullback_concrete_sets}, $X$ should be the set of $y\in Y$ that
+are sent to $\true$. Thus $m$ is the characteristic map for the three element
+subset \[X=\{(\true,\true),(\true,\false),(\false,\true)\}\ss\BB\times\BB.\] To
+prepare for later generalization of this idea in any topos, we want a way of thinking of $X$ only in terms of properties
+listed at the beginning of \cref{subsec.set_like}. In fact, one can think of $X$
+as the union of $\{\true\}\times\BB$ and $\BB\times\{\true\}$---a colimit of
+limits involving the subobject classifier and terminal object. This description will construct
+an analogous subobject of $\Omega\times\Omega$, and hence classify a map $\Omega\times\Omega\to\Omega$, in any topos $\cat{E}$.
+
+\begin{exercise}%
+\index{NOT operation}%
+\label{exc.neg_char}
+Every boolean has a negation, $\neg\false=\true$ and $\neg\true=\false$. The function $\neg\colon\BB\to\BB$ is the characteristic function of some thing, (*?*).
+\begin{enumerate}
+	\item What sort of thing should (*?*) be? For example, should $\neg$ be the characteristic function of an object? A topos? A morphism? A subobject? A pullback diagram?
+	\item Now that you know the sort of thing (*?*) is, which thing of that sort is it?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\index{IMPLIES operation}%
+\label{exc.implies_char}%
+\index{booleans!as monoidal closed}
+Given two booleans $P,Q$, define $P\imp Q$ to mean $P=(P\wedge Q)$.
+\begin{enumerate}
+	\item Write down the truth table for the statement $P=(P\wedge Q)$:
+	\[
+	\begin{array}{cc||c|c}
+		P&Q&P\wedge Q&P=(P\wedge Q)\\
+		\true&\true&\?&\?\\
+		\true&\false&\?&\?\\
+		\false&\true&\?&\?\\
+		\false&\false&\?&\?\\
+	\end{array}
+	\]
+	\item If you already have an idea what $P\imp Q$ should mean, does it agree with the last column of table above?
+	\item What is the characteristic function $m\colon \BB\times\BB\to\BB$ for $P\imp Q$?
+	\item What subobject does $m$ classify?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.even_prime_10}
+Consider the sets $E\coloneqq\{n\in\NN\mid n\text{ is even}\}$, $P\coloneqq\{n\in\NN\mid n\text{ is prime}\}$, and $T\coloneqq\{n\in\NN\mid n\geq 10\}$. Each is a subset of $\NN$, so defines a function $\NN\to\BB$.
+\begin{enumerate}
+	\item What is $\corners{E}(17)$?
+	\item What is $\corners{P}(17)$?
+	\item What is $\corners{T}(17)$?
+	\item Name the smallest three elements in the set classified by $(\corners{E}\wedge\corners{P})\vee\corners{T}$.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\paragraph{Review.}
+Let's take stock of where we are and where we're going. In \cref{sec.safe_machines}, we set out our goal of proving properties about behavior, and we said that topos theory is a good mathematical setting for doing that. We are now at the end of \cref{sec.logic_and_set}, which was about $\smset$ as an examplar topos. What happened?
+
+In \cref{subsec.set_like}, we talked about properties of $\smset$ that are enjoyed by any topos: limits and colimits, cartesian closure, epi-mono factorizations, and subobject classifiers. Then in \cref{subsec.subobj_classifier} we launched into thinking about the subobject classifier in general and in the specific topos $\smset$, where it is the set $\bb$ of booleans because any subset of $Y$ is classified by a specific predicate $p\colon Y\to\BB$. Finally, in \cref{subsubsec.logic_set} we discussed how to understand logic in terms of $\Omega$: there are various maps $\wedge,\vee,\imp\colon\Omega\times\Omega\to\Omega$ and $\neg\colon\Omega\to\Omega$ etc., which serve as logical connectives. These are operations on truth values.%
+\index{limit}%
+\index{colimit}
+
+We have talked a lot about toposes, but we've only seen one so far: the category of sets. But we've actually seen more without knowing it: the category $\cat{C}\inst$ of instances on any database schema from \cref{def.instance} is a topos. Such toposes are called \emph{presheaf toposes} and are fundamental, but we will focus on \emph{sheaf toposes}, because our topos of behavior types will be a sheaf topos.%
+\index{topos!database instances as}
+
+Sheaves are fascinating, but highly abstract mathematical objects. They are not for the faint of mathematical heart (those who are faint of physical heart are welcome to proceed). 
+
+%
+\index{logic|)}
+
+%-------- Section --------=%
+\section{Sheaves}%
+\label{sec.sheaves}%
+\index{sheaf|(}
+
+
+Sheaf theory began before category theory, e.g.\ in the form of something called
+``local coefficient systems for homology groups.'' However its modern
+formulation in terms of functors and sites is due to Grothendieck, who also
+invented toposes.
+
+The basic idea is that rather than study spaces, we should study what happens
+\emph{on} spaces. A space is merely the `site' at which things happen. For
+example, if we think of the plane $\RR^2$ as a space, we might examine only
+points and regions in it.  But if we think of $\RR^2$ as a site where things happen,
+then we might think of things like weather systems throughout the plane, or sand
+dunes, or trajectories and flows of material. There are many sorts of things
+that can happen on a space, and these are the sheaves: a sheaf on a space is roughly ``a
+sort of thing that can happen on the space.'' If we want to think about points
+or regions from the sheaf perspective, we would consider them as different points of view on what's happening. That is, it's all about
+what happens on a space: the parts of the space are just perspectives from which
+to watch the show.%
+\index{site}
+
+This is reminiscent of databases. The schema of a database is not the interesting part; the data is what's interesting. To be clear, the schema of a database is a site---it's acting like the space---and the category of all instances on it is a topos. In general, we can think of any small category $\cat{C}$ as a site; the corresponding topos is the category of functors $\cat{C}\op\to\smset$.%
+\footnote{The category of functors $\cat{C}\to\smset$ is also a topos: use
+$\cat{C}\op$ as the defining site.}%
+\index{database!instances form a topos}
+Such functors are called \emph{presheaves on $\cat{C}$}.%
+\index{category!of database instances}%
+\index{site!database schema as}
+
+Did you notice that we just introduced a huge class of toposes? For any category $\cat{C}$, we said there is a topos of presheaves on it. So before we go on to sheaves, let's discuss this preliminary topic of presheaves. We will begin to develop some terminology and ways of thinking that will later generalize to sheaves.%
+\index{presheaves!topos of}
+
+%---- Subsection ----%
+\subsection{Presheaves}%
+\label{subsec.what_are_toposes}%
+\index{presheaf|(}
+
+Recall the definition of functor and natural transformation from \cref{sec.cat_fun_nt_db}. Presheaves are just functors, but they have special terminology that leads us to think about them in a certain geometric way.
+
+\begin{definition}%
+\label{def.presheaf}%
+\index{presheaf}%
+\index{opposite category!and presheaves}
+Let $\cat{C}$ be a small category. A \emph{presheaf} $P$ on $\cat{C}$ is a functor $P\colon\cat{C}\op\to\smset$. To each object $c\in\cat{C}$, we refer to the set $P(c)$ as \emph{the set of sections of $P$ over $c$}. To each morphism $f\colon c'\to c$, we refer to the function $P(f)\colon P(c)\to P(c')$ as the \emph{restriction map along $f$}. For any section $s\in P(c)$, we may denote $P(f)(s)\in P(c')$, i.e.\ its restriction along $f$, by $\restrict{s}{f}$.%
+\index{restriction map|see {presheaf, restriction map}}%
+\index{presheaf!restriction maps}%
+\index{presheaf!sections}%
+\index{functor!presheaf as}
+
+If $P$ and $Q$ are presheaves, a \emph{morphism} $\alpha\colon P\to Q$ between them
+is a natural transformation of functors%
+\index{presheaves!morphism of}
+\[
+\begin{tikzcd}
+  \cat{C}\op\ar[r, bend left, "P", ""'{name=P, below}]\ar[r, bend right, "Q"', ""{name=Q, above}]\ar[from=P, to=Q, Rightarrow, "\alpha"]&\smset.
+\end{tikzcd}
+\]
+\end{definition}%
+\index{natural transformation!as presheaf morphism}
+
+\begin{example}%
+\label{ex.graph_presheaf_topos}%
+\index{graphs!topos of}
+Let $\Cat{ArShp}$ be the category shown below:
+\[
+\Cat{ArShp}\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&, column sep=large]
+	\LTO{Vertex}\ar[r, shift left, "\mathrm{src}"]\ar[r, shift right, "\mathrm{tgt}"']\&\LTO{Pure Arrow}
+\end{tikzcd}
+}
+\]
+The reason we call our category $\Cat{ArShp}$ is that we can imagine of it as an `arrow shape.'
+\begin{equation}%
+\label{eqn.arshape}
+\begin{tikzpicture}
+	\node[coordinate] (Left) {};
+	\node[coordinate, right=1 of Left] (Right) {};
+	\node at ($(Left)!.5!(Right)$) (Center) {};
+	\fill[fill=black] (Left)  circle (1.1pt);
+	\fill[fill=black] (Right) circle (1.1pt);
+	\draw[->, very thick] (Left) -- (Right);
+	\node[draw, inner sep=10pt, fit=(Left) (Right)] (Arrow) {};
+	\node[left=0 of Arrow] {Pure Arrow$\coloneqq$};
+	\node[above=2 of Center] (V) {};
+	\fill[fill=black] (V) circle (2.2pt);
+	\node[draw, fit=(V)] (Vertex) {};
+	\node[left=0 of Vertex] {Vertex$\coloneqq$};
+	\begin{scope}[|->, blue, shorten >=3pt]
+  	\draw[bend right=15pt] (V) to node[left] {$\mathrm{src}$} (Left);
+  	\draw[bend left=15pt] (V) to node[right] {$\mathrm{tgt}$} (Right);
+	\end{scope}
+\end{tikzpicture}
+\end{equation}
+A presheaf on $\Cat{ArShp}$ is a functor $I\colon\Cat{ArShp}\op\to\smset$,
+which is a database instance on $\Cat{ArShp}\op$. Note that $\Cat{ArShp}\op$ is
+what we called $\Cat{Gr}$ in \cref{subsec.instances_cat}; there we showed that
+database instances on $\Cat{Gr}$---i.e.\ presheaves on $\Cat{ArShp}$--- are just
+directed graphs, e.g.\
+\[
+P\coloneqq\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\bullet\&\bullet\ar[l]\ar[r]\&\bullet\ar[d, shift left]\ar[d, shift right]\&\bullet\ar[loop below]\\
+	\&\bullet\ar[r, shift left]\&\bullet\ar[l, shift left]\&\bullet\ar[r]\&\bullet\ar[ul, bend right]
+\end{tikzcd}
+}
+:\Cat{ArShp}\op\to\smset
+\]%
+\index{presheaf!as database instance}
+
+Thinking of presheaves on any category $\cat{C}$, it often makes sense to imagine the objects of $\cat{C}$ as shapes of some sort, and the morphisms of $\cat{C}$ as continuous maps between shapes, just like we did for the arrow shape in \cref{eqn.arshape}. In that context, one can think of a presheaf $P$ as a kind of lego construction: $P$ is built out of the shapes in $\cat{C}$, connected together using the morphisms in $\cat{C}$. In the case where $\cat{C}$ is the arrow shape, a presheaf is a graph. So this would say that a graph is a sort of lego construction, built out of vertices and arrows connected together using the inclusion of a vertex as the source or target of an arrow. Can you see it?
+
+This statement can be made pretty precise; though we cannot go through it here,
+the above lego idea is summarized by the formal statement that ``the category of
+presheaves on $\cat{C}$ is the free colimit completion of
+$\cat{C}$.''%
+\index{colimit!presheaves form colimit completion} Ask a friendly neighborhood category theorist for details.%
+\index{category!of presheaves}
+\end{example}
+
+However one thinks of presheaves---in terms of lego assemblies or database instances---they're relatively straightforward. The difference between presheaves and sheaves is that sheaves take into account some sort of `covering information.' The trivial notion of covering is to say that every object covers itself and nothing more; if one uses this trivial covering, presheaves and sheaves are the same thing. In our behavioral context we will need a non-trivial notion of covering, so sheaves and presheaves will be slightly different. Our next goal is to understand sheaves on a topological space.%
+\index{cover}
+
+
+%
+\index{presheaf|)}
+
+%---- Subsection ----%
+\subsection{Topological spaces} %
+\label{subsec.topology}%
+\index{topological space|(}
+We said in \cref{sec.sheaves} that, rather than study spaces, we consider spaces
+as mere `sites' on which things happen. We also said the things that can
+happen on a space are called sheaves, and always form a type of category called
+a topos. To define a topos of sheaves, we must start with the site on which they
+exist.
+
+Sites are very abstract mathematical objects, and we will not make them precise
+in this book. However, one of the easiest sorts of sites to think about are
+those coming from topological spaces: every topological space naturally has the
+structure of a site. We've talked about spaces for a while without making them
+precise; let's do so now.%
+\index{site!topological space as}
+
+\begin{definition}%
+\label{def.topological_space}%
+\index{topological space}%
+\index{open set}
+  Let $X$ be a set, and let $\powset(X)=\{U\ss X\}$ denote its set of subsets. A
+  \emph{topology} on $X$ is a subset $\Op\ss\powset(X)$, elements of which we call \emph{open sets},%
+  \tablefootnote{In other words, we refer to a subset $U\ss X$ as \emph{open} if $U\in\Op$.}
+  satisfying the following conditions:
+  \begin{enumerate}[label=(\alph*)]
+  	\item Whole set: the subset $X\ss X$ is open, i.e.\ $X\in\Op$.
+  	\item Binary intersections: if $U,V\in\Op$ then $(U\cap V)\in\Op$.
+	\item Arbitrary unions: if $I$ is a set and if we are given an open set
+	  $U_i\in\Op$ for each $i$, then their union is also open,
+	  $\big(\bigcup_{i\in I}U_i\big)\in\Op$. We interpret the particular
+	  case where $I=\varnothing$ to mean that the empty set is open:
+	  $\varnothing\in\Op$. 
+  \end{enumerate}
+  If $U=\bigcup_{i\in I}U_i$, we say that $(U_i)_{i\in I}$ \emph{covers} $U$.
+
+  A pair $(X,\Op)$, where $X$ is a set and $\Op$ is a topology on $X$, is called a \emph{topological space}.%
+\index{cover}
+
+  
+  A \emph{continuous function} between topological spaces $(X,\Op_X)$ and
+  $(Y,\Op_Y)$ is a function $f\colon X\to Y$ such that for every $U\in\Op_Y$,
+  the preimage $f^{-1}(U)$ is in $\Op_X$. %
+\index{continuous function}%
+\index{preimage}
+\end{definition}
+
+At the very end of \cref{subsec.what_are_toposes} we mentioned how sheaves differ from presheaves in that they take into account `covering information.' The notion of covering an open set by a union of other open sets was defined in \cref{def.topological_space}, and it will come into play when we define sheaves in \cref{def.sheaf}.
+
+\begin{example}%
+\label{ex.usual_R}%
+\index{real numbers!topology on}
+The usual topology $\Op$ on $\RR^2$ is based on `$\epsilon$-balls.' For any $\epsilon\in\RR$ with $\epsilon>0$, and any point $p=(x,y)\in\RR^2$, define \emph{the $\epsilon$-ball centered at $p$} to be:
+\[B(p;\epsilon)\coloneqq\{p'\in\RR^2\mid d(p,p')<\epsilon\}%
+\tablefootnote{Here, $d((x,y),(x',y'))\coloneqq\sqrt{(x-x')^2+(y-y')^2}$ is the usual `Euclidean distance' between two points. One can generalize $d$ to any metric.}
+\]
+In other words, $B(x,y;\epsilon)$ is the set of all points within $\epsilon$ of $(x,y)$.
+
+For an arbitrary subset $U\ss\RR^2$, we call it open and put it in $\Op$ if, for every $(x,y)\in U$ there exists a (small enough) $\epsilon>0$ such that $B(x,y;\epsilon)\ss U$.
+\[
+\begin{tikzpicture}[font=\tiny]
+	\node (north) at (0,2) {};
+	\node (south) at (0,-1.4) {};
+	\node (east) at (2,0) {};
+	\node (west) at (-2,0) {};
+	\draw (north) to (south);
+	\draw (east) to (west);
+  \draw [thick] plot [smooth cycle] coordinates {(-1,0) (1,1) (2,1) (1,0) (2,-1)};
+  \node (xy) at (1.5,.8) {};
+	\draw (1.5, -.1) to[pos=-.5] node {$x$} (1.5, .1);
+	\draw (-.1, .8) to[pos=-.5] node {$y$} (.1, .8);
+  \filldraw (xy) circle (.8pt);
+  \node [dotted, thick, circle, inner sep=0, minimum size=8pt, draw] (surround xy) at (xy.center) {};
+  \node (bigxy) at (6, .8) {};
+  \node[above=-4pt of bigxy] {$(x,y)$};
+  \filldraw (bigxy) circle (1pt);
+  \node[dotted, very thick, circle, minimum size=40pt, draw] (surround bigxy) at (bigxy) {};
+  \draw (bigxy.center) to node[below left=-3pt and -3pt] {$\epsilon$} (surround bigxy.south east);
+  \draw[dashed, gray] (surround xy.north) -- (surround bigxy.north);
+  \draw[dashed, gray] (surround xy.south) -- (surround bigxy.south);
+  \node[below=.4 of surround bigxy] {an $\epsilon$-ball centered at $p=(x,y)$};
+  \node at (.5,.5) {$U$};
+  \node[text width=2.1in] at (1,-1.7) {an open set $U\ss\RR^2$, a point $p=(x,y)\in U$, and an $\epsilon$-ball $B(x,y;\epsilon)\ss U$.};
+ \end{tikzpicture}
+\]
+
+The same idea works if we replace $\rr^2$ with any other metric space $X$
+(\cref{def.ord_metric_space}): it can be considered as a topological space
+where the open sets are subsets $U$ such that for any $p\in U$ there is an
+$\epsilon$-ball centered at $p$ and contained in $U$. So every metric space can be considered as a topological space.%
+\index{metric space!as topological space}
+\end{example}
+
+\begin{exercise}%
+\label{ex.usual_top_R}
+Consider the set $\rr$. It is a metric space with $d(x_1,x_2)\coloneqq|x_1-x_2|$.
+\begin{enumerate}
+	\item What is the 1-dimensional analogue of $\epsilon$-balls as found in \cref{ex.usual_R}? That is, for each $x\in\RR$, define $B(x,\epsilon)$.
+	\item When is an arbitrary subset $U\ss\RR$ called open, in analogy with \cref{ex.usual_R}?
+	\item Find three open sets $U_1$, $U_2$, and $U$ in $\RR$, such that $(U_i)_{i\in\{1,2\}}$ covers $U$.
+	\item Find an open set $U$ and a collection $(U_i)_{i\in I}$ of opens sets where $I$ is infinite, such that $(U_i)_{i\in I}$ covers $U$.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.coarse_fine}%
+\index{topology!discrete}
+For any set $X$, there is a `coarsest' topology, having as few open sets as possible: $\Op_{\mathrm{crse}}=(\varnothing,X)$. There is also a `finest' topology, having as many open sets as possible: $\Op_{\mathrm{fine}}=\powset(X)$. The latter, $(X,\powset(X))$ is called the \emph{discrete space on the set $X$}.
+\end{example}
+
+\begin{exercise}%
+\label{exc.course_fine}
+\begin{enumerate}
+	\item Verify that for any set $X$, what we called $\Op_{\mathrm{crse}}$ in \cref{ex.coarse_fine} really is a topology, i.e.\ satisfies the conditions of \cref{def.topological_space}.
+	\item Verify also that $\Op_{\mathrm{fine}}$ really is a topology.
+	\item Show that if $(X,\powset(X))$ is discrete and $(Y,\Op_Y)$ is any topological space, then every function $X\to Y$ is continuous.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}%
+\label{ex.Sierpinski}%
+\index{Sierpinski space}
+There are four topologies possible on $X=\{1,2\}$. Two are $\Op_{\mathrm{crse}}$ and $\Op_{\mathrm{fine}}$ from \cref{ex.coarse_fine}. The other two are:
+\[
+  \Op_1\coloneqq\left\{\varnothing,\{1\},X\right\}
+  \qquad\text{and}\qquad
+  \Op_2\coloneqq\left\{\varnothing,\{2\},X\right\}
+\]
+The two topological spaces $(\{1,2\},\Op_1)$ and $(\{1,2\},\Op_2)$ are isomorphic; either one can be called \emph{the Sierpinski space}.
+\end{example}
+
+\paragraph{The open sets of a topological space form a preorder.}
+%
+\index{preorder!of open sets}
+
+Given a topological space $(X,\Op)$, the set $\Op$ has the structure of a preorder using the subset relation, $(\Op,\ss)$. It is reflexive because $U\ss U$ for any $U\in\Op$, and it is transitive because if $U\ss V$ and $V\ss W$ then $U\ss W$.
+
+Recall from \cref{subsubsec.pos_free_spectrum} that we can regard any preorder, and hence $\Op$, as a category: its objects are the open sets $U$ and for any $U,V$ the set of morphisms $\Op(U,V)$ is empty if $U\not\ss V$ and it has one element if $U\ss V$.
+
+\begin{exercise}%
+\label{exc.opens_Sierp}
+Recall the Sierpinski space, say $(X,\Op_1)$ from \cref{ex.Sierpinski}.
+\begin{enumerate}
+	\item Write down the Hasse diagram for its preorder of opens.
+	\item Write down all the covers.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.subspace_topology}%
+\index{topology!subspace}
+  Given any topological space $(X,\Op)$, any subset $Y\subseteq X$ can be given the
+  \emph{subspace topology}, call it $\Op_{?\cap Y}$. This topology defines any $A \subseteq Y$ to be open, $A\in\Op_{?\cap Y}$,
+if there is an open set $B\in\Op$ such that $A = B \cap Y$.
+\begin{enumerate}
+	\item Find a $B\in\Op$ that shows that the whole set $Y$ is open, i.e.\ $Y\in\Op_{?\cap Y}$.
+	\item Show that $\Op_{?\cap Y}$ is a topology in the sense of \cref{def.topological_space}.%
+	\footnote{Hint 1: for any set $I$, collection of sets $(U_i)_{i\in I}$ with $U_i\ss X$, and set $V\ss X$, one has $\left(\bigcup_{i\in I}U_i\right)\cap V=\bigcup_{i\in I}(U_i\cap V)$. Hint 2: for any $U, V, W\ss X$, one has $(U\cap W)\cap (V\cap W)=(U\cap V)\cap W$.}
+	\item Show that the inclusion function $Y \hookrightarrow X$ is a
+	  continuous function.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{remark}%
+\label{rem.top_sp_quantale}%
+\index{quantale!of open sets}
+Suppose $(X,\Op)$ is a topological space, and consider the preorder $(\Op,\ss)$ of open sets. It turns out that $(\Op,\ss,X,\cap)$ is always a quantale in the sense of \cref{def.monoidal_closed}. We will not need this fact, but we invite the reader to think about it a bit in \cref{exc.top_sp_quantale}.
+\end{remark}
+
+\begin{exercise}%
+\label{exc.top_sp_quantale}%
+\index{booleans!as base of enrichment for preorders}
+In \cref{subsec.Lawv_metric_spaces,subsec.preorders_Bool_enriched} we discussed how $\Bool$-categories are preorders and $\Cost$-categories are Lawvere metric spaces, and in \cref{subsec.variations_quantale} we imagined interpretations of $\cat{V}$-categories for other quantales $\cat{V}$.
+
+If $(X,\Op)$ is a topological space and $\cat{V}$ the corresponding quantale as in \cref{rem.top_sp_quantale}, how might we imagine a $\cat{V}$-category? 
+\end{exercise}
+
+% Subsubsection %
+\subsection{Sheaves on topological spaces}%
+\label{subsec.sheaves_on_spaces}
+
+To summarize where we are, a topological space $(X,\Op)$ is a set $X$ together with a bunch of subsets we call `open'; these open subsets form a preorder---and hence category---denoted $\Op$. Sheaves on $X$ will be presheaves on $\Op$ with a special property, aptly named the `sheaf condition.'
+
+Recall the terminology and notation for presheaves: a presheaf on $\Op$ is a functor $P\colon \Op\op\to\smset$. Thus to every open set $U\in\Op$ we have a set $P(U)$, called the set of \emph{sections over $U$}, and to every inclusion of open sets $V\ss U$ we have a function $P(U)\to P(V)$ called the \emph{restriction}. If $s\in P(U)$ is a section over $U$, we may denote its restriction to $V$ by $\restrict{s}{V}$. Recall that we say a collection of open sets $(U_i)_{i\in I}$ \emph{covers} an open set $U$ if $U=\bigcup_{i\in I}U_i$.
+
+We are now ready to give the following definition, which comes in several waves: we first define matching families, then gluing, then sheaf condition, then sheaf, and finally the category of sheaves.%
+\index{category!of sheaves}
+
+\begin{definition}%
+\label{def.sheaf}%
+\index{sheaf}%
+\index{sheaf!condition}%
+\index{matching family}%
+\index{cover}%
+\index{gluing}
+Let $(X,\Op)$ be a topological space, and let $P\colon\Op\op\to\smset$ be a presheaf on $\Op$. 
+
+Let $(U_i)_{i\in I}$ be a collection of open sets $U_i\in\Op$ covering $U$. A \emph{matching family $(s_i)_{i\in I}$ of $P$-sections over $(U_i)_{i\in I}$} consists of a section $s_i\in P(U_i)$ for each $i\in I$, such that for every $i,j\in I$ we have 
+\[
+  \restrict{s_i}{U_i\cap U_j}=\restrict{s_j}{U_i\cap U_j}.
+\]
+
+Given a matching family $(s_i)_{i\in I}$ for the cover $U=\bigcup_{i\in I}U_i$,
+we say that $s\in P(U)$ is a \emph{gluing}, or \emph{glued section}, of the
+matching family if $\restrict{s}{U_i}=s_i$ holds for all $i\in I$.
+  
+If there exists a unique gluing $s\in P(U)$ for every matching family $(s_i)_{i\in I}$, we say that $P$ \emph{satisfies the sheaf condition for the cover $U=\bigcup_{i\in I}U_i$}. If $P$ satisfies the sheaf condition for every cover, we say that $P$ is a \emph{sheaf} on $(X,\Op)$.
+
+Thus a sheaf is just a presheaf satisfying the sheaf condition for every open cover. If $P$ and $Q$
+are sheaves, then a \emph{morphism} $f\colon P\to Q$ between these sheaves is just a morphism---that
+is, a natural transformation---between their underlying presheaves. We denote by
+$\Shv(X,\Op)$ the category of sheaves on $X$.%
+\index{sheaves!morphism of}
+\end{definition}
+
+The category of sheaves on $X$ is a topos, but we'll get to that.%
+\index{topos!as category of sheaves}
+
+\begin{example}%
+\label{ex.empty_cover}%
+\index{cover!empty}
+Here is a funny---but very important---special case to which the notion of matching family applies. We do not give this example for intuition, but because (to emphasize) it's an important and easy-to-miss case. Just like the sum of no numbers is 0 and the product of no numbers is $1$, the union of no sets is the empty set. Thus if we take $U=\varnothing\ss X$ and $I=\varnothing$, then the empty collection of subsets (one for each $i\in I$, of which there are none) covers $U$. In this case the empty tuple $()$ counts a matching family of sections, and it is the only matching family for the empty cover of the empty set.
+
+In other words, in order for a presheaf $P\colon\Op\op\to\smset$ to be a sheaf, a necessary (but rarely sufficient) condition is that $P(\varnothing)\cong\{()\}$, i.e.\ $P(\varnothing)$ must be a set with one element.
+\end{example}
+
+\paragraph{Extended example: sections of a function.}%
+\index{sheaf!of sections of a function}
+This example is for intuition, and gives a case where the `section' and `restriction' terminology are easy to visualize.
+
+Consider the function $f\colon X\to Y$ shown below, where each element of $X$ is
+sent to the element of $Y$ immediately below it. For example,
+$f(a_1)=f(a_2)=a$, $f(b_1)=b$, and so on.
+\begin{equation}%
+\label{eqn.sections_of_function}
+\begin{tikzpicture}[y=.35cm, every label/.style={font=\scriptsize}, baseline=(f)]
+	\node[label={[above=-5pt]:$a$}] (Ya) {$\bullet$};
+	\node[right=1 of Ya,  label={[above=-5pt]:$b$}] (Yb) {$\bullet$};
+	\node[right=1 of Yb,  label={[above=-5pt]:$c$}] (Yc) {$\bullet$};
+	\node[right=1 of Yc,  label={[above=-5pt]:$d$}] (Yd) {$\bullet$};
+	\node[right=1 of Yd,  label={[above=-5pt]:$e$}] (Ye) {$\bullet$};
+	\node[draw, inner ysep=4pt, fit={(Ya) ($(Yb.north)+(0,1ex)$) (Ye)}] (Y) {};
+	\node[left=0 of Y] (Ylab) {$Y\coloneqq$};
+%
+  \node[above=4 of Ya, label={[above=-5pt]:$a_1$}] (Xa1) {$\bullet$};
+  \node[above=1 of Xa1, label={[above=-5pt]:$a_2$}] (Xa2) {$\bullet$};
+  \node[above=4 of Yb, label={[above=-5pt]:$b_1$}] (Xb1) {$\bullet$};
+  \node[above=1 of Xb1, label={[above=-5pt]:$b_2$}] (Xb2) {$\bullet$};
+  \node[above=1 of Xb2, label={[above=-5pt]:$b_3$}] (Xb3) {$\bullet$};
+  \node[above=4 of Yc, label={[above=-5pt]:$c_1$}] (Xc1) {$\bullet$};
+  \node[above=4 of Ye, label={[above=-5pt]:$e_1$}] (Xe1) {$\bullet$};
+  \node[above=1 of Xe1, label={[above=-5pt]:$e_2$}] (Xe2) {$\bullet$};
+	\node[draw, inner ysep=3pt, fit={(Xa2) ($(Xb3.north)+(0,1ex)$) (Xe1)}] (X) {};
+	\node[left=0 of X] {$X\coloneqq$};
+%
+	\draw[->, shorten <=3pt, shorten >=3pt] (X) to node[left] (f) {$f$} (Y);
+\end{tikzpicture}
+\end{equation}
+For each point $y\in Y$, the preimage set $f^{-1}(y)\ss X$ above it is often called the \emph{fiber over $y$}. Note that different $f$'s would arrange the eight elements of $X$ differently over $Y$: elements of $Y$ would have different fibers.%
+\index{preimage}%
+\index{fiber|see {preimage}}
+
+\begin{exercise}%
+\label{exc.fiber_practice}
+Consider the function $f\colon X\to Y$ shown in \cref{eqn.sections_of_function}.
+\begin{enumerate}
+	\item What is the fiber of $f$ over $a$?
+	\item What is the fiber of $f$ over $c$?
+	\item What is the fiber of $f$ over $d$?
+	\item Gave an example of a function $f'\colon X\to Y$ for which every fiber has either one or two elements.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+Let's consider $X$ and $Y$ as discrete topological spaces, so every subset is open, and $f$ is automatically  continuous (see \cref{exc.course_fine}). We will think of $f$ as an arrangement of $X$ over $Y$, in terms of fibers as above, and use it to build a sheaf on $Y$. To do this, we begin by building a presheaf---i.e.\ a functor $\Fun{Sec}_f\colon\Op(Y)\op\to\smset$---and then we'll prove it's a sheaf.
+
+Define the presheaf $\Fun{Sec}_f$ on an arbitrary subset $U\ss Y$ by:
+\[\Fun{Sec}_f(U)\coloneqq\{s\colon U\to X\mid(s\cp f)(u)=u\text{ for all }u\in U\}.\]
+One might describe $\Fun{Sec}_f(U)$ as the set of all ways to pick a `cross-section' of the $f$ arrangement over $U$. That is, an element $s\in\Fun{Sec}_f(U)$ is a choice of one element per fiber over $U$.%
+\index{cross section|see {section}}
+
+As an example, let's say $U=\{a,b\}$. How many such $s$'s are there in
+$\Fun{Sec}_f(U)$? To answer this, let's clip the picture \eqref{eqn.sections_of_function} and look only at the relevant part:
+\begin{equation}%
+\label{eqn.all_six_sections}
+\begin{tikzpicture}[y=.25cm, x=.25cm, every label/.style={font=\scriptsize}, trim left=2cm]
+	\node (Ya6) {};
+	\foreach \i [remember=\i as \lasti (initially 6)] in {0,...,5} {
+  	\node[label={[below=6.5pt]:$a$}, right=8 of Ya\lasti]   (Ya\i)  {$\bullet$};
+  	\node[label={[below=5pt]:$b$}, right=1 of Ya\i]  (Yb\i)  {$\bullet$};
+    \node[above=4 of Ya\i]  (Xa1\i) {$\bullet$};
+    \node[above=1 of Xa1\i] (Xa2\i) {$\bullet$};
+    \node[above=4 of Yb\i]  (Xb1\i) {$\bullet$};
+    \node[above=1 of Xb1\i] (Xb2\i) {$\bullet$};
+    \node[above=1 of Xb2\i] (Xb3\i) {$\bullet$};
+    \node[draw, fit=(Ya\i) (Yb\i)] (Y\i) {};
+    \node[draw, fit=(Xa1\i) (Xb3\i)] (X\i) {};
+		\draw[->, shorten <=3pt, shorten >=3pt] (X\i) -- (Y\i);
+		\tikzmath{
+  		int \a, \b, \ii;
+  		\a = 1+div(\i, 3);
+  		\b = 1+mod(\i,3);
+			\ii=1+\i;
+		}
+    \node[above=0 of X\i] {$s_{\ii}$};
+		\begin{scope}[mapsto]
+  		\draw[bend left] (Ya\i) to (Xa\a\i);
+  		\draw[bend right] (Yb\i) to (Xb\b\i);
+			\node[circle, dotted, draw] at (Xa\a\i) {};
+			\node[circle, dotted, draw] at (Xb\b\i) {};
+		\end{scope}
+	}
+\end{tikzpicture}
+\end{equation}
+Looking at the picture \eqref{eqn.all_six_sections}, do you see how we get all cross-sections of $f$ over $U$? 
+
+\begin{exercise}%
+\label{exc.presheaf_ex_cont}
+Refer to \cref{eqn.sections_of_function}.
+\begin{enumerate}
+	\item Let $V_1=\{a,b,c\}$. Draw all the sections over it, i.e.\ all elements of $\Fun{Sec}_f(V_1)$, as we did in \cref{eqn.all_six_sections}.
+	\item Let $V_2=\{a,b,c,d\}$. Again draw all the sections, $\Fun{Sec}_f(V_2)$.
+	\item Let $V_3=\{a,b,d,e\}$. How many sections (elements of $\Fun{Sec}_f(V_3)$) are there?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+By now you should understand the sections of $\Fun{Sec}_f(U)$ for various $U\ss X$. This is $\Fun{Sec}_f$ on objects, so you are half way to understanding $\Fun{Sec}_f$ as a presheaf. That is, as a presheaf, $\Fun{Sec}_f$ also includes a restriction maps for every subset $V\ss U$. Luckily, the restriction maps are easy: if $V\ss U$, say $V=\{a\}$ and $U=\{a,b\}$, then given a section $s$ as in \cref{eqn.all_six_sections}, we get a section over $V$ by `restricting' our attention to what $s$ does on $\{a\}$. 
+\begin{equation}%
+\label{eqn.restriction_map_rand9384}
+\begin{tikzpicture}[y=.25cm, x=.75cm, every label/.style={font=\scriptsize}, trim left=4.5cm]
+	\node (Ya6) {};
+	\foreach \i [remember=\i as \lasti (initially 6)] in {0,...,1} {
+  	\node[label={[below=6.5pt]:$a$}, right=8 of Ya\lasti]   (Ya\i)  {$\bullet$};
+    \node[above=4 of Ya\i]  (Xa1\i) {$\bullet$};
+    \node[above=1 of Xa1\i] (Xa2\i) {$\bullet$};
+    \node[draw, fit=(Ya\i)] (Y\i) {};
+    \node[draw, fit=(Xa1\i) (Xa2\i)] (X\i) {};
+		\draw[->, shorten <=3pt, shorten >=3pt] (X\i) -- (Y\i);
+		\tikzmath{
+  		int \ii;
+			\ii=1+\i;
+		}
+		\begin{scope}[mapsto]
+  		\draw[ bend left] (Ya\i) to (Xa\ii\i);
+			\node[circle, dotted, draw] at (Xa\ii\i) {};
+		\end{scope}
+	}
+	\node[above=0 of X0] {$\restrict{s_1}{V}=\restrict{s_2}{V}=\restrict{s_3}{V}$};
+	\node[above=0 of X1] {$\restrict{s_4}{V}=\restrict{s_5}{V}=\restrict{s_6}{V}$};
+\end{tikzpicture}
+\end{equation}
+
+\begin{exercise}%
+\label{exc.section_practice}
+\begin{enumerate}
+	\item Write out the sets of sections $\Fun{Sec}_f(\{a,b,c\})$ and $\Fun{Sec}_f(\{a,c\})$.
+	\item Draw lines from the first to the second to indicate the restriction map.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Now we have understood $\Fun{Sec}_f$ as a presheaf; we next explain how to see that it is a sheaf, i.e.\ that it satisfies the sheaf condition for every cover. To understand the sheaf condition, consider the set $U_1=\{a,b\}$ and $U_2=\{b,e\}$. These cover the set $U=\{a,b,e\}=U_1\cup U_2$. By \cref{def.sheaf}, a matching family for this cover consists of a section over $U_1$ and a section over $U_2$ that agree on the overlap set, $U_1\cap U_2=\{b\}$.
+
+So consider $s_1\in \Fun{Sec}_f(U_1)$ and $s_2\in \Fun{Sec}_f(U_2)$ shown below.
+\begin{equation}%
+\label{eqn.one_section}
+\begin{tikzpicture}[y=.4cm, x=.4cm, every label/.style={font=\scriptsize}, baseline=(f)]
+  	\node[label={[above=-5pt]:$a$}] (Ya)  {$\bullet$};
+  	\node[right=1 of Ya, red, label={[red, above=-5pt]:$b$}]  (Yb)  {$\bullet$};
+    \node[above=4 of Ya,  label={[above=-5pt]:$a_1$}]  (Xa1) {$\bullet$};
+    \node[above=1 of Xa1, label={[above=-5pt]:$a_2$}] (Xa2) {$\bullet$};
+    \node[above=4 of Yb,  label={[above=-5pt]:$b_1$}]  (Xb1) {$\bullet$};
+    \node[above=1 of Xb1, label={[above=-5pt]:$b_2$}] (Xb2) {$\bullet$};
+    \node[above=1 of Xb2, label={[above=-5pt]:$b_3$}] (Xb3) {$\bullet$};
+    \node[draw, fit={(Ya) ($(Yb.north east)+(0,1)$)}] (Y) {};
+    \node[draw, fit={(Xa1) ($(Xb3.north east)+(0,1)$)}] (X) {};
+		\draw[->, shorten <=3pt, shorten >=3pt] (X) to node (f) {} (Y);
+    \node[above=0 of X] {$g_1$};
+		\begin{scope}[mapsto]
+  		\draw[bend left] (Ya) to (Xa1);
+  		\draw[red, bend right] (Yb) to (Xb2);
+			\node[circle, dotted, draw] at (Xa1) {};
+			\node[red, circle, dotted, draw] at (Xb2) {};
+		\end{scope}
+		\node[right=5 of Yb, red, label={[red, above=-5pt]:$b$}]   (Ybb)  {$\bullet$}; 
+  	\node[right=1 of Ybb,  label={[above=-5pt]:$e$}]   (Yee)  {$\bullet$};
+    \node[above=4 of Ybb,  label={[above=-5pt]:$b_1$}] (Xbb1) {$\bullet$};
+    \node[above=1 of Xbb1, label={[above=-5pt]:$b_2$}] (Xbb2) {$\bullet$};
+    \node[above=1 of Xbb2, label={[above=-5pt]:$b_3$}] (Xbb3) {$\bullet$};
+    \node[above=4 of Yee,  label={[above=-5pt]:$e_1$}] (Xee1) {$\bullet$};
+    \node[above=1 of Xee1, label={[above=-5pt]:$e_2$}] (Xee2) {$\bullet$};
+    \node[draw, fit={(Ybb) ($(Yee.north east)+(0,1)$)}] (YY) {};
+    \node[draw, fit={(Xee1) ($(Xbb3.north west)+(0,1)$)}] (XX) {};
+		\draw[->, shorten <=3pt, shorten >=3pt] (XX) -- (YY);
+    \node[above=0 of XX] {$g_2$};
+		\begin{scope}[mapsto]
+  		\draw[red, bend left] (Ybb) to (Xbb2);
+  		\draw[green!50!black, bend right] (Yee) to (Xee2);
+			\node[red, circle, dotted, draw] at (Xbb2) {};
+			\node[green!50!black, circle, dotted, draw] at (Xee2) {};
+		\end{scope}		
+\end{tikzpicture}
+\end{equation}
+Since sections $g_1$ and $g_2$ agree on the overlap---they both send $b$ to
+$b_2$---the two sections shown in \cref{eqn.one_section} can be glued to form a single section over
+$U=\{a,b,e\}$:
+\[
+\begin{tikzpicture}[y=.4cm, x=.4cm, every label/.style={font=\scriptsize}]
+  	\node[label={[above=-5pt]:$a$}] (Ya)  {$\bullet$};
+  	\node[right=1 of Ya, red, label={[red, above=-5pt]:$b$}]  (Yb)  {$\bullet$};
+  	\node[right=1 of Yb,  label={[above=-5pt]:$e$}]   (Yee)  {$\bullet$};
+    \node[above=4 of Ya,  label={[above=-5pt]:$a_1$}]  (Xa1) {$\bullet$};
+    \node[above=1 of Xa1, label={[above=-5pt]:$a_2$}] (Xa2) {$\bullet$};
+    \node[above=4 of Yb,  label={[above=-5pt]:$b_1$}]  (Xb1) {$\bullet$};
+    \node[above=1 of Xb1, label={[above=-5pt]:$b_2$}] (Xb2) {$\bullet$};
+    \node[above=1 of Xb2, label={[above=-5pt]:$b_3$}] (Xb3) {$\bullet$};
+    \node[above=4 of Yee,  label={[above=-5pt]:$e_1$}] (Xee1) {$\bullet$};
+    \node[above=1 of Xee1, label={[above=-5pt]:$e_2$}] (Xee2) {$\bullet$};
+    \node[draw, fit={(Ya) ($(Yb.north east)+(0,1)$) (Yee)}] (Y) {};
+    \node[draw, fit={(Xa1) ($(Xb3.north east)+(0,1)$) (Xee1)}] (X) {};
+		\draw[->, shorten <=3pt, shorten >=3pt] (X) -- (Y);
+    \node[above=0 of X] {glued section};
+		\begin{scope}[mapsto]
+  		\draw[bend left] (Ya) to (Xa1);
+  		\draw[red, bend right] (Yb) to (Xb2);
+	 		\draw[bend right, green!50!black] (Yee) to (Xee2);
+			\node[circle, dotted, draw] at (Xa1) {};
+			\node[circle, red, dotted, draw] at (Xb2) {};
+			\node[circle, green!50!black, dotted, draw] at (Xee2) {};
+		\end{scope}
+\end{tikzpicture}
+\qedhere
+\]
+
+\begin{exercise}%
+\label{exc.sections_agree_overlap}
+Again let $U_1=\{a,b\}$ and $U_2=\{b,e\}$, so the overlap is $U_1\cap U_2=\{b\}$.
+\begin{enumerate}
+	\item Find a section $s_1\in\Fun{Sec}_f(U_1)$ and a section $s_2\in\Fun{Sec}_f(U_2)$ that \emph{do not} agree on the overlap.
+	\item For your answer ($s_1,s_2)$ in part 1, can you find a section $s\in\Fun{Sec}_f(U_1\cup U_2)$ such that $\restrict{s}{U_1}=s_1$ and $\restrict{s}{U_2}=s_2$?
+	\item Find a section $h_1\in\Fun{Sec}_f(U_1)$ and a section $h_2\in\Fun{Sec}_f(U_2)$ that \emph{do} agree on the overlap, but which are different than our choice in \cref{eqn.one_section}.
+	\item Can you find a section $h\in\Fun{Sec}_f(U_1\cup U_2)$ such that $\restrict{h}{U_1}=h_1$ and $\restrict{h}{U_2}=h_2$?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+%
+\index{topological space|)}
+
+\paragraph{Other examples of sheaves.}
+
+The extended example above generalizes to any continuous function $f\colon X\to Y$ between
+topological spaces.
+
+\begin{example}%
+\label{ex.sheaf_from_cont_function}%
+\index{sheaf!of sections of a function}
+Let $f\colon(X,\Op_X)\to(Y,\Op_Y)$ be a continuous function. Consider the functor $\Fun{Sec}_f\colon\Op_Y\op\to\smset$ given by
+\[
+\Fun{Sec}_f(U)\coloneqq\{g\colon U\to X\mid g\text{ is continuous and
+}(g\cp f)(u)=u\text{ for all }u\in U\},
+\]
+The morphisms of $\Op_Y$ are inclusions $V\ss U$. Given $g\colon U\to X$ and $V\ss U$, what we call the restriction of $g$ to $V$ is the usual thing we mean by restriction, the same as it was in \cref{eqn.restriction_map_rand9384}. One can again check that $\Fun{Sec}_f$ is a sheaf.
+\end{example}
+
+
+\begin{example}%
+\index{sheaf!of vector fields}%
+\label{ex.tangent_bundle}%
+\index{tangent bundle}%
+\index{vector!tangent}%
+\index{vector field}
+A nice example of a sheaf on a space $M$ is that of vector fields on $M$. If you
+calculate the wind velocity at every point on Earth, you will have what's called
+a vector field on Earth. If you know the wind velocity at every point in
+Afghanistan and I know the wind velocity at every point in Pakistan, and our
+calculations agree around the border, then we can glue our information together
+to get the wind velocity over the union of the two countries. All possible wind
+velocity fields over all possible open sets of the Earth's surface together form
+the sheaf of vector fields. 
+
+Let's say this a bit more formally. A manifold $M$---you can just imagine a sphere such as the Earth's surface---always has something called a tangent bundle. It is a space $TM$ whose points are pairs $(m,v)$, where $m\in M$ is a point in the manifold and $v$ is a tangent vector emanating from it. Here's a picture of one tangent plane---all the tangent vectors emanating from some fixed point---on a sphere:
+\[
+\begin{tikzpicture}
+  \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (2cm);
+  \node[label={[below left=0 and 0]:$m$}] at (.5, 1.4) (m) {};
+  \fill[fill=black] (m) circle (2pt);
+  \node[trapezium, dashed, draw, trapezium left angle=120, trapezium right angle=60, minimum width=4cm] at (m) (trap) {};
+  \draw[dotted, thin] (0,0) -- (m);
+  \draw[->, thin, shorten >=.1cm] (m.center) -- (trap.top side);
+  \draw[->, thin, shorten >=.1cm] (m.center) -- (trap.right side);
+  \node[label={[below=5pt]:$v$}] at ($(m)+(.7,-.4)$) (v) {};
+  \draw[->, thin] (m.center) -- (v.center);
+  \node[left] at (-2cm,0) {$M\coloneqq$};
+  \node[right=2pt of trap, gray] {$\ss TM$};
+\end{tikzpicture}
+\]
+The tangent bundle $TM$ includes the whole tangent plane shown above---including the three vectors drawn on it---as well as the tangent plane at every other point on the sphere. 
+
+The tangent bundle $TM$ on a manifold $M$ comes with a continuous map $\pi\colon TM\to M$ back down to the manifold, sending $(m,v)\mapsto m$. One might say that $\pi$ ``forgets the tangent vector and just remembers the point it emanated from.'' By \cref{ex.sheaf_from_cont_function}, $\pi$ defines a sheaf $\Fun{Sec}_\pi$. It could be called the sheaf of `tangent vector sections on $M$', but its usual name is the sheaf of \emph{vector fields on $M$}. This is what we were describing when we spoke of the sheaf of wind velocities on Earth, above. Given an open subset $U\ss M$, an element $v\in\Fun{Sec}_\pi(U)$ is called a vector field over $U$ because it continuously assigns a tangent vector $v(u)$ to each point $u\in U$. The tangent vector at $u$ tells us the velocity of the wind at that point.%
+\index{tangent bundle!vector fields as sections of}
+
+Here's a fun digression: in the case of a spherical manifold $M$ like the Earth,
+it's possible to prove that for every open set $U$, as long as $U\neq M$, there
+is a vector field $v\in\Fun{Sec}_\pi(U)$ that is never 0: the wind could be
+blowing throughout $U$. However, a theorem of Poincar\'e says that if you look
+at the whole sphere, there is guaranteed to be a point $m\in M$ at which the
+wind is not blowing at all. It's like the eye of a hurricane or perhaps a
+cowlick. A cowlick in someone's hair occurs when the hair has no direction to
+go, so it sticks up! Hair sticking up would not count as a tangent vector:
+tangent vectors must start out lying flat along the head. Poincar\'{e} proved
+that if your head was covered completely with inch-long hair, there would be at
+least one cowlick. This difference between local sections (over arbitrary $U\ss
+X$) and global sections (over $X$)---namely that hair can be well combed
+whenever $U\neq X$ but cannot be well combed when $U=X$---can be thought of as a
+generative effect, and can be measured by cohomology (see
+\cref{ch1.further_reading}).%
+\index{cowlick!inevitability of}
+\end{example}%
+\index{generative effect}
+
+\begin{exercise}%
+\label{exc.whats_the_sheaf}
+If $M$ is a sphere as in \cref{ex.tangent_bundle}, we know from \cref{def.sheaf} that we can consider the category $\Shv(M)$ of sheaves on $M$; in fact, such categories are toposes and these are what we're getting to.
+
+But are the sheaves on $M$ the vector fields? That is, is there a one-to-one correspondence between sheaves on $M$ and vector fields on $M$? If so, why? If not, how are sheaves on $M$ and vector fields on $M$ related?
+\end{exercise}
+
+\begin{example}%
+\label{ex.Sets_as_sheaves}%
+\index{set!as sheaf on one-point space}
+For every topological space $(X,\Op)$, we have the topos of sheaves on it. The topos of sets, which one can regard as the story of set theory, is the category of sheaves on the one-point space $\{*\}$. In topos theory, we see the category of sets---an huge, amazing, and rich category---as corresponding to a single point. Imagine how much more complex arbitrary toposes are, when they can take place on much more interesting topological spaces (and in fact even more general `sites'). 
+\end{example}
+
+\begin{exercise}%
+\label{exc.sierpinski}%
+\index{Sierpinski space}
+Consider the Sierpinski space $(\{1,2\},\Op_1)$ from \cref{ex.Sierpinski}.
+\begin{enumerate}
+	\item What is the category $\Op$ for this space? (You may have already figured this out in \cref{exc.opens_Sierp}; if not, do so now.)
+	\item What does a presheaf on $\Op$ consist of?
+	\item What is the sheaf condition for $\Op$?
+	\item How do we identify a sheaf on $\Op$ with a function?
+	\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+
+%
+\index{sheaf|)}
+
+%---- Subsection ----%
+
+\section{Toposes} %
+\label{subsec.topos_logic} %
+\label{subsec.def_and_properties_toposes}
+%
+\index{topos|(}
+
+A \emph{topos} is defined to be a category of sheaves.%
+\footnote{This is sometimes called a \emph{sheaf topos} or a \emph{Grothendieck topos}. There is a more general sort of topos called an \emph{elementary topos} due to Lawvere.}%
+\index{topos!as category of sheaves}%
+\index{sheaves!topos of}
+So for any topological space $(X,\Op)$, the category $\Shv(X,\Op)$ defined in
+\cref{def.sheaf} is a topos. In particular, taking the one-point space $X =\Cat{1}$ with its unique topology, we find that the category
+$\smset$ is a topos, as we've been saying all along and saw again explicitly in \cref{ex.Sets_as_sheaves}. And for any database schema---i.e.\ finitely presented category---$\cat{C}$, the category $\cat{C}\inst$ of database instances on $\cat{C}$ is also a topos.%
+\footnote{We said that a topos is a category of sheaves, yet database instances are presheaves; so how is $\cat{C}\inst$ a topos? Well, presheaves in fact count as sheaves. We apologize that this couldn't be clearer. All of this could be made formal if we were to introduce \emph{sites}. Unfortunately, that concept is simply too abstract for the scope of this chapter.}
+Toposes encompass both of these sources of examples, and many more.
+
+Toposes are incredibly nice structures, for a variety of seemingly disparate
+reasons. In this sketch, the reason in focus is that every topos has many of the
+same structural properties that the category $\smset$ has.  Indeed, we
+discussed in \cref{subsec.set_like} that every topos has limits and colimits, is
+cartesian closed, has epi-mono factorizations, and has a subobject classifier
+(see \cref{subsec.subobj_classifier}). Using these properties, one can do logic
+with semantics in the topos $\cat{E}$. We explained this for sets, but now
+imagine it for sheaves on a topological space. There, the same logical symbols
+$\wedge, \vee, \neg,\imp,\exists,\forall$ become operations that mean something
+about sub-sheaves---e.g.\ vector fields, sections of continuous functions,
+etc.---not just subsets.%
+\index{logic!in a topos}%
+\index{epi-mono factorization}
+
+To understand this more deeply, we should say what the subobject classifier
+$\true\colon 1 \to \Omega$ is in more generality.  We said that, in the topos $\smset$, the  subobject classifier is the set of booleans
+$\Omega=\BB$. In a sheaf topos $\cat{E}=\Shv(X,\Op)$, the object $\Omega\in\cat{E}$ is
+a sheaf, not just a set. What sheaf is it? 
+
+% Subsubsection %
+\subsection{The subobject classifier $\Omega$ in a sheaf
+topos}%
+\label{subsec.subob_class_sheaf_topos}%
+\index{subobject classifier|(}
+
+In this subsection we aim to understand the subobject classifier $\Omega$, i.e.\
+the object of truth values, in the sheaf topos $\Shv(X,\Op)$. Since $\Omega$ is
+a sheaf, let's understand it by going through the definition of sheaf
+(\cref{def.sheaf}) slowly in this case. A sheaf $\Omega$ is a presheaf that
+satisfies the sheaf condition. As a presheaf it is just a functor
+$\Omega\colon\Op\op\to\smset$; it assigns a set $\Omega(U)$ to each open
+$U\ss X$ and comes with a restriction map $\Omega(U)\to\Omega(V)$ whenever $V\ss
+U$. So in our quest to understand $\Omega$, we first ask the question: what
+presheaf is it?
+
+The answer to our question is that $\Omega$ is the presheaf that assigns to
+$U\in\Op$ the set of open subsets of $U$:
+\begin{equation}%
+\label{eqn.omega_as_opens}
+  \Omega(U)\coloneqq\{U'\in\Op\mid U'\ss U\}.
+\end{equation}
+That was easy, right? And given the restriction map for $V\ss U$ is given by
+\begin{align}%
+\label{eqn.omega_open_rest}
+	\Omega(U)&\to\Omega(V)\\\nonumber	
+	U'&\mapsto U'\cap V.
+\end{align}
+One can check that this is
+functorial---see \cref{exc.Omega_functorial}---and after doing so we will still
+need to see that it satisfies the sheaf condition. But at least we don't have to
+struggle to understand $\Omega$: it's a lot like $\Op$ itself.
+
+\begin{exercise}%
+\label{exc.booleans_as_subspace_1}%
+\index{booleans!as subobject classifier}
+Let $X=\{1\}$ be the one point space. We said above that its subobject classifier is the set $\bb$ of booleans, but how does that align with the definition of $\Omega$ given in \cref{eqn.omega_as_opens}?
+\end{exercise}
+
+
+\begin{exercise}%
+\label{exc.Omega_functorial}~
+\begin{enumerate}
+	\item Show that the definition of $\Omega$ given above in \cref{eqn.omega_as_opens,eqn.omega_open_rest} is functorial, i.e., that whenever $W\ss V\ss U$, the restriction map $\Omega(U)\to\Omega(V)$ followed by the restriction map $\Omega(V)\to\Omega(W)$ is the same as the restriction map $\Omega(U)\to\Omega(W)$.
+	\item Is that all that's necessary to conclude that $\Omega$ is a presheaf?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+
+To see that $\Omega$ as defined in \cref{eqn.omega_as_opens} satisfies the sheaf condition (see \cref{def.sheaf}), suppose that we have a cover
+$U=\bigcup_{i\in I}U_i$, and suppose given an element $V_i\in\Omega(U_i)$, i.e.\
+an open set $V_i\ss U_i$, for each $i\in I$. Suppose further that for all
+$i,j\in I$, it is the case that $V_i\cap U_j=V_j\cap U_i$, i.e.\ that the
+elements form a matching family. Define
+$V\coloneqq\bigcup_{i\in I}V_i$; it is an open subset of $U$, so we can consider
+$V$ as an element of $\Omega(U)$. The following verifies that $V$ is indeed a gluing for the $(V_i)_{i\in I}$:
+\[V\cap U_j=\left(\bigcup_{i\in I}V_i\right)\cap U_j=\bigcup_{i\in I}(V_i\cap U_j)=\bigcup_{i\in I}(V_j\cap U_i)=\left(\bigcup_{i\in I}U_i\right)\cap V_j=V_j\]
+In other words $V\cap U_j=V_j$ for any $j\in I$. So our $\Omega$ has been upgraded from presheaf to sheaf!
+
+The eagle-eyed reader will have noticed that we haven't yet given all the data
+needed to define a subobject classifier. To turn the object $\Omega$ into a subobject classifier in good standing, we also need to give a sheaf morphism
+$\true\colon\{1\} \to \Omega$. Here $\{1\}\colon \Op\op \to \smset$ is the terminal
+sheaf; it maps every open set to the terminal, one element set $\{1\}$. The correct morphism
+$\true\colon \{1\} \to \Omega$ for the subobject classifier is the sheaf morphism that assigns, for
+every $U \in \Op$ the function $\{1\}=\{1\}(U)\to\Omega(U)$ sending $1\mapsto U$, the largest open set $U\ss U$. From now on we denote $\{1\}$ simply as $1$.
+
+\paragraph{Upshot: Truth values are open sets.}
+
+The point is that the truth values in the topos of sheaves on a space $(X,\Op)$ are the open sets of that space. When someone says ``is property $P$ true?,'' the answer is not yes or no, but ``it is true on the open subset $U$.'' If this $U$ is everything, $U=X$, then $P$ is really true; if $U$ is nothing, $U=\varnothing$, then $P$ is really false. But in general, it's just true some places and not others.
+
+\begin{example}%
+\label{ex.subobject_classifier_graphs}
+The category $\Cat{Grph}$ of graphs is a presheaf topos, and one can also think of it as the category of instances for a database schema, as we saw in \cref{ex.graph_presheaf_topos}. The subobject classifier $\Omega$ in the topos $\Cat{Gr}$ is thus a graph, so we can draw it. Here's what it looks like:
+\[
+\Omega_{\Cat{Grph}}=\boxCD{
+\begin{tikzcd}[column sep=70pt, ampersand replacement=\&]
+	0
+		\ar[loop left, "{(0,0;\ 0)}"]
+		\ar[r, bend left=15pt, "{(0, V;\ 0)}"]
+\&
+	V
+		\ar[loop above, "{(V, V;\ 0)}"]
+		\ar[loop below, "{(V, V;\ A)}"]
+		\ar[l, bend left=15pt, "{(V, 0;\ 0)}"]
+\end{tikzcd}
+}
+\]
+Finding $\Omega$ for oneself is easiest using something called the Yoneda Lemma, but we have not introduced it. For a nice, easy introduction to the topos of graphs, see \cite{vigna2003guided}. The terminal graph is a single vertex with a single loop, and the graph homomorphism $\true\colon 1\to\Omega$ sends that loop to $(V,V;\ A)$.
+
+Given any graph $G$ and subgraph $i\colon H\ss G$, we need to construct a graph homomorphism $\corners{H}\colon G\to \Omega$ classifying $H$. The idea is that for each part of $G$, we decide ``how much of it is in $H$. A vertex in $v$ in $G$ is either in $H$ or not; if so we send it to $V$ and if not we send it to $0$. But arrows $a$ are more complicated. If $a$ is in $H$, we send it $(V,V;A)$. But if it is not in $H$, the mathematics requires us to ask more questions: is its source in $H$? is its target in $G"$? both? neither? Based on the answers to these questions we send $a$ to $(V, 0;\ 0)$, $(0, V;\ 0)$, $(V, V;\ 0)$, or $(0, 0;\ 0)$, respectively.
+\end{example}
+
+\begin{exercise}%
+\label{exc.classify_subgraph}
+Consider the subgraph $H\ss G$ shown here:
+\[
+\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r]\&\LMO{B}\&\LMO{C}
+\end{tikzcd}
+}
+\quad\ss\quad
+\boxCD{
+\begin{tikzcd}[ampersand replacement=\&]
+	\LMO{A}\ar[r, shift left, "f"]\&\LMO{B}\ar[l, shift left, "g"]\ar[r, "h"]\&\LMO{C}\ar[r, "i"]\&\LMO{D}
+\end{tikzcd}
+}
+\]
+Find the graph homomorphism $\corners{H}\colon G\to\Omega$ classifying it. See \cref{ex.subobject_classifier_graphs}.
+\end{exercise}
+
+% Subsubsection %
+\subsection{Logic in a sheaf topos}%
+\label{subsec.logic_sheaf_topos}
+%
+\index{AND operation}%
+\index{OR operation}
+Let's consider the logical connectives, AND, OR, IMPLIES, and NOT. Suppose we have a topological space  $X\in\Op$. Given two open sets $U,V$, considered as truth values $U,V\in\Omega(X)$, then their conjunction `$U$ AND $V$' is their intersection, and their disjunction `$U$ OR $V$' is their union;
+\begin{equation}%
+\label{eqn.AND_OR}
+  (U\wedge V)\coloneqq U\cap V
+  \qquad\text{and}\qquad
+  (U\vee V)\coloneqq U\cup V.
+\end{equation}
+These formulas are easy to remember, because $\wedge$ looks like $\cap$ and
+$\vee$ looks like $\cup$. The implication $U\imp V$ is the largest open set $R$ such that $R\cap U\ss V$, i.e.
+\begin{equation}%
+\label{eqn.implies_logic}
+  (U\imp V)\coloneqq\bigcup_{\{R\in\Op\mid R\cap U\ss V\}}R.
+\end{equation}
+In general, it is not easy to reduce \cref{eqn.implies_logic} further, so implication is the hardest logical connective to think about topologically.
+%
+\index{IMPLIES operation}
+
+%
+\index{NOT operation}
+Finally, the negation of $U$ is given by $\neg U\coloneqq(U\imp\false)$, and this turns out to be relatively simple. By the formula in \cref{eqn.implies_logic}, it is the union of all $R$ such that $R\cap U=\varnothing$, i.e.\ the union of all open sets in the complement of $U$. If you know topology, you might recognize that $\neg U$ is the `interior of the complement of $U$.'
+
+\begin{example}
+Consider the real line $X=\RR$ as a topological space (see \cref{ex.usual_top_R}). Let $U,V\in\Omega(X)$ be the open sets $U=\{x\in\RR\mid x<3\}$ and $V=\{x\in\RR\mid -4< x < 4\}$. Using interval notation, $U=(-\infty,3)$ and $V=(-4,4)$. Then
+\begin{itemize}
+	\item $U\wedge V=(-4,3)$.
+	\item $U\vee V=(-\infty,4)$.
+	\item $\neg U=(3,\infty)$.
+	\item $\neg V=(-\infty,-4)\cup(4,\infty)$.
+	\item $(U\imp V)=(-4,\infty)$
+	\item $(V\imp U)=U$
+	\qedhere
+\end{itemize}
+\end{example}
+
+\begin{exercise}%
+\label{exc.real_line_logic}
+Consider the real line $\RR$ as a topological space, and consider the open subset $U=\RR-\{0\}$.
+\begin{enumerate}
+	\item What open subset is $\neg U$?
+	\item What open subset is $\neg\neg U$?
+	\item Is it true that $U\ss\neg\neg U$?
+	\item Is it true that $\neg\neg U\ss U$?
+	\qedhere
+\end{enumerate}	
+\end{exercise}
+
+Above we explained operations on open sets, one corresponding to each logical connective; there are also open sets corresponding to the the symbols $\true$ and $\false$. We explore this in an exercise.
+
+\begin{exercise}%
+\label{exc.top_bot_practice}
+Let $(X,\Op)$ be a topological space.
+\begin{enumerate}
+	\item Suppose the symbol $\true$ corresponds to an open set such that for any open set $U\in\Op$, we have $(\true\wedge U)=U$. Which open set is it?
+	\item Other things we should expect from $\true$ include $(\true\vee U)=\true$ and $(U\imp \true)=\true$ and $(\true\imp U)=U$. Do these hold for your answer to 1?
+	\item The symbol $\false$ corresponds to an open set $U\in\Op$ such that for any open set $U\in\Op$, we have $(\false\vee U)=U$. Which open set is it?
+	\item Other things we should expect from $\false$ include $(\false\wedge U)=\false$ and $(\false\imp U)=\true$. Do these hold for your answer to 1?
+	\qedhere
+\end{enumerate} 
+\end{exercise} 
+
+\begin{example}
+For a vector bundle $\pi\colon E\to X$ over a space $X$, the corresponding sheaf is $\Fun{Sec}_\pi$ corresponding to its sections: to each open set $i_U\colon U\ss X$, we associate the set of functions $s\colon U\to E$ for which $s\cp\pi=i_U$. For example, in the case of the tangent bundle $\pi\colon TM\to M$ (see \cref{ex.tangent_bundle}), the corresponding sheaf, call it $\const{VF}$, associates to each $U$ the set $\const{VF}(U)$ of vector fields on $U$.
+
+The internal logic of the topos can then be used to consider properties of vector fields. For example, one could have a predicate $\const{Grad}\colon\const{VF}\to\Omega$ that asks for the largest subspace $\const{Grad}(v)$ on which a given vector field $v$ comes from the gradient of some scalar function. One could also have a predicate that asks for the largest open set on which a vector field is non-zero. Logical operations like $\wedge$ and $\vee$ could then be applied to hone in on precise submanifolds throughout which various desired properties hold, and to reason logically about what other properties are forced to hold there.
+\end{example}
+
+%---- Subsection ----%
+\subsection{Predicates}%
+\label{subsec.predicates}
+%
+\index{predicate}
+In English, a predicate is the part of the sentence that comes after the subject. For example ``\dots is even'' or ``\dots likes the weather'' are predicates. Not every subject makes sense for a given predicate; e.g.\ the sentence ``7 is even'' may be false, but it makes sense. In contrast, the sentence ``2.7 is even'' does not really make sense, and ``2.7 likes the weather'' certainly doesn't. In computer science, they might say ``The expression `2.7 likes the weather' does not type check.'' 
+
+The point is that each predicate is associated to a type, namely the type of subject that makes sense for that predicate. When we apply a predicate to a subject of the appropriate type, the result has a truth value: ``7 is even'' is either true or false. Perhaps ``Bob likes the weather'' is true some days and false on others. In fact, this truth value might change by the year (bad weather this year), by the season, by the hour, etc. In English, we expect truth values of sentences to change over time, which is exactly the motivation for this chapter. We're working toward a logic where truth values change over time.
+
+In a topos $\cat{E}=\Shv(X,\Op)$, a predicate is a sheaf morphism $p\colon S\to\Omega$ where $S\in\cat{E}$ is a sheaf and $\Omega\in\cat{E}$ is the subobject classifier, the sheaf of truth values. By \cref{def.sheaf} we get a function $p(U)\colon S(U)\to\Omega(U)$ for any open set $U\ss X$. In the above example---which we will discuss more carefully in \cref{subsec.topos_behavior_types}---if $S$ is the sheaf of people (people come and go over time), and $\mathrm{Bob}\in S(U)$ is a person existing over a time $U$, and $p$ is the predicate ``likes the weather,'' then $p(\mathrm{Bob})$ is the set of times during which Bob likes the weather. So the answer to ``Bob likes the weather'' is something like ``in summers yes, and also in April 2018 and May 2019 yes, but in all other times no.'' That's $p(\mathrm{Bob})$, the temporal truth value obtained by applying the predicate $p$ to the subject Bob.
+
+\begin{exercise}%
+\label{exc.weather_bob}
+Just now we described how a predicate $p\colon S\to\Omega$, such as ``\dots likes the weather,'' acts on sections $s\in S(U)$, say $s=\mathrm{Bob}$. But by \cref{def.subobject_classifier}, any predicate $p\colon S\to\Omega$ also defines a subobject of $\{S\mid p\}\ss S$. Describe the sections of this subsheaf.
+\end{exercise}
+
+\paragraph{The poset of subobjects.}
+%
+\index{preorder!of subobjects}
+
+For a topos $\cat{E}=\Shv(X,\Op)$ and object (sheaf) $S\in\cat{E}$, the set of $S$-predicates $|\Omega^E|=\cat{E}(S,\Omega)$ is naturally given the structure of a poset, which we denote 
+\begin{equation}%
+\label{eqn.preorder_of_predicates}
+	(|\Omega^S|, \leq^S)
+\end{equation}
+Given two predicates $p,q\colon S\to\Omega$, we say that $p\leq^S q$ if the first implies the second. More precisely, for any $U\in\Op$ and section $s\in S(U)$ we obtain two open subsets $p(s)\ss U$ and $q(s)\ss U$. We say that $p\leq^S q$ if $p(s)\ss q(s)$ for all $U\in\Op$ and $s\in S(U)$. We often drop the superscript from $\leq^S$ and simply write $\leq$. In formal logic notation, one might write $p\leq^Sq$ using the $\vdash$ symbol, e.g.\ in one of the following ways:
+\[s:S\mid p(s)\vdash q(s)\qquad\text{or}\qquad p(s)\vdash_{s:S}q(s).\]
+In particular, if $S=1$ is the terminal object, we denote $|\Omega^S|$ by $|\Omega|$, and refer to elements $p\in|\Omega|$ as \emph{propositions}. They are just morphisms $p\colon 1\to\Omega$.
+
+This preorder is partially ordered---a poset---meaning that if $p\leq q$ and $q\leq p$ then $p=q$. The reason is that for any subsets $U,V\ss X$, if $U\ss V$ and $V\ss U$ then $U=V$.
+
+\begin{exercise}%
+\label{exc.vdash}
+Give an example of a space $X$, a sheaf $S\in\Shv(X)$, and two predicates $p,q\colon S\to\Omega$ for which $p(s)\vdash_{s:S} q(s)$ holds. You do not have to be formal.
+\end{exercise}
+
+All of the logical symbols ($\true,\false,\wedge,\vee,\imp,\neg$) from
+\cref{subsec.logic_sheaf_topos} make sense in any such poset $|\Omega^S|$. For
+any two predicates $p,q\colon S\to\Omega$, we define $(p\wedge q)\colon
+S\to\Omega$ by $(p\wedge q)(s)\coloneqq p(s)\wedge q(s)$, and similarly for
+$\vee$. Thus one says that these operations are \emph{computed pointwise} on
+$S$. With these definitions, the $\wedge$ symbol is the meet and the $\vee$
+symbol is the join---in the sense of \cref{def.meets_joins}---for the poset
+$|\Omega^S|$.
+
+With all of the logical structure we've defined so far, the poset $|\Omega^S|$ of predicates on $S$ forms what's called a Heyting algebra. We will not define it here, but more information can be found in \cref{sec.C7_further_reading}. We now move on to quantification.
+
+%---- Subsection ----%
+\subsection{Quantification}%
+\label{subsec.quantification}
+%
+\index{quantification}
+
+Quantification comes in two flavors: universal and existential, or `for all' and `there exists.' Each takes in a predicate of $n+1$ variables and returns a predicate of $n$ variables.
+
+\begin{example}%
+\label{ex.worried_pred}
+Suppose we have two sheaves $S,T\in\Shv(X,\Op)$ and a predicate $p\colon S\times T\to\Omega$. Let's say $T$ represents what's considered newsworthy and $S$ is again the set of people. So for a subset of time $U$, a section $t\in T(U)$ is something that's considered newsworthy throughout the whole of $U$, and a section $s\in S(U)$ is a person that lasts throughout the whole of $U$. Let's imagine the predicate $p$ as ``$s$ is worried about $t$.'' Now recall from \cref{subsec.predicates} that a predicate $p$ does not simply return true or false; given a person $s$ and a news-item $t$, it returns a truth value corresponding to the subset of times on which $p(s,t)$ is true. 
+
+``For all $t$ in $T$, \dots is worried about $t$'' is itself a predicate on just one variable, $S$, which we denote
+\[\forall(t:T)\ldotp p(s,t).\]
+Applying this predicate to a person $s$ returns the times when that person is worried about everything in the news. Similarly, ``there exists $t$ in $T$ such that $s$ is worried about $t$'' is also a predicate on $S$, which we denote $\exists(t:T)\ldotp p(s,t)$. If we apply this predicate to a person $s$, we get the times when person $s$ is worried about at least one thing in the news.
+\end{example}
+
+\begin{exercise}%
+\label{exc.predicate_practice}
+In the topos $\smset$, where $\Omega=\BB$, consider the predicate $p\colon\NN\times\ZZ\to\BB$ given by
+\[
+  p(n,z)=
+  \begin{cases}
+    \true&\tn{ if }n\leq|z|\\
+    \false&\tn{ if }n>|z|.
+  \end{cases}
+\]
+\begin{enumerate}
+	\item What is the set of $n\in\NN$ for which the predicate $\forall(z:\ZZ)\ldotp p(n,z)$ holds?
+	\item What is the set of $n\in\NN$ for which the predicate $\exists(z:\ZZ)\ldotp p(n,z)$ holds?
+	\item What is the set of $z\in\ZZ$ for which the predicate $\forall(n:\NN)\ldotp p(n,z)$ holds?
+	\item What is the set of $z\in\ZZ$ for which the predicate $\exists(n:\NN)\ldotp p(n,z)$ holds?	
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+So given $p$, we have a universally- and an existentially-quantified predicate
+$\forall(t:T)\ldotp p(s,t)$ and $\exists(t:T)\ldotp p(s,t)$ on $S$. How do we
+formally understand them as sheaf morphisms $S\to\Omega$ or, equivalently, as
+subsheaves of $S$?
+
+\paragraph{Universal quantification.}
+
+Given a predicate $p\colon S\times T\to\Omega$, the universally-quantified predicate $\forall(t:T)\ldotp p(s,t)$ takes a section $s\in S(U)$, for any open set $U$, and returns a certain open set $V\in\Omega(U)$. Namely, it returns the largest open set $V\ss U$ for which $p(\restrict{s}{V},t)=V$ holds for all $t\in T(V)$. 
+
+\begin{exercise}%
+\label{exc.worrying_news_universal}
+Suppose $s$ is a person alive throughout the interval $U$. Apply the above definition to the example $p(s,t)=$ ``person $s$ is worried about news $t$'' from \cref{ex.worried_pred}. Here, $T(V)$ is the set of items that are in the news throughout the interval $V$.
+\begin{enumerate}
+  \item What open subset of $U$ is $\forall(t:T)\ldotp p(s,t)$ for a person $s$?
+  \item Does it have the semantic meaning you'd expect, given the less formal description in \cref{subsec.quantification}?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Abstractly speaking, the universally-quantified predicate corresponds to the subsheaf given by the following pullback:
+\[
+\begin{tikzcd}
+	\forall_tp\ar[r]\ar[d, tail]&1\ar[d, tail, "\true^T"]\\
+	S\ar[r,"p'"']&\Omega^T\ar[ul, phantom, pos=1, "\lrcorner"]
+\end{tikzcd}
+\]
+where $p'\colon S\to\Omega^T$ is the currying of $S\times T\to\Omega$ and
+$\true^T$ is the currying of the composite $1\times T\To{!} 1\To{\true}\Omega$.
+See \cref{eqn.currying}.%
+\index{currying}
+
+\paragraph{Existential quantification.}
+
+Given a predicate $p\colon S\times T\to\Omega$, the existentially quantified predicate $\exists(t:T)\ldotp p(s,t)$ takes a section $s\in S(U)$, for any open set $U$, and returns a certain open set $V\in\Omega(U)$, namely the union $V=\bigcup_iV_i$ of all the open sets $V_i$ for which there exists some $t_i\in T(V_i)$ satisfying $p(\restrict{s}{V_i},t_i)=V_i$. If the result is $U$ itself, you might be tempted to think ``ah, so there exists some $t\in T(U)$ satisfying $p(t)$,'' but that is not necessarily so. There is just a cover of $U=\bigcup U_i$ and local sections $t_i\in T(U_i)$, each satisfying $p$, as explained above. Thus the existential quantifier is doing a lot of work ``under the hood,'' taking coverings into account without displaying that fact in the notation.
+
+\begin{exercise}%
+\label{exc.worrying_news_existential}
+Apply the above definition to the ``person $s$ is worried about news $t$'' predicate from \cref{ex.worried_pred}.
+\begin{enumerate}
+  \item What open set is $\exists(t:T)\ldotp p(s,t)$ for a person $s$?
+  \item Does it have the semantic meaning you'd expect?
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Abstractly speaking, the existentially-quantified predicate is given as follows. Start with the subobject classified by $p$, namely $\{(s,t)\in S\times T\mid p(s,t)\}\ss S\times T$, compose with the projection $\pi_S\colon S\times T\to S$ as on the upper right; then take the epi-mono factorization of the composite as on the lower left:%
+\index{epi-mono factorization!and existential quantification}
+\[
+\begin{tikzcd}
+  \{S\times T\mid p\}\ar[tail,r]\ar[d, two heads]& S\times T\ar[d,"\pi_S"]\\
+  \exists_tp\ar[r, tail]&S
+\end{tikzcd}
+\]
+Then the bottom map is the desired subsheaf of $S$.
+
+% Subsubsection %
+\subsection{Modalities}%
+\label{subsec.modalities}%
+\index{modal operator}
+
+Back in \cref{ex.modal_operator} we discussed modal operators---also known as
+modalities---saying they are closure operators on preorders which arise in
+logic. The preorders we were referring to are the ones discussed in
+\cref{eqn.preorder_of_predicates}: for any object $S\in\cat{E}$ there is the poset
+$(|\Omega^S|,\leq^S)$ of predicates on $S$, where $|\Omega^S|=\cat{E}(S,\Omega)$ is just the set of morphisms $S\to\Omega$ in the category $\cat{E}$.%
+\index{closure operator}
+
+\begin{definition}%
+\label{def.modality}
+A \emph{modality} in $\Shv(X)$ is a sheaf morphism $j\colon\Omega\to\Omega$ satisfying three properties for all $U\ss X$ and $p,q\in\Omega(U)$:
+\begin{enumerate}[label=(\alph*)]
+	\item $p\leq j(p)$; 
+	\item $(j\cp j)(p)\leq j(p)$;	and
+	\item $j(p\wedge q)=j(p)\wedge j(q)$.
+\end{enumerate}
+\end{definition}
+
+\begin{exercise}%
+\label{exc.two_defs_of_closure}
+Suppose $j\colon\Omega\to\Omega$ is a morphism of sheaves on $X$, such that $p\leq j(p)$ holds for all $U\ss X$ and $p\in\Omega(U)$. Show that for all $q\in\Omega(U)$ we have $j(j(q))\leq j(q)$ iff $j(j(q))=j(q)$.
+\end{exercise}
+
+%Note that 1.\ and 2.\ together say that $j$ is a closure operator in the sense of \cref{ex.modal_operator}; they together imply that $j\cp j=j$.
+
+%\begin{proposition}
+%Suppose that $\cat{E}$ is a topos, $\Omega$ is its subobject classifier, and $j\colon\Omega\to\Omega$ is a modality on $\cat{E}$. Then for any $S\in\cat{E}$ and predicates $p,q\in|\Omega^S|$, one has
+%\[p\wedge j(p\imp q)\leq jq\]
+%\end{proposition}
+%\begin{proof}
+%By the universal property of meets in a preorder, $x\leq x'$ and $y\leq y'$ imply $(x\wedge x')\leq (y\wedge y')$. By \cref{def.modality} 1., $p\leq jp$, and by reflexivity $j(p\imp q)\leq j(p\imp q)$. Thus, also using 3., 
+%\[(p\wedge j(p\imp q))\leq (jp\wedge j(p\imp q))=j(p\wedge (p\imp q))\]
+%By the adjunction \cref{eqn.adjunction_informal} and the definition of meets, we have $p\wedge (p\imp q)=p\wedge q\leq q$. Thus applying $j$ we have $j(p\wedge (p\imp q))\leq j(q)$, and we are done.
+%\end{proof}
+
+In \cref{ex.modal_operator} we informally said that for any proposition $p$, e.g. ``Bob is in San Diego,'' there is a modal operator ``assuming $p$, ....'' Now we are in a position to make that formal.
+
+\begin{proposition}%
+\label{prop.open_closed_quasiclosed}
+Fix a proposition $p\in|\Omega|$. Then
+\begin{enumerate}[label=(\alph*)]
+	\item the sheaf morphism $\Omega\to\Omega$ given by sending $q$ to $p\imp q$ is a modality.
+	\item the sheaf morphism $\Omega\to\Omega$ given by sending $q$ to $p\vee q$ is a modality.
+	\item the sheaf morphism $\Omega\to\Omega$ given by sending $q$ to $(q\imp p)\imp p$ is a modality.
+\end{enumerate}
+\end{proposition}
+
+We cannot prove \cref{prop.open_closed_quasiclosed} here, but we give references in \cref{sec.C7_further_reading}.
+
+\begin{exercise}%
+\label{exc.check_modality}
+Let $S$ be the sheaf of people as in \cref{subsec.predicates}, and let $j\colon\Omega\to\Omega$ be ``assuming Bob is in San Diego...'' 
+\begin{enumerate}
+	\item Name any predicate $p\colon S\to\Omega$, such as ``likes the weather.''
+	\item Choose a time interval $U$. For an arbitrary person $s\in S(U)$, what sort of thing is $p(s)$, and what does it mean?
+	\item What sort of thing is $j(p(s))$ and what does it mean?
+	\item Is it true that $p(s)\leq j(p(s))$? Explain briefly.
+	\item Is it true that $j(j(p(s)))=j(p(s))$? Explain briefly.
+	\item Choose another predicate $q\colon S\to\Omega$. Is it true that $j(p\wedge q)=j(p)\wedge j(q)$? Explain briefly.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+%
+\index{subobject classifier|)}
+
+%---- Subsection ----%
+\subsection{Type theories and semantics}
+%
+\label{subsec.type_th_and_semantics}%
+\index{type theory}%
+\index{semantics}
+
+We have been talking about the logic of a topos in terms of open sets, but this is actually a conflation of two ideas that are really better left unconflated. The first is logic, or formal language, and the second is semantics, or meaning. The formal language looks like this:
+\begin{equation}%
+\label{eqn.logic_surjective}
+	\forall(t:T)\ldotp\exists(s:S)\ldotp f(s)=t
+\end{equation}
+and semantic statements are like ``the sheaf morphism $f\colon S\to T$ is an
+epimorphism.'' In the former, logical world, all statements are linguistic expressions formed according to strict
+rules and all proofs are deductions that also follow strict rules. In the
+latter, semantic world, statements and proofs are about the sheaves themselves, as mathematical objects. We admit these are rough
+statements; again, our aim here is only to give a taste, an invitation to further reading.
+
+To \emph{provide semantics} for a logical system means to provide a compiler that converts each logical statement in the formal language into a mathematical statement about particular sheaves and their relationships. A computer can carry out logical deductions without knowing what any of them ``mean'' about sheaves. We say that semantics is \emph{sound} if every formal proof is converted into a true fact about the relevant sheaves.%
+\index{semantics!sound}
+
+Every topos can be assigned a formal language, often called its \emph{internal
+language}, in which to carry out constructions and formal proofs. This language
+has a sound semantics---a sort of logic-to-sheaf compiler---which goes under the name \emph{categorical semantics} or \emph{Kripke-Joyal semantics}. We gave the basic ideas in \cref{subsec.topos_logic}; we give references to the literature in \cref{sec.C7_further_reading}.%
+\index{language!internal}
+
+\begin{example}
+In every topos $\cat{E}$, and for every $f\colon S\to T$ in $\cat{E}$, the morphism $f$ is an epimorphism if and only if \cref{eqn.logic_surjective} holds. For example, consider the case of database instances on a schema $\cat{C}$, say with 100 tables (one of which might be denoted $c\in\Ob(\cat{C})$) and 500 foreign key columns (one of which might be denoted $f\colon c\to c'$ in $\cat{C}$); see \cref{eqn.free_schema}.
+
+If $S$ and $T$ are two instances and $f$ is a natural transformation between them, then we can ask the question of whether or not \cref{eqn.logic_surjective} holds. This simple formula is compiled by the Kripke-Joyal semantics into asking:
+\begin{quote}
+	Is it true that for every table $c\in\Ob(\cat{C})$ and every row $s\in S(c)$ there exists a row $t\in T(c)$ such that $f(s)=t$?
+\end{quote}
+This is exactly what it means for $f$ to be surjective. Maybe this is not too impressive, but whether one is talking about databases or topological spaces, or complex ideas from algebraic geometry, \cref{eqn.logic_surjective} always compiles into the question of surjectivity. For topological spaces it would say something like:
+\begin{quote}
+	Is it true that for every open set $U\ss X$ and every section $s\in S(U)$ of the bundle $S$, there exists an open covering of $(U_i\ss U)_{i\in I}$ of $U$ and a section $t_i\in T(U_i)$ of the bundle $T$ for each $i\in I$, such that $f(t_i)=\restrict{s}{U_i}$ is the restriction of $s$ to $U_i$?
+\end{quote}
+\end{example}
+
+%-------- Section --------%
+\section{A topos of behavior types}%
+\label{subsec.topos_behavior_types}%
+\index{behavior!topos for}
+
+Now that we have discussed logic in a sheaf topos, we return to our motivating example, a topos of behavior types. We begin by discussing the topological space on which behavior types will be sheaves, a space called the \emph{interval domain}.%
+
+\begin{remark}
+Note that above, we were thinking very intuitively about time, e.g.\ when we discussed people being worried about the news. Now we will be thinking about time in a different way, but there is no need to change your answers or reconsider the intuitive thinking done above.
+\end{remark}
+
+%---- Subsection ----%
+\subsection{The interval domain}%
+\label{subsec.IR}
+%
+\index{interval domain, $\IR$|(}
+
+The interval domain $\IR$ is a specific topological space, which we will use to model intervals of time. In other words, we will be interested in the category $\Shv(\IR)$ of sheaves on the interval domain.%
+\index{topological space}
+
+To give a topological space, one must give a pair $(X,\Op)$, where $X$ is a set of `points' and $\Op$ is a topology on $X$; see \cref{def.topological_space}. The set of points for $\IR$ is that of all finite closed intervals
+\[\IR\coloneqq\{[d,u]\ss\RR\mid d\leq u\}.\]
+For $a<b$ in $\RR$, let $o_{[a,b]}$ denote the set $o_{[a,b]}\coloneqq\{[d,u]\in\IR\mid a<d\leq u<b\}$; these are called \emph{basic open sets}. The topology $\Op$ is determined by these basic open sets in that a subset $U$ is open if it is the union of some collection of basic open sets.
+
+Thus for example, $o_{[0,5]}$ is an open set: it contains every $[d,u]$ contained in the open interval $\{x\in\RR\mid 0<x<5\}$. Similarly $o_{[4,8]}$ is an open set, but note that $o_{[0,5]}\cup o_{[4,8]}\neq o_{[0,8]}$. Indeed, the interval $[2,6]$ is in the right-hand side but not the left.
+
+\begin{exercise}%
+\label{exc.explain_intervals}
+\begin{enumerate}
+	\item Explain why $[2,6]\in o_{[0,8]}$.
+	\item Explain why $[2,6]\not\in o_{[0,5]}\cup o_{[4,8]}$.
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+Let $\Op$ denote the open sets of $\IR$, as described above, and let $\Cat{BT}\coloneqq\Shv(\IR,\Op)$ denote the topos of sheaves on this space. We call it the topos of \emph{behavior types}.
+
+There is an important subspace of $\IR$, namely the usual space of real numbers $\RR$. We see $\RR$ as a subspace of $\IR$ via the isomorphism
+\[\RR\cong\{[d,u]\in\IR\mid d=u\}.\]
+We discussed the usual topology on $\RR$ in \cref{ex.usual_R}, but we also get a topology on $\RR$ because it is a subset of $\IR$; i.e.\ we have the subspace topology as described in \cref{exc.subspace_topology}. These agree, as the reader can check.
+
+\begin{exercise}%
+\label{exc.R_subsp_IR}
+Show that a subset $U\ss\RR$ is open in the subspace topology of $\RR\ss\IR$ iff $U\cap\RR$ is open in the usual topology on $\RR$ defined in \cref{ex.usual_R}.
+\end{exercise}
+
+%---- Subsection ----%
+\subsection{Sheaves on $\IR$}
+
+We cannot go into much depth about the sheaf topos $\Cat{BT}=\Shv(\IR,\Op)$, for reasons of space; we refer the interested reader to \cref{sec.C7_further_reading}. In this section we will briefly discuss what it means to be a sheaf on $\IR$, giving a few examples including that of the subobject classifier. 
+
+
+\paragraph{What is a sheaf on $\IR$?}%
+\index{sheaf!on $\IR$ as semantics of behavior}
+
+A sheaf $S$ on the interval domain $(\IR,\Op)$ is a functor $S\colon\Op\op\to\smset$:
+it assigns to each open set $U$ a set $S(U)$; how should we interpret this? An
+element $s\in S(U)$ is something that says is an ``event that takes place throughout the interval $U$.'' Given this $U$-event $s$ together with an open subset of
+$V\ss U$, there is a $V$-event $\restrict{s}{V}$ that tells us what $s$ is if we regard it as an event taking place
+throughout $V$. If $U=\bigcup_{i\in I}U_i$ and we can find matching $U_i$-events $(s_i)$ for each $i\in I$, then the sheaf condition (\cref{def.sheaf}) says that they have a unique gluing, i.e.\ a $U$-event $s\in S(U)$ that encompasses all of them: $\restrict{s}{U_i}=s_i$ for each $i\in I$.
+
+We said in \cref{subsec.IR} that every open set $U\ss\IR$ can be written as the union of basic open sets $o_{[a,b]}$. This implies that any sheaf $S$ is determined by its values $S(o_{[a,b]})$ on these basic open sets. The sheaf condition furthermore implies that these vary continuously in a certain sense, which we can express formally as
+\[S(o_{[a,b]})\cong\lim_{\epsilon>0}S(o_{[a-\epsilon,b+\epsilon]}).\]
+However, rather than get into the details, we describe a few sorts of sheaves that may be of interest.
+
+\begin{example}%
+\label{ex.const_sheaves}%
+\index{sheaf!constant}
+For any set $A$ there is a sheaf $\const{A}\in\Shv(\IR)$ that assigns to each open set $U$ the set $\const{A}(U)\coloneqq A$. This allows us to refer to integers, or real numbers, or letters of an alphabet, as though they were behaviors. What sort of behavior is $7\in\NN$? It is the sort of behavior that never changes: it's always seven. Thus $\const{A}$ is called the \emph{constant sheaf on $A$}.
+\end{example}
+
+\begin{example}%
+\index{sheaf!of local functions}
+Fix any topological space $(X,\Op_X)$. Then there is a sheaf $F_X$ of \emph{local functions from $\IR$ to $X$}. That is, for any open set $U\in\Op_{\IR}$, we assign the set $F_X(U)\coloneqq\{f\colon U\to X\mid f\text{ is continuous}\}$. There is also the sheaf $G_X$ of local functions on the subspace $\RR\ss\IR$. That is, for any open set $U\in\Op_{\IR}$, we assign the set $G_X(U)\coloneqq\{f\colon U\cap\RR\to X\mid f\text{ is continuous}\}$. 
+\end{example}
+
+\begin{exercise}%
+\label{exc.interval_domain_top}
+Let's check that \cref{ex.const_sheaves} makes sense. Fix any topological space $(X,\Op_X)$ and any subset $R\ss\IR$ of the interval domain. Define $H_X(U)\coloneqq\{f\colon U\cap R\to X\mid f\text{ is continuous}\}$.
+\begin{enumerate}
+	\item Is $H_X$ a presheaf? If not, why not; if so, what are the restriction maps?
+	\item Is $H_X$ a sheaf? Why or why not?
+	\qedhere
+\qedhere
+\end{enumerate}
+\end{exercise}
+
+
+\begin{example}
+Another source of examples comes from the world of open hybrid dynamical systems. These are machines whose behavior is a mixture of continuous movements---generally imagined as trajectories through a vector field---and discrete jumps. These jumps are imagined as being caused by signals that spontaneously arrive. Over any interval of time, a hybrid system has certain things that it can do and certain things that it cannot. Although we will not make this precise here, there is a construction for converting any hybrid system into a sheaf on $\IR$; we will give references in \cref{sec.C7_further_reading}.%
+\index{dynamical system!hybrid}
+\end{example}
+
+We refer to sheaves on $\IR$ as behavior types because almost any sort of behavior one can imagine is a behavior type. Of course, a complex behavior type---such as the way someone acts when they are in love---would be extremely hard to write down. But the idea is straightforward: for any interval of time, say a three-day interval $(d,d+3)$, let $L(d,d+3)$ denote the set of all possible behaviors a person who is in love could possibly do. Obviously it's a big, unwieldy set, and no one would want to make precise. But to the extent that one can imagine that sort of behavior as occurring through time, they could imagine the corresponding sheaf.
+
+\paragraph{The subobject classifier as a sheaf on $\IR$.}%
+\index{subobject
+classifier!for behavior types}
+In any sheaf topos, the subobject classifier $\Omega$ is itself a sheaf. It is responsible for the truth values in the topos. As we said in \cref{subsec.subob_class_sheaf_topos}, when it comes to sheaves on a topological space $(X,\Op)$, truth values are open subsets $U\in\Op$.
+
+$\Cat{BT}$ is the topos of sheaves on the space $(\IR,\Op)$, as defined in \cref{subsec.IR}. As always, the subobject classifier $\Omega$ assigns to any $U\in\Op$ the set of open subsets of $U$, so these are the truth values. But what do they mean? The idea is that every proposition, such as ``Bob likes the weather'' returns an open set $U$, as if to respond that Bob likes the weather ``...throughout time period $U$.'' Let's explore this just a bit more.
+
+Suppose Bob likes the weather throughout the interval $(0,5)$ and throughout the
+interval $(4,8)$. We would probably conclude that Bob likes the weather
+throughout the interval $(0,8)$. But what about the more ominous statement ``a
+single pair of eyes has remained watching position $p$.'' Then just
+because it's true on $(0,5)$ and on $(4,8)$, does not imply that it's been true
+on $(0,8)$: there may have been a change of shift, where one watcher was
+relieved from their post by another watcher. As another example, consider the
+statement ``the stock market did not go down by more than 10 points.'' This
+might be true on $(0,5)$ and true on $(4,8)$ but not on $(0,8)$. In order to
+capture the semantics of statements like these---statements that take time to
+evaluate---we must use the space $\IR$ rather than the space $\RR$.
+
+
+%
+%\begin{proposition}
+%Let $(\IR,\Op)$ be as above. There is a monotone bijection between $\Op$ and the preorder of Lipschitz functions $f\colon\RR\to[0,\infty]$, where $f\leq g$ iff $f(x)\leq g(x)$ for all $x$.
+%
+%The map is given by sending $U\ss\IR$ to $f_U\colon\RR\to[0,\infty]$ defined by
+%\[f_U(x)\coloneqq\sup\{y\in[0,\infty]\mid [x-y,x+y]\in U\]
+%\end{proposition}
+%
+
+%
+\index{interval domain, $\IR$|)}
+%---- Subsection ----%
+\subsection{Safety proofs in temporal logic}%
+\index{safety proof}
+
+We now have at least a basic idea of what goes into a proof of safety, say for
+autonomous vehicles, or airplanes in the national airspace system. In fact, the underlying ideas of this chapter came out of a project between MIT, Honeywell Inc., and NASA \cite{speranzon2018abstraction}. The background for the project was that the National Airspace System consists of many different systems interacting: interactions between airplanes, each of which is an interaction between physics, humans, sensors, and actuators, each of which is an interaction between still more basic parts. The same sort of story would hold for a fleet of autonomous vehicles, as in the introduction to this chapter.
+
+Suppose that each of the systems---at any level---is guaranteed to satisfy some property. For example, perhaps we can assume that an engine is either out of gas, has a broken fuel line, or is following the orders of a human driver or pilot. If there is a rupture in the fuel line, the sensors will alert
+the human within three seconds, etc. Each of the components interact with a number
+of different variables. In the case of airplanes, a pilot interacts with the radio, the positions of the
+dials, the position of the thruster, and the visual data in front of her. The
+component---here the pilot---is guaranteed to keep these variables in some
+relation: ``if I see something, I will say something'' or ``if the dials are in
+position $\const{bad\_pos}$, I will engage the thruster within 1 second.'' We
+call these guarantees \emph{behavior contracts}.%
+\index{behavior!contract}
+
+All of the above can be captured in the topos $\Cat{BT}$ of behavior types. The variables are behavior types: the altimeter is a variable whose value $\theta\in \RR_{\geq0}$ is changing continuously with respect to time. The thruster is also a continuously-changing variable whose value is in the range $[0,1]$, etc.
+
+The guaranteed relationships---behavior contracts---are given by predicates on variables. For example, if the pilot will always engage the thruster within one second of the display dials being in position $\const{bad\_pos}$, this can be captured by a predicate $p\colon\const{dials}\times\const{thrusters}\to\Omega$. While we have not written out a formal language for $p$, one could imagine the predicate $p(D,T)$ for $D:\const{dials}$ and $T:\const{thrusters}$ as
+\begin{multline}%
+\label{eqn.sample_contract}
+  \forall(t:\RR)\ldotp @_{t}\big(\const{bad\_pos}(D)\big)\imp\\
+  \exists(r:\RR)\ldotp(0<r<1)\wedge\forall(r':\RR)\ldotp 0\leq r'\leq 5\imp @_{t+r+r'}\big(\const{engaged}(T)\big).
+\end{multline}
+Here $@_t$ is a modality, as we discussed in \cref{def.modality}; in fact it turns out to be one of type 3.\ from \cref{prop.open_closed_quasiclosed}, but we cannot go into that. For a proposition $q$, the statement $@_t(q)$ says that $q$ is true in some small enough neighborhood around $t$. So \eqref{eqn.sample_contract} says ``starting within one second of whenever the dials say that we are in a bad position, I'll engage the thrusters for five seconds.'' %
+\index{predicate}
+
+Given an actual playing-out-of-events over a time period $U$, i.e.\ actual section $D\in\const{dials}(U)$ and section $T\in\const{thrusters}(U)$, the
+predicate \cref{eqn.sample_contract} will hold on certain parts of $U$ and not others, and this is the truth value of $p$. Hopefully the pilot upholds her behavior contract at all
+times she is flying, in which case the truth value will be $\true$ throughout that interval $U$. But if the pilot breaks her contract over certain intervals, then this fact is recorded in $\Omega$.
+
+The logic allows us to record axioms like that shown in \cref{eqn.sample_contract} and then reason from them: e.g.\ if the pilot and the airplane, and at least one of the three radars upholds its contract then safe separation will be maintained. We cannot give further details here, but these matters have been worked out in detail in \cite{Schultz.Spivak:2017a}; see \cref{sec.C7_further_reading}.
+
+%-------- Section --------%
+\section{Summary and further reading}%
+\label{sec.C7_further_reading}
+
+This chapter was about modeling various sorts of behavior using sheaves on a space of time-intervals. Behavior may seem like it's something that occurs now in the present, but in fact our memory of past behavior informs what the current behavior means. In order to commit to anything, to plan or complete any sort of process, one needs to be able to reason over time-intervals. The nice thing about temporal sheaves---indeed sheaves on any site---is that they fit into a categorical structure called a topos, which has many useful formal properties. In particular, it comes equipped with a higher-order logic with which we can formally reason about how temporal sheaves work together when combined in larger systems. A much more detailed version of this story was presented in \cite{Schultz.Spivak:2017a}.\nocite{Spivak.Vasilakopoulou.Schultz:2016a} But it would have been impossible without the extensive edifice of topos theory and domain theory that has been developed over the past six decades.
+
+Sheaf toposes were invented by Grothendieck and his school in the 1960s \cite{Artin.Grothendieck.Verdier:1971a} as an approach to proving conjectures at the intersection of algebraic geometry and number theory, called the Weil conjectures. Soon after, Lawvere and Tierney recognized that toposes had all the structure necessary to do logic, and with a whole host of other category theorists, the subject was developed to an impressive extent in many directions. For a much more complete history, see \cite{Mclarty:1990a}.
+
+There are many sorts of references on topos theory. One that starts by introducing categories and then moves to toposes, focusing on logic, is \cite{Mclarty:1992a}. Our favorite treatment is perhaps \cite{MacLane.Moerdijk:1992a}, where the geometric aspects play a central role. Finally, Johnstone has done the field a huge favor by collecting large amounts of the theory into a single two-volume set \cite{Johnstone:2002a}; it is very dense, but an essential reference for the serious student or researcher. For just categorical (Kripke-Joyal) semantics of logic in a topos, one should see either \cite{MacLane.Moerdijk:1992a}, \cite{Jacobs:1999a}, or \cite{Lambek.Scott:1988a}.
+
+We did not mention domain theory much in this chapter, aside from referring to the interval domain. But domains, in the sense of Dana Scott, play an important role in the deeper aspects of temporal type theory. A good reference is \cite{Gierz.Keimel.Lawson.Mislove.Scott:2003a}, but for an introduction we suggest \cite{Abramsky.Jung:1994a}.
+
+In some sense our application area has been a very general sort of dynamical system. Other categorical approaches to this subject include \cite{Joyal.Nielsen.Winskel:1996a}, \cite{Haghverdi.Tabuada.Pappas:2003a}, \cite{Ames.Sastry:2005a}, and \cite{Lawvere:1986a}, though there are many others.%
+\index{dynamical system!}
+
+\bigskip
+
+We hope you have enjoyed the seven sketches in this book. As a next step, consider running a reading course on applied category theory with some friends or colleagues. Simultaneously, we hope you begin to search out categorical ways of thinking about familiar subjects. Perhaps you'll find something you want to contribute to this growing field of applied category theory, or as we sometimes call it, the field of compositionality.%
+\index{compositionality}
+
+%
+\index{topos|)}
+%
+\index{applied category theory|)}
+
+\end{document}

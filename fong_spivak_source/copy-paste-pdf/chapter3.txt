@@ -1,0 +1,1361 @@
+3 Databases:Categories,Functors,
+andUniversalConstructions
+3.1 WhatisaDatabase?
+Integratingdatafromdisparatesourcesisamajorprobleminindustrytoday.Astudyin
+2008[BH08]showedthatdataintegrationaccountsfor40%ofIT(informationtechnol
+ogy)budgets,andthatthemarketfordataintegrationsoftwarewas$2.5billionin2007
+andincreasingatarateofmorethan8%peryear.Inotherwords,itisamajorproblem;
+butwhatisit?
+Adatabaseisasystemofinterlockingtables
+Databecomesinformationwhenit isstoredinagivenformation.That is, thenumbers
+andlettersdon’tmeananythinguntil theyareorganized,oftenintoasystemof inter
+lockingtables.Anorganizedsystemofinterlockingtablesiscalledadatabase.Hereis
+afavoriteexample:
+Employee FName WorksIn Mngr
+1 Alan 101 2
+2 Ruth 101 2
+3 Kris 102 3
+Department DName Secr
+101 Sales 1
+102 IT 3
+(3.1)
+Thesetwotablesinterlockbyuseofaspecialleft-handcolumn,demarcatedbyaverti
+calline;itiscalledtheIDcolumn.TheIDcolumnofthefirsttableiscalled“Employee,”
+andtheIDcolumnofthesecondtableiscalled“Department.”TheentriesintheIDcol
+umn–e.g.1,2,3or101,102–arelikerowlabels; theyindicateawholerowof the
+tablethey’rein.Thuseachrowlabelmustbeunique(notworowsinatablecanhave
+thesamelabel),sothatitcanunambiguouslyspecifyitsrow.
+Eachtable’sIDcolumn,andthesetofuniqueidentifiersfoundtherein,iswhatallows
+for theinterlockingmentionedabove. Indeed,otherentries invarious tablescanref
+erencerows inagiventablebyuseof itsIDcolumn.Forexample,eachentryinthe
+WorksIncolumnreferencesadepartment foreachemployee;eachentryintheMngr
+(manager)columnreferencesanemployeeforeachemployee, andeachentryinthe
+Secr(secretary)columnreferencesanemployeeforeachdepartment.Managingallthis
+cross-referencingisthepurposeofdatabases.
+Lookingbackat tables(3.1),onemightnoticethateverynon-IDcolumn, foundin
+either table, isareference toa labelof somesort.Someof these, namelyWorksIn,
+78
+Databases: Categories, Functors, and Universal Constructions
+Mngr, and Secr, are internal references, often called foreign keys; they refer to rows
+(keys) in the ID column of another (foreign) table. Others, namely FName and DName,
+are external references; they refer to strings or integers, which can also be thought
+of as labels, whose meaning is known more broadly. Internal reference labels can be
+changed as long as the change is consistent– 1 could be replaced by 1001 every
+where without changing the meaning– whereas external reference labels certainly
+cannot! Changing Ruth to Bruce everywhere would change how people understood the
+data.
+The reference structure for a given database– i.e. how tables interlock via foreign
+keys– tells us something about what information was intended to be stored in it. One
+may visualize the reference structure for Eq. (3.1) graphically as follows:
+(3.2)
+This is a kind of “Hasse diagram for a database,” much like the Hasse diagrams for
+preorders in Remark 1.34. How should you read it?
+The two tables from Eq. (3.1) are represented in the graph (3.2) by the two black
+nodes, which are given the same name as the ID columns: Employee and Department.
+There is another node– drawn white rather than black– which represents the external
+reference type of strings, like “Alan,” “Alpha,” and “Sales.” The arrows in the diagram
+represent non-ID columns of the tables; they point in the direction of reference: WorksIn
+refers an employee to a department.
+Exercise 3.1. Count the number of non-ID columns in Eq. (3.1). Count the number of
+arrows (foreign keys) in Eq. (3.2). They should be the same number in this case; is this
+a coincidence?
+A Hasse-style diagram like the one in Eq. (3.2) can be called a database schema; it
+represents how the information is being organized, the formation in which the data is
+kept. One may add rules, sometimes called “business rules” to the schema, in order to
+ensure the integrity of the data. If these rules are violated, one knows that data being
+entered does not conform to the way the database designers intended. For example, the
+designers may enforce rules saying
+● every department’s secretary must work in that department;
+● every employee’s manager must work in the same department as the employee.
+Doing so changes the schema, say from ‘easySchema’ (3.2) to ‘mySchema’ below.
+3.1 What is a Database?
+79
+(3.3)
+In other words, the difference is that easySchema plus constraints equals mySchema.
+We will soon see that database schemas are categories C, that the data itself is
+given by a “set-valued” functor C → Set, and that databases can be mapped to each
+other via functors C → D. In other words, there is a relatively large overlap between
+database theory and category theory. This has been worked out in a number of papers;
+see Section 3.6. It has also been implemented in working software, called FQL, which
+stands for functorial query language. Here is example FQL code for the schema shown
+above:
+schema mySchema = {
+nodes
+Employee, Department;
+attributes
+DName : Department-> string,
+FName : Employee-> string;
+arrows
+Mngr
+: Employee-> Employee,
+WorksIn : Employee-> Department,
+Secr
+: Department-> Employee;
+equations
+Department.Secr.WorksIn = Department,
+Employee.Mngr.WorksIn
+}
+= Employee.WorksIn;
+Communication between databases
+We have said that databases are designed to store information about something. But
+different people or organizations might view the same sort of thing in different ways.
+For example, one bank stores its financial records according to European standards and
+another does so according to Japanese standards. If these two banks merge into one, they
+will need to be able to share their data despite differences in the shape of their database
+schemas.
+Such problems are huge and intricate in general, because databases often comprise
+hundreds or thousands of interlocking tables. Moreover, these problems occur more
+frequently than just when companies want to merge. It is quite common that a given
+company moves data between databases on a daily basis. The reason is that different
+ways of organizing information are convenient for different purposes. Just like we pack
+our clothes in a suitcase when traveling but use a closet at home, there is generally not
+one best way to organize anything.
+80
+Databases: Categories, Functors, and Universal Constructions
+Category theory provides a mathematical approach for translating between these dif
+ferent organizational forms. That is, it formalizes a sort of automated reorganizing
+process called data migration, which takes data that fits snugly in one schema and moves
+it into another.
+Here is a simple case. Imagine an airline company has two different databases,
+perhaps created at different times, that hold roughly the same data.
+(3.4)
+Schema A has more detail than schema B–anairlineseatmaybe infirst classor
+economy– but they are roughly the same. We shall see that they can be connected by a
+functor, and that data conforming to A can be migrated through this functor to schema
+B and vice versa.
+The statistics at the beginning of this section show that this sort of problem– when
+occurring at enterprise scale– continues to prove difficult and expensive. If one attempts
+to move data from a source schema to a target schema, the migrated data could fail to fit
+into the target schema or fail to satisfy some of its constraints. This happens surprisingly
+often in the world of business: a night may be spent moving data, and the next morning
+it is found to have arrived broken and unsuitable for further use. In fact, it is believed
+that over half of database migration projects fail.
+In this chapter, we will discuss a category-theoretic method for migrating data. Using
+categories and functors, one can prove up front that a given data migration will not fail,
+i.e. that the result is guaranteed to fit into the target schema and satisfy all its constraints.
+The material in this chapter gets to the heart of category theory: in particular, we
+discuss categories, functors, natural transformations, adjunctions, limits, and colimits.
+In fact, many of these ideas have been present in the discussion above:
+● Theschema pictures, e.g. Eq. (3.3), depict categories C.
+● Theinstances, e.g. Eq. (3.1), are functors from C to a certain category called Set.
+● The implicit mapping in Eq. (3.4), which takes economy and first class seats in A to
+airline seats in B, constitutes a functor A → B.
+● The notion of data migration for moving data between schemas is formalized by
+adjoint functors.
+3.2 Categories
+81
+Webegin in Section 3.2 with the definition of categories and a bunch of different sorts
+of examples. In Section 3.3 we bring back databases, in particular their instances and the
+maps between them, by discussing functors and natural transformations. In Section 3.4
+we discuss data migration by way of adjunctions, which generalize the Galois connec
+tions we introduced in Section 1.4. Finally in Section 3.5 we give a bonus section on
+limits and colimits.1
+3.2
+Categories
+A category C consists of four pieces of data– objects, morphisms, identities, and a
+composition rule– satisfying two properties, as described below.
+Definition 3.2. To specify a category C:
+(i) one specifies a collection2 Ob(C), elements of which are called objects;
+(ii) for every two objects c,d, one specifies a set C(c,d),3 elements of which are called
+morphisms from c to d;
+(iii) for every object c ∈ Ob(C), one specifies a morphism idc ∈ C(c,c), called the
+identity morphism on c;
+(iv) for every three objects c,d,e ∈ Ob(C) and morphisms f ∈ C(c,d) and g ∈ C(d,e),
+one specifies a morphism f g ∈ C(c,e), called the composite of f and g.
+We will sometimes write an object c ∈ C, instead of c ∈ Ob(C). It will also be conve
+nient to denote elements f ∈ C(c,d) as f : c → d. Here, c is called the domain of f,
+and d is called the codomain of f .
+These constituents are required to satisfy two conditions:
+(a) unitality: for any morphism f : c → d, composing with the identities at c or d does
+nothing: idc f = f and f idd = f;
+(b) associativity: for any three morphisms f : c0 → c1, g: c1 → c2, and h: c2 → c3,
+the following are equal: ( f g) h = f (g h). We write this composite simply as
+f 
+g h.
+Our next goal is to give lots of examples of categories. Our first source of examples
+is that of free and finitely presented categories, which generalize the notion of Hasse
+diagram from Remark 1.34.
+1 By“bonus,” we mean that although not strictly essential to the understanding of this particular chapter,
+limits and colimits will show up throughout the book and throughout one’s interaction with category
+theory, and we think the reader will especially benefit from this material in the long run.
+2 Here, a collection can be thought of as a bunch of things, just like a set, but that may be too large to
+formally be a set. An example is the collection of all sets, which would run afoul of Russell’s paradox if it
+were itself a set.
+3 This set C(c,d) is often denoted HomC(c,d), and called the “hom-set from c to d.” The word “hom” stands
+for homomorphism, of which the word “morphism” is a shortened version.
+82
+Databases: Categories, Functors, and Universal Constructions
+3.2.1
+Free Categories
+Recall from Definition 1.31 that a graph consists of two types of thing: vertices and
+arrows. From there one can define paths, which are just head-to-tail sequences of arrows.
+Every path p has a start vertex and an end vertex; if p goes from v to w, we write
+p: v → w. To every vertex v, there is a trivial path, containing no arrows, starting
+and ending at v; we often denote it by idv or simply by v. We may also concatenate
+paths: given p: v → w and q: w → x, their concatenation is denoted p q, and it
+goes v → x.
+In Chapter 1, we used graphs to depict preorders (V,≤): the vertices form the ele
+ments of the preorder, and we say that v ≤ w if there is a path from v to w in G.We
+will now use graphs in a very similar way to depict certain categories, known as free
+categories. Then we will explain a strong relationship between preorders and categories
+in Section 3.2.3.
+Definition 3.3. For any graph G = (V, A,s,t), we can define a category Free(G),
+called the free category on G, whose objects are the vertices V and whose morphisms
+from c to d are the paths from c to d. The identity morphism on an object c is simply
+the trivial path at c. Composition is given by concatenation of paths.
+For example, we define 2 to be the free category generated by the graph shown below:
+(3.5)
+It has two objects v1 and v2, and three morphisms: idv1 
+: v1 → v1, f1: v1 → v2, and
+idv2 
+: v2 → v2.Hereidv1 
+is the path of length 0 starting and ending at v1, f1 is the path
+of length 1 consisting of just the arrow f1, and idv2 
+is the length 0 path at v2. As our
+notation suggests, idv1 
+is the identity morphism for the object v1, and similarly idv2 
+for
+v2. As composition is given by concatenation, we have, for example, idv1 
+f1 = f1,
+idv2 
+idv2 
+= idv2
+, and so on.
+From now on, we may elide the difference between a graph and the corresponding
+free category Free(G), at least when the one we mean is clear enough from context.
+Exercise 3.4. For Free(G) to really be a category, we must check that this data we
+specified obeys the unitality and associativity properties. Check that these are obeyed
+for any graph G.
+Exercise 3.5. The free category on the graph shown here:4
+(3.6)
+4 Asmentioned above, we elide the difference between the graph and the corresponding free category.
+3.2Categories 83
+hasthreeobjectsandsixmorphisms:thethreeverticesandsixpathsinthegraph.
+Createsixnames,oneforeachof thesixmorphismsin3.Writedownasix-by-six
+table,labeltherowsandcolumnsbythesixnamesyouchose.
+1. Copyandcompletethetablebywritingthenameofthecompositeineachcell,when
+thereisacomposite.
+2.Wherearetheidentities?
+Exercise3.6. Let’smakesomedefinitions,basedonthepatternabove:
+1.Whatisthecategory1?Thatis,whatareitsobjectsandmorphisms?
+2.Whatisthecategory0?
+3.Whatistheformulaforthenumberofmorphismsinnforarbitraryn∈N?
+Example3.7(Naturalnumbersasafreecategory). Considerthefollowinggraph:
+(3.7)
+Ithasonlyonevertexandonearrow,but ithas infinitelymanypaths. Indeed, ithas
+auniquepathof lengthnforeverynaturalnumbern∈N.That is,Path={z,s,(s
+s),(s s s),...},wherewewritezforthelength0pathonz;itrepresentsthemorphism
+idz.Thereisaone-to-onecorrespondencebetweenPathandthenaturalnumbers,N=
+{0,1,2,3,...}.
+Thisisanexampleofacategorywithoneobject.Acategorywithoneobjectiscalled
+amonoid,anotionwefirstdiscussedinExample2.5.Therewesaidthatamonoidis
+atuple(M,∗,e)where∗:M×M→Misafunctionande∈Misanelement,and
+m∗1=m=1∗mand(m∗n)∗p=m∗(n∗p).
+Thetwonotionsmaysuperficiallylookdifferent,but it iseasytodescribethecon
+nection.GivenacategoryCwithoneobject, say•, letM :=C(•,•), let e=id•,
+and let ∗:C(•,•)×C(•,•)→C(•,•)be thecompositionoperation∗= .The
+associativityandunitalityrequirementsfor themonoidwillbesatisfiedbecauseCis
+acategory.
+Exercise3.8. InExample3.7we identified thepathsof the loopgraph(3.7)with
+numbersn∈N.Pathscanbeconcatenated.Givennumbersm,n∈N,whatnumber
+correspondstotheconcatenationoftheirassociatedpaths?
+3.2.2 PresentingCategoriesviaPathEquations
+SoforanygraphG, there isafreecategoryonG.Butwedon’thave tostopthere:
+wecanaddequationsbetweenpathsinthegraph,andstillgetacategory.Weareonly
+84
+Databases: Categories, Functors, and Universal Constructions
+allowed to equate two paths p and q when they are parallel, meaning they have the same
+source vertex and the same target vertex.
+A finite graph with path equations is called a finite presentation for a category,
+and the category that results is known as a finitely presented category.Hereare two
+examples:
+Both of these are presentations of categories: in the left-hand one, there are no equations
+so it presents a free category, as discussed in Section 3.2.1. The free square category has
+ten morphisms, because every path is a unique morphism.
+Exercise 3.9.
+1. Write down the ten paths in the free square category above.
+2. Name two different paths that are parallel.
+3. Name two different paths that are not parallel.
+On the other hand, the category presented on the right has only nine morphisms,
+because f h and g i aremadeequal.This category is called the “commutative square.”
+Its morphisms are
+{A, B,C, D, f,g,h,i, f h}.
+One might say “the missing one is g i,” but that is not quite right: g i is there too,
+because it is equal to f h. As usual, A denotes idA,etc.
+Exercise 3.10. Write down all the morphisms in the category presented by the
+following diagram:
+85
+3.2 Categories
+Example 3.11. We should also be aware that enforcing an equation between two
+morphisms often implies additional equations. Here are two more examples of presen
+tations, in which this phenomenon occurs:
+In C wehave the equation s s = z. But this implies s s s = z s = s! And similarly
+we have s s s s =z z =z.ThesetofmorphismsinCisinfact merely {z,s}, with
+composition described by s s = z z = z, and z s = s z = s. In group theory, one
+would speak of a group called Z/2Z.
+Exercise 3.12. WritedownallthemorphismsinthecategoryDfromExample3.11. 
+Remark 3.13. We can now see that the schemas in Section 3.1, e.g. Eqs. (3.2)
+and (3.3), are finite presentations of categories. We will come back to this idea in
+Section 3.3.
+3.2.3
+Preorders and Free Categories: Two Ends of a Spectrum
+Now that we have used graphs to depict preorders in Chapter 1 and categories above,
+we may want to know the relationship between these two uses. The main idea we want
+to explain now is that
+“A preorder is a category where every two parallel arrows are the same.”
+Thus any preorder can be regarded as a category, and any category can be somehow
+“crushed down” into a preorder. Let’s discuss these ideas.
+Preorders as categories
+Suppose (P,≤) is a preorder. It specifies a category P as follows. The objects of P
+are precisely the elements of P; that is, Ob(P) = P. As for morphisms, P has exactly
+one morphism p → q if p ≤ q and no morphisms p → q if p≤ q. The fact that
+≤is reflexive ensures that every object has an identity, and the fact that ≤ is transitive
+ensures that morphisms can be composed. We call P the category corresponding to the
+preorder (P,≤).
+In fact, a Hasse diagram for a preorder can be thought of a presentation of a cat
+egory where, for all vertices p and q, every two paths from p → q are declared
+equal. For example, in Eq. (1.3) we saw a Hasse diagram that was like the graph on the
+left:
+86
+Databases: Categories, Functors, and Universal Constructions
+The Hasse diagram (left) might look the most like the free category presentation
+(middle) which has no equations, but that is not correct. The free category has three
+morphisms (paths) from bottom object to top object, whereas preorders are categories
+with at most one morphism between two given objects. Instead, the diagram on the
+right, with these paths from bottom to top made equal, is the correct presentation for the
+preorder on the left.
+Exercise 3.14. What equations would you need to add to the graphs below in order to
+present the associated preorders?
+The preorder reflection of a category
+Given any category C, one can obtain a preorder (C,≤) from it by destroying the dis
+tinction between any two parallel morphisms. That is, let C := Ob(C), and put c1 ≤ c2
+iff C(c1,c2)= ∅. If there is one, or two, or fifty, or infinitely many morphisms c1 → c2
+in C, the preorder reflection does not see the difference. But it does see the difference
+between some morphisms and no morphisms.
+Exercise 3.15. What is the preorder reflection of the category N from Example 3.7? 
+Wehave only discussed adjoint functors between preorders, but soon we will discuss
+adjoints in general. Here is a statement you might not understand exactly, but it’s true;
+you can ask a category theory expert about it and they should be able to explain it to
+you:
+Considering a preorder as a category is right adjoint to turning a category into a preorder by
+preorder reflection.
+Remark 3.16 (Ends of a spectrum). The main point of this subsection is that both pre
+orders and free categories are specified by a graph without path equations, but they
+denote opposite ends of a spectrum. In both cases, the vertices of the graph become the
+3.2 Categories
+87
+objects of a category and the paths become morphisms. But in the case of free cate
+gories, there are no equations so each path becomes a different morphism. In the case
+of preorders, all parallel paths become the same morphism. Every category presenta
+tion, i.e. graph with some equations, lies somewhere in between the free category (no
+equations) and its preorder reflection (all possible equations).
+3.2.4
+Important Categories in Mathematics
+We have been talking about category presentations, but there are categories that are
+best understood directly, not by way of presentations. Recall the definition of category
+from Definition 3.2. The most important category in mathematics is the category of
+sets.
+Definition 3.17. The category of sets, denoted Set, is defined as follows.
+(i) Ob(Set) is the collection of all sets.
+(ii) If S and T are sets, then Set(S,T) ={f : S → T | f is a function}.
+(iii) For each set S, the identity morphism is the function idS: S → S given by
+idS(s) := s for each s ∈ S.
+(iv) Given f : S → T and g: T → U, their composite is the function f g: S → U
+given by ( f g)(s) := g(f(s)).
+These definitions satisfy the unitality and associativity conditions, so Set is indeed a
+category.
+Closely related is the category FinSet. This is the category whose objects are finite
+sets and whose morphisms are functions between them.
+Exercise 3.18. Let 2 ={1,2} and 3 ={1,2,3}. These are objects in the category
+Set discussed in Definition 3.17. Write down all the elements of the set Set(2,3); there
+should be nine.
+Remark 3.19. You may have wondered what categories have to do with V-categories
+(Definition 2.30); perhaps you think the definitions hardly look alike. Despite the term
+“enriched category,” V-categories are not categories with extra structure. While some
+sorts of V-categories, such as Bool-categories, i.e. preorders, can naturally be seen as
+categories, other sorts, such as Cost-categories, cannot.
+Thereason for the importance of Set is that, if we generalize the definition of enriched
+category (Definition 2.30), we find that categories in the sense of Definition 3.2 are
+exactly Set-categories– so categories are V-categories for a very special choice of
+V. We’ll come back to this in Section 4.4.4. For now, we simply remark that just
+like a deep understanding of the category Cost– e.g. knowing that it is a quantale– yields insight into Lawvere metric spaces, so the study of Set yields insights into
+categories.
+88
+Databases: Categories, Functors, and Universal Constructions
+There are many other categories that mathematicians care about:
+● Top: the category of topological spaces (neighborhood),
+● Grph: the category of graphs (connection),
+● Meas: the category of measure spaces (amount),
+● Mon:the category of monoids (action),
+● Grp: the category of groups (reversible action, symmetry),
+● Cat: the category of categories (action in context, structure).
+But in fact, this does not at all do justice to the diversity of categories mathematicians
+think about. They work with whatever category they find fits their purpose at the time,
+like “the category of connected Riemannian manifolds of dimension at most 4.”
+Here is one more source of examples: take any category you already have and reverse
+all its morphisms; the result is again a category.
+Example 3.20. Let C be a category. Its opposite, denoted Cop, is the category with the
+same objects, Ob(Cop) := Ob(C), and for any two objects c,d ∈ Ob(C), one has
+Cop(c,d) := C(d,c). Identities and composition are as in C.
+3.2.5
+Isomorphisms in a Category
+The previous sections have all been about examples of categories: free categories, pre
+sented categories, and important categories in math. In this section, we briefly switch
+gears and talk about an important concept in category theory, namely the concept of
+isomorphism.
+In a category, there is often the idea that two objects are interchangeable. For example,
+in the category Set, one can exchange the set { , } for the set {0,1} and everything
+will be the same, other than the names for the elements. Similarly, if one has a preorder
+with elements a,b, such that a ≤ b and b ≤ a, i.e. a ∼
+= b, then a and b are essentially
+the same. How so? Well, they act the same, in that for any other object c, we know that
+c ≤aiff c ≤ b, and c ≥ a iff c ≥ b. The notion of isomorphism formalizes this notion
+of interchangeability.
+Definition 3.21. An isomorphism is a morphism f : A → B such that there exists a
+morphism g: B → A satisfying f g = idA and g f = idB. In this case we call f
+and g inverses, and we often write g = f−1, or equivalently f = g−1. We also say that
+A and B are isomorphic objects.
+Example 3.22. The set A :={a,b,c} and the set 3 ={1,2,3} are isomorphic, i.e. there
+exists an isomorphism f : A → 3 given by f(a) = 2, f(b) = 1, f(c) = 3. The
+isomorphisms in the category Set are bijections.
+3.3 Functors,NaturalTransformations,andDatabases 89
+Recall that thecardinalityofafiniteset isthenumberofelementsinit.Thiscanbe
+understoodintermsofisomorphismsinFinSet.Namely,foranyfinitesetA∈FinSet,
+itscardinalityisthenumbern∈NsuchthatthereexistsanisomorphismA∼ =n.Georg
+CantordefinedthecardinalityofanysetX tobeits isomorphismclass,meaningthe
+equivalenceclassconsistingofallsetsthatareisomorphictoX.
+Exercise3.23.
+1.Whatistheinverse f−1:3→Aofthefunction f giveninExample3.22?
+2. HowmanydistinctisomorphismsarethereA→3?
+Exercise3.24. Showthat inanygivencategoryC, foranygivenobject c∈C, the
+identityidc isanisomorphism.
+Exercise3.25. RecallExamples3.7and3.11.Amonoidinwhicheverymorphismis
+anisomorphismisknownasagroup.
+1. IsthemonoidinExample3.7agroup?
+2.WhataboutthemonoidCinExample3.11?
+Exercise3.26. LetGbeagraph,andletFree(G)bethecorrespondingfreecategory.
+SomebodytellsyouthattheonlyisomorphismsinFree(G)aretheidentitymorphisms.
+Isthatpersoncorrect?Whyorwhynot?
+Example3.27. Inthisexample,weshallseethatitispossibleforgand f tobealmost–butnotquite–inverses,inacertainsense.
+Considerthefunctions f :2→3andg:3→2drawnbelow:
+Thenthereadershouldbeabletocheckinstantlythat f g=id2butg f=id3.Thus
+f andgarenotinversesandhencenotisomorphisms.Wewon’tneedthisterminology,
+butcategorytheoristswouldsaythat f andgformaretraction.
+3.3 Functors,NaturalTransformations,andDatabases
+InSection3.1weshowedsomedatabaseschemas:graphswithpathequations.Thenin
+Section3.2.2wesaidthatgraphswithpathequationscorrespondtofinitelypresented
+90
+Databases: Categories, Functors, and Universal Constructions
+categories. Now we want to explain what the data in a database is, as a way to introduce
+functors. To do so, we begin by noticing that sets and functions– the objects and
+morphisms in the category Set– can be captured by particularly simple databases.
+3.3.1
+Sets and Functions as Databases
+Planet of Sol
+Mercury
+Venus
+Earth
+Mars
+Jupiter
+Saturn
+Uranus
+Neptune
+Prime number
+The first observation is that any set can be understood as a table with only one column:
+the ID column.
+2
+3
+5
+7
+11
+13
+17
+Flying pig
+.
+.
+.
+Rather than put the elements of the set between braces, e.g. {2,3,5,7,11,...}, we write
+them down as rows in a table.
+In databases, single-column tables are often called controlled vocabularies, or master
+data. Now to be honest, we can only write out every single entry in a table when its set of
+rows is finite. A database practitioner might find the idea of our prime number table a bit
+unrealistic. But we’re mathematicians, so since the idea makes perfect sense abstractly,
+we will continue to think of sets as one-column tables.
+The above databases have schemas consisting of just one vertex:
+Obviously, there’s really not much difference between these schemas, other than the
+label of the unique vertex. So we could say “sets are databases whose schema consists
+of a single vertex.” Let’s move on to functions.
+Afunction f : A → B canalmost be depicted as a two-column table
+Beatle Played
+George leadguitar
+John rhythmguitar
+Paul bassguitar
+Ringo drums
+except it is unclear whether the elements of the right-hand column exhaust all of B.
+What if there are rock-and-roll instruments out there that none of the Beatles played? So
+a function f : A → B requires two tables, one for A and its f column, and one for B:
+3.3 Functors, Natural Transformations, and Databases
+91
+Beatle Played
+George leadguitar
+John rhythmguitar
+Paul bassguitar
+Ringo drums
+Rock-and-roll instrument
+bass guitar
+drums
+keyboard
+lead guitar
+rhythm guitar
+Thus the database schema for any function is just a labeled version of 2:
+The lesson is that an instance of a database takes a presentation of a category, and turns
+every vertex into a set, and every arrow into a function. As such, it describes a map
+from the presented category to the category Set. In Section 2.4.2 we saw that maps of
+V-categories are known as V-functors. Similarly, we call maps of plain old categories
+functors.
+3.3.2
+Functors
+Afunctor is a mapping between categories. It sends objects to objects and morphisms to
+morphisms, while preserving identities and composition. Here is the formal definition.
+Definition 3.28. Let C and D be categories. To specify a functor from C to D, denoted
+F: C →D,
+(i) for every object c ∈ Ob(C), one specifies an object F(c) ∈ Ob(D);
+(ii) for every morphism f : c1 → c2 in C, one specifies a morphism F(f): F(c1) →
+F(c2) in D.
+The above constituents must satisfy two properties:
+(a) for every object c ∈ Ob(C),wehaveF(idc) = idF(c);
+(b) for every three objects c1,c2,c3 ∈ Ob(C) and two morphisms f ∈ C(c1,c2), g ∈
+C(c2,c3), the equation F( f g) = F( f) F(g) holds in D.
+Example 3.29. For example, here we draw three functors F : 2 → 3:
+92 Databases:Categories,Functors,andUniversalConstructions
+Ineachcase, thedottedarrowsshowwhatthefunctorFdoestotheverticesin2;once
+that informationisspecified, it turnsout–inthisspecialcase–thatwhatFdoes to
+thethreepathsin2iscompletelydetermined.Intheleft-handdiagram,Fsendsevery
+pathtothe trivialpath, i.e. the identityonn0. InthemiddlediagramF(m0)=n0,
+F(f1)=g1,andF(m1)=n1.Intheright-handdiagram,F(m0)=n0,F(m1)=n2,
+andF(f1)=g1 g2.
+Exercise3.30. Abovewewrotedownthreefunctors2→3.Findandwritedownall
+theremainingfunctors2→3.
+Example3.31. Recall thecategoriespresentedbyFree_squareandComm_square in
+Section3.2.2.Heretheyareagain,with addedtothelabels inFree_squaretohelp
+distinguishthem:
+There are lots of functors from the free square category (let’s call it F) to the
+commutativesquarecategory(let’scallitC).
+However, thereisexactlyonefunctorF:F→CthatsendsA toA,B toB,C to
+C,andD toD.Thatis,oncewehavemadethisdecisionabouthowFactsonobjects,
+eachofthetenpathsinFisforcedtogotoacertainpathinC: theonewiththeright
+sourceandtarget.
+Exercise3.32. SaywhereeachofthetenmorphismsinFissentunderthefunctorF
+fromExample3.31.
+Allofourexamplefunctorssofarhavebeencompletelydeterminedbywhattheydo
+onobjects,butthisisusuallynotthecase.
+Exercise 3.33. Consider the free categories C = •→• andD= •⇒•.
+Give two functors F,G:C→Dthat act the sameonobjects but differentlyon
+morphisms.
+Example 3.34. There are also lots of functors fromthe commutative square cate
+goryCtothefreesquarecategoryF,butnonethatsendsAtoA,BtoB,CtoC,
+andDtoD.ThereasonisthatifFweresuchafunctor,thensince f h=g i inC,we
+3.3 Functors,NaturalTransformations,andDatabases 93
+wouldhaveF(f h)=F(g i),but thentherulesoffunctorswouldletusreasonas
+follows:
+f h=F(f) F(h)=F(f h)=F(g i)=F(g) F(i)=g i .
+Theresultingequation, f h=g i doesnotholdinFbecauseitisafreecategory
+(thereare“noequations”):everytwopathsareconsidereddifferentmorphisms.Thus
+ourproposedFisnotafunctor.
+Example3.35(Functorsbetweenpreordersaremonotonemaps). RecallfromSection3.2.3
+thatpreordersarecategorieswithatmostonemorphismbetweenanytwoobjects.A
+functorbetweenpreordersisexactlyamonotonemap.
+Forexample,consider thepreorder(N,≤)consideredasacategoryNwithobjects
+Ob(N)=Nandauniquemorphismm→n iffm≤n.AfunctorF:N→N
+sendseachobjectn ∈Ntoanobject F(n) ∈N. Itmust sendmorphisms inNto
+morphisms inN.Thismeans if thereis tobeamorphismm→n thentheremust
+alsobeamorphismF(m)→F(n).Inotherwords, ifm≤n, thenwemustalsohave
+F(m)≤F(n).Butaslongasm≤nimpliesF(m)≤F(n),wehaveafunctor.
+ThusafunctorF:N→NandamonotonemapN→Narethesamething.
+Exercise3.36(Thecategoryofcategories). Backintheprimordialooze, thereisacate
+goryCatinwhichtheobjectsarethemselvescategories.Yourtaskhereistoconstruct
+thiscategory.
+1. GivenanycategoryC,showthat thereexistsafunctor idC:C→C,knownasthe
+identityfunctoronC,thatmapseachobjecttoitselfandeachmorphismtoitself.
+NotethatafunctorC→DconsistsofafunctionfromOb(C)toOb(D)andforeach
+pairofobjectsc1,c2∈CafunctionfromC(c1,c2)toD(F(c1),F(c2)).
+2. ShowthatgivenF:C→DandG:D→E,wecandefineanewfunctor (F
+G):C→Ejustbycomposingfunctions.
+3. Showthatthereisacategory,callitCat,wheretheobjectsarecategories,morphisms
+arefunctors,andidentitiesandcompositionaregivenasabove.
+3.3.3 DatabaseInstancesasSet-ValuedFunctors
+LetCbeacategory,andrecallthecategorySetfromDefinition3.17.AfunctorF:C→
+Setisknownasaset-valuedfunctoronC.Muchofdatabasetheory(nothowtomake
+themfast,butwhattheyareandwhatyoudowiththem)canbecastinthislight.
+Indeed,wealreadysawinRemark3.13thatanydatabaseschemacanberegardedas
+(presenting)acategoryC.Thenextthingtonoticeisthatthedataitself–anyinstanceof
+thedatabase–isgivenbyaset-valuedfunctor I:C→Set.Theonlyadditionaldetail
+94 Databases:Categories,Functors,andUniversalConstructions
+isthat foranywhitenode, suchasc= string◦ ,wewant toforce I tomaptothesetof
+strings.Wesuppressthisdetailinthefollowingdefinition.
+Definition3.37. LetCbeaschema,i.e.afinitelypresentedcategory.AC-instanceisa
+functorI:C→Set.5
+Exercise3.38. Let1denotethecategorywithoneobject,called1,oneidentitymor
+phismid1,andnoothermorphisms.ForanyfunctorF:1→Setonecanextractaset
+F(1).Showthat,foranysetS,thereisafunctorFS:1→SetsuchthatFS(1)=S.
+Theaboveexercisereaffirmsthatthesetofplanets,thesetofprimenumbers,andthe
+setofflyingpigsareallset-valuedfunctors–instances–ontheschema1.Similarly,
+set-valuedfunctorsonthecategory2arefunctions.Allourexamplessofarareforthe
+situationwheretheschemaisafreecategory(noequations).Let’stryanexampleofa
+categorythatisnotfree.
+Example3.39. Considerthefollowingcategory:
+(3.8)
+What isaset-valuedfunctorF:C→Set?Itwillconsistofaset Z :=F(z)anda
+functionS:=F(s):Z→Z,subjecttotherequirementthatS S=S.Herearesome
+examples.
+● Z is thesetofUScitizens, andSsendseachcitizentoherorhispresident.The
+president’spresidentisher-orhimself.
+● Z=NisthesetofnaturalnumbersandSsendseachnumberto0. Inparticular,0
+goestoitself.
+● Zisthesetofallwell-formedarithmeticexpressions,suchas13+(2∗4)or−5,that
+onecanwriteusingintegersandthesymbols+,−,∗,(,).ThefunctionSevaluates
+theexpression toreturnan integer,which is itself awell-formedexpression.The
+evaluationofanintegerisitself.
+● Z=N≥2,andSsendsntoitssmallestprimefactor.Thesmallestprimefactorofa
+primeisitself.
+5Warning:aC-instanceisastateofthedatabase“ataninstantintime.”Theterm“instance”shouldnotbe
+confusedwithitsusageinobject-orientedprogramming,whichwouldcorrespondmoretowhatwecalla
+rowr∈I(c).
+3.3 Functors,NaturalTransformations,andDatabases 95
+N≥2 Smallestprimefactor
+2 2
+3 3
+4 2
+. . . . . .
+49 7
+50 2
+51 3
+. . . . . .
+Exercise3.40. Above,wethoughtof thesortofdatathatwouldmakesensefor the
+schema (3.8).Give anexampleof the sort of data thatwouldmake sense for the
+followingschemas:
+Themainideaisthis:adatabaseschemaisacategory,andaninstanceonthatschema– thedata itself– isaset-valuedfunctor.All theconstraints, orbusiness rules, are
+ensuredbytherulesoffunctors,namelythatfunctorspreservecomposition.6
+3.3.4 NaturalTransformations
+IfCisaschema–i.e. afinitelypresentedcategory–thentherearemanydatabase
+instanceson it,whichwecanorganize intoacategory.But this ispart of a larger
+story, namelythatofnatural transformations.Anabstractpicture tohave inmindis
+this:
+6Onecanputmorecomplexconstraints,calledembeddeddependencies,onadatabase;thesecorrespond
+category-theoreticallytowhatarecalled“liftingproblems”incategorytheory.See[Spi14b]formoreon
+this.
+96
+Databases: Categories, Functors, and Universal Constructions
+Definition 3.41. Let C and D be categories, and let F,G: C → D be functors. To
+specify a natural transformation α: F ⇒ G,
+(i) for each object c ∈ C, one specifies a morphism αc: F(c) → G(c) in D, called the
+c-component of α.
+These components must satisfy the following, called the naturality condition:
+(a) for every morphism f : c → d in C, the following equation must hold:
+F( f) αd =αc G(f).
+A natural transformation α: F → G is called a natural isomorphism if each
+component αc is an isomorphism in D.
+The naturality condition can also be written as a so-called commutative diagram.A
+diagram in a category is drawn as a graph whose vertices and arrows are labeled by
+objects and morphisms in the category. For example, here is a diagram that’s relevant to
+the naturality condition in Definition 3.41:
+(3.9)
+Definition 3.42. A diagram D in C is a functor D: J → C from any category J, called
+the indexing category of the diagram D. We say that D commutes if D( f) = D(f )
+holds for every parallel pair of morphisms f, f : a → b in J.7
+In terms of Eq. (3.9), the only case of two parallel morphisms is that of F(c) ⇒ G(d),
+so to say that the diagram commutes is to say that F( f ) αd = αc G( f). This is exactly
+the naturality condition from Definition 3.41.
+Example 3.43. A representative picture is as follows:
+7 Wecould package this formally by saying that D commutes iff it factors through the preorder reflection
+of J.
+3.3 Functors, Natural Transformations, and Databases
+97
+We have depicted, in blue and red respectively, two functors F,G: C → D. A nat
+ural transformation α: F ⇒ G is given by choosing components α1: v → x and
+α2: w → y.Wehavehighlighted the only choice for each in green: namely, α1 = c and
+α2 = g.
+The key point is that the functors F and G are ways of viewing the category C as
+lying inside the category D. The natural transformation α, then, is a way of relating
+these two views using the morphisms in D. Does this help you to see and appreciate the
+notation
+Example 3.44. We said in Exercise 3.38 that a functor 1 → Set can be identi
+f
+ied with a set. So suppose A and B are sets considered as functors A, B: 1 →
+Set. A natural transformation between these functors is just a function between the
+sets.
+Definition 3.45. Let C and D be categories. We denote by DC the category whose
+objects are functors F : C → D and whose morphisms DC(F,G) are the natural trans
+formations α: F → G.Thiscategory DC is called the functor category,orthecategory
+of functors from C to D.
+Exercise 3.46. Let’s look more deeply at how DC is a category.
+1. Figure out how to compose natural transformations. (Hint: an expert tells you “for
+each object c ∈ C, compose the c-components.”)
+2. Propose an identity natural transformation on any object F ∈ DC, and check that it
+is unital (i.e. that it obeys condition (a) of Definition 3.2).
+Example 3.47. In our new language, Example 3.44 says that Set1 is isomorphic to Set.
+Example 3.48. Let N denote the category associated to the preorder (N,≤), and recall
+from Example 3.35 that we can identify a functor F: N → N with a nondecreasing
+sequence (F0, F1, F2,...)of natural numbers, i.e. F0 ≤ F1 ≤ F2 ≤···.IfG is another
+functor, considered as a nondecreasing sequence, then what is a natural transformation
+α: F →G?
+Since there is at most one morphism between two objects in a preorder, each compo
+nent αn: Fn → Gn has no data, it just tells us a fact: that Fn ≤ Gn. And the naturality
+98
+Databases: Categories, Functors, and Universal Constructions
+condition is vacuous: every square in a preorder commutes. So a natural transformation
+between F and G exists iff Fn ≤ Gn for each n, and any two natural transformations
+F ⇒Garethe same. In other words, the category NN is itself a preorder, namely the
+preorder of monotone maps N → N.
+Exercise 3.49. Let C be an arbitrary category and let P be a preorder, thought of as a
+category. Consider the following statements:
+1. For any two functors F,G: C → P, there is at most one natural transformation
+F →G.
+2. For any two functors F,G: P → C, there is at most one natural transformation
+F →G.
+For each, if it is true, say why; if it is false, give a counterexample.
+Remark 3.50. Recall that in Remark 2.50 we said the category of preorders is equiv
+alent to the category of Bool-categories. We can now state the precise meaning of
+this sentence. First, there exists a category PrO in which the objects are preorders
+and the morphisms are monotone maps. Second, there exists a category Bool-Cat in
+which the objects are Bool-categories and the morphisms are Bool-functors. We call
+these two categories equivalent because there exist functors F : PrO → Bool-Cat and
+G: Bool-Cat → PrO such that there exist natural isomorphisms F G ∼
+= idPrO and
+G F∼ =idBool-Cat in the sense of Definition 3.41.
+3.3.5
+The Category of Instances on a Schema
+Definition 3.51. Suppose that C is a database schema and I, J : C → Set are
+database instances. An instance homomorphism between them is a natural transforma
+tion α: I → J. Write C-Inst := SetC to denote the functor category as defined in
+Definition 3.45.
+Wesawin Example 3.44 that 1-Inst is isomorphic to the category Set. In this subsec
+tion, we will show that there is a schema whose instances are graphs and whose instance
+homomorphisms are graph homomorphisms.
+Extended example: the category of graphs as a functor category
+You may find yourself back in the primordial ooze (first discussed in Section 2.3.2),
+because while previously we have been using graphs to present categories, now we
+obtain graphs themselves as database instances on a specific schema (which is itself a
+graph):
+3.3 Functors, Natural Transformations, and Databases
+99
+Here is an example of a Gr-instance, i.e. a set-valued functor I : Gr → Set, in table
+form:
+Arrow source target
+a 1 2
+b 1 3
+c 1 3
+d 2 2
+e 2 3
+Vertex
+1
+2
+3
+4
+(3.10)
+Here I(Arrow) = {a,b,c,d,e}, and I(Vertex) = {1,2,3,4}. One can draw the
+instance I as a graph:
+Every row in the Vertex table is drawn as a vertex, and every row in the Arrow table is
+drawn as an arrow, connecting its specified source and target. Every possible graph can
+be written as a database instance on the schema Gr, and every possible Gr-instance can
+be represented as a graph.
+Exercise 3.52. In Eq. (3.2), a graph is shown (forget the distinction between white and
+black nodes). Write down the corresponding Gr-instance, as in Eq. (3.10). (Do not be
+concerned that you are in the primordial ooze.)
+Thus the objects in the category Gr-Inst are graphs. The morphisms in Gr-Inst
+are called graph homomorphisms. Let’s unwind this. Suppose that G, H : Gr → Set
+are functors (i.e. Gr-instances); that is, they are objects G, H ∈ Gr-Inst.Amor
+phism G → H is a natural transformation α: G → H between them; what does that
+entail?
+By Definition 3.41, since Gr has two objects, α consists of two components,
+αVertex : G(Vertex) → H(Vertex)
+and
+αArrow: G(Arrow) → H(Arrow),
+both of which are morphisms in Set. In other words, α consists of a function from
+vertices of G to vertices of H and a function from arrows of G to arrows of H.
+For these functions to constitute a graph homomorphism, they must “respect source
+and target” in the precise sense that the naturality condition, Eq. (3.9), holds. That
+100
+Databases: Categories, Functors, and Universal Constructions
+is, for every morphism in Gr, namely source and target, the following diagrams must
+commute:
+These may look complicated, but they say exactly what we want. We want the func
+tions αVertex and αArrow to respect source and targets in G and H. The left diagram
+says “start with an arrow in G. You can either apply α to the arrow and then take its
+source in H, or you can take its source in G and then apply α to that vertex; either
+way you get the same answer.” The right-hand diagram says the same thing about
+targets.
+Example 3.53. Consider the graphs G and H shown below
+Here they are, written as database instances– i.e. set-valued functors– on Gr:
+G :=
+H :=
+Arrow source target
+c
+The top row is G and the bottom row is H. They are offset so you can more easily
+complete the following exercise.
+Arrow source target
+a 1 2
+b 2 3
+4 5
+d 4 5
+e 5 5
+Vertex
+1
+2
+3
+Vertex
+4
+5
+Exercise 3.54. We claim that– with G, H as in Example 3.53– there is exactly one
+graph homomorphism α: G → H such that αArrow(a) = d.
+1. What is the other value of αArrow, and what are the three values of αVertex?
+2. In your own copy of the tables of Example 3.53,drawαArrow as two lines connecting
+the cells in the ID column of G(Arrow) to those in the ID column of H(Arrow).
+Similarly, draw αVertex as connecting lines.
+3. Check the source column and target column and make sure that the matches are
+natural, i.e. that “alpha-then-source equals source-then-alpha” and similarly for
+“target.”
+3.4AdjunctionsandDataMigration 101
+3.4 AdjunctionsandDataMigration
+Wehavetalkedabouthowset-valuedfunctorsonaschemacanbeunderstoodasfilling
+thatschemawithdata.Buttherearealsofunctorsbetweenschemas.Whenthetwosorts
+offunctorsarecomposed,dataismigrated.Thisisthesimplestformofdatamigration;
+morecomplexwaystomigratedatacomefromusingadjoints.Allof theaboveisthe
+subjectofthissection.
+3.4.1 PullingBackDataalongaFunctor
+Tobegin,wewillmigratedatabetweenthegraph-indexingschemaGrandtheloop
+schema,whichwecallDDS,shownbelow
+WebeginbywritingdownasampleinstanceI:DDS→Setonthisschema:
+State next
+1 4
+2 4
+3 5
+4 5
+5 5
+6 7
+7 6
+(3.11)
+WecalltheschemaDDS,standingfordiscretedynamicalsystem.Indeed,wemaythink
+ofthedataintheDDS-instanceoftable(3.11)aslistingthestatesandmovementsofa
+deterministicmachine:ateverypoint intimethemachineisinoneofthelistedstates,
+andgiventhemachineinoneof thestates, inthenext instant itmoves toauniquely
+determinednextstate.
+Ourgoalistomigratethedatain(3.11)todataonGr;thiswillgiveusthedataofa
+graphandsoallowustovisualizeourmachine.
+Wewilluseafunctorconnectingtheseschemasinordertomovedatabetweenthem.
+Thereadercancreateanyfunctorshelikes,butwewilluseaspecificfunctorF:Gr→
+DDStomigratedatainawaythatmakessensetous, theauthors.HerewedrawF,
+usingcolorstoaidunderstanding:
+102 Databases:Categories,Functors,andUniversalConstructions
+ThefunctorFsendsbothobjectsofGrtothe“State”objectofDDS(asitmust).On
+morphisms,itsendsthe“source”morphismtotheidentitymorphismon“State,”andthe
+“target”morphismtothemorphism“next.”
+Asampledatabase instanceonDDSwasgiveninEq. (3.11); recall that this isa
+functorI:DDS→Set.Sonowwehavetwofunctorsasfollows:
+(3.12)
+ObjectsinGraresentbyFtoobjectsinDDS,whicharesentbyI toobjectsinSet,
+whicharesets.MorphismsinGraresentbyFtomorphismsinDDS,whicharesent
+byI tomorphisms inSet,whicharefunctions.ThisdefinesacompositefunctorF
+I:Gr→Set.BothFandI respectidentitiesandcomposition,soF Idoestoo.Thus
+wehaveobtainedaninstanceonGr, i.e.wehaveconvertedourdiscretedynamical
+systemfromEq.(3.11)intoagraph!Whatgraphisit?
+ForaninstanceonGr,weneedtofillanArrowtableandaVertextable.Bothof
+thesearesentbyFtoState,solet’sfillbothwiththerowsofStateinEq.(3.11).Simi
+larly,sinceFsends“source”totheidentityandsends“target”to“next,”weobtainthe
+followingtables:
+Arrow source target
+1 1 4
+2 2 4
+3 3 5
+4 4 5
+5 5 5
+6 6 7
+7 7 6
+Vertex
+1
+2
+3
+4
+5
+6
+7
+Nowthatwehaveagraph,wecandrawit.
+3.4 Adjunctions and Data Migration
+103
+Each arrow is labeled by its source vertex, as if to say, “What I do next is determined by
+what I am now.”
+Exercise 3.55. Consider the functor G: Gr → DDS given by sending “source” to
+“next” and sending “target” to the identity on “State.” Migrate the same data, called I
+in Eq. (3.11), using the functor G. Write down the tables and draw the corresponding
+graph.
+We refer to the above procedure– basically just composing functors as in Eq. (3.12)– as “pulling back data along a functor.” We just now pulled back data I along
+functor F.
+Definition 3.56. Let C and D be categories and let F: C → D be a functor. For any
+set-valued functor I : D → Set, we refer to the composite functor F I : C → Set as
+the pullback of I along F. Given a natural transformation α: I ⇒ J, there is a natural
+transformation αF : F I ⇒ F J,whosecomponent (F I)(c) → (F J)(c)forany
+c ∈ Ob(C) is given by (αF)c := αFc.
+This uses the data of F to define a functor F : D-Inst → C-Inst.
+Note that the term pullback is also used for a certain sort of limit; for more details see
+Remark 3.85.
+3.4.2
+Adjunctions
+In Section 1.4 we discussed Galois connections, which are adjunctions between pre
+orders. Now that we have defined categories and functors, we can discuss adjunctions
+in general. The relevance to databases is that the data migration functor 
+from Defi
+nition 3.56 always has two adjoints of its own: a left adjoint which we denote and a
+right adjoint which we denote .
+Recall that an adjunction between preorders P and Q is a pair of monotone maps
+f : P → Qandg: Q → Pthatarealmost inverses: we have
+f (p) ≤ q iff p ≤ g(q).
+(3.13)
+Recall from Section 3.2.3 that in a preorder P, a hom-set P(a,b) has one element
+when a ≤ b, and no elements otherwise. We can thus rephrase Eq. (3.13) as an
+isomorphism of sets Q( f(p),q) ∼
+= P(p,g(q)): either both are one-element sets
+or both are 0-element sets. This suggests how to define adjunctions in the general
+case.
+104
+Databases: Categories, Functors, and Universal Constructions
+Definition 3.57. Let CandDbecategories,and L: C → Dand R: D → Cbefunctors.
+Wesay that L is left adjoint to R (and that R is right adjoint to L) if, for any c ∈ C and
+d ∈D,there is an isomorphism of hom-sets
+αc,d : C(c, R(d)) ∼ =
+−→ D(L(c),d)
+that is natural in c and d.8
+Given a morphism f : c → R(d) in C, its image g := αc,d(f) is called its mate.
+Similarly, the mate of g: L(c) → d is f.
+To denote an adjunction we write L R, or in diagrams
+with the ⇒ in the direction of the left adjoint.
+Example 3.58. Recall that every preorder P can be regarded as a category. Galois con
+nections between preorders and adjunctions between the corresponding categories are
+exactly the same thing.
+Example 3.59. Let B ∈ Ob(Set) be any set. There is an adjunction called “currying B,”
+after the logician Haskell Curry:
+Abstractly we write it as on the left, but what this means is that, for any sets A,C, there
+is a natural isomorphism as on the right.
+To explain this, we need to talk about exponential objects in Set. Suppose that B and
+C are sets. Then the set of functions B → C is also a set; let’s denote it CB. It’s written
+this way because if C has 10 elements and B has 3 elements then CB has 103 elements,
+and more generally for any two finite sets |CB|=|C||B|.
+The idea of currying is that, given sets A, B, and C, there is a one-to-one correspon
+dence between functions (A × B) → C and functions A → CB. Intuitively, if I have a
+function f of two variables a,b, I can “put off” entering the second variable: if you give
+8 This naturality is between functors Cop × D → Set. It says that for any morphisms f : c→ c in C and
+g: d →d inD,thefollowing diagram commutes:
+3.4 Adjunctions and Data Migration
+105
+mejust a, I’ll return a function B → C that’s waiting for the B input. This is the curried
+version of f . As one might guess, there is a formal connection between exponential
+objects and what we called hom-elements b 
+c in Definition 2.57.
+Exercise 3.60. In Example 3.59, we discussed an adjunction between functors −×B
+and (−)B. But we only said how these functors worked on objects: for an arbitrary set
+X, they return sets X × B and XB respectively.
+1. Given a morphism f : X → Y, what morphism should −×B: X × B → Y × B
+return?
+2. Given a morphism f : X → Y, what morphism should (−)B: XB → YB return?
+3. Consider the function +: N × N → N, which sends (a,b)→ a + b.Currying+,
+we get a certain function p: N → NN. What is p(3)?
+Example 3.61. If you know some abstract algebra or topology, here are some other
+examples of adjunctions.
+1. Free constructions: given any set you get a free group, free monoid, free ring, free
+vector space, etc.; each of these is a left adjoint. The corresponding right adjoint takes
+a group, a monoid, a ring, a vector space, etc. and forgets the algebraic structure to
+return the underlying set.
+2. Similarly, given a graph you get a free preorder or a free category, as we discussed in
+Section 3.2.3; each is a left adjoint. The corresponding right adjoint is the underlying
+graph of a preorder or of a category.
+3. Discrete things: given any set you get a discrete preorder, discrete graph, discrete
+metric space, discrete category, discrete topological space; each of these is a left
+adjoint. The corresponding right adjoint is again underlying set.
+4. Codiscrete things: given any set you get a codiscrete preorder, complete graph, codis
+crete category, codiscrete topological space; each of these is a right adjoint. The
+corresponding left adjoint is the underlying set.
+5. Given a group, you can quotient by its commutator subgroup to get an abelian group;
+this is a left adjoint. The right adjoint is the inclusion of abelian groups into groups.
+3.4.3
+Left and Right Pushforward Functors, and 
+Given F: C → D, the data migration functor F turns D-instances into C-instances.
+This functor has both a left and a right adjoint:
+106
+Databases: Categories, Functors, and Universal Constructions
+Using the names and in this context is fairly standard in category theory. In the
+case of databases, they have the following helpful mnemonic:
+Migration functor pronounced
+reminiscent of
+database idea
+delta
+sigma
+pi
+duplicate
+or destroy
+sum
+product
+duplicate or destroy
+tables or columns
+union (sum up) data
+pair9 and query data
+Just like we used F to pull back any discrete dynamical system along F: Gr →
+DDSand get a graph, the migration functors F and F can be used to turn any graph
+into a discrete dynamical system. That is, given an instance J : Gr → Set, we can get
+instances F(J) and F(J) on DDS. This, however, is quite technical, and we leave
+it to the adventurous reader to compute an example, with help perhaps from [Spi14a],
+which explores the definitions of and in detail. A less technical shortcut is simply
+to code up the computation in the open-source FQL software.
+To get the basic idea across without getting mired in technical details, here we will
+instead discuss a very simple example. Recall the schemas from Eq. (3.4). We can set
+up a functor between them, the one sending black dots to black dots and white dots to
+white dots:
+With this functor F in hand, we can transform any B-instance into an A-instance using
+F. Whereas was interesting in the case of turning discrete dynamical systems into
+graphs in Section 3.4.1, it is not very interesting in this case. Indeed, it will just copy
+for duplicate– the rows in Airline Seat into both Economy and First Class.
+F has two adjoints, F and F, both of which transform any A-instance I into a
+B-instance. The functor F does what one would most expect from reading the names
+on each object: it will put into Airline Seat the union of Economy and First Class:
+F(I)(Airline Seat) = I(Economy) I(First Class).
+The functor F putsinto Airline Seat the set of those pairs (e, f ) where e is an Econ
+omy seat, f is a First Class seat, and e and f have the same price and position. In this
+particular example, one imagines that there should be no such seats in a valid instance
+9 This is more commonly called “join” by database programmers.
+3.4 Adjunctions and Data Migration
+107
+I, in which case F(I)(Airline Seat) would be empty. But in other uses of these same
+schemas, F can be a useful operation. For example, in the schema A replace the label
+‘Economy’ by‘RewardsProgram’, andin B replace‘Airline Seat’ by ‘First Class Seats’.
+Then the operation F finds those first class seats that are also rewards program seats.
+This operation is a kind of database query; querying is the operation that databases are
+built for.
+The moral is that complex data migrations can be specified by constructing functors
+F between schemas and using the “induced” functors F, F, and F. Indeed, in
+practice essentially all useful migrations can be built up from these. Hence the language
+of categories provides a framework for specifying and reasoning about data migrations.
+3.4.4
+Single Set Summaries of Databases
+To give a stronger idea of the flavor of and , we consider another special case,
+namely where the target category D is equal to 1; see Exercise 3.6. In this case, there is
+exactly one functor C → 1 for any C; let’s denote it
+!: C →1.
+(3.14)
+Exercise 3.62. Describe the functor !: C → 1 from Eq. (3.14). Where does it send each
+object? What about each morphism?
+We want to consider the data migration functors !: C-Inst → 1-Inst and
+! : C-Inst → 1-Inst. In Example 3.44, we saw that an instance on 1 is the same thing
+as a set. So let’s identify 1-Inst with Set, and hence discuss
+! : C-Inst → Set
+and
+! : C-Inst → Set.
+Given any schema C and instance I : C → Set, we will get sets !(I) and !(I). Think
+ing of these sets as database instances, each corresponds to a single one-column table
+a controlled vocabulary– summarizing an entire database instance on the schema C.
+Consider the following schema
+Here’s a sample instance I : G → Set:
+Email sent_by received_by
+Em_1 Bob Grace
+Em_2 Grace
+Pat
+Em_3 Bob
+Em_4 Sue
+Em_5 Doug
+Emmy
+Doug
+Sue
+Em_6 Bob Bob
+(3.15)
+Address
+Bob
+Doug
+Emmy
+Grace
+Pat
+Sue
+108
+Databases: Categories, Functors, and Universal Constructions
+Exercise 3.63. Note that G from Eq. (3.15) is isomorphic to the schema Gr. In Sec
+tion 3.3.5 we saw that instances on Gr are graphs. Draw the above instance I as a
+graph.
+Now we have a unique functor !: G → 1, and we want to say what !(I) and
+!(I) give us as single-set summaries. First, !(I) tells us all the emailing groups
+the “connected components”– in I:
+1
+Bob-Grace-Pat-Emmy
+Sue-Doug
+This form of summary, involving identifying entries into common groups, or quotients,
+is typical of-operations.
+The functor !(I) lists the emails from I which were sent from a person to her- or
+him-self.
+1
+Em_6
+This is again a sort of query, selecting the entries that fit the criterion of self-to-self
+emails. Again, this is typical of-operations.
+Where do these facts– that ! and ! act the way we said– come from? Everything
+follows from the definition of adjoint functors (3.57): indeed we hope this, together
+with the examples given in Example 3.61, give the reader some idea of how general and
+useful adjunctions are, both in mathematics and in database theory.
+One more point: while we will not spell out the details, we note that these operations
+are also examples of constructions known as colimits and limits in Set. We end this
+chapter with bonus material, exploring these key category theoretic constructions. The
+reader should keep in mind that, in general and not just for functors to 1,-operations
+are built from colimits in Set, and-operations are built from limits in Set.
+3.5
+3.5.1
+Bonus: An Introduction to Limits and Colimits
+What do products of sets, the results of !-operations on database instances, and
+meets in a preorder all have in common? The answer, as we shall see, is that they are
+all examples of limits. Similarly, disjoint unions of sets, the results of !-operations
+on database instances, and joins in a preorder are all colimits. Let’s begin with
+limits.
+Recall that ! takes a database instance I : C → Set and turns it into a set !(I).
+More generally, a limit turns a functor F : C → D into an object of D.
+Terminal Objects and Products
+Terminal objects and products are each a sort of limit. Let’s discuss them in turn.
+3.5 Bonus: An Introduction to Limits and Colimits
+109
+Terminal objects
+The most basic limit is a terminal object.
+Definition 3.64. Let C be a category. Then an object Z in C is a terminal object if, for
+each object C of C, there exists a unique morphism !: C → Z.
+Since this unique morphism exists for all objects in C, we say that terminal objects
+have a universal property.
+Example 3.65. In Set, any set with exactly one element is a terminal object. Why? Con
+sider some such set {•}. Then for any other set C we need to check that there is exactly
+one function !: C →{•}.This unique function is the one that does the only thing that
+can be done: it maps each element c ∈ C to the element •∈{•}.
+Exercise 3.66. Let (P,≤) be a preorder, let z ∈ P be an element, and let P be the
+corresponding category (see Section 3.2.3). Show that z is a terminal object in P if and
+onlyifitisatop element in P: that is, if and only if for all c ∈ P we have c ≤ z.
+Exercise 3.67. Name a terminal object in the category Cat. (Hint: recall Exercise
+3.62.)
+Exercise 3.68. Not every category has a terminal object. Find one that doesn’t.
+Proposition 3.69. All terminal objects in a category C are isomorphic.
+Proof. This is a simple, but powerful standard argument. Suppose Z and Z are both
+terminal objects in some category C. Then there exist (unique) maps a: Z → Z and
+b: Z→ Z.Composing these, we get a map a b: Z → Z. Now since Z is termi
+nal, this map Z → Z must be unique. But idZ is also such a map. So we must have
+a b = idZ. Similarly, we find that b a = idZ . Thus a is an isomorphism, with
+inverse b.
+Remark 3.70 (“The limit” vs. “a limit”). Not only are all terminal objects isomorphic,
+there is a unique isomorphism between any two. We hence say “terminal objects are
+unique up to unique isomorphism.” To a category theorist, this is very nearly the same
+thing as saying “all terminal objects are equal.” Thus we often abuse terminology and
+talk of “the” terminal object, rather than “a” terminal object. We will do the same for any
+sort of limit or colimit, e.g. speak of “the product” of two sets, rather than “a product.”
+Wesaw asimilar phenomenon in Definition 1.76.
+110
+Databases: Categories, Functors, and Universal Constructions
+Products
+Products are slightly more complicated to formalize than terminal objects, but they are
+familiar in practice.
+Definition 3.71. Let C be a category, and let X,Y be objects in C.Aproduct of X
+and Y is an object, denoted X × Y, together with morphisms pX : X × Y → X and
+pY : X ×Y →Y suchthat for all objects C together with morphisms f : C → X and
+g: C →Y,there exists a unique morphism C → X ×Y, denoted f,g , for which the
+following diagram commutes:
+We will try to bring this down to earth in Example 3.72. Before we do, note that
+X ×Y isan object equipped with morphisms to X and Y. Roughly speaking, it is like
+“the best object-equipped-with-morphisms-to-X-and-Y”inallofC, in the sense that any
+other object-equipped-with-morphisms-to-X-and-Y maps to it uniquely. This is called a
+universal property. It’s customary to use a dotted line to indicate the unique morphism
+that exists because of some universal property.
+Example 3.72. In Set, a product of two sets X and Y is their usual cartesian product
+X ×Y :={(x,y) | x ∈ X,y ∈ Y},
+which comes with two projections pX : X × Y → X and pY : X × Y → Y, given by
+pX(x, y) := x and pY(x, y) := y.
+Given any set C with functions f : C → X and g: C → Y, the unique map from C
+to X×Y suchthattherequired diagram commutes is given by f,g(c) := ( f(c),g(c)).
+Here is a picture of the product 6 × 4 of sets 6 and 4.
+3.5 Bonus: An Introduction to Limits and Colimits
+111
+Exercise 3.73. Let (P,≤) be a preorder, let x, y ∈ P be elements, and let P be the
+corresponding category. Show that the product x × y in P agrees with their meet x ∧ y
+in P.
+Example 3.74. Given two categories C and D, their product C × D may be given as
+follows. The objects of this category are pairs (c,d), where c is an object of C and d is
+an object of D. Similarly, morphisms (c,d) → (c,d)arepairs( f,g)where f : c → c
+is a morphism in C and g: d → d is a morphism in D. Composition of morphisms is
+simply given by composing each entry in the pair separately, so ( f,g) ( f ,g) =
+( f f ,g g).
+Exercise 3.75.
+1. What are the identity morphisms in a product category C × D?
+2. Whyis composition in a product category associative?
+3. What is the product category 1 × 2?
+4. What is the product category P × Q when P and Q are preorders and P and Q are
+the corresponding categories?
+These two constructions, terminal objects and products, are subsumed by the notion
+of limit.
+3.5.2
+Limits
+We’ll get a little abstract. Consider the definition of product. This says that, given any
+pair of maps X f ←− C g −→ Y, there exists a unique map C → X × Y such that certain
+diagrams commute. This has the flavor of being terminal– there is a unique map to
+X ×Y–butitseems a bit more complicated. How are the two ideas related?
+It turns out that products are terminal objects, but of a different category, which we’ll
+call Cone(X,Y), the category of cones over X and Y in C. We shall see in Exercise 3.76
+that X pX
+←− X×Y pY−→Y isaterminal object in Cone(X,Y).
+An object of Cone(X,Y) is simply a pair of maps X f ←− C g −
+→Y.Amorphism from
+X f ←− C g −→ Y to X f ←− C g −→ Y in Cone(X,Y) is a morphism a: C → C in C such
+that the following diagram commutes:
+Exercise 3.76. Check that a product X pX
+←− X ×Y pY−→ Y is exactly the same as a
+terminal object in Cone(X,Y).
+112
+Databases: Categories, Functors, and Universal Constructions
+We’re now ready for the abstract definition. Don’t worry if the details are unclear;
+the main point is that it is possible to unify terminal objects, maximal elements, and
+meets, products of sets, preorders, and categories, and many other familiar friends under
+the scope of a single definition. In fact, they’re all just terminal objects in different
+categories.
+Recall from Definition 3.42 that, formally speaking, a diagram in C is just a functor
+D: J →C.HereJiscalled the indexing category of the diagram D.
+Definition 3.77. Let D: J → C be a diagram. A cone (C,c∗) over D consists of
+(i) an object C ∈ C;
+(ii) for each object j ∈ J, a morphism cj : C → D(j).
+To be a cone, these must satisfy the following property:
+(a) for each f : j → k in J,wehaveck = cj D(f).
+A morphism of cones (C,c∗) → (C,c∗) is a morphism a: C → C in C such that
+for all j ∈ J we have cj = a cj . Cones over D, and their morphisms, form a category
+Cone(D).
+The limit of D, denoted lim(D), is the terminal object in the category Cone(D). Say
+it is the cone lim(D) = (C,c∗); we refer to C as the limit object and the map cj for any
+j ∈ Jasthe jth projection map.
+For visualization purposes, if J is the free category on the graph
+with five objects and five non-identity morphisms, then we may draw a diagram D: J →
+C inside C as on the left below, and a cone on it as on the right:
+Here, any two parallel paths that start at C are considered the same. Note that both these
+diagrams depict a collection of objects and morphisms inside the category C.
+Example 3.78. Terminal objects are limits where the indexing category is empty,
+J =∅.
+3.5Bonus:AnIntroductiontoLimitsandColimits 113
+Example3.79. Productsarelimitswheretheindexingcategoryconsistsoftwoobjects
+v,wandnoarrows,J= v • w • .
+3.5.3 FiniteLimitsinSet
+Recallthatthisdiscussionwasinspiredbywantingtounderstand-operations,andin
+particular !.Wecannowseethatadatabaseinstance I:C→Set isadiagramin
+Set.Thefunctor ! takesthelimitofthisdiagram.Inthissubsectionwegiveaformula
+describingtheresult.ThiscapturesallfinitelimitsinSet.
+Indatabasetheory,weworkwithcategoriesCthatarepresentedbyafinitegraph
+plusequations.Wewon’texplainthedetails,butinfactit’senoughjusttoworkwiththe
+graphpart:asfaraslimitsareconcerned,theequationsinCdon’tmatter.Forconsistency
+withtherestofthissection,let’sdenotethedatabaseschemabyJinsteadofC.
+Theorem3.80. LetJbeacategorypresentedbythefinitegraph(V,A,s,t)together
+with some equations, and let D: J→Set be a set-valued functor.WriteV =
+{v1,...,vn}.Theset
+lim
+J
+D:= (d1,...,dn)|di∈D(vi)forall1≤i≤nand
+foralla:vi→vj∈A,wehaveD(a)(di)=dj
+togetherwiththeprojectionmapspi : (limJD)→D(vi)givenbypi(d1,...,dn) :=
+di,isalimitofD.
+Example3.81. If J istheemptygraph•, thenn=0: therearenovertices.Thereis
+exactlyoneemptytuple( ),whichvacuouslysatisfies theproperties, sowe’vecon
+structedthelimitasthesingletonset{()}consistingofjust theemptytuple.Thusthe
+limit of theemptydiagram, i.e. the terminal object inSet, is thesingletonset.See
+Remark3.70.
+Exercise3.82. Showthat thelimit formulainTheorem3.80worksforproducts.See
+Example3.79.
+Exercise3.83. IfD:1→Setisafunctor,what isthelimitofD?Computeitusing
+Theorem3.80,andcheckyouransweragainstDefinition3.77.
+Pullbacks
+Inparticular,theconditionthatthelimitofD:J→Setselectstuples(d1,...,dn)such
+thatD(a)(di)=dj foreachmorphisma: i→j inJallowsustouselimitstoselect
+114 Databases:Categories,Functors,andUniversalConstructions
+data that satisfiescertainequationsorconstraints.This iswhat allowsus toexpress
+queriesintermsoflimits.Hereisanexample.
+Example3.84. IfJispresentedbythecospangraph x • f−−→a • g←−−y • ,thenitslimitis
+knownasapullback.GiventhediagramX f −→A g ←−Y,thepullbackistheconeshown
+ontheleftbelow:
+The fact that thediagramcommutesmeans that thediagonal arrowca is insome
+sensesuperfluous,soonegenerallydenotespullbacksbydroppingthediagonalarrow,
+naming the conepoint X×AY, andadding the symbol, as shown to the right
+above.
+HereisapicturetohelpusunpackthedefinitioninSet.WetakeX=6,Y=4,and
+Atobethesetofcolors{red,blue,black}.
+Thefunctions f :6→Aandg:4→Aareexpressedinthecoloringof thedots:
+for example, g(2)=g(4)=red,while f(5)=black.Thepullbackselectspairs
+(i, j)∈6×4suchthat f(i)andg(j)havethesamecolor.
+Remark3.85. AsmentionedfollowingDefinition3.56, thisdefinitionofpullbackis
+not tobeconfusedwiththepullbackofaset-valuedfunctoralongafunctor; theyare
+fornowbest thoughtofasdifferentconceptswhichaccidentallyhavethesamename.
+Owingtothepoweroftheprimordialooze,however, thepullbackalongafunctorisa
+specialcaseofpullbackasthelimitofacospan:itcanbeunderstoodasthepullbackof
+acertaincospaninCat.Tounpackthisrequiresthenotionsofcategoryofelementsand
+discreteopfibration;askyourfriendlyneighborhoodcategorytheorist.
+3.6 Summary and Further Reading
+115
+3.5.4
+3.6
+A Brief Note on Colimits
+Just like upper bounds have a dual concept– namely that of lower bounds– so limits
+have a dual concept: colimits. To expose the reader to this concept, we provide a succinct
+definition of these using opposite categories and opposite functors. The point, however,
+is just exposure; we will return to explore colimits in detail in Chapter 6.
+Exercise 3.86. Recall from Example 3.20 that every category C has an oppo
+site Cop. Let F: C → D be a functor. How should we define its opposite,
+Fop: Cop → Dop? That is, how should Fop act on objects, and how should it act on
+morphisms?
+Definition 3.87. Given a category C we say that a cocone in C is a cone in Cop.
+Given a diagram D: J → C, we may take the limit of the functor Dop: Jop → Cop.
+This is a cone in Cop, and so by definition a cocone in C.Thecolimit of D is this
+cocone.
+Definition 3.87 is like a compressed file: useful for transmitting quickly, but com
+pletely useless for working with, unless you can successfully unpack it. We will unpack
+it later in Chapter 6 when we discuss electric circuits.
+Summary and Further Reading
+Congratulations on making it through one of the longest chapters in the book! We apol
+ogize for the length, but this chapter had a lot of work to do. Namely it introduced the
+“big three” of category theory– categories, functors, and natural transformations– as
+well as discussing adjunctions, limits, and very briefly colimits.
+That’s really quite a bit of material. For more on all these subjects, one can consult any
+standard book on category theory, of which there are many. The bible (old, important,
+seminal, and requires a priest to explain it) is [Mac98]; another thorough introduction
+is [Bor94]; a logical perspective is given in [Awo10]; a computer science perspective
+is given in [BW90], [Pie91], and [Wal92]; math students should probably read [Lei14],
+[Rie17], or [Gra18]; a general audience might start with [Spi14a].
+Wepresentedcategories from a database perspective, because data is pretty ubiquitous
+in our world. A database schema– i.e. a system of interlocking tables– can be captured
+by a category C, and filling it with data corresponds to a functor C → Set.HereSet is
+the category of sets, perhaps the most important category to mathematicians.
+The perspective of using category theory to model databases has been rediscovered
+several times. It seems to have first been discussed by various authors around the mid
+1990s [IP94; CD95; PS95; TG96]. Bob Rosebrugh and collaborators took it much fur
+ther in a series of papers including [FGR03; JR02; RW92]. Most of these authors tend to
+focus on sketches, which are more expressive categories. Spivak rediscovered the idea
+again quite a bit later, but focused on categories rather than sketches, so as to have all
+116
+Databases: Categories, Functors, and Universal Constructions
+three data migration functors , , ;see[Spi12; SW15b]. The version of this story
+presented in the chapter, including the white and black nodes in schemas, is part of a
+larger theory of algebraic databases, where a programming language such as Java or
+Haskell is attached to a database. The technical details are worked out in [Sch+17], and
+its use in database integration projects can be found in [SW15a; Wis+15].
+Before we leave this chapter, we want to emphasize two things: coherence conditions
+and universal constructions.
+Coherence conditions
+In the definitions of category, functor, and natural transformations, we have data
+(indexed by (i)) that is required to satisfy certain properties (indexed by (a)). Indeed,
+for categories it was about associativity and unitality of composition, for functors it
+was about respecting composition and identities, and for natural transformations it was
+the naturality condition. These conditions are often called coherence conditions:we
+want the various structures to cohere, to work well together, rather than to flop around
+unattached.
+Understanding why these particular structures and coherence conditions are “the right
+ones” is more science than mathematics: we empirically observe that certain combina
+tions result in ideas that are both widely applicable and also strongly compositional.
+That is, we become satisfied with coherence conditions when they result in beautiful
+mathematics down the road.
+Universal constructions
+Universal constructions are one of the most important themes of category theory.
+Roughly speaking, one gives some specified shape in a category and says “find me the
+best solution!” And category theory comes back and says “do you want me to approx
+imate from the left or the right (colimit or limit)?” You respond, and either there is a
+best solution or there is not. If there is, it’s called the (co)limit; if there’s not we say “the
+(co)limit does not exist.”
+Evendata migration fits this form. We say “find methe closest thing in D that matches
+my C-instance using my functor F: C → D.” In fact this approach– known as Kan
+extensions– subsumes the others. One of the two founders of category theory, Saunders
+Mac Lane, has a section in his book [Mac98] called “All concepts are Kan extensions,”
+a big statement, no?
