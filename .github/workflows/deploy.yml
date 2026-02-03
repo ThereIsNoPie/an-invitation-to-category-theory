@@ -25,81 +25,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Setup PATH for Cabal binaries
-        run: |
-          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
       - name: Setup GHC and Cabal
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y cabal-install ghc
-          echo "Running cabal update..."
-          cabal update
-          echo "Cabal update complete"
-
-      - name: Get Agda version for cache key
-        id: versions
-        run: |
-          echo "Querying Hackage for Agda version..."
-          echo "Running: cabal list --simple-output agda"
-
-          AGDA_OUTPUT=$(cabal list --simple-output agda)
-          echo "Cabal list output:"
-          echo "$AGDA_OUTPUT"
-
-          AGDA_VERSION=$(echo "$AGDA_OUTPUT" | grep -E '^agda\s' | tail -1 | awk '{print $2}')
-
-          echo "Extracted version: '$AGDA_VERSION'"
-
-          if [ -z "$AGDA_VERSION" ]; then
-            echo "ERROR: Failed to get Agda version from cabal list"
-            echo "Using fallback version"
-            AGDA_VERSION="2.8.0"
-          fi
-
-          echo "agda=$AGDA_VERSION" >> $GITHUB_OUTPUT
-          echo "Using Agda version: $AGDA_VERSION"
-
-      - name: Cache Agda installation
-        id: cache-agda
-        uses: actions/cache@v4
+        uses: haskell-actions/setup@v2
         with:
-          path: |
-            ~/.cabal/store
-            ~/.cabal/packages
-            ~/.cabal/bin
-          key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-v3
-          restore-keys: |
-            ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-
+          ghc-version: '9.10.1'
+          cabal-version: 'latest'
 
-      - name: Verify or install Agda
+      - name: Install Agda
         run: |
-          echo "=== Diagnostic Info ==="
-          echo "Agda version from previous step: ${{ steps.versions.outputs.agda }}"
-          echo "Expected cache key: ${{ runner.os }}-agda-${{ steps.versions.outputs.agda }}-v3"
-          echo "Cache hit status: ${{ steps.cache-agda.outputs.cache-hit }}"
-          echo "Cache matched key: ${{ steps.cache-agda.outputs.cache-matched-key }}"
-          echo "PATH: $PATH"
-          echo ""
-          echo "Contents of ~/.cabal/bin:"
-          ls -lah ~/.cabal/bin/ 2>/dev/null || echo "~/.cabal/bin does not exist"
-          echo ""
-          echo "Which agda:"
-          which agda 2>/dev/null || echo "agda not found in PATH"
-          echo ""
+          cabal update
+          cabal install Agda-2.8.0
+          echo "$HOME/.cabal/bin" >> $GITHUB_PATH
 
-          # Check if Agda actually exists and works, regardless of cache-hit status
-          if command -v agda &> /dev/null && agda --version &> /dev/null; then
-            echo "✓ Agda is available and working"
-            agda --version
-          else
-            echo "Agda not found or not working - installing..."
-            cabal install Agda
-            echo "✓ Agda installed successfully"
-            echo "Installed to: $(which agda)"
-            agda --version
-          fi
+      - name: Verify Agda
+        run: agda --version
 
       - name: Get Agda stdlib version
         id: stdlib-version
@@ -108,78 +47,25 @@ jobs:
           echo "version=$STDLIB_VERSION" >> $GITHUB_OUTPUT
           echo "Using stdlib version: $STDLIB_VERSION"
 
-      - name: Cache Agda standard library
-        id: cache-stdlib
-        uses: actions/cache@v4
-        with:
-          path: ~/.agda
-          key: ${{ runner.os }}-agda-stdlib-${{ steps.stdlib-version.outputs.version }}-v2
-          restore-keys: |
-            ${{ runner.os }}-agda-stdlib-
-
       - name: Setup Agda standard library
         run: |
-          echo "=== Stdlib Diagnostic Info ==="
-          echo "~/.agda directory contents:"
-          ls -lah ~/.agda/ 2>/dev/null || echo "~/.agda does not exist"
-          echo "Cache hit status: ${{ steps.cache-agda.outputs.cache-hit }}"
-          echo "Cache matched key: ${{ steps.cache-stdlib.outputs.cache-matched-key }}"
-          echo ""
-
-          # Check if stdlib actually exists, regardless of cache-hit status
-          if [ -d ~/.agda/agda-stdlib ] && [ -f ~/.agda/agda-stdlib/standard-library.agda-lib ]; then
-            echo "✓ Standard library already present (from cache or previous run)"
-
-            # Verify/regenerate config files
-            if [ -f ~/.agda/libraries ] && [ -f ~/.agda/defaults ]; then
-              echo "✓ Configuration files present"
-            else
-              echo "⚠ Configuration files missing - regenerating..."
-              echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
-              echo "standard-library" > ~/.agda/defaults
-              echo "✓ Configuration files regenerated"
-            fi
-          else
-            echo "Installing Agda standard library..."
-            mkdir -p ~/.agda
-            cd ~/.agda
-
-            # Remove partial install if it exists
-            if [ -d "agda-stdlib" ]; then
-              echo "Removing incomplete agda-stdlib directory..."
-              rm -rf agda-stdlib
-            fi
-
-            git clone --depth 1 --branch ${{ steps.stdlib-version.outputs.version }} https://github.com/agda/agda-stdlib.git
-            cd agda-stdlib
-            echo "name: standard-library" > standard-library.agda-lib
-            echo "include: src" >> standard-library.agda-lib
-            echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
-            echo "standard-library" > ~/.agda/defaults
-            echo "✓ Standard library installed"
-          fi
-
-          echo ""
-          echo "=== Final Configuration ==="
-          echo "libraries file:"
-          cat ~/.agda/libraries
-          echo "defaults file:"
-          cat ~/.agda/defaults
-          echo "agda-stdlib directory:"
-          ls ~/.agda/agda-stdlib/ 2>/dev/null || echo "agda-stdlib not found!"
+          mkdir -p ~/.agda
+          cd ~/.agda
+          git clone --depth 1 --branch ${{ steps.stdlib-version.outputs.version }} https://github.com/agda/agda-stdlib.git
+          cd agda-stdlib
+          echo "name: standard-library" > standard-library.agda-lib
+          echo "include: src" >> standard-library.agda-lib
+          echo "$HOME/.agda/agda-stdlib/standard-library.agda-lib" > ~/.agda/libraries
+          echo "standard-library" > ~/.agda/defaults
 
       - name: Generate HTML documentation
         run: |
-          echo "Generating HTML from Agda sources..."
           agda --html --html-dir=docs --html-highlight=auto src/Everything.agda
-          echo "✓ HTML documentation generated"
 
       - name: Copy custom assets
         run: |
           if [ -d "site-assets" ]; then
-            echo "Copying custom assets..."
             cp -r site-assets/* docs/
-            echo "✓ Assets copied"
           fi
 
       - name: Build with Jekyll
