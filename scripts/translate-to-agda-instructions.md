@@ -6,8 +6,7 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last completed:** Construction 2.44 (Change of Base)
-- **Last Learnt/reviewed** Exercise 2.47
+- **Last Learnt/reviewed** Exercise 2.49
 
 ### Completed in this session (verified against PDF):
 - Example 2.45: CostToBoolMonotone

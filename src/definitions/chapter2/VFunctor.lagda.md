@@ -10,7 +10,7 @@ number: 48
 
 ## Textbook Definition
 
-**Definition 2.47.** Let $\mathcal{X}$ and $\mathcal{Y}$ be $\mathcal{V}$-categories. A *$\mathcal{V}$-functor from $\mathcal{X}$ to $\mathcal{Y}$*, denoted $F : \mathcal{X} \to \mathcal{Y}$, consists of one constituent:
+**Definition 2.48.** Let $\mathcal{V}$ be a symmetric monoidal preorder and let $\mathcal{X}$ and $\mathcal{Y}$ be $\mathcal{V}$-categories. A *$\mathcal{V}$-functor from $\mathcal{X}$ to $\mathcal{Y}$*, denoted $F : \mathcal{X} \to \mathcal{Y}$, consists of one constituent:
 
 (i) a function $F : \text{Ob}(\mathcal{X}) \to \text{Ob}(\mathcal{Y})$
 

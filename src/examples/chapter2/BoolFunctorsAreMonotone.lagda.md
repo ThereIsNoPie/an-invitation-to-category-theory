@@ -10,7 +10,7 @@ number: 49
 
 ## Textbook Description
 
-**Example 2.48.** We have said several times that preorders are Bool-categories, where $\mathcal{X}(x_1, x_2) = \mathsf{true}$ is denoted $x_1 \leq x_2$. One would hope that monotone maps between preorders would correspond exactly to Bool-functors, and that's true.
+**Example 2.49.** We have said several times that preorders are Bool-categories, where $\mathcal{X}(x_1, x_2) = \mathsf{true}$ is denoted $x_1 \leq x_2$. One would hope that monotone maps between preorders would correspond exactly to Bool-functors, and that's true.
 
 A monotone map $(X, \leq_X) \to (Y, \leq_Y)$ is a function $F : X \to Y$ such that for every $x_1, x_2 \in X$, if $x_1 \leq_X x_2$ then $F(x_1) \leq_Y F(x_2)$.
 
