@@ -10,7 +10,7 @@ number: 51
 
 ## Textbook Description
 
-**Example 2.49.** Lawvere metric spaces are Cost-categories. The definition of Cost-functor should hopefully return a nice notion—a "friend"—from the theory of metric spaces, and it does: it recovers the notion of Lipschitz function.
+**Example 2.51.** Lawvere metric spaces are Cost-categories. The definition of Cost-functor should hopefully return a nice notion—a "friend"—from the theory of metric spaces, and it does: it recovers the notion of Lipschitz function.
 
 A Lipschitz (or more precisely, 1-Lipschitz) function is one under which the distance between any pair of points does not increase. That is, given Lawvere metric spaces $(X, d_X)$ and $(Y, d_Y)$, a Cost-functor between them is a function $F : X \to Y$ such that for every $x_1, x_2 \in X$ we have $d_X(x_1, x_2) \geq d_Y(F(x_1), F(x_2))$.
 

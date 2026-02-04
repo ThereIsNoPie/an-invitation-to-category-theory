@@ -6,7 +6,7 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last Learnt/reviewed** Exercise 2.49
+- **Last Learnt/reviewed** Exercise 2.52
 
 ### Completed in this session (verified against PDF):
 - Example 2.45: CostToBoolMonotone
@@ -121,6 +121,7 @@ Guidelines:
 - **Postulates OK** for reals, etc.
 - **Simple over clever** - explicit case splits over abstract proofs
 - **Comments only where non-obvious**
+- **Exercises: split into Problem and Solution** - Put type signatures (and any necessary definitions/records) in a `## Problem` section, and implementations/proofs in a `## Solution` section. This lets readers attempt the exercise before seeing the answer. See `exercises/chapter2/PowerSetIntersection.lagda.md` for a good example.
 
 ## Step 4: Compile and Add
 

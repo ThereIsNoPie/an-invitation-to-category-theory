@@ -10,7 +10,7 @@ number: 52
 
 ## Textbook Description
 
-**Exercise 2.50.** The concepts of opposite, dagger, and skeleton extend from preorders to V-categories.
+**Exercise 2.52.** The concepts of opposite, dagger, and skeleton extend from preorders to V-categories.
 
 The *opposite* of a V-category $\mathcal{X}$ is denoted $\mathcal{X}^{\text{op}}$ and is defined by:
 - $\text{Ob}(\mathcal{X}^{\text{op}}) := \text{Ob}(\mathcal{X})$
@@ -33,8 +33,9 @@ open import definitions.chapter2.SymmetricMonoidalPreorder
 open import definitions.chapter2.VCategory using (VCategory)
 open import definitions.chapter2.VFunctor using (VFunctor; IsVFunctor)
 open import definitions.chapter2.LawvereMetricSpace using (LawvereMetricSpace)
-open import examples.chapter2.Cost using (Cost; [0,∞]; 0∞; _≥_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
+open import definitions.chapter2.MetricSpace using (MetricSpace)
+open import examples.chapter2.Cost using (Cost; [0,∞]; 0∞; _≥_; ≥-refl; ≥-antisym; 0-least)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 ```
 
 ## Opposite V-Category
@@ -84,38 +85,48 @@ IsSkeletal {V} X = ∀ {x y} → I ≤ hom x y → I ≤ hom y x → x ≡ y
     open SymmetricMonoidalPreorder V
 ```
 
-## Skeletal Dagger Cost-Categories are Extended Metric Spaces
+## Problem
 
-For Cost-categories (Lawvere metric spaces):
-- Dagger means d(x,y) ≥ d(y,x), i.e., the metric is symmetric
-- Skeletal means 0 ≥ d(x,y) and 0 ≥ d(y,x) implies x = y
+A skeletal dagger Cost-category satisfies all four metric space axioms (Definition 2.34):
+1. d(x,x) = 0 — from identity: 0 ≥ d(x,x), and d ≥ 0
+2. d(x,y) = 0 → x = y — from skeletal
+3. d(x,y) = d(y,x) — symmetry from dagger
+4. d(x,y) + d(y,z) ≥ d(x,z) — triangle inequality from composition
 
-Together with the Lawvere metric space axioms, this gives an extended metric space.
+Show that a skeletal dagger Cost-category is an extended metric space.
 
 ```agda
--- A skeletal dagger Cost-category satisfies:
--- 1. d(x,x) = 0           (from identity: 0 ≥ d(x,x), and d ≥ 0)
--- 2. d(x,z) ≤ d(x,y) + d(y,z)  (triangle inequality from composition)
--- 3. d(x,y) = d(y,x)      (symmetry from dagger)
--- 4. d(x,y) = 0 → x = y   (from skeletal: 0 ≥ d(x,y) means d(x,y) = 0)
+skeletal-dagger→metric :
+  (X : LawvereMetricSpace) →
+  IsDagger X →
+  IsSkeletal X →
+  MetricSpace
+```
 
--- This is exactly the definition of an extended metric space!
--- (Extended because d(x,y) can be ∞)
+## Solution
 
-record IsExtendedMetricSpace (X : LawvereMetricSpace) : Set where
-  open VCategory X
+**Strategy:** A Lawvere metric space already provides zero self-distance and the triangle inequality. Dagger adds symmetry, and skeletal adds separation.
 
-  field
-    symmetric : ∀ {x y} → hom x y ≡ hom y x
-    separates : ∀ {x y} → hom x y ≡ 0∞ → x ≡ y
+- **zero-self**: identity gives `0 ≥ d(x,x)`, and `0-least` gives `d(x,x) ≥ 0`. Apply `≥-antisym`.
+- **symmetry**: dagger in both directions gives `d(x,y) ≥ d(y,x)` and `d(y,x) ≥ d(x,y)`. Apply `≥-antisym`.
+- **separation**: given `d(x,y) ≡ 0`, use dagger to get `0 ≥ d(y,x)`, combine with `0-least` and `≥-antisym` to get `d(y,x) ≡ 0`. Then both directions are zero, so skeletal gives `x ≡ y`.
+- **triangle**: directly from composition.
 
--- From dagger + skeletal, we get an extended metric space
-postulate
-  skeletal-dagger→extended :
-    (X : LawvereMetricSpace) →
-    IsDagger X →
-    IsSkeletal X →
-    IsExtendedMetricSpace X
+```agda
+skeletal-dagger→metric X dagger skeletal = record
+  { X = Ob
+  ; d = hom
+  ; zero-self = ≥-antisym 0-least identity
+  ; symmetry = λ {x} {y} →
+      ≥-antisym (dagger {x} {y}) (dagger {y} {x})
+  ; separation = λ {x} {y} hxy≡0 →
+      let 0≥hyx = subst (_≥ hom y x) hxy≡0 (dagger {x} {y})
+          hyx≡0 = ≥-antisym 0-least 0≥hyx
+      in skeletal (subst (0∞ ≥_) (sym hxy≡0) ≥-refl)
+                  (subst (0∞ ≥_) (sym hyx≡0) ≥-refl)
+  ; triangle = composition
+  }
+  where open VCategory X
 ```
 
 ## The Analogy
@@ -124,8 +135,6 @@ The exercise asks us to make sense of:
 
 > "Preorders are to sets as Lawvere metric spaces are to extended metric spaces."
 
-```agda
-{-
 The analogy works as follows:
 
 | Preorder concept | Lawvere metric space concept |
@@ -142,7 +151,5 @@ This "forgets" all the structure, leaving just a set.
 An extended metric space is one where d(x,y) = 0 implies x = y.
 This "forgets" the asymmetry and non-separation, leaving just distances.
 
-So: preorders can be "quotiented" to sets (via skeletal + dagger)
-    Lawvere metric spaces can be "quotiented" to extended metric spaces (via skeletal + dagger)
--}
-```
+So: preorders can be "quotiented" to sets (via skeletal + dagger),
+and Lawvere metric spaces can be "quotiented" to extended metric spaces (via skeletal + dagger).

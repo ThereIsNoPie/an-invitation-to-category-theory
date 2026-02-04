@@ -149,6 +149,7 @@ postulate
   -- Ordering
   ≥-refl : ∀ {x : [0,∞]} → x ≥ x
   ≥-trans : ∀ {x y z : [0,∞]} → x ≥ y → y ≥ z → x ≥ z
+  ≥-antisym : ∀ {x y : [0,∞]} → x ≥ y → y ≥ x → x ≡ y
   ∞-greatest : ∀ {x : [0,∞]} → ∞ ≥ x
   0-least : ∀ {x : [0,∞]} → x ≥ 0∞
 

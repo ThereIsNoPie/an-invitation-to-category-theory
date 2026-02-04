@@ -25,7 +25,7 @@ The monoidal unit being 0 will translate into saying that you can always get fro
 ```agda
 module examples.chapter2.Cost where
 
-open import plumbing.Reals using ([0,∞]; 0∞; ∞; _≥_; _+ℝ_; ≥-refl; ≥-trans; +ℝ-identityˡ; +ℝ-identityʳ; +ℝ-assoc; +ℝ-comm; +ℝ-mono) public
+open import plumbing.Reals using ([0,∞]; 0∞; ∞; _≥_; _+ℝ_; ≥-refl; ≥-trans; ≥-antisym; 0-least; ∞-greatest; +ℝ-identityˡ; +ℝ-identityʳ; +ℝ-assoc; +ℝ-comm; +ℝ-mono) public
 open import definitions.chapter1.Preorder using (Preorder; IsPreorder)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalStructure; SymmetricMonoidalPreorder)
