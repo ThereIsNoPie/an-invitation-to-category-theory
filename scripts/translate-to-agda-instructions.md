@@ -6,25 +6,8 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last Learnt/reviewed** Exercise 2.52
+- **Last Learnt/reviewed** 2.55
 
-### Completed in this session (verified against PDF):
-- Example 2.45: CostToBoolMonotone
-- Definition 2.48: VFunctor
-- Example 2.49: BoolFunctorsAreMonotone
-- Example 2.51: CostFunctorsAreLipschitz
-- Exercise 2.52: OppositeDaggerSkeletal
-- Definition 2.53: VProduct
-- Definition 2.57: MonoidalClosed
-- Example 2.60: CostIsMonoidalClosed
-- Exercise 2.61: BoolIsMonoidalClosed
-- Example 2.62: BoolOrNotClosed
-- Proposition 2.64: ClosedMonoidalProperties
-- Definition 2.66: Quantale
-- Example 2.67: CostIsQuantale
-- Proposition 2.72: JoinsIffMeets
-- Exercise 2.41: NMYCategory
-- Construction 2.44: ChangeOfBase
 
 ## Step 1: Find the Next Item
 
