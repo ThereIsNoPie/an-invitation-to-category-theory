@@ -10,7 +10,7 @@ number: 57
 
 ## Textbook Definition
 
-**Definition 2.55.** A symmetric monoidal preorder $\mathcal{V} = (V, \leq, I, \otimes)$ is called *symmetric monoidal closed* (or just *closed*) if, for every two elements $v, w \in V$, there is an element $v \multimap w$ in $\mathcal{V}$, called the *hom-element*, with the property
+**Definition 2.57.** A symmetric monoidal preorder $\mathcal{V} = (V, \leq, I, \otimes)$ is called *symmetric monoidal closed* (or just *closed*) if, for every two elements $v, w \in V$, there is an element $v \multimap w$ in $\mathcal{V}$, called the *hom-element*, with the property
 
 $$(a \otimes v) \leq w \quad \text{iff} \quad a \leq (v \multimap w)$$
 

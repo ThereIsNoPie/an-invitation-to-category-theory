@@ -24,6 +24,11 @@ Formalise the next textbook item from Fong & Spivak into Literate Agda.
 
    For exercises, label these `## Problem` and `## Solution`. For definitions/examples/propositions, use `## Definition` / `## Construction` or similar. No postulates or holes needed — literate Agda compiles type signatures and implementations across separate code blocks.
 
+   **HTML rendering rules:**
+   - **Use ` ```text ` not bare ` ``` `** for ASCII diagrams — bare fenced blocks get parsed as Agda in `.lagda.md`.
+   - **Escape kramdown-sensitive characters in prose**: `|` → `\lvert`/`\rvert`, `_` → `\_`, `*` → `\*`, `<`/`>` → `\lt`/`\gt`.
+   - **Avoid** `\begin{aligned}`, `\begin{gather}`, `\begin{array}` — unsupported by kramdown+MathJax pipeline.
+
 5. **Compile**: Run `agda src/path/to/File.lagda.md`. Fix any errors.
 
 6. **Register**: Add import to `src/Everything.agda` in the correct section.

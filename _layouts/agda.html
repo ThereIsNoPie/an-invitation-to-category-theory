@@ -227,22 +227,28 @@
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'collapsible-section-content';
 
-                // Save reference to parent and next sibling before we start moving nodes
                 const parent = heading.parentNode;
-                const nextSibling = heading.nextSibling;
 
                 // Determine what level we're stopping at
                 const headingLevel = heading.tagName;
                 const stopAtTags = headingLevel === 'H2' ? ['H2'] : ['H2', 'H3'];
 
-                // Collect all content until the next heading of the same or higher level
-                // Don't include the heading itself since it's in the summary
+                // Collect all content until the next heading of the same or higher level.
+                // Use nextSibling (not nextElementSibling) to capture text nodes too —
+                // kramdown renders $$...$$ as bare \[...\] text nodes outside <p> tags,
+                // and skipping them orphans the content that follows.
                 const contentToWrap = [];
-                let currentNode = heading.nextElementSibling;
+                let currentNode = heading.nextSibling;
+                let stopNode = null;
 
-                while (currentNode && !stopAtTags.includes(currentNode.tagName)) {
+                while (currentNode) {
+                    if (currentNode.nodeType === Node.ELEMENT_NODE &&
+                        stopAtTags.includes(currentNode.tagName)) {
+                        stopNode = currentNode;
+                        break;
+                    }
                     contentToWrap.push(currentNode);
-                    currentNode = currentNode.nextElementSibling;
+                    currentNode = currentNode.nextSibling;
                 }
 
                 // Move all content nodes into the collapsible
@@ -252,8 +258,8 @@
 
                 details.appendChild(contentDiv);
 
-                // Insert the collapsible section where the heading was
-                parent.insertBefore(details, nextSibling);
+                // Insert before the next heading (stopNode), or at end if no stop
+                parent.insertBefore(details, stopNode);
 
                 // Remove the original heading since it's now in the summary
                 heading.remove();

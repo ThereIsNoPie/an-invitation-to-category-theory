@@ -6,7 +6,7 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last Learnt/reviewed** 2.56
+- **Last Learnt/reviewed** 2.57
 
 
 ## Step 1: Find the Next Item

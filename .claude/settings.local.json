@@ -6,7 +6,8 @@
       "Bash(find:*)",
       "Bash(agda --safe:*)",
       "Bash(agda:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []
