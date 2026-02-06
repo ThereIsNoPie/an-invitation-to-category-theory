@@ -10,5 +10,20 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-agda.sh",
+            "timeout": 120,
+            "statusMessage": "Type-checking Agda..."
+          }
+        ]
+      }
+    ]
   }
 }
