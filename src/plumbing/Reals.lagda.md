@@ -160,6 +160,12 @@ postulate
   +ℝ-mono : ∀ {x₁ x₂ y₁ y₂ : [0,∞]} → x₁ ≥ y₁ → x₂ ≥ y₂ → (x₁ +ℝ x₂) ≥ (y₁ +ℝ y₂)
   +ℝ-∞ˡ : ∀ {x : [0,∞]} → ∞ +ℝ x ≡ ∞
 
+  -- Minimum
+  min : [0,∞] → [0,∞] → [0,∞]
+  min-lb-l : ∀ {x y : [0,∞]} → x ≥ min x y
+  min-lb-r : ∀ {x y : [0,∞]} → y ≥ min x y
+  min-glb : ∀ {x y z : [0,∞]} → x ≥ z → y ≥ z → min x y ≥ z
+
 -- Derived from commutativity
 +ℝ-identityʳ : ∀ {x : [0,∞]} → x +ℝ 0∞ ≡ x
 +ℝ-identityʳ = trans +ℝ-comm +ℝ-identityˡ
