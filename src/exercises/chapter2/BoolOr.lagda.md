@@ -8,7 +8,7 @@ number: 12
 
 # Booleans with OR
 
-## Textbook Description
+## Textbook Exercise
 
 **Exercise 2.12.** Let $(\mathbb{B}, \leq)$ be as above, but now consider the monoidal product to be $\vee$ (OR).
 
@@ -55,6 +55,17 @@ data _≤𝔹_ : Bool → Bool → Set where
   }
 ```
 
+## Problem
+
+Which choice of monoidal unit $I$ makes $(\mathbb{B}, \leq, I, \vee)$ a
+symmetric monoidal preorder — and do all the conditions of Definition 2.1 hold?
+
+```agda
+𝔹∨-structure : SymmetricMonoidalStructure 𝔹-preorder
+
+Bool∨-SMP : SymmetricMonoidalPreorder
+```
+
 ## Solution
 
 **Answer:** The monoidal unit must be $\mathsf{false}$.
@@ -63,7 +74,7 @@ For unitality we need: $I \vee x = x$ and $x \vee I = x$ for all $x$.
 - If $I = \mathsf{true}$: $\mathsf{true} \vee x = \mathsf{true} \neq x$ when $x = \mathsf{false}$. ✗
 - If $I = \mathsf{false}$: $\mathsf{false} \vee x = x$ ✓ and $x \vee \mathsf{false} = x$ ✓
 
-## The Symmetric Monoidal Structure
+The remaining conditions are finite case checks:
 
 ```agda
 -- Monotonicity: x₁ ≤ y₁ and x₂ ≤ y₂ implies (x₁ ∨ x₂) ≤ (y₁ ∨ y₂)
@@ -100,7 +111,6 @@ For unitality we need: $I \vee x = x$ and $x \vee I = x$ for all $x$.
 ∨-identityʳ {false} = refl
 ∨-identityʳ {true} = refl
 
-𝔹∨-structure : SymmetricMonoidalStructure 𝔹-preorder
 𝔹∨-structure = record
   { I = false
   ; _⊗_ = _∨_
@@ -112,10 +122,7 @@ For unitality we need: $I \vee x = x$ and $x \vee I = x$ for all $x$.
   }
 ```
 
-## Bool∨: The Symmetric Monoidal Preorder
-
 ```agda
-Bool∨-SMP : SymmetricMonoidalPreorder
 Bool∨-SMP = record
   { preorder = 𝔹-preorder
   ; structure = 𝔹∨-structure

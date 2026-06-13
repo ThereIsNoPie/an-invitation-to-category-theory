@@ -8,7 +8,7 @@ number: 52
 
 # Opposite, Dagger, and Skeletal V-Categories
 
-## Textbook Description
+## Textbook Exercise
 
 **Exercise 2.52.** The concepts of opposite, dagger, and skeleton extend from preorders to V-categories.
 

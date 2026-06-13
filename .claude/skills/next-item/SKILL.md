@@ -16,13 +16,18 @@ Formalise the next textbook item from Fong & Spivak into Literate Agda.
 
 3. **Evaluate**: Decide if it's worth formalising (in the context of whether formalising it will help the reader learn or whether an informal explanation is just as good/better). Skip items that are pure prose/motivation, require heavy real number machinery with no payoff, or are too heavily reliant on new postulates. If skipping, explain what the item says and why it's a skip, then update `Last Learnt/reviewed` and move to the next item. Ask the user if unsure.
 
-4. **Write the Agda**: Use `scripts/template.lagda.md` as base. Check `src/plumbing/` and `src/definitions/` before creating new types or postulating.
+4. **Write the Agda**: Use `scripts/template.lagda.md` as base — its section names are load-bearing. Check `src/plumbing/` and `src/definitions/` before creating new types or postulating.
 
-   **Always** split the code into two sections:
-   - **First code block**: Type signatures, record definitions, and any supporting types — this is the high-level concept from the textbook. A reader should understand what's going on from this alone.
-   - **Second code block** (after a `## Solution` or `## Construction` heading): Implementations and proofs — the low-level details a reader can look into later.
+   **Section names control rendering.** The HTML layout collapses sections named `Textbook Exercise`/`Textbook Definition`/`Textbook Description`/`Textbook Statement`, `Agda Setup`/`Setup`, `Solution`, `Proof`, `Implementation`, `Construction` (the last four also with `: ...` suffixes), so the reader lands directly on the problem statement. Standard order:
 
-   For exercises, label these `## Problem` and `## Solution`. For definitions/examples/propositions, use `## Definition` / `## Construction` or similar. No postulates or holes needed — literate Agda compiles type signatures and implementations across separate code blocks.
+   1. `## Textbook Exercise` (or `Textbook Definition`/`Textbook Description`) — verbatim quote, collapsed.
+   2. `## Agda Setup` — module header + imports only, collapsed.
+   3. Optional visible context sections (supporting types the reader needs).
+   4. `## Problem` (visible) — **the first Agda the reader sees must be a concise rendering of the textbook statement**: type signatures that map directly onto the textbook sentence. For definitions/examples/propositions name it after the concept (e.g. `## Definition`, `## Statement`) — just keep it visible.
+   5. `## Solution` (collapsed) — implementations and proofs. For definitions/propositions use `## Construction`, `## Implementation` or `## Proof`.
+   6. Optional visible `## Interpretation` etc.
+
+   No postulates or holes needed — literate Agda compiles type signatures and implementations across separate code blocks, even with a nested module declared in between.
 
    **HTML rendering rules:**
    - **Use ` ```text ` not bare ` ``` `** for ASCII diagrams — bare fenced blocks get parsed as Agda in `.lagda.md`.

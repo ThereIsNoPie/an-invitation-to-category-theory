@@ -100,7 +100,16 @@ For **exercises**, this means a `## Problem` section (signatures) and `## Soluti
 
 Since the file is literate Agda, placing a type signature in one code block and the implementation in a later code block compiles naturally — no postulates or holes needed.
 
-See `exercises/chapter2/PowerSetIntersection.lagda.md` for reference.
+**Section names control rendering.** Always start from `scripts/template.lagda.md`. The HTML layout collapses sections with these exact headings, so the reader lands directly on the Problem statement: `Textbook Exercise`/`Textbook Definition`/`Textbook Description`/`Textbook Statement`, `Agda Setup`/`Setup`, `Solution`, `Proof`, `Implementation`, `Construction` (the last four also with `: ...` suffixes). Standard order:
+
+1. `## Textbook Exercise` (collapsed) — verbatim textbook quote
+2. `## Agda Setup` (collapsed) — module header + imports only
+3. optional visible context sections
+4. `## Problem` (visible) — the first Agda the reader sees: signatures that map directly onto the textbook sentence
+5. `## Solution` (collapsed) — implementations
+6. optional visible `## Interpretation` etc.
+
+See `exercises/chapter2/OppositeDaggerSkeletal.lagda.md` (2.52) or `exercises/chapter2/ClosureIsAdjunction.lagda.md` (2.59) for reference.
 
 ## LaTeX Rendering Pitfalls
 

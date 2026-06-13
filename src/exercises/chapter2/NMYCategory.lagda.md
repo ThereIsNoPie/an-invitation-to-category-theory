@@ -8,30 +8,13 @@ number: 41
 
 # NMY-Category
 
-## Textbook
+## Textbook Exercise
 
 **Exercise 2.41.** Recall the monoidal preorder NMY := (P, ≤, yes, min) from Exercise 2.18. Interpret what an NMY-category is.
 
 **Exercise 2.18.** Consider the preorder (P, ≤) with Hasse diagram no → maybe → yes. We propose a monoidal structure with yes as the monoidal unit and "min" as the monoidal product.
 
-## Interpretation
-
-An NMY-category X has objects and for each pair x, y a value X(x,y) in {no, maybe, yes}.
-
-Axioms:
-
-- Identity: yes ≤ X(x,x), so X(x,x) = yes
-- Composition: min(X(x,y), X(y,z)) ≤ X(x,z)
-
-Meaning: This is a "certainty of reachability" category:
-
-- yes = "definitely can reach"
-- maybe = "possibly can reach"
-- no = "cannot reach"
-
-The composition axiom says certainty is pessimistic: the weakest link in a chain determines overall certainty.
-
-## Agda
+## Agda Setup
 
 ```agda
 module exercises.chapter2.NMYCategory where
@@ -41,7 +24,18 @@ open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalPreorder; SymmetricMonoidalStructure)
 open import definitions.chapter2.VCategory using (VCategory)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+```
 
+## Problem
+
+The ingredients are given by Exercise 2.18: the carrier {no, maybe, yes} with
+the chain ordering, unit yes, and product min.
+
+```text
+no → maybe → yes
+```
+
+```agda
 -- The carrier: {no, maybe, yes}
 data Certainty : Set where
   no    : Certainty
@@ -57,6 +51,49 @@ data _≤C_ : Certainty → Certainty → Set where
   maybe≤yes   : maybe ≤C yes
   yes≤yes     : yes ≤C yes
 
+-- The monoidal product: min
+min : Certainty → Certainty → Certainty
+min no    _     = no
+min maybe no    = no
+min maybe maybe = maybe
+min maybe yes   = maybe
+min yes   c     = c
+```
+
+The task: build NMY as a symmetric monoidal preorder, say what an NMY-category
+is, and interpret it.
+
+```agda
+-- NMY: the symmetric monoidal preorder (P, ≤, yes, min)
+NMY : SymmetricMonoidalPreorder
+
+-- An NMY-category is a category enriched in NMY
+NMY-Category : Set₁
+NMY-Category = VCategory NMY
+```
+
+## Solution: interpretation
+
+An NMY-category X has objects and, for each pair x, y, a value X(x,y) in {no, maybe, yes}.
+
+Axioms:
+
+- Identity: yes ≤ X(x,x), so X(x,x) = yes
+- Composition: min(X(x,y), X(y,z)) ≤ X(x,z)
+
+Meaning: This is a "certainty of reachability" category:
+
+- yes = "definitely can reach"
+- maybe = "possibly can reach"
+- no = "cannot reach"
+
+The composition axiom says certainty is pessimistic: the weakest link in a chain determines overall certainty.
+
+## Solution: construction
+
+The preorder and monoidal structure laws are all finite case splits.
+
+```agda
 ≤C-refl : ∀ {x} → x ≤C x
 ≤C-refl {no}    = no≤no
 ≤C-refl {maybe} = maybe≤maybe
@@ -80,14 +117,6 @@ CertaintyPreorder = record
     ; transitive = ≤C-trans
     }
   }
-
--- The monoidal product: min
-min : Certainty → Certainty → Certainty
-min no    _     = no
-min maybe no    = no
-min maybe maybe = maybe
-min maybe yes   = maybe
-min yes   c     = c
 
 min-mono : ∀ {x₁ x₂ y₁ y₂} → x₁ ≤C y₁ → x₂ ≤C y₂ → min x₁ x₂ ≤C min y₁ y₂
 min-mono no≤no       _           = ≤C-refl
@@ -164,19 +193,16 @@ NMYStructure = record
   ; symmetry = λ {x} {y} → min-sym {x} {y}
   }
 
--- NMY: The symmetric monoidal preorder (P, ≤, yes, min)
-NMY : SymmetricMonoidalPreorder
 NMY = record
   { preorder = CertaintyPreorder
   ; structure = NMYStructure
   }
-
--- An NMY-category is a VCategory enriched in NMY
-NMY-Category : Set₁
-NMY-Category = VCategory NMY
 ```
 
 ## Example
+
+A two-object NMY-category: you can definitely stay where you are, you can
+maybe get from A to B, and you can never get from B to A.
 
 ```agda
 module ExampleNMYCategory where

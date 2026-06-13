@@ -8,7 +8,7 @@ number: 68
 
 # Joins in Bool and Cost
 
-## Textbook
+## Textbook Exercise
 
 **Exercise 2.68.**
 
@@ -19,6 +19,22 @@ number: 68
 2. What is the join $x \vee y$ in the case
    - (a) $\mathcal{V} = \mathbf{Bool}$, and $x, y \in \mathbb{B}$ are booleans?
    - (b) $\mathcal{V} = \mathbf{Cost}$, and $x, y \in [0,\infty]$ are distances?
+
+## Agda Setup
+
+```agda
+module exercises.chapter2.JoinsInBoolAndCost where
+
+open import definitions.chapter1.MeetJoin using (IsJoin)
+open import examples.chapter2.BoolAnd using (_≤𝔹_; ≤-refl; f≤t)
+open import examples.chapter2.Cost using ([0,∞]; ∞; _≥_)
+open import plumbing.Reals using (∞-greatest; min; min-lb-l; min-lb-r; min-glb)
+open import Data.Bool using (Bool; true; false; _∨_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_,_)
+open import Data.Empty using (⊥)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+```
 
 ## Problem
 
@@ -36,18 +52,6 @@ x ∨ y = OR(x,y)             x ∨ y = min(x,y) (least element ≥ both)
 ```
 
 ```agda
-module exercises.chapter2.JoinsInBoolAndCost where
-
-open import definitions.chapter1.MeetJoin using (IsJoin)
-open import examples.chapter2.BoolAnd using (_≤𝔹_; ≤-refl; f≤t)
-open import examples.chapter2.Cost using ([0,∞]; ∞; _≥_)
-open import plumbing.Reals using (∞-greatest; min; min-lb-l; min-lb-r; min-glb)
-open import Data.Bool using (Bool; true; false; _∨_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (_,_)
-open import Data.Empty using (⊥)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-
 -- 1a. Bottom of Bool: ⋁∅ = false
 bool-bottom : IsJoin _≤𝔹_ false (λ _ → ⊥)
 

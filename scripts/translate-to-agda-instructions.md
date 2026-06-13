@@ -6,7 +6,7 @@ Create clean, minimal Agda that's easy to understand and learn from.
 
 ## Current Progress
 
-- **Last Learnt/reviewed** 2.57
+- **Last Learnt/reviewed** 2.59
 
 
 ## Step 1: Find the Next Item
@@ -70,7 +70,12 @@ number: N
 
 # Title
 
-## Textbook
+## Textbook Exercise
+
+(Section names matter: the HTML layout collapses `Textbook Exercise`/`Textbook
+Definition`/`Textbook Description`/`Textbook Statement`, `Agda Setup`/`Setup`,
+`Solution`, `Proof`, `Implementation`, `Construction` — so the reader lands on
+the visible `## Problem` section. See `scripts/template.lagda.md`.)
 
 Quote textbook. Use LaTeX for math: $d(x,y)$ inline, $$d(x,y) \geq 0$$ display.
 
@@ -86,15 +91,28 @@ Quote textbook. Use LaTeX for math: $d(x,y)$ inline, $$d(x,y) \geq 0$$ display.
 - For multi-step derivations, use a single long line or multiple separate `$$...$$` blocks
 - If a derivation is complex, prefer prose with inline math over display blocks
 
-## Diagram
-
-ASCII diagrams, matrices, tables to clarify structure.
-
-## Agda
+## Agda Setup
 
 \```agda
 module TYPE.chapterN.Name where
--- code
+-- imports only — this section is collapsed in the rendered HTML
+\```
+
+## Problem
+
+ASCII diagrams (use \```text fences), matrices, tables to clarify structure.
+
+The first Agda the reader sees: type signatures that map directly onto the
+textbook statement.
+
+\```agda
+-- statement : Hypothesis → Conclusion
+\```
+
+## Solution
+
+\```agda
+-- statement = ... (implementations/proofs, collapsed in the rendered HTML)
 \```
 ```
 
@@ -104,7 +122,7 @@ Guidelines:
 - **Postulates OK** for reals, etc.
 - **Simple over clever** - explicit case splits over abstract proofs
 - **Comments only where non-obvious**
-- **Exercises: split into Problem and Solution** - Put type signatures (and any necessary definitions/records) in a `## Problem` section, and implementations/proofs in a `## Solution` section. This lets readers attempt the exercise before seeing the answer. See `exercises/chapter2/PowerSetIntersection.lagda.md` for a good example.
+- **Exercises: split into Problem and Solution** - Put type signatures (and any necessary definitions/records) in a `## Problem` section, and implementations/proofs in a `## Solution` section. This lets readers attempt the exercise before seeing the answer. See `exercises/chapter2/OppositeDaggerSkeletal.lagda.md` or `exercises/chapter2/ClosureIsAdjunction.lagda.md` for good examples.
 
 ## Step 4: Compile and Add
 
