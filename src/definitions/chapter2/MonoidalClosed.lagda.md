@@ -27,6 +27,7 @@ module definitions.chapter2.MonoidalClosed where
 
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalPreorder)
+open import plumbing.EquationalReasoning using (module Goal-Reasoning)
 open import Data.Product using (_×_; _,_)
 ```
 
@@ -63,6 +64,8 @@ From the closure condition, we can derive useful properties.
 ```agda
 module ClosedProperties (MCP : MonoidalClosedPreorder) where
   open MonoidalClosedPreorder MCP
+  open ≤-Reasoning
+  open Goal-Reasoning
 
   -- Evaluation: (v ⊸ w) ⊗ v ≤ w
   -- (Using uncurry with a = v ⊸ w and reflexivity)
@@ -70,7 +73,15 @@ module ClosedProperties (MCP : MonoidalClosedPreorder) where
   eval = uncurry reflexive
 
   -- The hom functor is monotone in the second argument
-  -- If w ≤ w', then (v ⊸ w) ≤ (v ⊸ w')
+  -- If w ≤ w', then (v ⊸ w) ≤ (v ⊸ w').  Made explicit: the outer step
+  -- transposes across the adjunction (goal-directed `curry`), and the inner
+  -- subgoal is a plain ≤-chain (equational reasoning).
   ⊸-mono-r : ∀ {v w w'} → w ≤ w' → (v ⊸ w) ≤ (v ⊸ w')
-  ⊸-mono-r {v} {w} {w'} w≤w' = curry (transitive eval w≤w')
+  ⊸-mono-r {v} {w} {w'} w≤w' =
+      (v ⊸ w) ≤ (v ⊸ w')   by curry ⟵
+      ((v ⊸ w) ⊗ v) ≤ w'    witness
+        (begin
+          (v ⊸ w) ⊗ v  ≤⟨ eval ⟩
+          w            ≤⟨ w≤w' ⟩
+          w'           ∎)
 ```

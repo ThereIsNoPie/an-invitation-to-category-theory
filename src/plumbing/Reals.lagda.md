@@ -138,7 +138,7 @@ postulate
   -- Addition
   _+ℝ_ : [0,∞] → [0,∞] → [0,∞]
 
-infixl 6 _+ℝ_
+infixl 6 _+ℝ_ _∸_
 infix 4 _≥_
 ```
 
@@ -165,6 +165,13 @@ postulate
   min-lb-l : ∀ {x y : [0,∞]} → x ≥ min x y
   min-lb-r : ∀ {x y : [0,∞]} → y ≥ min x y
   min-glb : ∀ {x y z : [0,∞]} → x ≥ z → y ≥ z → min x y ≥ z
+
+  -- Truncated subtraction (monus): y ∸ x = max(0, y - x)
+  -- Its defining universal property is the adjunction (_+ℝ x) ⊣ (_∸ x):
+  --   (a +ℝ x) ≥ y  ⟺  a ≥ (y ∸ x)
+  _∸_ : [0,∞] → [0,∞] → [0,∞]
+  ∸-adjunctˡ : ∀ {a x y : [0,∞]} → (a +ℝ x) ≥ y → a ≥ (y ∸ x)
+  ∸-adjunctʳ : ∀ {a x y : [0,∞]} → a ≥ (y ∸ x) → (a +ℝ x) ≥ y
 
 -- Derived from commutativity
 +ℝ-identityʳ : ∀ {x : [0,∞]} → x +ℝ 0∞ ≡ x

@@ -171,6 +171,45 @@ module ≡-Reasoning where
   x ∎ = refl
 ```
 
+## Goal-Directed Reasoning
+
+Equational reasoning chains steps **within one relation**: the lines are carrier
+elements (`a`, `b`, `c`) and every step is a proof of `_≤_`/`_∼_`/`_≡_` between
+adjacent lines. It cannot express a step that changes the *shape* of the whole
+judgement — e.g. transposing `(a ⊗ v) ≤ w` into `a ≤ (v ⊸ w)` across an
+adjunction.
+
+**Goal-directed reasoning** works one level up. Each line is a whole *statement*
+(a type), and each step is an arbitrary function between statements. You read it
+top-down, starting from the goal:
+
+```text
+Goal            by f ⟵      -- to prove Goal, apply f to a proof of the next line
+NextStatement   by g ⟵      -- to prove that, apply g to a proof of the next line
+BaseStatement   witness s   -- the base case: s is a proof of BaseStatement
+```
+
+producing `f (g s)` — but with every intermediate statement spelled out and
+checked by Agda. Because the steps are ordinary functions, a `witness` (or any
+step) may itself contain a `begin … ∎` chain: that is how you combine the two
+styles — goal-directed for the shape-changing steps, equational reasoning for the
+composition chains nested inside.
+
+```agda
+module Goal-Reasoning where
+
+  infixr 1 _by_⟵_
+  infix  2 _witness_
+
+  -- Reduce the goal T to a subgoal S via f : S → T
+  _by_⟵_ : (T : Set) {S : Set} → (S → T) → S → T
+  (T by f ⟵ s) = f s
+
+  -- Discharge the final statement S with a proof s : S (spelling out S)
+  _witness_ : (S : Set) → S → S
+  (S witness s) = s
+```
+
 ## Examples
 
 Here are some example usages:
