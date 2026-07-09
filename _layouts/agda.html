@@ -11,7 +11,9 @@
     <!-- MathJax for LaTeX math rendering -->
     <script>
         MathJax = {
+            loader: { load: ['[tex]/amscd'] },
             tex: {
+                packages: { '[+]': ['amscd'] },
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']]
             }
@@ -105,6 +107,19 @@
             background-color: var(--bg-code, #f8f8f8);
         }
 
+        /* Diagram blocks (```svg fences unwrapped to inline SVG) */
+        .diagram {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+            color: var(--text-primary);
+        }
+
+        .diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+
         /* Collapsible section styles */
         .collapsible-section {
             border: 1px solid var(--border-color);
@@ -161,6 +176,20 @@
 <body>
     {% include sidebar.html %}
 
+    <!-- Shared arrowhead markers for ```svg diagrams: marker-end="url(#arrow)" etc. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" />
+            </marker>
+            <marker id="arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8"
+                orient="auto-start-reverse">
+                <path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="context-stroke" stroke-width="1.5" />
+            </marker>
+        </defs>
+    </svg>
+
     <main class="main-content">
         <div class="agda-content">
             {{ content }}
@@ -170,6 +199,15 @@
     <script>
         // Make specific sections collapsible and collapsed by default
         document.addEventListener('DOMContentLoaded', function () {
+            // Unwrap ```svg fenced blocks into live inline SVG diagrams.
+            // Runs before section collapsing so diagrams are plain DOM nodes by then.
+            document.querySelectorAll('.agda-content pre > code.language-svg').forEach(function (code) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'diagram';
+                wrapper.innerHTML = code.textContent; // repo-authored content
+                code.closest('pre').replaceWith(wrapper);
+            });
+
             // Check if a header name should be hideable (collapsed by default)
             function isHideableHeaderName(headerText) {
                 return headerText === 'Textbook Definition' ||

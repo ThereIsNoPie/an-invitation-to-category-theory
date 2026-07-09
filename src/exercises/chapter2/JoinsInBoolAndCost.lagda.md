@@ -40,16 +40,33 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 The bottom element $\mathbf{0} = \bigvee \varnothing$ is the least element in the preorder (anything is an upper bound of $\varnothing$, so the *least* upper bound is the smallest element). The binary join $x \vee y$ is the least upper bound of $\lbrace x, y \rbrace$.
 
-```text
-Bool (≤ order):              Cost (≥ order):
+Arrows point *up the order* (from smaller to larger in the preorder). The trap:
+Cost uses the reversed order ≥, so the numerically greatest distance ∞ sits at
+the *bottom*.
 
-  true                         ∞ ≥ ... ≥ 3 ≥ 0
-   |
-  false
+```svg
+<svg viewBox="0 0 480 270" role="img" aria-label="Hasse diagrams: Bool under ≤ with false below true; Cost under ≥ with ∞ at the bottom, then 3, 1, 0 at the top">
+  <text x="120" y="30" font-size="16" font-weight="bold" text-anchor="middle" fill="currentColor">Bool (≤)</text>
+  <text x="120" y="70" font-size="16" text-anchor="middle" fill="currentColor">true</text>
+  <text x="120" y="200" font-size="16" text-anchor="middle" fill="currentColor">false</text>
+  <line x1="120" y1="184" x2="120" y2="78" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="120" y="235" font-size="14" text-anchor="middle" fill="var(--agda-function)">⋁∅ = false (least)</text>
 
-⋁∅ = false (least in ≤)     ⋁∅ = ∞ (least in ≥... actually greatest!)
-x ∨ y = OR(x,y)             x ∨ y = min(x,y) (least element ≥ both)
+  <text x="340" y="30" font-size="16" font-weight="bold" text-anchor="middle" fill="currentColor">Cost (≥)</text>
+  <text x="340" y="65" font-size="16" text-anchor="middle" fill="currentColor">0</text>
+  <text x="340" y="110" font-size="16" text-anchor="middle" fill="currentColor">1</text>
+  <text x="340" y="155" font-size="16" text-anchor="middle" fill="currentColor">3</text>
+  <text x="340" y="200" font-size="16" text-anchor="middle" fill="currentColor">∞</text>
+  <line x1="340" y1="184" x2="340" y2="161" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="340" y1="139" x2="340" y2="116" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="340" y1="94" x2="340" y2="71" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="340" y="235" font-size="14" text-anchor="middle" fill="var(--agda-function)">⋁∅ = ∞ (least in ≥)</text>
+  <text x="340" y="255" font-size="12" text-anchor="middle" fill="currentColor" opacity="0.7">numerically greatest!</text>
+</svg>
 ```
+
+So the joins are: in Bool, $x \vee y = \mathsf{OR}(x, y)$; in Cost,
+$x \vee y = \min(x, y)$ — the least element that is ≥ both.
 
 ```agda
 -- 1a. Bottom of Bool: ⋁∅ = false

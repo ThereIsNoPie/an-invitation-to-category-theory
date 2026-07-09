@@ -58,7 +58,22 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
      For definitions/examples/propositions name this section after the concept
      instead (e.g. "## Definition", "## Statement") — just keep it visible. -->
 
-Draw any diagrams, matrices, tables as ASCII (note the `text` language tag —
+Diagrams are opt-in — only include one if the user asked or the item really
+needs it. When you do, draw inline SVG in an `svg` fence — the layout renders
+it live. See "Diagrams (SVG)" in scripts/translate-to-agda-instructions.md for
+the conventions (viewBox only, currentColor, shared `url(#arrow)` markers):
+
+```svg
+<svg viewBox="0 0 240 60" role="img" aria-label="no implies maybe implies yes">
+  <text x="30" y="35" font-size="16" text-anchor="middle" fill="currentColor">no</text>
+  <text x="120" y="35" font-size="16" text-anchor="middle" fill="currentColor">maybe</text>
+  <text x="210" y="35" font-size="16" text-anchor="middle" fill="currentColor">yes</text>
+  <line x1="48" y1="30" x2="88" y2="30" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="152" y1="30" x2="188" y2="30" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>
+```
+
+ASCII in a `text` fence still works for quick sketches (note the language tag —
 a bare fence is parsed as Agda):
 
 ```text

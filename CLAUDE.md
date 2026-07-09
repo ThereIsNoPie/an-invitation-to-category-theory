@@ -111,6 +111,10 @@ Since the file is literate Agda, placing a type signature in one code block and 
 
 See `exercises/chapter2/OppositeDaggerSkeletal.lagda.md` (2.52) or `exercises/chapter2/ClosureIsAdjunction.lagda.md` (2.59) for reference.
 
+## Diagrams
+
+**Opt-in, not default.** Add a diagram only when the user asks for one (e.g. they're confused) or a page is judged to really benefit from one — most pages need none. Use the `/add-diagram <path or item number> [what's confusing]` skill to add one to an existing page. Draw diagrams as hand-written inline SVG in ` ```svg ` fenced blocks — the site layout renders them live, theme-aware. Conventions (viewBox only, `currentColor`, shared `url(#arrow)` markers) and a worked example: "Diagrams (SVG)" section in `scripts/translate-to-agda-instructions.md`. Commutative squares with math labels: MathJax `$$\begin{CD} ... \end{CD}$$` (amscd, grid-only). ASCII in ` ```text ` fences remains fine for quick sketches and wiring diagrams.
+
 ## LaTeX Rendering Pitfalls
 
 kramdown parses markdown before MathJax, so:

@@ -39,6 +39,12 @@ This determines the path: **review & improve** an existing file, or **create a n
   - Functions → input/output examples
   - Proofs → outline the logical steps before diving in
   - New concepts → connect to something already known
+
+  Diagrams in `.lagda.md` files are **opt-in**: add one only when the human
+  asks (typically because they're confused) or the page clearly needs it. When
+  you do, draw it as inline SVG in a ` ```svg ` fence (rendered live by the
+  layout) — see "Diagrams (SVG)" in `scripts/translate-to-agda-instructions.md`.
+  In chat, ASCII is fine.
 - **Gotchas** — common misunderstandings or subtle points
 
 For **Remarks and pure prose**: explain the content, note what it connects to, and update `Last Learnt/reviewed`. No formalisation needed — but the human still needs to understand it.
@@ -79,6 +85,7 @@ After any file creation or modification, check for rendering bugs:
    - **Bare code blocks parsed as Agda**: ` ``` ` without a language tag in `.lagda.md` gets parsed as Agda code. **Fix**: use ` ```text ` for ASCII diagrams.
    - **Broken LaTeX from kramdown**: `|` becomes table delimiters (use `\lvert`/`\rvert`), `_` and `*` in prose trigger emphasis (escape as `\_`, `\*`), unsupported environments (`\begin{aligned}` etc.).
    - **`<` and `>` in math**: Can be parsed as HTML tags. Use `\lt` and `\gt`.
+   - **SVG diagrams**: confirm the ` ```svg ` block survives as `<code class="language-svg">` in the output HTML (the layout unwraps it client-side), and that the SVG uses `currentColor` + `viewBox` per the conventions in `scripts/translate-to-agda-instructions.md`.
 4. **Fix issues** in the source `.lagda.md`, re-run `agda`, then `scripts/build-local.sh` again.
 
 ## Step 7: Update progress

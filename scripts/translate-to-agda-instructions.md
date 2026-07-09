@@ -100,7 +100,8 @@ module TYPE.chapterN.Name where
 
 ## Problem
 
-ASCII diagrams (use \```text fences), matrices, tables to clarify structure.
+Diagrams (use \```svg fences — see the Diagrams section below), matrices,
+tables to clarify structure. ASCII in \```text fences is fine as a fallback.
 
 The first Agda the reader sees: type signatures that map directly onto the
 textbook statement.
@@ -123,6 +124,52 @@ Guidelines:
 - **Simple over clever** - explicit case splits over abstract proofs
 - **Comments only where non-obvious**
 - **Exercises: split into Problem and Solution** - Put type signatures (and any necessary definitions/records) in a `## Problem` section, and implementations/proofs in a `## Solution` section. This lets readers attempt the exercise before seeing the answer. See `exercises/chapter2/OppositeDaggerSkeletal.lagda.md` or `exercises/chapter2/ClosureIsAdjunction.lagda.md` for good examples.
+
+## Diagrams (SVG)
+
+**When to add:** diagrams are opt-in. By default pages have no diagrams — add
+one only when the user asks (typically because they're confused) or when the
+item is clearly hard to follow without one. Don't decorate.
+
+Rendered diagrams go in ` ```svg ` fenced blocks containing hand-written inline
+SVG. The layout unwraps these client-side into live SVG. Never write raw
+`<svg>` HTML outside a fence — kramdown mangles it.
+
+Conventions:
+- **`viewBox` only, no `width`/`height` attributes** — CSS scales the diagram.
+  Leave ~20 units of padding around content so strokes/labels aren't clipped.
+- **Theme-aware colors**: `stroke="currentColor"` and `fill="currentColor"`
+  everywhere; the layout sets the diagram's color to the page text color in
+  both light and dark mode. For accents use CSS variables sparingly, e.g.
+  `stroke="var(--agda-function)"`.
+- **Text**: `font-size="16"`, `text-anchor="middle"`, no `font-family` (inherits
+  the page font). Unicode math in labels is fine: ≤ ⊗ ∘ ∞ ⊤ ⊥ subscripts.
+- **Arrowheads**: the layout defines shared markers — use
+  `marker-end="url(#arrow)"` (solid) or `marker-end="url(#arrow-open)"` (open).
+  End arrow lines a few units short of the target node so the head isn't
+  swallowed. A self-contained `<defs>` inside the diagram also works if needed.
+- **Commutative squares with real math labels**: prefer MathJax `amscd` over
+  SVG — `$$\begin{CD} A @>f>> B \\ @VgVV @VVhV \\ C @>k>> D \end{CD}$$`.
+  (Grid-only: no diagonal arrows; for diagonals use SVG.)
+- **Wiring diagrams / quick sketches**: ASCII in ` ```text ` fences is still fine.
+
+Example — Hasse diagram of a preorder (a, b below c, c below d):
+
+```svg
+<svg viewBox="0 0 200 240" role="img" aria-label="Hasse diagram">
+  <text x="60" y="206" font-size="16" text-anchor="middle" fill="currentColor">a</text>
+  <text x="140" y="206" font-size="16" text-anchor="middle" fill="currentColor">b</text>
+  <text x="100" y="126" font-size="16" text-anchor="middle" fill="currentColor">c</text>
+  <text x="100" y="46" font-size="16" text-anchor="middle" fill="currentColor">d</text>
+  <line x1="66" y1="186" x2="92" y2="140" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="134" y1="186" x2="108" y2="140" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="100" y1="106" x2="100" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>
+```
+
+For weighted graphs (Cost), label edges with `<text>` beside the line, e.g.
+distance values; curve parallel/opposite edges with
+`<path d="M ... Q ... ..." fill="none">`.
 
 ## Step 4: Compile and Add
 

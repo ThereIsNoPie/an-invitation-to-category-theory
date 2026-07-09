@@ -30,7 +30,8 @@ Formalise the next textbook item from Fong & Spivak into Literate Agda.
    No postulates or holes needed — literate Agda compiles type signatures and implementations across separate code blocks, even with a nested module declared in between.
 
    **HTML rendering rules:**
-   - **Use ` ```text ` not bare ` ``` `** for ASCII diagrams — bare fenced blocks get parsed as Agda in `.lagda.md`.
+   - **Diagrams are opt-in** — most pages need none. If the user asks for one, or the item is clearly hard to follow without one (e.g. a nontrivial Hasse diagram or weighted Cost graph), draw it as hand-written inline SVG in a ` ```svg ` fence — the layout renders it live. Follow the "Diagrams (SVG)" conventions in `scripts/translate-to-agda-instructions.md` (viewBox only, `currentColor`, shared `url(#arrow)` markers). For commutative squares with math labels prefer MathJax `$$\begin{CD} ... \end{CD}$$`.
+   - **Use ` ```text ` not bare ` ``` `** for ASCII sketches — bare fenced blocks get parsed as Agda in `.lagda.md`.
    - **Escape kramdown-sensitive characters in prose**: `|` → `\lvert`/`\rvert`, `_` → `\_`, `*` → `\*`, `<`/`>` → `\lt`/`\gt`.
    - **Avoid** `\begin{aligned}`, `\begin{gather}`, `\begin{array}` — unsupported by kramdown+MathJax pipeline.
 
