@@ -10,7 +10,7 @@ number: 64
 
 ## Textbook Statement
 
-**Proposition 2.61.** Suppose $\mathcal{V} = (V, \leq, I, \otimes, \multimap)$ is a symmetric monoidal preorder that is closed. Then:
+**Proposition 2.64.** Suppose $\mathcal{V} = (V, \leq, I, \otimes, \multimap)$ is a symmetric monoidal preorder that is closed. Then:
 
 (a) For every $v \in V$, the monotone map $(-\otimes v) : (V, \leq) \to (V, \leq)$ is left adjoint to $(v \multimap -) : (V, \leq) \to (V, \leq)$.
 
@@ -31,67 +31,74 @@ open import definitions.chapter2.MonoidalClosed
   using (MonoidalClosedPreorder; IsMonoidalClosed)
 open import definitions.chapter2.SymmetricMonoidalPreorder
   using (SymmetricMonoidalPreorder)
+open import plumbing.EquationalReasoning using (module Goal-Reasoning)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym)
 ```
 
 ## Properties
 
+Each signature maps onto one item of the proposition, reading $v \multimap w$
+as a single-use converter from $v$ to $w$. Item (a) is the adjunction that
+*defines* closure; (c), (d), (e) are its consequences. Item (b) — that
+$-\otimes v$ preserves joins — also follows from (a), since left adjoints
+preserve joins (Proposition 1.104), but it needs the joins machinery, so we
+record it in prose only.
+
 ```agda
 module Properties (MCP : MonoidalClosedPreorder) where
   open MonoidalClosedPreorder MCP
+  open Goal-Reasoning
+  open ≤-Reasoning
 
-  -- (a) The adjunction is exactly the definition of monoidal closed
-  -- (-⊗v) ⊣ (v⊸-)
-  -- This is just the curry/uncurry isomorphism
+  -- (a) (−⊗v) ⊣ (v⊸−): the adjunction is exactly curry/uncurry
+  adjunctionᴸ : ∀ {a v w} → (a ⊗ v) ≤ w → a ≤ (v ⊸ w)
+  adjunctionᴿ : ∀ {a v w} → a ≤ (v ⊸ w) → (a ⊗ v) ≤ w
 
-  -- (c) Evaluation: v ⊗ (v ⊸ w) ≤ w
-  -- Proof: From reflexivity (v ⊸ w) ≤ (v ⊸ w), uncurry gives
-  --        ((v ⊸ w) ⊗ v) ≤ w, then use symmetry
+  -- (c) evaluation: a v and a single-use v-to-w converter yield a w
   eval : ∀ {v w} → (v ⊗ (v ⊸ w)) ≤ w
-  eval {v} {w} = subst (_≤ w) symmetry (uncurry reflexive)
 
-  -- (d) v ≅ (I ⊸ v)
-  -- One direction: v ≤ (I ⊸ v)
-  -- Proof: From v ⊗ I = v ≤ v, curry gives v ≤ (I ⊸ v)
+  -- (d) having a v = having a single-use nothing-to-v converter
   unit-iso-1 : ∀ {v} → v ≤ (I ⊸ v)
-  unit-iso-1 {v} = curry (subst (_≤ v) (sym right-unit) reflexive)
-
-  -- Other direction: (I ⊸ v) ≤ v
-  -- Proof: (I ⊸ v) = I ⊗ (I ⊸ v) ≤ v by eval
   unit-iso-2 : ∀ {v} → (I ⊸ v) ≤ v
+
+  -- (e) converters compose: a u-to-v and a v-to-w give a u-to-w
+  hom-compose : ∀ {u v w} → ((u ⊸ v) ⊗ (v ⊸ w)) ≤ (u ⊸ w)
+```
+
+## Proof
+
+```agda
+  -- (a) is definitional: closure gives exactly this Galois connection
+  adjunctionᴸ = curry
+  adjunctionᴿ = uncurry
+
+  -- (c) uncurry reflexivity (v⊸w)≤(v⊸w) to (v⊸w)⊗v ≤ w, then commute.
+  -- Made explicit: every step reshapes the whole judgement, so it is a pure
+  -- goal-directed chain — read top-down from the goal.
+  eval {v} {w} =
+      (v ⊗ (v ⊸ w)) ≤ w    by subst (_≤ w) symmetry ⟵
+      ((v ⊸ w) ⊗ v) ≤ w     by uncurry ⟵
+      (v ⊸ w) ≤ (v ⊸ w)     witness reflexive
+
+  -- (d) forward: v⊗I = v ≤ v, so curry gives v ≤ (I⊸v)
+  unit-iso-1 {v} = curry (subst (_≤ v) (sym right-unit) reflexive)
+  -- (d) back: (I⊸v) = I⊗(I⊸v) ≤ v by eval
   unit-iso-2 {v} = subst (_≤ v) left-unit eval
 
-  -- (e) Composition of homs: (u ⊸ v) ⊗ (v ⊸ w) ≤ (u ⊸ w)
-  -- Proof: By curry, we need ((u ⊸ v) ⊗ (v ⊸ w)) ⊗ u ≤ w
-  --        Using associativity and symmetry to rearrange
-  hom-compose : ∀ {u v w} → ((u ⊸ v) ⊗ (v ⊸ w)) ≤ (u ⊸ w)
-  hom-compose {u} {v} {w} = curry goal
-    where
-      -- u ⊗ (u ⊸ v) ≤ v
-      step1 : (u ⊗ (u ⊸ v)) ≤ v
-      step1 = eval
-
-      -- (u ⊗ (u ⊸ v)) ⊗ (v ⊸ w) ≤ v ⊗ (v ⊸ w)
-      step2 : ((u ⊗ (u ⊸ v)) ⊗ (v ⊸ w)) ≤ (v ⊗ (v ⊸ w))
-      step2 = monotonicity step1 reflexive
-
-      -- v ⊗ (v ⊸ w) ≤ w
-      step3 : (v ⊗ (v ⊸ w)) ≤ w
-      step3 = eval
-
-      -- (u ⊗ (u ⊸ v)) ⊗ (v ⊸ w) ≤ w
-      combined : ((u ⊗ (u ⊸ v)) ⊗ (v ⊸ w)) ≤ w
-      combined = transitive step2 step3
-
-      -- Goal: ((u ⊸ v) ⊗ (v ⊸ w)) ⊗ u ≤ w
-      -- First get: u ⊗ ((u ⊸ v) ⊗ (v ⊸ w)) ≤ w
-      -- by associativity: (u ⊗ (u ⊸ v)) ⊗ (v ⊸ w) = u ⊗ ((u ⊸ v) ⊗ (v ⊸ w))
-      step4 : (u ⊗ ((u ⊸ v) ⊗ (v ⊸ w))) ≤ w
-      step4 = subst (_≤ w) associativity combined
-
-      -- Then use symmetry: ((u ⊸ v) ⊗ (v ⊸ w)) ⊗ u = u ⊗ ((u ⊸ v) ⊗ (v ⊸ w))
-      goal : (((u ⊸ v) ⊗ (v ⊸ w)) ⊗ u) ≤ w
-      goal = subst (_≤ w) symmetry step4
+  -- (e) Made explicit. The outer skeleton is goal-directed: every step reshapes
+  -- the whole judgement, so read it top-down from the goal. `curry` transposes
+  -- across the adjunction, then two `subst`s reassociate and commute the u factor
+  -- to the front. The base case is a plain ≤-chain: feed u into the u-to-v
+  -- converter to obtain v, then feed that v into the v-to-w converter to obtain w.
+  hom-compose {u} {v} {w} =
+      ((u ⊸ v) ⊗ (v ⊸ w)) ≤ (u ⊸ w)         by curry ⟵
+      (((u ⊸ v) ⊗ (v ⊸ w)) ⊗ u) ≤ w         by subst (_≤ w) symmetry ⟵
+      (u ⊗ ((u ⊸ v) ⊗ (v ⊸ w))) ≤ w         by subst (_≤ w) associativity ⟵
+      ((u ⊗ (u ⊸ v)) ⊗ (v ⊸ w)) ≤ w         witness
+        (begin
+          (u ⊗ (u ⊸ v)) ⊗ (v ⊸ w)  ≤⟨ monotonicity eval reflexive ⟩
+          v ⊗ (v ⊸ w)               ≤⟨ eval ⟩
+          w                         ∎)
 ```
 
 ## Interpretation
