@@ -10,7 +10,7 @@ number: 67
 
 ## Textbook Description
 
-**Example 2.63.** In Example 2.57, we saw that Cost is monoidal closed. To check whether Cost is a quantale, we take an arbitrary set of elements $A \subseteq [0, \infty]$ and ask if it has a join $\bigvee A$. To be a join, it needs to satisfy:
+**Example 2.67.** In Example 2.60, we saw that Cost is monoidal closed. To check whether Cost is a quantale, we take an arbitrary set of elements $A \subseteq [0, \infty]$ and ask if it has a join $\bigvee A$. To be a join, it needs to satisfy:
 
 (a) $a \geq \bigvee A$ for all $a \in A$, and
 (b) if $b \in [0, \infty]$ is any element such that $a \geq b$ for all $a \in A$, then $\bigvee A \geq b$.

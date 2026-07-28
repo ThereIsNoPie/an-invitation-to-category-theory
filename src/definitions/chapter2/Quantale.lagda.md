@@ -49,32 +49,33 @@ Arrows point up the order $\subseteq$. Note the join $\{a\} \vee \{b\} = \{a,b\}
 
 ## All Joins
 
-A preorder has all joins if every subset has a join. We model this using an indexed join over any index set.
+A preorder has all joins if every subset has a join. In type theory, a subset of $V$ is represented as an indexed family: a function $\text{Idx} \to V$ for some index set $\text{Idx}$. The "subset" is the image of that function.
+
+Note: we use `Idx` rather than `I` for the index set, to avoid shadowing the monoidal unit `I` brought in by `open SymmetricMonoidalPreorder V`.
 
 ```agda
--- A preorder has all joins if for every index set I and family A : I → V,
--- the join ⋁ᵢ A(i) exists
 record HasAllJoins (V : SymmetricMonoidalPreorder) : Set₁ where
   open SymmetricMonoidalPreorder V
 
   field
-    -- The join operation, indexed by any set
-    ⋁ : {I : Set} → (I → Carrier) → Carrier
+    -- The join operation: for any index set Idx and family a : Idx → Carrier,
+    -- ⋁ a is the join of the "subset" { a(i) | i : Idx }
+    ⋁ : {Idx : Set} → (Idx → Carrier) → Carrier
 
     -- Join is an upper bound: a(i) ≤ ⋁ a for all i
-    join-ub : ∀ {I : Set} {a : I → Carrier} {i : I} → a i ≤ ⋁ a
+    join-ub : ∀ {Idx : Set} {a : Idx → Carrier} {i : Idx} → a i ≤ ⋁ a
 
     -- Join is the least upper bound: if b is an upper bound, then ⋁ a ≤ b
-    join-lub : ∀ {I : Set} {a : I → Carrier} {b : Carrier}
+    join-lub : ∀ {Idx : Set} {a : Idx → Carrier} {b : Carrier}
              → (∀ i → a i ≤ b) → ⋁ a ≤ b
 
-  -- The empty join (indexed by the empty type)
+  -- The empty join: Idx = ⊥ means no elements, so this is ⋁∅
   𝟘 : Carrier
-  𝟘 = ⋁ {I = ⊥} (λ ())
+  𝟘 = ⋁ {Idx = ⊥} (λ ())
 
-  -- Binary join
+  -- Binary join: Idx = Bool picks out two elements x and y
   _∨_ : Carrier → Carrier → Carrier
-  x ∨ y = ⋁ {I = Bool} (λ { true → x ; false → y })
+  x ∨ y = ⋁ {Idx = Bool} (λ { true → x ; false → y })
 ```
 
 ## Agda Formalization
@@ -102,7 +103,7 @@ module QuantaleProperties (Q : Quantale) where
   -- v ⊗ (⋁ᵢ aᵢ) ≅ ⋁ᵢ (v ⊗ aᵢ)
   -- This is because (-⊗v) is a left adjoint, and left adjoints preserve joins
   postulate
-    ⊗-distributes-⋁ : ∀ {I : Set} {a : I → Carrier} {v : Carrier}
+    ⊗-distributes-⋁ : ∀ {Idx : Set} {a : Idx → Carrier} {v : Carrier}
                     → (v ⊗ ⋁ a) ≤ ⋁ (λ i → v ⊗ a i)
 ```
 
