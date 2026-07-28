@@ -69,6 +69,8 @@ import exercises.chapter2.OppositeDaggerSkeletal
 import exercises.chapter2.ClosureIsAdjunction
 import exercises.chapter2.BoolIsMonoidalClosed
 import exercises.chapter2.JoinsInBoolAndCost
+import exercises.chapter2.BoolIsQuantale
+import exercises.chapter2.PowerSetIsQuantale
 import exercises.chapter2.NMYCategory
 
 -- Chapter 1 Examples
