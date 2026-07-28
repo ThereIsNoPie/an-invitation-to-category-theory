@@ -50,6 +50,7 @@ import propositions.chapter1.SubsetMeetJoinMonotonicity
 import propositions.chapter2.OppositeSymmetricMonoidalPreorder
 import propositions.chapter2.PreorderBoolCategoryCorrespondence
 import propositions.chapter2.ClosedMonoidalProperties
+import propositions.chapter2.SelfEnrichment
 import propositions.chapter2.JoinsIffMeets
 
 -- Chapter 1 Exercises
