@@ -10,16 +10,18 @@ number: 72
 
 ## Textbook Statement
 
-**Proposition 2.67.** Let $\mathcal{P} = (P, \leq)$ be a preorder. It has all joins iff it has all meets.
+**Proposition 2.72.** Let $\mathcal{P} = (P, \leq)$ be a preorder. It has all joins iff it has all meets.
 
 ## Proof Sketch
 
 The joins in $\mathcal{P}$ are the meets in $\mathcal{P}^{\text{op}}$, so the two claims are dual. It suffices to show that if $\mathcal{P}$ has all joins then it has all meets.
 
-Suppose $\mathcal{P}$ has all joins and suppose that $A \subseteq \mathcal{P}$ is a subset for which we want the meet. Consider the set $M_A := \{p \in P \mid p \leq a \text{ for all } a \in A\}$ of elements below everything in $A$. Let $m_A := \bigvee_{p \in M_A} p$ be their join. We claim that $m_A$ is a meet for $A$.
+Suppose $\mathcal{P}$ has all joins and suppose that $A \subseteq \mathcal{P}$ is a subset for which we want the meet. Consider the set $M_A := \lbrace p \in P \mid p \leq a \text{ for all } a \in A \rbrace$ of elements below everything in $A$. Let $m_A := \bigvee_{p \in M_A} p$ be their join. We claim that $m_A$ is a meet for $A$.
 
 1. For any $a \in A$, we have $m_A \leq a$: since all $p \in M_A$ satisfy $p \leq a$, so does their join $m_A$.
 2. For any $m'$ with $m' \leq a$ for all $a \in A$, we have $m' \leq m_A$: every such $m'$ is an element of $M_A$, and $m_A$ is their join.
+
+The textbook proves only this direction, appealing to duality for the converse. Below we formalise both directions explicitly — the converse is the mirror image: the join of $A$ is the *meet of all upper bounds* of $A$.
 
 ## Agda Setup
 
@@ -54,7 +56,7 @@ record HasAllMeets (P : Preorder) : Set₁ where
              → (∀ i → b ≤ a i) → b ≤ ⋀ a
 ```
 
-## Construction of Meets from Joins
+## Construction: Meets from Joins
 
 ```agda
 module JoinsToMeets (P : Preorder) (J : HasAllJoins P) where
@@ -86,6 +88,54 @@ module JoinsToMeets (P : Preorder) (J : HasAllJoins P) where
     ; meet-lb = meet-is-lb
     ; meet-glb = meet-is-glb
     }
+```
+
+## Construction: Joins from Meets
+
+The dual construction: the join is the meet of all upper bounds.
+
+```agda
+module MeetsToJoins (P : Preorder) (M : HasAllMeets P) where
+  open Preorder P
+  open HasAllMeets M
+
+  -- The set of upper bounds of A
+  -- U_A = {p ∈ P | a ≤ p for all a ∈ A}
+  UpperBounds : {I : Set} → (I → Carrier) → Set
+  UpperBounds {I} a = Σ[ p ∈ Carrier ] (∀ (i : I) → a i ≤ p)
+
+  -- The join is the meet of all upper bounds
+  join : {I : Set} → (I → Carrier) → Carrier
+  join a = ⋀ {I = UpperBounds a} proj₁
+
+  -- The join is an upper bound
+  join-is-ub : ∀ {I : Set} {a : I → Carrier} {i : I} → a i ≤ join a
+  join-is-ub {I} {a} {i} = meet-glb (λ ub → proj₂ ub i)
+
+  -- The join is the least upper bound
+  join-is-lub : ∀ {I : Set} {a : I → Carrier} {b : Carrier}
+              → (∀ i → a i ≤ b) → join a ≤ b
+  join-is-lub {I} {a} {b} b-is-ub = meet-lb {i = b , b-is-ub}
+
+  -- Package it up
+  hasAllJoins : HasAllJoins P
+  hasAllJoins = record
+    { ⋁ = join
+    ; join-ub = join-is-ub
+    ; join-lub = join-is-lub
+    }
+```
+
+## The Proposition
+
+Both directions, packaged as the statement of Proposition 2.72:
+
+```agda
+joins→meets : (P : Preorder) → HasAllJoins P → HasAllMeets P
+joins→meets P J = JoinsToMeets.hasAllMeets P J
+
+meets→joins : (P : Preorder) → HasAllMeets P → HasAllJoins P
+meets→joins P M = MeetsToJoins.hasAllJoins P M
 ```
 
 ## Interpretation
